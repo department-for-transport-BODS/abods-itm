@@ -1,0 +1,4 @@
+lxml==5.3.0
+petl==1.7.15
+psycopg2-binary==2.9.9
+aws-lambda-powertools==3.0.0

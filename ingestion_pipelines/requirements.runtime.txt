@@ -1,0 +1,11 @@
+awslambdaric==2.2.0
+boto3==1.34.145
+botocore==1.34.145
+jmespath==1.0.1
+pip==24.0
+python-dateutil==2.9.0.post0
+s3transfer==0.10.2
+setuptools==65.5.0
+simplejson==3.19.3
+six==1.16.0
+urllib3==1.26.19
