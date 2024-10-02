@@ -3,7 +3,7 @@ from datetime import datetime
 
 from attr import dataclass
 
-from .utils import validate_date
+from .utils import get_otp_state, get_time_difference, validate_date
 
 
 @dataclass
@@ -83,3 +83,29 @@ class AVLRecord:
     def batch_id(self) -> int:
         """The batch_id"""
         return self._data["batch_id"]
+
+
+@dataclass
+class RecordToRemove:
+    stop_index: str
+    stop_details: StopDetails
+    avl: AVLRecord
+
+
+@dataclass
+class MatchedStopDetails:
+    avl: AVLRecord
+    stop_index: str
+    stop_details: StopDetails
+    last_time_in_zone: datetime
+    batch_id: int
+    is_final_stop: bool
+
+    def get_time_difference(self):
+        return get_time_difference(
+            self.last_time_in_zone,
+            self.stop_details.timetable_departure_time,
+        )
+
+    def get_otp_state(self):
+        return get_otp_state(self.is_final_stop, self.get_time_difference())
