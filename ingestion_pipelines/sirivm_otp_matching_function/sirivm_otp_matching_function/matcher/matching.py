@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Any
 
 from aws_lambda_powertools import Logger
 
@@ -25,6 +26,7 @@ def get_shard_filter(shards: dict, shard_no: str) -> list[str]:
     """Get a shard filter by a specified shard number
 
     Args:
+        shards (dict): Shards data
         shard_no (str): Shard number assigned in s3 ingestion queue message
 
     Returns:
@@ -540,11 +542,11 @@ def positions_timetable_lookup(
 
     Args:
         timetable_dict (dict): Timetable data
+        shards (dict): Shards data
         shard_no (str): Shard number assigned
         avl_dict (list): A list of avl records
-        timetable_output (dict): Timetable data
-        batch_id (str, optional): Avl batch id. Defaults to None.
-        stop_history (dict, optional): Full stop history of the specified shard. Defaults to {}.
+        batch_id (str, optional): Avl batch id.
+        stop_history (dict, optional): Full stop history of the specified shard.
 
     Returns:
         timetable_output (dict): The matched stops which require updates in the database
@@ -623,6 +625,4 @@ def positions_timetable_lookup(
                         remove_matched_stops(
                             group_stop_history, "matched_stops", matched_stops_to_remove
                         )
-    timetable_output["set"].update(stop_pos_distances)
-    timetable_output["remove"].extend(stop_pos_distances_remove)
-    return timetable_output, stop_history
+    return stop_pos_distances, stop_pos_distances_remove, stop_history
