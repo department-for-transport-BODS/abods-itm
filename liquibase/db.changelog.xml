@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+    <!-- Initial changeset to create the baseline structure -->
+    <changeSet id="1" author="abodsuser">
+        <sqlFile path="sql/1-baseline.sql" splitStatements="false"/>
+        <!-- <rollback>
+            <sql>DROP TABLE example_table;</sql>
+        </rollback> -->
+    </changeSet>
+    <changeSet id="2" author="abodsuser">
+        <sqlFile path="sql/2-timetable-update.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="3" author="abodsuser">
+        <sqlFile path="sql/3-avl-staging-table-correction.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="4" author="abodsuser">
+        <sqlFile path="sql/4-entity-owner-update.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="5" author="abodsuser">
+        <sqlFile path="sql/5-uk-borders.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="6" author="abodsuser">
+        <sqlFile path="sql/6-uat-prerelease.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="7" author="abodsuser">
+        <sqlFile path="sql/7-timetable-column-update.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="8" author="abodsuser">
+        <sqlFile path="sql/8-timetable-bugfix.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="9" author="abodsuser">
+        <sqlFile path="sql/9-add-expected-tables.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="10" author="abodsuser">
+        <sqlFile path="sql/10-create-and-index-timetable-summary-operator.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="11" author="abodsuser">
+        <sqlFile path="sql/11-create-partitions-and-insert-for-operators-if-not-exists.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="12" author="abodsuser">
+        <sqlFile path="sql/12-create-and-index-timetable-summary-service.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="13" author="abodsuser">
+        <sqlFile path="sql/13-create-partition-and-populate-for-summary-service.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="14" author="abodsuser">
+        <sqlFile path="sql/14-timetable-vehiclejourney-changes.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="15" author="abodsuser">
+        <sqlFile path="sql/15-timetable-add-indexes.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="16" author="abodsuser">
+        <sqlFile path="sql/16-create-performance-statistics-table.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="17" author="abodsuser">
+        <sqlFile path="sql/17-create-get-date-range-procedure.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="18" author="abodsuser">
+        <sqlFile path="sql/18-create-get-trend-date-range-procedure.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="19" author="abodsuser">
+        <sqlFile path="sql/19-create-update-performance-statistics-procedure.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="20" author="abodsuser">
+        <sqlFile path="sql/20-timetable-timestamp-conversion.sql" splitStatements="false"/>
+    </changeSet>
+     <changeSet id="21" author="abodsuser">
+        <sqlFile path="sql/21-timezone-changes.sql" splitStatements="false"/>
+    </changeSet>
+     <changeSet id="22" author="abodsuser">
+        <sqlFile path="sql/22-headway-timetable.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="23" author="abodsuser">
+        <sqlFile path="sql/23-unique-servicenames.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="24" author="abodsuser">
+        <sqlFile path="sql/24-operatorref-null-fix.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="25" author="abodsuser">
+        <sqlFile path="sql/25-pre-uat-fixups.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="26" author="abodsuser">
+        <sqlFile path="sql/26-pre-uat-fixups2.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="27" author="abodsuser">
+        <sqlFile path="sql/27-historic-timetables.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="28" author="abodsuser">
+        <sqlFile path="sql/28-pre-uat-db-trueup.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="29" author="abodsuser">
+        <sqlFile path="sql/29-update-generate-timetables.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="30" author="abodsuser">
+        <sqlFile path="sql/30-update-perf-stats-proc.sql" splitStatements="false"/>
+    </changeSet>
+</databaseChangeLog>

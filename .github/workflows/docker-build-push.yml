@@ -1,0 +1,96 @@
+name: docker build and push
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        type: choice
+        description: name of service to build
+        required: true
+        default: 'pglifecycle'
+        options: 
+        - 'pglifecycle'
+        - 'datadog-agent'
+      imageTag:
+        description: Custom tag to apply to images. If 'blank', use git commit sha
+        type: string
+        default: ''
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.service }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  SVC_NAME: ${{ github.event.inputs.service }}
+  SVC_TAG: ${{ github.event.inputs.imageTag }}
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.config.outputs.tag }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: validate job parameters
+        id: config
+        run: |
+          if [ -z ${SVC_TAG} ]; then
+            sha_short=$(git rev-parse --short HEAD)
+            SVC_TAG=$sha_short
+          fi
+
+          echo """ \
+            Executing Docker build and push job using parameters:
+              (Service Name) - $SVC_NAME
+              (Image Tag) - $SVC_TAG 
+          """
+          echo "tag=$SVC_TAG" >> "$GITHUB_OUTPUT"
+
+  build-push:
+    runs-on: ubuntu-latest
+    environment: ${{ matrix.environment }}
+    needs: validation
+
+    permissions:
+      id-token: write
+      contents: read
+
+    strategy:
+      matrix:
+        environment:
+          - sandbox
+          - dev
+          - prod
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-session-name: ${{ matrix.environment }}-docker-build-push
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
+      - name: login to amazon ecr
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: build, tag, and push image 
+              (${{ env.SVC_NAME }}:${{ needs.validation.outputs.tag }}) to amazon ecr
+        id: build-push
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.SVC_NAME }}
+          IMAGE_TAG: ${{ needs.validation.outputs.tag }}
+        run: |
+          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "[INFO] Image $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
+        working-directory: docker/${{ env.SVC_NAME }}

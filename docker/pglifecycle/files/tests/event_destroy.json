@@ -1,0 +1,13 @@
+{
+  "type": "destroy",
+  "authUser": "root",
+  "targetDatabase": "abods",
+  "roles": [
+      "abods_ro",
+      "abods_iam_ro",
+      "abods_proxy_ro",
+      "abods_rw",
+      "abods_iam_rw",
+      "abods_proxy_rw"
+  ]
+}

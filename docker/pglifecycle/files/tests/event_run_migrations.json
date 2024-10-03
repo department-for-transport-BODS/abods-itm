@@ -1,0 +1,10 @@
+{
+  "type": "run_migrations",
+  "authUser": " abods_proxy_rw",
+  "targetDatabase": "abods",
+  "databaseMigrations": {
+      "bucketName": "abods-shared-deployment-artefacts-992382459269",
+      "bucketPrefix": "releases/itm",
+      "releaseVersion": "latest"
+  }
+}

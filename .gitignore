@@ -1,0 +1,25 @@
+# SAM default build folder
+.aws-sam/
+
+# dotenv / environment variables file
+.env
+
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# pyenv
+.python-version
+.venv
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+test.ipynb
+.idea
