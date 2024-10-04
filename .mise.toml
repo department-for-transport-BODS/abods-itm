@@ -1,0 +1,9 @@
+[tools]
+python = "3.11"
+
+[settings]
+experimental = true
+
+[tasks.fmt]
+dir = "ingestion_pipelines/sirivm_otp_matching_function"
+run = "ruff format"

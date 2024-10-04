@@ -487,7 +487,10 @@ def move_potential_match_to_match(
                 int(pm_index) < lowest_matched_stop_index
                 # and len(ordered_matched_stops_with_new_match) == saved_matches_limit
             ):
-                log_specific(avl, f"{pm_index} lower than lowest_matched_stop_index {lowest_matched_stop_index}")
+                log_specific(
+                    avl,
+                    f"{pm_index} lower than lowest_matched_stop_index {lowest_matched_stop_index}",
+                )
                 # 30.Delete this new potential match
                 potential_matches_to_delete.append(pm_index)
                 delete_potential_match = True

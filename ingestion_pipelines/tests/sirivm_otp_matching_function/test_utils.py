@@ -2,7 +2,7 @@
 # import os
 # import logging
 # from unittest import mock
-# from ingestion_pipelines.sirivm_otp_matching_function.matcher.utils import log_specific
+# from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.utils import log_specific
 
 # @pytest.fixture(autouse=True)
 # def mock_settings_env_vars():

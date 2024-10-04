@@ -652,7 +652,7 @@ Resources:
     Properties:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function'
       CodeUri: ./sirivm_otp_matching_function
-      Handler: app.lambda_handler
+      Handler: sirivm_otp_matching_function.app.lambda_handler
       Timeout: 60
       MemorySize: 5000
       Layers: !If
