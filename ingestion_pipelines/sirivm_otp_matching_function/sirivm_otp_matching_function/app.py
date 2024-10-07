@@ -106,7 +106,7 @@ def backfill_record_handler(rec, shards: dict[str, Any]):
 
 
 def live_record_handler(rec, shards: dict[str, Any], timetable: dict[str, Any]):
-    currentDate = datetime.today().strftime("%Y-%m-%d")
+    current_date = datetime.today()
     fname = rec["messageAttributes"]["key"]["stringValue"]
     batch_id = rec["messageAttributes"]["batch_id"]["stringValue"]
     shard_no = rec["messageAttributes"]["shard"]["stringValue"]
@@ -118,7 +118,7 @@ def live_record_handler(rec, shards: dict[str, Any], timetable: dict[str, Any]):
         avl_dict = s3_client.get_avl_data(fname)
         # read stop history of the shard
         shard_stop_history = s3_client.get_stop_history(
-            currentDate, shard_no, avl_time_val
+            current_date, shard_no, avl_time_val
         )
         # clean stop history
         clean_shard_stop_history = clean_stop_history(shard_stop_history, avl_datetime)
@@ -133,7 +133,7 @@ def live_record_handler(rec, shards: dict[str, Any], timetable: dict[str, Any]):
         )
         try:
             db_client.live_update_succcess(batch_id, to_set, to_remove)
-            s3_client.export_stop_history(stop_history, currentDate, shard_no)
+            s3_client.export_stop_history(stop_history, current_date, shard_no)
             logger.info(f"OTP data updated for file {fname}")
         except Exception as e:
             logger.error(f"Error {e}")
