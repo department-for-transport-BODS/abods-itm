@@ -9,11 +9,13 @@ import csv
 
 test_data_dir = Path(__file__).parent
 
+
 def read_timetable(file_name: str) -> dict:
     path = test_data_dir / "timetable" / file_name
     with Path.open(path) as f:
         timetable_json = json.load(f)
     return timetable_json
+
 
 def read_avl(file_name: str) -> list:
     path = test_data_dir / "avl" / file_name
@@ -23,6 +25,7 @@ def read_avl(file_name: str) -> list:
     for avl in avl_list:
         avl_dicts.append([avl])
     return avl_dicts
+
 
 def get_shards(file_name: str) -> dict:
     path = test_data_dir / file_name

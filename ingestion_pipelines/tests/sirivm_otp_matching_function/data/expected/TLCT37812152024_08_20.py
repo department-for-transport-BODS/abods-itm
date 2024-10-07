@@ -40,7 +40,7 @@ expected_stop_history = {
                 "last_distance": 9.786452000783465,
                 "last_time_in_zone": datetime(2024, 8, 20, 12, 00, 5).replace(
                     tzinfo=pytz.utc
-                )
+                ),
             }
         },
     }

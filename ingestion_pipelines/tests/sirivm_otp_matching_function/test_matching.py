@@ -18,12 +18,16 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     move_potential_match_to_match,
     positions_timetable_lookup,
 )
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.utils import OtpState
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import AVLRecord
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.utils import (
+    OtpState,
+)
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
+    AVLRecord,
+)
 from .data.expected.TLCT37812152024_08_20 import (
     expected_stop_history,
     expected_set,
-    expected_remove
+    expected_remove,
 )
 
 
@@ -168,8 +172,8 @@ class TestCheckUpdateFirstStop:
         assert group_stop_history["potential_matches"] == expected_potential_matches
         assert stop_pos_distances_remove == expected_stop_pos_distances_remove
 
-class TestFindMatchesInPotentialMatches:
 
+class TestFindMatchesInPotentialMatches:
     avl_record = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[73][0])
     avl_record_2 = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[220][0])
     avl_record_3 = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[222][0])
@@ -177,74 +181,140 @@ class TestFindMatchesInPotentialMatches:
     timetable = read_timetable("TLCT37812152024-08-20.json")
     group_id = "TLCT37812152024-08-20"
     group_stop_history = {
-            "last_avl_index": 30,
-            "last_avl_time": datetime.datetime(2024, 8, 20, 11, 35, 25).replace(tzinfo=pytz.utc),
-            "matched_stops": {
-                        "3": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 31, 53).replace(tzinfo=pytz.utc),},
-                        "4": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 32, 20).replace(tzinfo=pytz.utc),},
-                        "5": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 32, 50).replace(tzinfo=pytz.utc),}
-                    },
-            "potential_matches": {
-                "6": {
-                    "last_avl_index": 29,
-                    "last_distance": 142,
-                    "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 34, 42).replace(tzinfo=pytz.utc)
-                    }
-                }
+        "last_avl_index": 30,
+        "last_avl_time": datetime.datetime(2024, 8, 20, 11, 35, 25).replace(
+            tzinfo=pytz.utc
+        ),
+        "matched_stops": {
+            "3": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 31, 53).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+            "4": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 32, 20).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+            "5": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 32, 50).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+        },
+        "potential_matches": {
+            "6": {
+                "last_avl_index": 29,
+                "last_distance": 142,
+                "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 34, 42).replace(
+                    tzinfo=pytz.utc
+                ),
             }
+        },
+    }
     group_stop_history_2 = {
-            "last_avl_index": 90,
-            "last_avl_time": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(tzinfo=pytz.utc),
-            "matched_stops": {
-                        "41": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 58, 3).replace(tzinfo=pytz.utc),},
-                        "42": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 58, 43).replace(tzinfo=pytz.utc),},
-                        "43": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 59, 5).replace(tzinfo=pytz.utc),}
-                    },
-            "potential_matches": {
-                "45": {
-                    "last_avl_index": 89,
-                    "last_distance": 11,
-                    "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(tzinfo=pytz.utc)
-                    },
-                "44": {
-                    "last_avl_index": 89,
-                    "last_distance": 13,
-                    "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 59, 27).replace(tzinfo=pytz.utc)
-                    },
-                }
-            }
+        "last_avl_index": 90,
+        "last_avl_time": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(
+            tzinfo=pytz.utc
+        ),
+        "matched_stops": {
+            "41": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 58, 3).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+            "42": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 58, 43).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+            "43": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 59, 5).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+        },
+        "potential_matches": {
+            "45": {
+                "last_avl_index": 89,
+                "last_distance": 11,
+                "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+            "44": {
+                "last_avl_index": 89,
+                "last_distance": 13,
+                "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 59, 27).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+        },
+    }
     group_stop_history_3 = {
-            "last_avl_index": 91,
-            "last_avl_time": datetime.datetime(2024, 8, 20, 12, 00, 5).replace(tzinfo=pytz.utc),
-            "matched_stops": {
-                        "42": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 58, 43).replace(tzinfo=pytz.utc),},
-                        "43": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 59, 5).replace(tzinfo=pytz.utc),},
-                        "45": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(tzinfo=pytz.utc),}
-                    },
-            "potential_matches": {
-                "44": {
-                    "last_avl_index": 90,
-                    "last_distance": 332,
-                    "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 59, 27).replace(tzinfo=pytz.utc)
-                    },
-                }
-            }
+        "last_avl_index": 91,
+        "last_avl_time": datetime.datetime(2024, 8, 20, 12, 00, 5).replace(
+            tzinfo=pytz.utc
+        ),
+        "matched_stops": {
+            "42": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 58, 43).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+            "43": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 59, 5).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+            "45": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+        },
+        "potential_matches": {
+            "44": {
+                "last_avl_index": 90,
+                "last_distance": 332,
+                "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 59, 27).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+        },
+    }
     group_stop_history_4 = {
-            "last_avl_index": 77,
-            "last_avl_time": datetime.datetime(2024, 8, 20, 11, 54, 9).replace(tzinfo=pytz.utc),
-            "matched_stops": {
-                        "33": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 50, 28).replace(tzinfo=pytz.utc),},
-                        "34": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 51, 35).replace(tzinfo=pytz.utc),},
-                        "35": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 53, 8).replace(tzinfo=pytz.utc),}
-                    },
-            "potential_matches": {
-                "36": {
-                    "last_avl_index": 76,
-                    "last_distance": 8,
-                    "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 53, 43).replace(tzinfo=pytz.utc)
-                    },
-                }
-            }
+        "last_avl_index": 77,
+        "last_avl_time": datetime.datetime(2024, 8, 20, 11, 54, 9).replace(
+            tzinfo=pytz.utc
+        ),
+        "matched_stops": {
+            "33": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 50, 28).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+            "34": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 51, 35).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+            "35": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 53, 8).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+        },
+        "potential_matches": {
+            "36": {
+                "last_avl_index": 76,
+                "last_distance": 8,
+                "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 53, 43).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+        },
+    }
     batch_id = "123"
 
     def mockenv(**envvars):
@@ -260,27 +330,47 @@ class TestFindMatchesInPotentialMatches:
                 group_stop_history,
                 30,
                 batch_id,
-                {group_id: {}}, # stop pos dist
-                [], # potential_matches_to_delete
-                45, # final_stop_index
-                [], # stop_pos_distances_remove,
-                [], # matched_stops_to_remove,
+                {group_id: {}},  # stop pos dist
+                [],  # potential_matches_to_delete
+                45,  # final_stop_index
+                [],  # stop_pos_distances_remove,
+                [],  # matched_stops_to_remove,
                 {
                     "last_avl_index": 30,
-                    "last_avl_time": datetime.datetime(2024, 8, 20, 11, 35, 25).replace(tzinfo=pytz.utc),
+                    "last_avl_time": datetime.datetime(2024, 8, 20, 11, 35, 25).replace(
+                        tzinfo=pytz.utc
+                    ),
                     "matched_stops": {
-                                "3": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 31, 53).replace(tzinfo=pytz.utc),},
-                                "4": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 32, 20).replace(tzinfo=pytz.utc),},
-                                "5": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 32, 50).replace(tzinfo=pytz.utc),},
-                                "6": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 34, 42).replace(tzinfo=pytz.utc),}
-                            },
+                        "3": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 31, 53
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                        "4": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 32, 20
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                        "5": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 32, 50
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                        "6": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 34, 42
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                    },
                     "potential_matches": {
                         "6": {
                             "last_avl_index": 29,
                             "last_distance": 142,
-                            "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 34, 42).replace(tzinfo=pytz.utc)
-                            }
+                            "last_time_in_zone": datetime.datetime(
+                                2024, 8, 20, 11, 34, 42
+                            ).replace(tzinfo=pytz.utc),
                         }
+                    },
                 },
                 ["6"],
                 ["3"],
@@ -292,33 +382,55 @@ class TestFindMatchesInPotentialMatches:
                 group_stop_history_2,
                 90,
                 batch_id,
-                {group_id: {}}, # stop pos dist
-                [], # potential_matches_to_delete
-                45, # final_stop_index
-                [], # stop_pos_distances_remove,
-                [], # matched_stops_to_remove,
+                {group_id: {}},  # stop pos dist
+                [],  # potential_matches_to_delete
+                45,  # final_stop_index
+                [],  # stop_pos_distances_remove,
+                [],  # matched_stops_to_remove,
                 {
                     "last_avl_index": 90,
-                    "last_avl_time": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(tzinfo=pytz.utc),
+                    "last_avl_time": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(
+                        tzinfo=pytz.utc
+                    ),
                     "matched_stops": {
-                                "41": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 58, 3).replace(tzinfo=pytz.utc),},
-                                "42": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 58, 43).replace(tzinfo=pytz.utc),},
-                                "43": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 59, 5).replace(tzinfo=pytz.utc),},
-                                "45": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(tzinfo=pytz.utc),}
-                            },
+                        "41": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 58, 3
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                        "42": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 58, 43
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                        "43": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 59, 5
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                        "45": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 59, 57
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                    },
                     "potential_matches": {
                         "45": {
                             "last_avl_index": 89,
                             "last_distance": 11,
-                            "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(tzinfo=pytz.utc)
-                            },
+                            "last_time_in_zone": datetime.datetime(
+                                2024, 8, 20, 11, 59, 57
+                            ).replace(tzinfo=pytz.utc),
+                        },
                         "44": {
                             "last_avl_index": 90,
                             "last_distance": 332.5369444168041,
-                            "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 59, 27).replace(tzinfo=pytz.utc)
-                            },
-                        }
+                            "last_time_in_zone": datetime.datetime(
+                                2024, 8, 20, 11, 59, 27
+                            ).replace(tzinfo=pytz.utc),
+                        },
                     },
+                },
                 ["45"],
                 ["41"],
                 id="pm_index is the final stop, move final stop to be a match",
@@ -329,28 +441,48 @@ class TestFindMatchesInPotentialMatches:
                 group_stop_history_3,
                 91,
                 batch_id,
-                {group_id: {}}, # stop pos dist
-                [], # potential_matches_to_delete
-                45, # final_stop_index
-                [], # stop_pos_distances_remove,
-                [], # matched_stops_to_remove,
+                {group_id: {}},  # stop pos dist
+                [],  # potential_matches_to_delete
+                45,  # final_stop_index
+                [],  # stop_pos_distances_remove,
+                [],  # matched_stops_to_remove,
                 {
                     "last_avl_index": 91,
-                    "last_avl_time": datetime.datetime(2024, 8, 20, 12, 00, 5).replace(tzinfo=pytz.utc),
+                    "last_avl_time": datetime.datetime(2024, 8, 20, 12, 00, 5).replace(
+                        tzinfo=pytz.utc
+                    ),
                     "matched_stops": {
-                                "42": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 58, 43).replace(tzinfo=pytz.utc),},
-                                "43": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 59, 5).replace(tzinfo=pytz.utc),},
-                                "44": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 59, 27).replace(tzinfo=pytz.utc)},
-                                "45": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(tzinfo=pytz.utc),}
-                            },
+                        "42": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 58, 43
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                        "43": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 59, 5
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                        "44": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 59, 27
+                            ).replace(tzinfo=pytz.utc)
+                        },
+                        "45": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 59, 57
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                    },
                     "potential_matches": {
                         "44": {
                             "last_avl_index": 90,
                             "last_distance": 332,
-                            "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 59, 27).replace(tzinfo=pytz.utc)
-                            }
+                            "last_time_in_zone": datetime.datetime(
+                                2024, 8, 20, 11, 59, 27
+                            ).replace(tzinfo=pytz.utc),
                         }
                     },
+                },
                 ["44"],
                 ["42"],
                 id="final stop has been matched, but the ping after the last match fulfills the criteria for the previous stop to match, match previous stop",
@@ -361,32 +493,48 @@ class TestFindMatchesInPotentialMatches:
                 group_stop_history_4,
                 77,
                 batch_id,
-                {group_id: {}}, # stop pos dist
-                [], # potential_matches_to_delete
-                45, # final_stop_index
-                [], # stop_pos_distances_remove,
-                [], # matched_stops_to_remove,
+                {group_id: {}},  # stop pos dist
+                [],  # potential_matches_to_delete
+                45,  # final_stop_index
+                [],  # stop_pos_distances_remove,
+                [],  # matched_stops_to_remove,
                 {
                     "last_avl_index": 77,
-                    "last_avl_time": datetime.datetime(2024, 8, 20, 11, 54, 9).replace(tzinfo=pytz.utc),
+                    "last_avl_time": datetime.datetime(2024, 8, 20, 11, 54, 9).replace(
+                        tzinfo=pytz.utc
+                    ),
                     "matched_stops": {
-                                "33": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 50, 28).replace(tzinfo=pytz.utc),},
-                                "34": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 51, 35).replace(tzinfo=pytz.utc),},
-                                "35": {"last_match_time": datetime.datetime(2024, 8, 20, 11, 53, 8).replace(tzinfo=pytz.utc),}
-                            },
+                        "33": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 50, 28
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                        "34": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 51, 35
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                        "35": {
+                            "last_match_time": datetime.datetime(
+                                2024, 8, 20, 11, 53, 8
+                            ).replace(tzinfo=pytz.utc),
+                        },
+                    },
                     "potential_matches": {
                         "36": {
                             "last_avl_index": 77,
                             "last_distance": 15.608686190208905,
-                            "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 54, 9).replace(tzinfo=pytz.utc)
-                            },
-                        }
+                            "last_time_in_zone": datetime.datetime(
+                                2024, 8, 20, 11, 54, 9
+                            ).replace(tzinfo=pytz.utc),
+                        },
                     },
+                },
                 [],
                 [],
                 id="the potential match is not a final stop and avl_pm_distance is less than threshold, update potential match details",
             ),
-        ]
+        ],
     )
     def test_find_matches_in_potential_matches(
         self,
@@ -402,13 +550,23 @@ class TestFindMatchesInPotentialMatches:
         matched_stops_to_remove: list,
         expected_group_stop_history: dict,
         expected_potential_matches_to_delete: list,
-        expected_matched_stops_to_remove: list
+        expected_matched_stops_to_remove: list,
     ):
-        find_matches_in_potential_matches(avl, timetable_dict, group_stop_history, current_avl_index, batch_id, stop_pos_distances, potential_matches_to_delete, final_stop_index, stop_pos_distances_remove, matched_stops_to_remove)
+        find_matches_in_potential_matches(
+            avl,
+            timetable_dict,
+            group_stop_history,
+            current_avl_index,
+            batch_id,
+            stop_pos_distances,
+            potential_matches_to_delete,
+            final_stop_index,
+            stop_pos_distances_remove,
+            matched_stops_to_remove,
+        )
         assert group_stop_history == expected_group_stop_history
         assert potential_matches_to_delete == expected_potential_matches_to_delete
         assert matched_stops_to_remove == expected_matched_stops_to_remove
-
 
 
 class TestRemoveMatchedStops:
