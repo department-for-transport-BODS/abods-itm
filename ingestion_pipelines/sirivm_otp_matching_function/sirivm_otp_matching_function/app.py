@@ -91,18 +91,15 @@ def backfill_record_handler(rec, shards: dict[str, Any]):
     avl_dict = s3_client.get_avl_data(fname)
 
     logger.info("Run matching")
-    timetable_output, stop_history = positions_timetable_lookup(
+    to_set, to_remove, stop_history = positions_timetable_lookup(
         timetable,
         shards,
         shard_no,
         avl_dict,
-        {"set": {}, "remove": []},
         None,
         clean_shard_stop_history,
     )
-    db_client.historic_update_success(
-        batch_id, timetable_output["set"], timetable_output["remove"], avl_date_str
-    )
+    db_client.historic_update_success(batch_id, to_set, to_remove, avl_date_str)
     logger.info(f"{fname} historic matching successful")
     s3_client.export_stop_history(stop_history, avl_datetime.date(), shard_no)
     logger.info(f"OTP data updated for file {fname}")
@@ -126,19 +123,16 @@ def live_record_handler(rec, shards: dict[str, Any], timetable: dict[str, Any]):
         # clean stop history
         clean_shard_stop_history = clean_stop_history(shard_stop_history, avl_datetime)
 
-        timetable_output, stop_history = positions_timetable_lookup(
+        to_set, to_remove, stop_history = positions_timetable_lookup(
             timetable,
             shards,
             shard_no,
             avl_dict,
-            {"set": {}, "remove": []},
             batch_id,
             clean_shard_stop_history,
         )
         try:
-            db_client.live_update_succcess(
-                batch_id, timetable_output["set"], timetable_output["remove"]
-            )
+            db_client.live_update_succcess(batch_id, to_set, to_remove)
             s3_client.export_stop_history(stop_history, currentDate, shard_no)
             logger.info(f"OTP data updated for file {fname}")
         except Exception as e:

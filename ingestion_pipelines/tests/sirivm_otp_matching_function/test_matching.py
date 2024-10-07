@@ -403,7 +403,7 @@ class TestUpdatePotentialMatch:
         avl: AVLRecord,
         pm_index: str,
         pm_details: dict,
-        current_avl_index: str,
+        current_avl_index: int,
         avl_pm_distance: float,
         update_recorded_at_time: bool,
         expected_pm_details: dict,
