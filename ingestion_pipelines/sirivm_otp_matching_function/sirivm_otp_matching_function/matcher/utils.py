@@ -49,6 +49,7 @@ def get_env_var(name: str) -> str:
         raise ValueError(f"Environment variable '{name}' is not set")
     return value
 
+
 def validate_date(date_input: datetime | str) -> datetime:
     """Validate the date
 
@@ -68,7 +69,11 @@ def validate_date(date_input: datetime | str) -> datetime:
             converted_date = datetime.strptime(date_input_wo_tz, "%Y-%m-%d %H:%M:%S")
         return converted_date.replace(tzinfo=utc)
 
-from ingestion_pipelines.sirivm_otp_matching_function.matcher.models import AVLRecord
+
+from .models import (
+    AVLRecord,
+)
+
 
 def log_specific(avl: AVLRecord, log_message: str) -> None:
     """Enable logging for a specific service

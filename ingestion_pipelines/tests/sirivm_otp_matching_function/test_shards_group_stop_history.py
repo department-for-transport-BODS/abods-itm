@@ -1,9 +1,7 @@
-import pytest
-from pathlib import Path
 import logging
 import datetime
 
-from ingestion_pipelines.sirivm_otp_matching_function.matcher.matching import get_shard_filter, get_group_stop_history
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.matching import get_shard_filter, get_group_stop_history
 from .data.get_test_data import get_shards
 
 class TestShards:

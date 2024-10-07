@@ -5,9 +5,8 @@ import os
 from unittest import mock
 from .data.get_test_data import read_avl, read_timetable
 import datetime
-from datetime import timedelta
 import pytz
-from ingestion_pipelines.sirivm_otp_matching_function.matcher.matching import (
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.matching import (
     check_update_first_stop,
     remove_matched_stops,
     update_matched_stop,
@@ -17,8 +16,8 @@ from ingestion_pipelines.sirivm_otp_matching_function.matcher.matching import (
     select_potential_match_with_same_recordedattime,
     move_potential_match_to_match,
 )
-from ingestion_pipelines.sirivm_otp_matching_function.matcher.utils import OtpState
-from ingestion_pipelines.sirivm_otp_matching_function.matcher.models import AVLRecord
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.utils import OtpState
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import AVLRecord
 
 
 class TestCheckUpdateFirstStop:
