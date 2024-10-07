@@ -29,16 +29,3 @@ def get_shards(file_name: str) -> dict:
     with Path.open(path) as f:
         shards = json.load(f)
     return shards
-
-def get_expected_result(group_id: str) -> dict:
-    """
-    Load Expected Result for processing entire stop history
-    """
-    file_path = test_data_dir / "expected" / f"{group_id}.py"
-    spec = importlib.util.spec_from_file_location("module.name", file_path)
-    if spec is not None:
-        module = importlib.util.module_from_spec(spec)
-        if spec.loader is not None:
-            spec.loader.exec_module(module)
-            return module.result
-    raise ValueError("Could not find expected result")
