@@ -5,11 +5,9 @@ python = "3.11"
 experimental = true
 
 [tasks.fmt]
-dir = "ingestion_pipelines/sirivm_otp_matching_function"
 run = "ruff format"
 
 [tasks."fmt:check"]
-dir = "ingestion_pipelines/sirivm_otp_matching_function"
 run = "ruff format --check --diff"
 
 [tasks.test]
