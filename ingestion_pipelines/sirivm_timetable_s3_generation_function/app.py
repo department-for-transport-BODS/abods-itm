@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timedelta
 import json
 import uuid
-from collections import defaultdict 
+from collections import defaultdict
 from dateutil.parser import parse
 import awswrangler as wr
 
@@ -34,19 +34,19 @@ def get_rds_token():
     except Exception as e:
         logging.error("could not get token ")
         raise e
-        
+
     return token
-    
+
 def write_to_s3(data_dict,path):
 
     data_string = json.dumps(data_dict, default=str)
-    
+
     client.put_object(
-        Bucket=sirivm_bucket, 
+        Bucket=sirivm_bucket,
         Key=path,
         Body=data_string
     )
-    
+
     return
 
 def getQueue(queue):
@@ -134,7 +134,7 @@ def backfill_lambda_handler(event, context):
     """Receive an event, get backfill start date and end date and start from time and shred the historic timetable into files in every half an hour interval with a 2-hour sliding window"""
     timetable_start_date = event.get("backfill_start_date")
     timetable_end_date = event.get("backfill_end_date")
-    start_from_time = event.get("start_from_time")                
+    start_from_time = event.get("start_from_time")
     if start_from_time:
         start_hour = int(start_from_time[0])
         start_minute = 0 if start_from_time[1] == "00" else 1
@@ -189,11 +189,11 @@ def live_lambda_handler(event, context):
     query="""  with my_groups as (
         select distinct vehiclejourney_id
         from public."Timetable" where date_of_journey  = now()::date
-        and expected_departure_time::time between 
+        and expected_departure_time::time between
         cast(current_timestamp(0) at time zone 'Europe/London' as time) - interval '120' minute
         and cast(current_timestamp(0) at time zone 'Europe/London' as time) +  interval '120' minute
     )
-    select t.group_id,row_number() over( partition by t.group_id order by t.group_id,t.expected_departure_time asc,t.stop_index  asc  ) as stop_index , 
+    select t.group_id,row_number() over( partition by t.group_id order by t.group_id,t.expected_departure_time asc,t.stop_index  asc  ) as stop_index ,
     t.stop_latitude,t.stop_longitude,t.expected_departure_time::time as expected_departure_time,t.timetable_id, t.date_of_journey
     from public."Timetable" t
     where t.date_of_journey  = now()::date
@@ -207,7 +207,7 @@ def live_lambda_handler(event, context):
     minute = datetime.strftime(now, '%M')
     minute_standardised = "30" if int(minute) >= 30 else "00"
     fname=f"timetable_shreds/YYYY={year}/MM={mon}/DD={day}/timetable_{year}{mon}{day}_{hour}_{minute_standardised}.json"
-    
+
     try:
         conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user, password=get_rds_token(), sslmode='require')
         conn.autocommit = True
@@ -217,7 +217,7 @@ def live_lambda_handler(event, context):
         res =cur.fetchall()
         for i in res:
             timetable_dict[i[0]][i[1]] = [(float(i[2]),float(i[3])),i[4],i[5],i[6]]
-        cur.close() 
+        cur.close()
         write_to_s3(timetable_dict,'timetable/timetable.json')
         write_to_s3(timetable_dict,fname)
         for shard_no in range(no_of_shards):

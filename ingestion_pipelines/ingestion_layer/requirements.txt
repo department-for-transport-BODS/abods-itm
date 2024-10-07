@@ -1,3 +1,4 @@
 psycopg2-binary
 lxml
 petl
+aws-lambda-powertools==3.0.0
