@@ -88,7 +88,7 @@ def get_rds_config():
 
     try:
         config = DBConfig(
-            region=get_env_var("AWSREGION"),
+            region=get_env_var("AWS_REGION"),
             host=get_env_var("POSTGRES_HOST"),
             port=int(get_env_var("POSTGRES_PORT")),
             user=get_env_var("POSTGRES_USER"),
@@ -112,7 +112,7 @@ class TimetableDBClient:
     def _get_rds_config(self) -> DBConfig:
         try:
             return DBConfig(
-                region=get_env_var("AWSREGION"),
+                region=get_env_var("AWS_REGION"),
                 host=get_env_var("POSTGRES_HOST"),
                 port=int(get_env_var("POSTGRES_PORT")),
                 user=get_env_var("POSTGRES_USER"),
