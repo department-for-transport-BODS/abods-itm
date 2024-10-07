@@ -14,7 +14,7 @@ conf["instances"][0]["password"] = getenv("PG_DD_PASSWORD")
 conf["instances"][0]["username"] = getenv("PG_DD_USERNAME")
 conf["instances"][0]["tags"] = [
     f"Environment:{getenv('ENVIRONMENT')}",
-    f"ProjectName:{getenv('PROJECT_NAME')}"
+    f"ProjectName:{getenv('PROJECT_NAME')}",
 ]
 
 # Write the updated configuration back to the file

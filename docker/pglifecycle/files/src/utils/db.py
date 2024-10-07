@@ -4,11 +4,7 @@ from .logger import log
 from os import getenv
 from psycopg import Error
 from utils.aws import get_secret, generate_rds_iam_auth_token
-from utils.config import (
-    ENVIRONMENT,
-    POSTGRES_HOST,
-    POSTGRES_PORT
-)
+from utils.config import ENVIRONMENT, POSTGRES_HOST, POSTGRES_PORT
 from utils.logger import log
 
 
@@ -24,31 +20,27 @@ def build_conn_opts(ev):
     - None: If an error occurs while generating the IAM token.
     """
     log.debug("Setting default options for PostgreSQL connection")
-    conn_opts = {
-        "host": POSTGRES_HOST,
-        "port": POSTGRES_PORT,
-        "dbname": "postgres"
-    }
+    conn_opts = {"host": POSTGRES_HOST, "port": POSTGRES_PORT, "dbname": "postgres"}
     log.debug(f"Default options for PostgreSQL connection: {conn_opts}")
 
     if ENVIRONMENT == "local":
-        conn_opts.update({
-            "user": getenv("POSTGRES_USER"),
-            "password": getenv("POSTGRES_PASSWORD"),
-            "gssencmode": "disable"
-        })
+        conn_opts.update(
+            {
+                "user": getenv("POSTGRES_USER"),
+                "password": getenv("POSTGRES_PASSWORD"),
+                "gssencmode": "disable",
+            }
+        )
     else:
-        log.debug(f"Generating IAM authentication token for login against {POSTGRES_HOST}")
+        log.debug(
+            f"Generating IAM authentication token for login against {POSTGRES_HOST}"
+        )
         username = ev["authUser"]
         token = generate_rds_iam_auth_token(POSTGRES_HOST, POSTGRES_PORT, username)
         if not token:
             log.error("Failed to generate IAM token. Exiting.")
             return None
-        conn_opts.update({
-            "user": username,
-            "password": token,
-            "sslmode": "require"
-        })
+        conn_opts.update({"user": username, "password": token, "sslmode": "require"})
 
     log.debug(f"Final PostgreSQL connection options: {conn_opts}")
     return conn_opts
@@ -97,6 +89,7 @@ def create_monitoring_function_sql(schema):
     SECURITY DEFINER;"""
     return sql, "Function for DataDog monitoring created successfully"
 
+
 def create_role_sql(role):
     role_name = role["name"]
     sql = f"""CREATE ROLE {role_name} WITH NOSUPERUSER NOCREATEDB NOCREATEROLE
@@ -125,21 +118,34 @@ def create_user_mapping_sql(user_mapping):
     user_name = user_mapping["name"]
     server_name = user_mapping["serverName"]
     credentials_arn = user_mapping["credentialsArn"]
-    user_credentials = get_secret(credentials_arn) if ENVIRONMENT != "local" else {"username": "local", "password": "local"}
+    user_credentials = (
+        get_secret(credentials_arn)
+        if ENVIRONMENT != "local"
+        else {"username": "local", "password": "local"}
+    )
     sql = f"""CREATE USER MAPPING
     FOR {user_name}
     SERVER {server_name} 
     OPTIONS (user '{user_credentials["username"]}', password '{user_credentials["password"]}');
     GRANT USAGE ON FOREIGN SERVER {server_name} TO {user_name}"""
-    return sql, f"User Mapping {user_name} for server {server_name} created successfully"
+    return (
+        sql,
+        f"User Mapping {user_name} for server {server_name} created successfully",
+    )
 
 
 def create_user_sql(user):
     user_name = user["name"]
-    role_name = user["roleName"] if "roleName" in user else re.sub(r"_[^_]+_", "_", user_name)
+    role_name = (
+        user["roleName"] if "roleName" in user else re.sub(r"_[^_]+_", "_", user_name)
+    )
     auth_type = user["authType"]
     if auth_type == "scram":
-        user_password = get_secret(user["credentialsArn"])["password"] if ENVIRONMENT != "local" else "local"
+        user_password = (
+            get_secret(user["credentialsArn"])["password"]
+            if ENVIRONMENT != "local"
+            else "local"
+        )
         sql = f"""CREATE USER {user_name} WITH NOSUPERUSER NOCREATEDB NOCREATEROLE
         INHERIT LOGIN NOREPLICATION NOBYPASSRLS
         CONNECTION LIMIT -1
@@ -209,7 +215,9 @@ class DatabaseUtils:
         try:
             self.conn = psycopg.connect(**self.conn_args)
             self.conn.autocommit = True
-            self.log.info(f"Connection to PostgreSQL successful. Using database [{self.conn_args.get('dbname')}]")
+            self.log.info(
+                f"Connection to PostgreSQL successful. Using database [{self.conn_args.get('dbname')}]"
+            )
         except Error as e:
             self.log.error(f"The error '{e}' occured when connecting to PostgreSQL")
             raise
@@ -246,7 +254,9 @@ class DatabaseUtils:
                 elif ret == 2:
                     return cur.fetchall()
         except Error as e:
-            self.log.error(f"The error '{e}' occurred when communicating with the database")
+            self.log.error(
+                f"The error '{e}' occurred when communicating with the database"
+            )
             raise
 
     def execute_sql_file(self, file_path):
@@ -262,5 +272,7 @@ class DatabaseUtils:
             with self.conn.cursor() as cur:
                 cur.execute(sql_commands)
         except Error as e:
-            self.log.error(f"The error '{e}' occurred when communicating with the database")
+            self.log.error(
+                f"The error '{e}' occurred when communicating with the database"
+            )
             raise
