@@ -22,4 +22,6 @@ logs
 *.log
 npm-debug.log*
 test.ipynb
+
 .idea
+.DS_Store

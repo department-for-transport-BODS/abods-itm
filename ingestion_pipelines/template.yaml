@@ -655,6 +655,9 @@ Resources:
       Handler: app.lambda_handler
       Timeout: 60
       MemorySize: 5000
+      EnvironmentVariables:
+        POWERTOOLS_SERVICE_NAME: sirivm-otp-matching-function
+        POWERTOOLS_LOG_LEVEL: INFO
       Layers: !If
         - IsNotLocal
         - - !Ref IngestionFunctionLayer
