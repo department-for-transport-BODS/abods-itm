@@ -6,14 +6,14 @@ on:
         type: choice
         description: name of service to build
         required: true
-        default: 'pglifecycle'
-        options: 
-        - 'pglifecycle'
-        - 'datadog-agent'
+        default: "pglifecycle"
+        options:
+          - "pglifecycle"
+          - "datadog-agent"
       imageTag:
         description: Custom tag to apply to images. If 'blank', use git commit sha
         type: string
-        default: ''
+        default: ""
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.inputs.service }}
@@ -82,8 +82,8 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: build, tag, and push image 
-              (${{ env.SVC_NAME }}:${{ needs.validation.outputs.tag }}) to amazon ecr
+      - name: build, tag, and push image
+          (${{ env.SVC_NAME }}:${{ needs.validation.outputs.tag }}) to amazon ecr
         id: build-push
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}

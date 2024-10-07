@@ -1,24 +1,26 @@
 name: modify database
-run-name: modify database from ${{ github.ref_name }} @ ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
-      github.ref_name == 'test' && 'test' ||
-      github.ref_name == 'cavl' && 'cavl' ||
-      github.ref_name == 'uat' && 'uat' ||
-      github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+run-name:
+  modify database from ${{ github.ref_name }} @ ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
+  github.ref_name == 'test' && 'test' ||
+  github.ref_name == 'cavl' && 'cavl' ||
+  github.ref_name == 'uat' && 'uat' ||
+  github.ref_name == 'dev' && 'dev' || 'sandbox' }}
 on:
   workflow_dispatch:
     inputs:
       action:
         type: choice
-        default: 'run-migrations'
+        default: "run-migrations"
         description: database modification action
-        options: 
-        - 'refresh'
-        - 'destroy'
-        - 'initialise'
-        - 'run-migrations'
+        options:
+          - "refresh"
+          - "destroy"
+          - "initialise"
+          - "run-migrations"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
+  group:
+    ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
     github.ref_name == 'test' && 'test' ||
     github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
@@ -28,7 +30,8 @@ concurrency:
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   DEPLOY_ACT: ${{ github.event.inputs.action }}
-  DEPLOY_ENV: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
+  DEPLOY_ENV:
+    ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
     github.ref_name == 'test' && 'test' ||
     github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
@@ -39,7 +42,8 @@ env:
 jobs:
   validation:
     runs-on: ubuntu-latest
-    environment: ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
+    environment:
+      ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
       github.ref_name == 'test' && 'test' ||
       github.ref_name == 'cavl' && 'cavl' ||
       github.ref_name == 'uat' && 'uat' ||

@@ -1,67 +1,80 @@
 {
   "type": "initialise",
   "authUser": "root",
-  "databases": [{
+  "databases": [
+    {
       "name": "abods",
-      "schemas": [
-          "bods",
-          "partman",
-          "public"
-      ],
+      "schemas": ["bods", "partman", "public"],
       "extensions": [
-          "aws_commons",
-          "aws_s3+cascade",
-          "pg_cron",
-          "pg_partman:partman",
-          "postgis",
-          "postgres_fdw"
+        "aws_commons",
+        "aws_s3+cascade",
+        "pg_cron",
+        "pg_partman:partman",
+        "postgis",
+        "postgres_fdw"
       ],
-      "servers": [{
+      "servers": [
+        {
           "name": "bods",
           "options": {
-              "host": "bodds-test.cwnpp0xdur9s.eu-west-2.rds.amazonaws.com",
-              "port": 5432,
-              "dbname": "bodds"
+            "host": "bodds-test.cwnpp0xdur9s.eu-west-2.rds.amazonaws.com",
+            "port": 5432,
+            "dbname": "bodds"
           },
-          "userMappings": [{
+          "userMappings": [
+            {
               "name": "root",
               "credentialsArn": "abods/test/rds/server/bodds-test"
-          },{
+            },
+            {
               "name": "abods_iam_rw",
               "credentialsArn": "abods/test/rds/server/bodds-test"
-          },{
+            },
+            {
               "name": "abods_proxy_rw",
               "credentialsArn": "abods/test/rds/server/bodds-test"
-          }]
-      }]
-  }],
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "datadogMonitoring": {
     "enabled": true,
     "authType": "scram",
     "credentialsArn": "abods/test/rds/user/datadog"
   },
-  "roles": [{
+  "roles": [
+    {
       "name": "abods_ro",
       "kind": "ro",
-      "users": [{
+      "users": [
+        {
           "name": "abods_iam_ro",
           "authType": "iam"
-      },{
+        },
+        {
           "name": "abods_proxy_ro",
           "authType": "scram",
           "credentialsArn": "abods/test/rds/user/abods_proxy_ro"
-      }]
-  },{
+        }
+      ]
+    },
+    {
       "name": "abods_rw",
       "kind": "rw",
       "schemas": ["cron", "aws_s3"],
-      "users": [{
+      "users": [
+        {
           "name": "abods_iam_rw",
           "authType": "iam"
-      },{
+        },
+        {
           "name": "abods_proxy_rw",
           "authType": "scram",
           "credentialsArn": "abods/test/rds/user/abods_proxy_rw"
-      }]
-  }]
+        }
+      ]
+    }
+  ]
 }
