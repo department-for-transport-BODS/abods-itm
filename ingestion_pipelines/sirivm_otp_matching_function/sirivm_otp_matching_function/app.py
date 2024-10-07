@@ -1,6 +1,6 @@
 from datetime import datetime
 from functools import lru_cache
-from typing import Any
+from typing import Any, NotRequired, TypedDict
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import SQSEvent
@@ -11,8 +11,8 @@ from dateutil.parser import parse
 from .client_db import TimetableDBClient
 from .client_s3 import TimetableS3Client
 from .matcher import clean_stop_history, positions_timetable_lookup
-from .matcher.models import RouteDetails
-from .matcher.utils import timer
+from .matcher.models import OperatorShards, Timetable
+from .matcher.utils import filter_avl_list, timer
 
 logger = Logger()
 
@@ -21,13 +21,18 @@ db_client = TimetableDBClient()
 
 
 @lru_cache(maxsize=1)
-def read_timetable(timetable_name: str) -> dict[str, RouteDetails]:
+def read_timetable(timetable_name: str) -> Timetable:
     timetable = s3_client.download_timetable(timetable_name)
     logger.info(f"Loaded {timetable_name}")
     return timetable
 
 
-_cache = {}
+class _Cache(TypedDict):
+    shards: NotRequired[OperatorShards]
+    main_timetable: NotRequired[Timetable]
+
+
+_cache: _Cache = {}
 
 
 @logger.inject_lambda_context(log_event=True)
@@ -72,7 +77,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
         live_record_handler(rec, _cache["shards"], _cache["main_timetable"])
 
 
-def historic_record_handler(rec: SQSRecord, shards: dict[str, Any]) -> None:
+def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
     """Fetch the historic AVL records and timetable to do historic OTP matching"""
     logger.append_keys(historic=True)
     logger.info("Processing historic record")
@@ -113,6 +118,7 @@ def historic_record_handler(rec: SQSRecord, shards: dict[str, Any]) -> None:
 
         logger.info("Fetching AVL data")
         avl_list = s3_client.get_avl_data(fname)
+        avl_list = filter_avl_list(shard_identifier, shards, avl_list)
 
         logger.info("Got data, calculating matches")
         to_set, to_remove, stop_history = positions_timetable_lookup(
@@ -141,8 +147,8 @@ def historic_record_handler(rec: SQSRecord, shards: dict[str, Any]) -> None:
 
 def live_record_handler(
     rec: SQSRecord,
-    shards: dict[str, Any],
-    timetable: dict[str, Any],
+    shards: OperatorShards,
+    timetable: Timetable,
 ) -> None:
     """Fetch the live AVL records and timetable to do live OTP matching"""
     logger.append_keys(historic=False)
@@ -171,6 +177,7 @@ def live_record_handler(
 
         logger.info("Fetching AVL data")
         avl_list = s3_client.get_avl_data(fname)
+        avl_list = filter_avl_list(shard_identifier, shards, avl_list)
 
         logger.info("Got data, calculating matches")
         to_set, to_remove, stop_history = positions_timetable_lookup(

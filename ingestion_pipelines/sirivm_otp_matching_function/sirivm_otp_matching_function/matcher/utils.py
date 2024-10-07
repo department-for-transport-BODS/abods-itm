@@ -1,5 +1,5 @@
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from typing import Literal, ParamSpec, TypeVar
 
@@ -92,3 +92,31 @@ def get_otp_state(
         return "Late"
 
     return "OnTime"
+
+
+from .models import (  # noqa: E402 - temp workaround for a cirular reference
+    AVLRecord,
+    OperatorShards,
+)
+
+
+def filter_avl_list(
+    shard_identifier: str,
+    sharded_operators: OperatorShards,
+    avl_list: Sequence[AVLRecord],
+) -> Sequence[AVLRecord]:
+    """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
+    if shard_identifier == "0":
+        # Allow all operators that aren't in a shard
+        all_sharded_operators = [
+            x for id_no, operators in sharded_operators.items() for x in operators
+        ]
+        return [
+            avl for avl in avl_list if avl.operator_ref not in all_sharded_operators
+        ]
+
+    return [
+        avl
+        for avl in avl_list
+        if avl.operator_ref in sharded_operators.get(shard_identifier, [])
+    ]
