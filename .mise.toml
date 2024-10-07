@@ -1,8 +1,10 @@
-[tools]
-python = "3.11"
-
 [settings]
 experimental = true
+asdf_compat = true
+
+[tasks.install]
+dir = "ingestion_pipelines"
+run = "pip install -r requirements.dev.txt"
 
 [tasks.fmt]
 run = "ruff format"
