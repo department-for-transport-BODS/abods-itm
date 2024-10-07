@@ -1,0 +1,1225 @@
+{
+    "failed_checks": [
+        {
+            "file": "/.github/workflows/build.yml",
+            "findings": [
+                {
+                    "resource": "on(build application)",
+                    "check_ids": [
+                        "CKV2_GHA_1"
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "/.github/workflows/checkov.yaml",
+            "findings": [
+                {
+                    "resource": "on(checkov)",
+                    "check_ids": [
+                        "CKV2_GHA_1"
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "/.github/workflows/cleanup-branches.yaml",
+            "findings": [
+                {
+                    "resource": "on(cleanup branches)",
+                    "check_ids": [
+                        "CKV2_GHA_1"
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "/.github/workflows/codeql-analysis.yaml",
+            "findings": [
+                {
+                    "resource": "on(code quality check)",
+                    "check_ids": [
+                        "CKV2_GHA_1"
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "/.github/workflows/docker-build-push.yml",
+            "findings": [
+                {
+                    "resource": "on(docker build and push)",
+                    "check_ids": [
+                        "CKV2_GHA_1",
+                        "CKV_GHA_7"
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "/.github/workflows/modify-db.yml",
+            "findings": [
+                {
+                    "resource": "on(modify database)",
+                    "check_ids": [
+                        "CKV2_GHA_1",
+                        "CKV_GHA_7"
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "/docker/datadog-agent/Dockerfile",
+            "findings": [
+                {
+                    "resource": "/docker/datadog-agent/Dockerfile.",
+                    "check_ids": [
+                        "CKV_DOCKER_2",
+                        "CKV_DOCKER_3"
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "/docker/pglifecycle/Dockerfile",
+            "findings": [
+                {
+                    "resource": "/docker/pglifecycle/Dockerfile.",
+                    "check_ids": [
+                        "CKV_DOCKER_2",
+                        "CKV_DOCKER_3"
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "/ingestion_pipelines/template.yaml",
+            "findings": [
+                {
+                    "resource": "AWS::EC2::SecurityGroup.SiriVmDbIngestionFunctionSecurityGroup",
+                    "check_ids": [
+                        "CKV_AWS_23"
+                    ]
+                },
+                {
+                    "resource": "AWS::EC2::SecurityGroup.SiriVmOtpMatchingFunctionSecurityGroup",
+                    "check_ids": [
+                        "CKV_AWS_23"
+                    ]
+                },
+                {
+                    "resource": "AWS::EC2::SecurityGroup.SiriVmS3IngestionFunctionSecurityGroup",
+                    "check_ids": [
+                        "CKV_AWS_23"
+                    ]
+                },
+                {
+                    "resource": "AWS::EC2::SecurityGroup.SiriVmTimetableS3GenerationFunctionSecurityGroup",
+                    "check_ids": [
+                        "CKV_AWS_23"
+                    ]
+                },
+                {
+                    "resource": "AWS::EC2::SecurityGroup.TravelineDbIngestionFunctionSecurityGroup",
+                    "check_ids": [
+                        "CKV_AWS_23"
+                    ]
+                },
+                {
+                    "resource": "AWS::S3::Bucket.LandingBucket",
+                    "check_ids": [
+                        "CKV_AWS_18",
+                        "CKV_AWS_21",
+                        "CKV_AWS_53",
+                        "CKV_AWS_54",
+                        "CKV_AWS_55",
+                        "CKV_AWS_56"
+                    ]
+                },
+                {
+                    "resource": "AWS::S3::Bucket.ProcessBucket",
+                    "check_ids": [
+                        "CKV_AWS_18",
+                        "CKV_AWS_21",
+                        "CKV_AWS_53",
+                        "CKV_AWS_54",
+                        "CKV_AWS_55",
+                        "CKV_AWS_56"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmIngestionQueue",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue10S1",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue10S2",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue10S3",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue10S4",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue10S5",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue10S6",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue10S7",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue1S1",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue1S2",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue1S3",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue1S4",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue1S5",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue1S6",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue1S7",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue2S1",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue2S2",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue2S3",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue2S4",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue2S5",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue2S6",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue2S7",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue3S1",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue3S2",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue3S3",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue3S4",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue3S5",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue3S6",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue3S7",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue4S1",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue4S2",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue4S3",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue4S4",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue4S5",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue4S6",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue4S7",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue5S1",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue5S2",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue5S3",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue5S4",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue5S5",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue5S6",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue5S7",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue6S1",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue6S2",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue6S3",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue6S4",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue6S5",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue6S6",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue6S7",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue7S1",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue7S2",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue7S3",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue7S4",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue7S5",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue7S6",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue7S7",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue8S1",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue8S2",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue8S3",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue8S4",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue8S5",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue8S6",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue8S7",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue9S1",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue9S2",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue9S3",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue9S4",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue9S5",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue9S6",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpBackfillQueue9S7",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpMatchingQueue",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpMatchingQueue1",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpMatchingQueue2",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpMatchingQueue3",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpMatchingQueue4",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpMatchingQueue5",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpMatchingQueue6",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmOtpMatchingQueue7",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::SQS::Queue.SiriVmProcessQueue",
+                    "check_ids": [
+                        "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmBackfillIngestionFunction",
+                    "check_ids": [
+                        "CKV_AWS_115",
+                        "CKV_AWS_116"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmDbIngestionFunction",
+                    "check_ids": [
+                        "CKV_AWS_115",
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction10S1",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction10S2",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction10S3",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction10S4",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction10S5",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction10S6",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction10S7",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction1S1",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction1S2",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction1S3",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction1S4",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction1S5",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction1S6",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction1S7",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction2S1",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction2S2",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction2S3",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction2S4",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction2S5",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction2S6",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction2S7",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction3S1",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction3S2",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction3S3",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction3S4",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction3S5",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction3S6",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction3S7",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction4S1",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction4S2",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction4S3",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction4S4",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction4S5",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction4S6",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction4S7",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction5S1",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction5S2",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction5S3",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction5S4",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction5S5",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction5S6",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction5S7",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction6S1",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction6S2",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction6S3",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction6S4",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction6S5",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction6S6",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction6S7",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction7S1",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction7S2",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction7S3",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction7S4",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction7S5",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction7S6",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction7S7",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction8S1",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction8S2",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction8S3",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction8S4",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction8S5",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction8S6",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction8S7",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction9S1",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction9S2",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction9S3",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction9S4",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction9S5",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction9S6",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpBackfillFunction9S7",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpMatchingFunction",
+                    "check_ids": [
+                        "CKV_AWS_115",
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpMatchingFunction1",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpMatchingFunction2",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpMatchingFunction3",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpMatchingFunction4",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpMatchingFunction5",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpMatchingFunction6",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmOtpMatchingFunction7",
+                    "check_ids": [
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmS3IngestionFunction",
+                    "check_ids": [
+                        "CKV_AWS_116"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SiriVmTimetableS3GenerationFunction",
+                    "check_ids": [
+                        "CKV_AWS_115",
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.SnsSubscriptionFunction",
+                    "check_ids": [
+                        "CKV_AWS_115",
+                        "CKV_AWS_116",
+                        "CKV_AWS_117"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.TravelineDbIngestionFunction",
+                    "check_ids": [
+                        "CKV_AWS_115",
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
+                    ]
+                }
+            ]
+        }
+    ]
+}

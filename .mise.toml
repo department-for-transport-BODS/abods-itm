@@ -8,5 +8,17 @@ experimental = true
 dir = "ingestion_pipelines/sirivm_otp_matching_function"
 run = "ruff format"
 
+[tasks."fmt:check"]
+dir = "ingestion_pipelines/sirivm_otp_matching_function"
+run = "ruff format --check --diff"
+
 [tasks.test]
 run = "pytest"
+
+[tasks.checkov]
+run = "checkov --baseline .checkov.baseline -d . --skip-path ./venv"
+
+[tasks.checks]
+depends = ["checkov", "test", "fmt:check"]
+
+
