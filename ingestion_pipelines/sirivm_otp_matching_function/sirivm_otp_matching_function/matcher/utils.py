@@ -1,8 +1,8 @@
+import os
 import time
 from datetime import datetime
 from enum import Enum
 from math import asin, cos, radians, sin, sqrt
-from os import getenv
 from typing import Callable, ParamSpec, TypeVar
 
 import boto3
@@ -32,22 +32,6 @@ def timer(passed_logger: Logger) -> Callable[Param, Return]:
         return applicator
 
     return decorate
-
-
-def get_env_var(name: str) -> str:
-    """
-    Raises a ValueError if env var missing
-
-    Args:
-        name (str): environment variable name
-
-    Returns:
-        str: environment variable
-    """
-    value = getenv(name)
-    if value is None:
-        raise ValueError(f"Environment variable '{name}' is not set")
-    return value
 
 
 def validate_date(date_input: datetime | str) -> datetime:
@@ -82,9 +66,12 @@ def log_specific(avl: AVLRecord, log_message: str) -> None:
         avl (AVLRecord): Avl record
         log_message (str): Log message
     """
-    operator_ref = get_env_var("OPERATOR_REF")
-    line_name = get_env_var("LINE_NAME")
-    if operator_ref == avl.operator_ref and line_name == avl.line_name:
+    if (
+        "OPERATOR_REF" in os.environ
+        and os.environ["OPERATOR_REF"] == avl.operator_ref
+        and "LINE_NAME" in os.environ
+        and os.environ["LINE_NAME"] == avl.line_name
+    ):
         logger.info(log_message)
 
 
