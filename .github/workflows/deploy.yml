@@ -1,30 +1,32 @@
 name: deploy application
-run-name: deploy application to ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
-    github.event_name == 'release' && 'prod' ||
-    contains(fromJSON('["workflow_dispatch", "push"]'), github.event_name) && (
-      startsWith(github.ref, 'refs/tags/v') && 'prod' ||
-      github.ref_name == 'main' && 'uat' ||
-      github.ref_name == 'cavl' && 'cavl' ||
-      github.ref_name == 'test' && 'test' ||
-      github.ref_name == 'dev' && 'dev'
-    ) || 'sandbox' }}
+run-name:
+  deploy application to ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
+  github.event_name == 'release' && 'prod' ||
+  contains(fromJSON('["workflow_dispatch", "push"]'), github.event_name) && (
+  startsWith(github.ref, 'refs/tags/v') && 'prod' ||
+  github.ref_name == 'main' && 'uat' ||
+  github.ref_name == 'cavl' && 'cavl' ||
+  github.ref_name == 'test' && 'test' ||
+  github.ref_name == 'dev' && 'dev'
+  ) || 'sandbox' }}
 
 on:
   workflow_dispatch:
   push:
     branches:
-    - 'test'
-    - 'cavl'
-    - 'main'
+      - "test"
+      - "cavl"
+      - "main"
     paths:
-    - 'VERSION'
+      - "VERSION"
   release:
     types: [published]
   repository_dispatch:
     types: [automated-deploy-dev]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
+  group:
+    ${{ github.workflow }}-${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
     github.event_name == 'release' && 'prod' ||
     startsWith(github.ref, 'refs/tags/v') && 'prod' ||
     github.ref_name == 'main' && 'uat' ||
@@ -35,16 +37,18 @@ concurrency:
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
-  RC_ENV: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
+  RC_ENV:
+    ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
     github.event_name == 'release' && 'prod' ||
     contains(fromJSON('["workflow_dispatch", "push"]'), github.event_name) && (
-      startsWith(github.ref, 'refs/tags/v') && 'prod' ||
-      github.ref_name == 'main' && 'uat' ||
-      github.ref_name == 'cavl' && 'cavl' ||
-      github.ref_name == 'test' && 'test' ||
-      github.ref_name == 'dev' && 'dev'
+    startsWith(github.ref, 'refs/tags/v') && 'prod' ||
+    github.ref_name == 'main' && 'uat' ||
+    github.ref_name == 'cavl' && 'cavl' ||
+    github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'dev' && 'dev'
     ) || 'sandbox' }}
-  RC_VER: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.release_version ||
+  RC_VER:
+    ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.release_version ||
     github.event_name == 'release' && github.event.release.tag_name || 'null' }}
   RC_SRC_PREFIX: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET_PREFIX }}
 
@@ -54,14 +58,15 @@ permissions:
 jobs:
   validation:
     runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
+    environment:
+      ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment ||
       github.event_name == 'release' && 'prod' ||
       contains(fromJSON('["workflow_dispatch", "push"]'), github.event_name) && (
-        startsWith(github.ref, 'refs/tags/v') && 'prod' ||
-        github.ref_name == 'main' && 'uat' ||
-        github.ref_name == 'cavl' && 'cavl' ||
-        github.ref_name == 'test' && 'test' ||
-        github.ref_name == 'dev' && 'dev'
+      startsWith(github.ref, 'refs/tags/v') && 'prod' ||
+      github.ref_name == 'main' && 'uat' ||
+      github.ref_name == 'cavl' && 'cavl' ||
+      github.ref_name == 'test' && 'test' ||
+      github.ref_name == 'dev' && 'dev'
       ) || 'sandbox' }}
     outputs:
       AWS_ACCOUNT_ID: ${{ steps.set-vars.outputs.AWS_ACCOUNT_ID }}
@@ -75,7 +80,7 @@ jobs:
       - name: checkout
         if: ${{ env.RC_VER == 'null' }}
         uses: actions/checkout@v4
-    
+
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -219,7 +224,7 @@ jobs:
           aws s3 cp s3://$RC_SRC/$rc_path/packaged.yaml .
           aws s3 cp s3://$RC_SRC/$rc_path/samconfig.yaml .
           echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully downloaded"
-      
+
       - name: get stack name
         id: get-stack
         uses: mikefarah/yq@v4.42.1
