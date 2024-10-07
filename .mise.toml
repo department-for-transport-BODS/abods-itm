@@ -10,13 +10,22 @@ run = "ruff format"
 [tasks."fmt:check"]
 run = "ruff format --check --diff"
 
+[tasks."lint"]
+run = "ruff check --fix ."
+
+[tasks."lint:check"]
+run = "ruff check ."
+
 [tasks.test]
 run = "pytest"
 
 [tasks.checkov]
 run = "checkov --baseline .checkov.baseline -d . --skip-path ./venv"
 
+[tasks.fix]
+depends = ["fmt", "lint"]
+
 [tasks.checks]
-depends = ["checkov", "test", "fmt:check"]
+depends = ["checkov", "test", "fmt:check", "lint:check"]
 
 
