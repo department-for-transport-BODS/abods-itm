@@ -7,3 +7,6 @@ experimental = true
 [tasks.fmt]
 dir = "ingestion_pipelines/sirivm_otp_matching_function"
 run = "ruff format"
+
+[tasks.test]
+run = "pytest"
