@@ -522,7 +522,7 @@ def move_potential_match_to_match(
             if int(list(matched_stops.keys())[-1]) == final_stop_index:
                 log_specific(
                     avl,
-                    f"matched stop {list(matched_stops.keys())[-1]} is final stop, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
+                    f"last matched stop {list(matched_stops.keys())[-1]} is final stop, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
                 )
                 del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
             else:
