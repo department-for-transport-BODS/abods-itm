@@ -147,6 +147,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_s3_ingestion_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -267,6 +269,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_s3_ingestion_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -369,6 +373,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_db_ingestion_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -501,6 +507,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_timetable_s3_generation_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -611,6 +619,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: traveline_import_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -697,6 +707,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -710,8 +722,6 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
-          POWERTOOLS_SERVICE_NAME: sirivm-otp-matching-function
-          POWERTOOLS_LOG_LEVEL: INFO
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -772,6 +782,11 @@ Resources:
                 - 'sns:ConfirmSubscription'
                 - 'sns:ListSubscriptionsByTopic'
               Resource: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/sns/avl-topic/arn}}'
+      Environment:
+        Variables:
+          # checkov:skip=CKV_AWS_173:These env vars don't need to be encrypted
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
 
   SnsSubscriptionCustomResource:
     Type: Custom::SNSSubscription
@@ -960,6 +975,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -1025,6 +1042,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -1090,6 +1109,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -1155,6 +1176,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -1220,6 +1243,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -1285,6 +1310,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -1350,6 +1377,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -1987,6 +2016,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2052,6 +2083,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2117,6 +2150,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2182,6 +2217,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2247,6 +2284,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2312,6 +2351,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2377,6 +2418,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2442,6 +2485,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2507,6 +2552,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2572,6 +2619,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2637,6 +2686,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2702,6 +2753,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2767,6 +2820,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2832,6 +2887,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2897,6 +2954,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -2962,6 +3021,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3027,6 +3088,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3092,6 +3155,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3157,6 +3222,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3222,6 +3289,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3287,6 +3356,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3352,6 +3423,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3417,6 +3490,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3482,6 +3557,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3547,6 +3624,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3612,6 +3691,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3677,6 +3758,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3742,6 +3825,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3807,6 +3892,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3872,6 +3959,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -3937,6 +4026,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4002,6 +4093,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4067,6 +4160,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4132,6 +4227,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4197,6 +4294,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4262,6 +4361,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4327,6 +4428,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4392,6 +4495,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4457,6 +4562,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4522,6 +4629,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4587,6 +4696,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4652,6 +4763,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4717,6 +4830,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4782,6 +4897,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4847,6 +4964,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4912,6 +5031,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -4977,6 +5098,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5042,6 +5165,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5107,6 +5232,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5172,6 +5299,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5237,6 +5366,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5302,6 +5433,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5367,6 +5500,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5432,6 +5567,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5497,6 +5634,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5562,6 +5701,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5627,6 +5768,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5692,6 +5835,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5757,6 +5902,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5822,6 +5969,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5887,6 +6036,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -5952,6 +6103,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -6017,6 +6170,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -6082,6 +6237,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -6147,6 +6304,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -6212,6 +6371,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -6277,6 +6438,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -6342,6 +6505,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -6407,6 +6572,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
@@ -6472,6 +6639,8 @@ Resources:
           - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
+          POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
           POSTGRES_HOST: !If
