@@ -820,12 +820,12 @@ class TestSelectPotentialMatchWithSameRecordedattime:
         },
         "potential_matches": {
             "4": {
-                "last_avl_index": 39,
+                "last_avl_index": 40,
                 "last_distance": 311.19398802530185,
                 "last_time_in_zone": datetime.datetime(2024, 8, 23, 11, 15, 36),
             },
             "38": {
-                "last_avl_index": 39,
+                "last_avl_index": 40,
                 "last_distance": 294.4630341883636,
                 "last_time_in_zone": datetime.datetime(2024, 8, 23, 11, 15, 36),
             },
@@ -835,7 +835,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:
                 "last_time_in_zone": datetime.datetime(2024, 8, 23, 11, 16, 14),
             },
             "37": {
-                "last_avl_index": 39,
+                "last_avl_index": 40,
                 "last_distance": 18.62101754791971,
                 "last_time_in_zone": datetime.datetime(2024, 8, 23, 11, 16),
             },
@@ -848,6 +848,23 @@ class TestSelectPotentialMatchWithSameRecordedattime:
             "1": {
                 "last_avl_index": 3,
                 "last_distance": 40.03840622665115,
+                "last_time_in_zone": datetime.datetime(2024, 8, 23, 10, 57, 48),
+            }
+        },
+        "matched_stops": {},
+    }
+    group_stop_history_consecutive_index_same_recordedattime = {
+        "last_avl_index": 3,
+        "last_avl_time": datetime.datetime(2024, 8, 23, 10, 57, 48),
+        "potential_matches": {
+            "2": {
+                "last_avl_index": 3,
+                "last_distance": 40.03840622665115,
+                "last_time_in_zone": datetime.datetime(2024, 8, 23, 10, 57, 48),
+            },
+            "3": {
+                "last_avl_index": 3,
+                "last_distance": 23.1234325,
                 "last_time_in_zone": datetime.datetime(2024, 8, 23, 10, 57, 48),
             }
         },
@@ -879,6 +896,15 @@ class TestSelectPotentialMatchWithSameRecordedattime:
                 "1",
                 [],
                 id="No potential matches are with the same recorded_at_time, return the current potential index",
+            ),
+            pytest.param(
+                avl_record,
+                "2",
+                group_stop_history_consecutive_index_same_recordedattime,
+                [],
+                "2",
+                [],
+                id="Consecutive stop indices with the same recorded_at_time, return the current potential index, no potential match needs to be removed",
             ),
         ],
     )

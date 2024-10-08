@@ -503,7 +503,6 @@ def move_potential_match_to_match(
             del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
         # 20. when the new match index is lower than the highest index saved
         # 28,29. Will this new match be the 3rd actual match saved and Is this new match the lowest index
-        print((int(pm_index) < lowest_matched_stop_index))
         if (
             int(pm_index) < lowest_matched_stop_index
             and len(matched_stops) == saved_matches_limit
@@ -543,8 +542,6 @@ def move_potential_match_to_match(
                     stop_pos_distances_remove.append(
                         (index, timetable_id, avl.group_id)
                     )
-    
-    print(delete_potential_match)
     if not delete_potential_match:
         # 24. move potential match to be a match
         update_matched_stop(
