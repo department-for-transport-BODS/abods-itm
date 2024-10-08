@@ -23,19 +23,27 @@ def mock_env_vars(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def mock_setup_db():
-    with patch("ingestion_pipelines.sirivm_db_ingestion_function.shared.db.setup_db") as mock_setup_db:
+    with patch(
+        "ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.shared.db.setup_db",
+    ) as mock_setup_db:
         mock_conn = MagicMock()
         mock_setup_db.return_value = mock_conn
         yield mock_conn
 
 
-@patch("ingestion_pipelines.sirivm_db_ingestion_function.app.update_batch_status")
-@patch("ingestion_pipelines.sirivm_db_ingestion_function.app.process_batch")
+@patch(
+    "ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.app.update_batch_status",
+)
+@patch(
+    "ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.app.process_batch",
+)
 def test_lambda_handler_success(
     mock_process_batch,
     mock_update_batch_status,
 ):
-    from ingestion_pipelines.sirivm_db_ingestion_function.app import lambda_handler
+    from ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.app import (
+        lambda_handler,
+    )
 
     lambda_handler(TEST_EVENT, LambdaContext())
 
@@ -64,13 +72,19 @@ def test_lambda_handler_success(
     )
 
 
-@patch("ingestion_pipelines.sirivm_db_ingestion_function.app.update_batch_status")
-@patch("ingestion_pipelines.sirivm_db_ingestion_function.app.process_batch")
+@patch(
+    "ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.app.update_batch_status",
+)
+@patch(
+    "ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.app.process_batch",
+)
 def test_lambda_handler_error(
     mock_process_batch,
     mock_update_batch_status,
 ):
-    from ingestion_pipelines.sirivm_db_ingestion_function.app import lambda_handler
+    from ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.app import (
+        lambda_handler,
+    )
 
     mock_process_batch.side_effect = Exception("Something went wrong")
 

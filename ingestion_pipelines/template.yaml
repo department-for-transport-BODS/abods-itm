@@ -331,7 +331,7 @@ Resources:
     Properties:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-db-ingestion-function'
       CodeUri: ./sirivm_db_ingestion_function
-      Handler: app.lambda_handler
+      Handler: sirivm_db_ingestion_function.app.lambda_handler
       Layers: !If
         - IsNotLocal
         - - !Ref IngestionFunctionLayer
