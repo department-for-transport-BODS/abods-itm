@@ -3,18 +3,23 @@
 lint.select = ["ALL"]
 lint.ignore = [
     "E501",
-    "D212",
-    "ANN101",
+    "D100",
+    "D103",
     "D203",
+    "D212",
     "D400",
     "D415",
+    "G004",
     "TRY003",
     "EM101",
+    "ANN101",
     "ANN102",
     "RET504",
     "S101",
     "TID252",
     "PTH123",
+    "DTZ005",
+    "PLR0913"
 ]
 lint.fixable = [
     "A",
@@ -69,8 +74,7 @@ lint.extend-select = ["I", "B"]
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402", "D100", "D101", "D102", "D103", "D104"]
 "__about__.py" = ["E402", "D100", "D101", "D102", "D103", "D104"]
-"**/{tests,docs}/*" = ["E402", "INP001", "T201"]
-"path/to/file.py" = ["E402"]
+"**/{tests,docs}/*" = ["E402", "INP001", "T201", "ANN001", "ANN201", "PLR2004"]
 
 [tool.ruff.lint.isort]
 case-sensitive = true
