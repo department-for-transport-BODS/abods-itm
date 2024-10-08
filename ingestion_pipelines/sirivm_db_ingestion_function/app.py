@@ -1,11 +1,13 @@
 from datetime import datetime
 from os import environ
+from typing import Any
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import SQSEvent
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from psycopg2.extensions import cursor
 
-from ingestion_pipelines.shared.db import setup_db
+from .shared.db import setup_db
 
 sirivm_bucket = environ["SIRIVM_BUCKET"]
 region = environ.get("AWS_REGION", "eu-west-2")
@@ -74,7 +76,7 @@ def process_batch(
     )
 
 
-def lambda_handler(event: dict, _context: dict) -> None:
+def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
     sqs_event = SQSEvent(event)
     bucket = sirivm_bucket
     start_time = datetime.now().isoformat()
