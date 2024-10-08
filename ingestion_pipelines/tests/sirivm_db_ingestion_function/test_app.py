@@ -23,7 +23,7 @@ def mock_env_vars(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def mock_setup_db():
-    with patch("ingestion_pipelines.shared.db.setup_db") as mock_setup_db:
+    with patch("ingestion_pipelines.sirivm_db_ingestion_function.shared.db.setup_db") as mock_setup_db:
         mock_conn = MagicMock()
         mock_setup_db.return_value = mock_conn
         yield mock_conn
