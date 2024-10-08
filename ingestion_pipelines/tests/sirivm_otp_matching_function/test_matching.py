@@ -322,7 +322,7 @@ class TestFindMatchesInPotentialMatches:
 
     @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
     @pytest.mark.parametrize(
-        "avl, timetable_dict, group_stop_history, current_avl_index, batch_id, stop_pos_distances, potential_matches_to_delete, final_stop_index, stop_pos_distances_remove, matched_stops_to_remove, expected_group_stop_history, expected_potential_matches_to_delete, expected_matched_stops_to_remove",
+        "avl, timetable_dict, group_stop_history, current_avl_index, batch_id, stop_pos_distances, potential_matches_to_delete, final_stop_index, stop_pos_distances_remove, expected_group_stop_history, expected_potential_matches_to_delete",
         [
             pytest.param(
                 avl_record,
@@ -334,18 +334,12 @@ class TestFindMatchesInPotentialMatches:
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
                 [],  # stop_pos_distances_remove,
-                [],  # matched_stops_to_remove,
                 {
                     "last_avl_index": 30,
                     "last_avl_time": datetime.datetime(2024, 8, 20, 11, 35, 25).replace(
                         tzinfo=pytz.utc
                     ),
                     "matched_stops": {
-                        "3": {
-                            "last_match_time": datetime.datetime(
-                                2024, 8, 20, 11, 31, 53
-                            ).replace(tzinfo=pytz.utc),
-                        },
                         "4": {
                             "last_match_time": datetime.datetime(
                                 2024, 8, 20, 11, 32, 20
@@ -373,7 +367,6 @@ class TestFindMatchesInPotentialMatches:
                     },
                 },
                 ["6"],
-                ["3"],
                 id="avl_pm_distance greater than last distance which is greater than threshold, move this potential match to a match",
             ),
             pytest.param(
@@ -386,18 +379,12 @@ class TestFindMatchesInPotentialMatches:
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
                 [],  # stop_pos_distances_remove,
-                [],  # matched_stops_to_remove,
                 {
                     "last_avl_index": 90,
                     "last_avl_time": datetime.datetime(2024, 8, 20, 11, 59, 57).replace(
                         tzinfo=pytz.utc
                     ),
                     "matched_stops": {
-                        "41": {
-                            "last_match_time": datetime.datetime(
-                                2024, 8, 20, 11, 58, 3
-                            ).replace(tzinfo=pytz.utc),
-                        },
                         "42": {
                             "last_match_time": datetime.datetime(
                                 2024, 8, 20, 11, 58, 43
@@ -432,7 +419,6 @@ class TestFindMatchesInPotentialMatches:
                     },
                 },
                 ["45"],
-                ["41"],
                 id="pm_index is the final stop, move final stop to be a match",
             ),
             pytest.param(
@@ -445,18 +431,12 @@ class TestFindMatchesInPotentialMatches:
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
                 [],  # stop_pos_distances_remove,
-                [],  # matched_stops_to_remove,
                 {
                     "last_avl_index": 91,
                     "last_avl_time": datetime.datetime(2024, 8, 20, 12, 00, 5).replace(
                         tzinfo=pytz.utc
                     ),
                     "matched_stops": {
-                        "42": {
-                            "last_match_time": datetime.datetime(
-                                2024, 8, 20, 11, 58, 43
-                            ).replace(tzinfo=pytz.utc),
-                        },
                         "43": {
                             "last_match_time": datetime.datetime(
                                 2024, 8, 20, 11, 59, 5
@@ -484,7 +464,6 @@ class TestFindMatchesInPotentialMatches:
                     },
                 },
                 ["44"],
-                ["42"],
                 id="final stop has been matched, but the ping after the last match fulfills the criteria for the previous stop to match, match previous stop",
             ),
             pytest.param(
@@ -497,7 +476,6 @@ class TestFindMatchesInPotentialMatches:
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
                 [],  # stop_pos_distances_remove,
-                [],  # matched_stops_to_remove,
                 {
                     "last_avl_index": 77,
                     "last_avl_time": datetime.datetime(2024, 8, 20, 11, 54, 9).replace(
@@ -531,7 +509,6 @@ class TestFindMatchesInPotentialMatches:
                     },
                 },
                 [],
-                [],
                 id="the potential match is not a final stop and avl_pm_distance is less than threshold, update potential match details",
             ),
         ],
@@ -547,10 +524,8 @@ class TestFindMatchesInPotentialMatches:
         potential_matches_to_delete: list,
         final_stop_index: int,
         stop_pos_distances_remove: list,
-        matched_stops_to_remove: list,
         expected_group_stop_history: dict,
         expected_potential_matches_to_delete: list,
-        expected_matched_stops_to_remove: list,
     ):
         find_matches_in_potential_matches(
             avl,
@@ -562,11 +537,9 @@ class TestFindMatchesInPotentialMatches:
             potential_matches_to_delete,
             final_stop_index,
             stop_pos_distances_remove,
-            matched_stops_to_remove,
         )
         assert group_stop_history == expected_group_stop_history
         assert potential_matches_to_delete == expected_potential_matches_to_delete
-        assert matched_stops_to_remove == expected_matched_stops_to_remove
 
 
 class TestRemoveMatchedStops:
@@ -1003,19 +976,24 @@ class TestMovePotentialMatchToMatch:
             "15": {
                 "last_avl_index": 59,
                 "last_distance": 72.1232432,
-                "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 36, 54).replace(
+                "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 37, 54).replace(
                     tzinfo=pytz.utc
                 ),
             },
             "23": {
                 "last_avl_index": 59,
                 "last_distance": 15.12312678,
-                "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 36, 54).replace(
+                "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 39, 54).replace(
                     tzinfo=pytz.utc
                 ),
             },
         },
         "matched_stops": {
+            "20": {
+                "last_match_time": datetime.datetime(2024, 8, 20, 11, 32, 23).replace(
+                    tzinfo=pytz.utc
+                )
+            },
             "21": {
                 "last_match_time": datetime.datetime(2024, 8, 20, 11, 34, 23).replace(
                     tzinfo=pytz.utc
@@ -1069,7 +1047,7 @@ class TestMovePotentialMatchToMatch:
 
     @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
     @pytest.mark.parametrize(
-        "final_stop_index, timetable_dict, avl, pm_index, pm_details, group_stop_history, potential_matches_to_delete, stop_pos_distances, batch_id, stop_pos_distances_remove, matched_stops_to_remove, expected_matched_stops_to_remove, expected_potential_matches_to_delete, expected_stop_pos_distances_remove, expected_matched_stops, expected_stop_pos_distances",
+        "final_stop_index, timetable_dict, avl, pm_index, pm_details, group_stop_history, potential_matches_to_delete, stop_pos_distances, batch_id, stop_pos_distances_remove, expected_potential_matches_to_delete, expected_stop_pos_distances_remove, expected_matched_stops, expected_stop_pos_distances",
         [
             pytest.param(
                 final_stop_index,
@@ -1082,8 +1060,6 @@ class TestMovePotentialMatchToMatch:
                 {group_id: {}},
                 "123",
                 [],  # stop pos distances remove
-                [],  # matched stops to remove
-                [],  # expected matched stops to remove
                 ["1"],  # expected pm to delete
                 [],  # expected stop pos dist remove
                 {
@@ -1122,8 +1098,6 @@ class TestMovePotentialMatchToMatch:
                 {group_id: {}},
                 "123",
                 [],  # stop_pos_distances_remove
-                [],  # matched_stops_to_remove
-                ["1"],  # expected_matched_stops_to_remove
                 ["3"],  # expected_potential_matches_to_delete
                 [],  # expected_stop_pos_distances_remove
                 {
@@ -1172,11 +1146,14 @@ class TestMovePotentialMatchToMatch:
                 {group_id: {}},
                 "123",
                 [],
-                [],
-                [],
                 ["15"],
                 [],
                 {
+                    "20": {
+                        "last_match_time": datetime.datetime(2024, 8, 20, 11, 32, 23).replace(
+                            tzinfo=pytz.utc
+                        )
+                    },
                     "21": {
                         "last_match_time": datetime.datetime(
                             2024, 8, 20, 11, 34, 23
@@ -1202,8 +1179,6 @@ class TestMovePotentialMatchToMatch:
                 {group_id: {}},
                 "123",
                 [],  # stop_pos_distances_remove
-                [],  # matched_stops_to_remove
-                ["24"],  # expected_matched_stops_to_remove
                 ["23"],  # expected_potential_matches_to_delete
                 [("24", 893823127, group_id)],  # expected_stop_pos_distances_remove
                 {
@@ -1215,11 +1190,6 @@ class TestMovePotentialMatchToMatch:
                     "23": {
                         "last_match_time": datetime.datetime(
                             2024, 8, 20, 11, 36, 54
-                        ).replace(tzinfo=pytz.utc)
-                    },
-                    "24": {
-                        "last_match_time": datetime.datetime(
-                            2024, 8, 20, 11, 35, 6
                         ).replace(tzinfo=pytz.utc)
                     },
                 },
@@ -1255,8 +1225,6 @@ class TestMovePotentialMatchToMatch:
         stop_pos_distances: dict,
         batch_id: str,
         stop_pos_distances_remove: list,
-        matched_stops_to_remove: list,
-        expected_matched_stops_to_remove: list,
         expected_potential_matches_to_delete: list,
         expected_stop_pos_distances_remove: list,
         expected_matched_stops: dict,
@@ -1273,9 +1241,7 @@ class TestMovePotentialMatchToMatch:
             stop_pos_distances,
             batch_id,
             stop_pos_distances_remove,
-            matched_stops_to_remove,
         )
-        assert matched_stops_to_remove == expected_matched_stops_to_remove
         assert potential_matches_to_delete == expected_potential_matches_to_delete
         assert stop_pos_distances_remove == expected_stop_pos_distances_remove
         assert group_stop_history["matched_stops"] == expected_matched_stops
