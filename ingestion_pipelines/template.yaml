@@ -388,6 +388,8 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
+          POWERTOOLS_SERVICE_NAME: sirivm-db-ingestion-function
+          POWERTOOLS_LOG_LEVEL: INFO
       LoggingConfig:
         LogGroup: !Ref SiriVmDbIngestionFunctionLogGroup
 
