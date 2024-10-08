@@ -153,6 +153,7 @@ def find_matches_in_potential_matches(
         final_stop_index (int): The stop index of the final stop
         stop_pos_distances_remove (list): The list of stops that needs to have matched records removed from database
     """
+    # Order potential matches by stop index to make sure stops are matched in order
     potential_matches = dict(
         sorted(
             group_stop_history["potential_matches"].items(),
@@ -462,12 +463,7 @@ def move_potential_match_to_match(
         stop_pos_distances_remove (list): The list of stops that needs to have matched records removed from database
     """
     is_final_stop = True if int(pm_index) == final_stop_index else False
-    matched_stops = dict(
-        sorted(
-            group_stop_history["matched_stops"].items(),
-            key=lambda t: validate_date(t[1]["last_match_time"]).timestamp(),
-        )
-    )
+    matched_stops = group_stop_history["matched_stops"]
     delete_potential_match = False
     last_time_in_zone = validate_date(pm_details["last_time_in_zone"])
     # 33. is this potential match the first match?
@@ -480,7 +476,7 @@ def move_potential_match_to_match(
         ordered_matched_stops_with_new_match = dict(
             sorted(
                 matched_stops_with_new_match.items(),
-                key=lambda t: t[1]["last_match_time"],
+                key=lambda t: validate_date(t[1]["last_match_time"]).timestamp(),
             )
         )
         new_highest_matched_stop_index = int(
