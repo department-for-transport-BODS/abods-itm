@@ -550,24 +550,24 @@ class TestFindMatchesInPotentialMatches:
                 {
                     "last_avl_index": 2,
                     "last_avl_time": datetime.datetime(2024, 8, 21, 7, 1, 3).replace(
-                    tzinfo=pytz.utc
+                        tzinfo=pytz.utc
                     ),
                     "matched_stops": {},
                     "potential_matches": {
                         "1": {
                             "last_avl_index": 2,
                             "last_distance": 11.812096582392824,
-                            "last_time_in_zone": datetime.datetime(2024, 8, 21, 7, 1, 3).replace(
-                                tzinfo=pytz.utc
-                            ),
+                            "last_time_in_zone": datetime.datetime(
+                                2024, 8, 21, 7, 1, 3
+                            ).replace(tzinfo=pytz.utc),
                         },
                         "41": {
                             "last_avl_index": 2,
                             "last_distance": 10.812096582392824,
-                            "last_time_in_zone": datetime.datetime(2024, 8, 21, 7, 1, 34).replace(
-                                tzinfo=pytz.utc
-                            ),
-                        }
+                            "last_time_in_zone": datetime.datetime(
+                                2024, 8, 21, 7, 1, 34
+                            ).replace(tzinfo=pytz.utc),
+                        },
                     },
                 },
                 [],
@@ -928,7 +928,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:
                 "last_avl_index": 3,
                 "last_distance": 23.1234325,
                 "last_time_in_zone": datetime.datetime(2024, 8, 23, 10, 57, 48),
-            }
+            },
         },
         "matched_stops": {},
     }
@@ -1238,9 +1238,9 @@ class TestMovePotentialMatchToMatch:
                 [],
                 {
                     "20": {
-                        "last_match_time": datetime.datetime(2024, 8, 20, 11, 32, 23).replace(
-                            tzinfo=pytz.utc
-                        )
+                        "last_match_time": datetime.datetime(
+                            2024, 8, 20, 11, 32, 23
+                        ).replace(tzinfo=pytz.utc)
                     },
                     "21": {
                         "last_match_time": datetime.datetime(
