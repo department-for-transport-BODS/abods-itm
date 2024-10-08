@@ -103,7 +103,7 @@ def check_update_first_stop(
                 f"time diff = {avl.recorded_at_time_utc - ms_last_match_time}, {avl.recorded_at_time_utc}, {ms_last_match_time}, {avl.recorded_at_time_utc - ms_last_match_time < timedelta(minutes=5)}",
             )
             # 8. if avl is within 5 mins after the last first stop matching time
-            if avl.recorded_at_time_utc - ms_last_match_time < timedelta(minutes=5):
+            if (avl.recorded_at_time_utc - ms_last_match_time) < timedelta(minutes=5):
                 log_specific(
                     avl,
                     "8. Last match time is witin 5 mins after recorded at time",
@@ -156,7 +156,7 @@ def find_matches_in_potential_matches(
     potential_matches = dict(
         sorted(
             group_stop_history["potential_matches"].items(),
-            key=lambda t: t[1]["last_time_in_zone"],
+            key=lambda t: int(t[0]),
         )
     )
     log_specific(avl, "14. iterating through potential matches")
@@ -175,7 +175,7 @@ def find_matches_in_potential_matches(
                 # Distance between avl and potential match stop is less than threshold
                 # 16. check if the potential match is the final stop of the route
                 if is_final_stop:
-                    # 18-19. the final stop has not been matched yet and there is more than 1 actual match stored
+                    # 18-19. the final stop has not been matched yet and there is at least one match
                     if (
                         pm_index not in group_stop_history["matched_stops"]
                         and len(group_stop_history["matched_stops"]) > 0
@@ -450,7 +450,7 @@ def move_potential_match_to_match(
     """Move the current potential match to be a match
 
     Args:
-        is_final_stop (bool): Current stop is a final stop
+        final_stop_index (int): Final stop index
         timetable_dict (dict): Timetable data
         avl (AVLRecord): Avl record
         pm_index (str): Potential match stop index which has become a match
@@ -465,7 +465,7 @@ def move_potential_match_to_match(
     matched_stops = dict(
         sorted(
             group_stop_history["matched_stops"].items(),
-            key=lambda t: t[1]["last_match_time"],
+            key=lambda t: validate_date(t[1]["last_match_time"]).timestamp(),
         )
     )
     delete_potential_match = False
