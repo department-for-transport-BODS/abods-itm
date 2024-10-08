@@ -16,8 +16,9 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     select_potential_match_with_same_recordedattime,
     move_potential_match_to_match,
 )
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.utils import OtpState
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import AVLRecord
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
+    AVLRecord,
+)
 
 
 class TestCheckUpdateFirstStop:
@@ -263,7 +264,7 @@ class TestWriteMatchedStopToDb:
             group_id,
             batch_id,
             last_time_in_zone_non_final,
-            OtpState.EARLY,
+            "Early",
             "Non-final",
         ),
     }
@@ -275,7 +276,7 @@ class TestWriteMatchedStopToDb:
             group_id,
             batch_id,
             last_time_in_zone_final,
-            OtpState.ON_TIME,
+            "OnTime",
             "final",
         ),
     }
@@ -643,7 +644,7 @@ class TestMovePotentialMatchToMatch:
                             datetime.datetime(2024, 8, 20, 11, 15, 48).replace(
                                 tzinfo=pytz.utc
                             ),
-                            OtpState.ON_TIME,
+                            "OnTime",
                             "Non-final",
                         )
                     }
@@ -693,7 +694,7 @@ class TestMovePotentialMatchToMatch:
                             datetime.datetime(2024, 8, 20, 11, 20, 4).replace(
                                 tzinfo=pytz.utc
                             ),
-                            OtpState.ON_TIME,
+                            "OnTime",
                             "Non-final",
                         )
                     }

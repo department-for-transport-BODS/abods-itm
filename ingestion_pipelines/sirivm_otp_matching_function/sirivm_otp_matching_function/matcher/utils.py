@@ -1,9 +1,8 @@
 import os
 import time
 from datetime import datetime
-from enum import Enum
 from math import asin, cos, radians, sin, sqrt
-from typing import Callable, ParamSpec, TypeVar
+from typing import Callable, Literal, ParamSpec, TypeVar
 
 import boto3
 import pytz
@@ -122,24 +121,14 @@ def haversine(avl: AVLRecord, stop_lat_long: tuple) -> float:
     return (c * r) * 1000
 
 
-class OtpState(Enum):
-    EARLY = "Early"
-    ON_TIME = "OnTime"
-    LATE = "Late"
-
-
-def get_otp_state(is_final_stop: bool, time_difference: float) -> OtpState:
+def get_otp_state(
+    is_final_stop: bool, time_difference: float
+) -> Literal["Early", "OnTime", "Late"]:
     """Calculate the otp state based on seconds of time difference"""
-    if is_final_stop:
-        if time_difference > 359:
-            otp_state = OtpState.LATE
-        else:
-            otp_state = OtpState.ON_TIME
-    else:
-        if time_difference < -60:
-            otp_state = OtpState.EARLY
-        elif time_difference > 359:
-            otp_state = OtpState.LATE
-        else:
-            otp_state = OtpState.ON_TIME
-    return otp_state
+    if not is_final_stop and time_difference < -60:
+        return "Early"
+
+    if time_difference > 359:
+        return "Late"
+
+    return "OnTime"
