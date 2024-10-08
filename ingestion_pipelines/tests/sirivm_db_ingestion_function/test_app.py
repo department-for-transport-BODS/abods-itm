@@ -1,6 +1,7 @@
 from unittest.mock import ANY, MagicMock, patch
 
 import pytest
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 TEST_EVENT = {
     "Records": [
@@ -36,7 +37,7 @@ def test_lambda_handler_success(
 ):
     from ingestion_pipelines.sirivm_db_ingestion_function.app import lambda_handler
 
-    lambda_handler(TEST_EVENT, None)
+    lambda_handler(TEST_EVENT, LambdaContext())
 
     # Assertions
     mock_update_batch_status.assert_any_call(
@@ -74,7 +75,7 @@ def test_lambda_handler_error(
     mock_process_batch.side_effect = Exception("Something went wrong")
 
     with pytest.raises(Exception, match="Something went wrong"):
-        lambda_handler(TEST_EVENT, None)
+        lambda_handler(TEST_EVENT, LambdaContext())
 
     # Assertions
     mock_update_batch_status.assert_any_call(
