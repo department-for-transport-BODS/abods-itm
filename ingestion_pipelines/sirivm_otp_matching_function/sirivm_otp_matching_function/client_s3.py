@@ -3,6 +3,7 @@ Fetching and Uploading Data into S3
 """
 
 import json
+import os
 import time
 from datetime import datetime
 from typing import Any
@@ -14,7 +15,7 @@ from botocore.exceptions import ClientError
 from pandas import DataFrame
 
 from .matcher.models import AVLRecord
-from .matcher.utils import get_env_var, timer
+from .matcher.utils import timer
 
 logger = Logger()
 client = boto3.client("s3")
@@ -30,7 +31,7 @@ class TimetableS3Client:
         if bucket_name is not None:
             self.bucket = bucket_name
         else:
-            self.bucket = get_env_var("SIRIVM_BUCKET")
+            self.bucket = os.environ["SIRIVM_BUCKET"]
 
         logger.append_keys(s3_bucket=self.bucket)
 

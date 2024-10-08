@@ -2,6 +2,7 @@
 Database Functions
 """
 
+import os
 from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Literal, ParamSpec, TypeVar
@@ -13,7 +14,7 @@ from aws_lambda_powertools.utilities.parser import BaseModel, ValidationError
 from botocore.exceptions import TokenRetrievalError
 from psycopg2.extras import execute_values
 
-from .matcher.utils import get_env_var, timer
+from .matcher.utils import timer
 
 logger = Logger()
 
@@ -85,14 +86,13 @@ def get_rds_config():
     """
     Get RDS Config
     """
-
     try:
         config = DBConfig(
-            region=get_env_var("AWS_REGION"),
-            host=get_env_var("POSTGRES_HOST"),
-            port=int(get_env_var("POSTGRES_PORT")),
-            user=get_env_var("POSTGRES_USER"),
-            database=get_env_var("POSTGRES_DB"),
+            region=os.environ["AWS_REGION"],
+            host=os.environ["POSTGRES_HOST"],
+            port=int(os.environ["POSTGRES_PORT"]),
+            user=os.environ["POSTGRES_USER"],
+            database=os.environ["POSTGRES_DB"],
         )
     except (ValidationError, ValueError) as exc:
         raise ValueError("Missing Database Configuration Values") from exc
@@ -112,11 +112,11 @@ class TimetableDBClient:
     def _get_rds_config(self) -> DBConfig:
         try:
             return DBConfig(
-                region=get_env_var("AWS_REGION"),
-                host=get_env_var("POSTGRES_HOST"),
-                port=int(get_env_var("POSTGRES_PORT")),
-                user=get_env_var("POSTGRES_USER"),
-                database=get_env_var("POSTGRES_DB"),
+                region=os.environ["AWS_REGION"],
+                host=os.environ["POSTGRES_HOST"],
+                port=int(os.environ["POSTGRES_PORT"]),
+                user=os.environ["POSTGRES_USER"],
+                database=os.environ["POSTGRES_DB"],
             )
         except (ValidationError, ValueError) as exc:
             raise ValueError("Missing Database Configuration Values") from exc
