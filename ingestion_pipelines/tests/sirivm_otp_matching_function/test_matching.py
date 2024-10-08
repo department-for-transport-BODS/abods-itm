@@ -1289,7 +1289,7 @@ class TestMovePotentialMatchToMatch:
                             datetime.datetime(2024, 8, 20, 11, 36, 54).replace(
                                 tzinfo=pytz.utc
                             ),
-                            OtpState.LATE,
+                            "Late",
                             "Non-final",
                         )
                     }
