@@ -17,6 +17,7 @@ TEST_EVENT = {
 @pytest.fixture(autouse=True)
 def mock_env_vars(monkeypatch):
     monkeypatch.setenv("SIRIVM_BUCKET", "test-bucket")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-2")
 
 
 @pytest.fixture(autouse=True)

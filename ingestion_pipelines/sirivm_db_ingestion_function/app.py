@@ -75,14 +75,14 @@ def process_batch(
 
 
 def lambda_handler(event: dict, _context: dict) -> None:
-    event = SQSEvent(event)
+    sqs_event = SQSEvent(event)
     bucket = sirivm_bucket
     start_time = datetime.now().isoformat()
 
     with conn.cursor() as cur:
-        for record in event.records:
-            key = record.message_attributes.__getitem__("key").string_value
-            batch_id = record.message_attributes.__getitem__("batch_id").string_value
+        for record in sqs_event.records:
+            key = record.message_attributes["key"].string_value
+            batch_id = record.message_attributes["batch_id"].string_value
 
             logger.append_keys(batch_id=batch_id, key=key)
 
