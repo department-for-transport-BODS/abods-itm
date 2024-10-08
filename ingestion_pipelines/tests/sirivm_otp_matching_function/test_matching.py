@@ -178,8 +178,11 @@ class TestFindMatchesInPotentialMatches:
     avl_record_2 = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[220][0])
     avl_record_3 = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[222][0])
     avl_record_4 = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[183][0])
+    avl_record_5 = AVLRecord(read_avl("FSMR3507042024-08-21.csv")[0][0])
     timetable = read_timetable("TLCT37812152024-08-20.json")
+    timetable_5 = read_timetable("FSMR3507042024-08-21.json")
     group_id = "TLCT37812152024-08-20"
+    group_id_5 = "FSMR3507042024-08-21"
     group_stop_history = {
         "last_avl_index": 30,
         "last_avl_time": datetime.datetime(2024, 8, 20, 11, 35, 25).replace(
@@ -310,6 +313,29 @@ class TestFindMatchesInPotentialMatches:
                 "last_avl_index": 76,
                 "last_distance": 8,
                 "last_time_in_zone": datetime.datetime(2024, 8, 20, 11, 53, 43).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+        },
+    }
+    group_stop_history_5 = {
+        "last_avl_index": 2,
+        "last_avl_time": datetime.datetime(2024, 8, 21, 7, 1, 3).replace(
+            tzinfo=pytz.utc
+        ),
+        "matched_stops": {},
+        "potential_matches": {
+            "1": {
+                "last_avl_index": 2,
+                "last_distance": 11.812096582392824,
+                "last_time_in_zone": datetime.datetime(2024, 8, 21, 7, 1, 3).replace(
+                    tzinfo=pytz.utc
+                ),
+            },
+            "41": {
+                "last_avl_index": 2,
+                "last_distance": 10.812096582392824,
+                "last_time_in_zone": datetime.datetime(2024, 8, 21, 7, 1, 34).replace(
                     tzinfo=pytz.utc
                 ),
             },
@@ -510,6 +536,42 @@ class TestFindMatchesInPotentialMatches:
                 },
                 [],
                 id="the potential match is not a final stop and avl_pm_distance is less than threshold, update potential match details",
+            ),
+            pytest.param(
+                avl_record_5,
+                timetable_5,
+                group_stop_history_5,
+                2,
+                batch_id,
+                {group_id_5: {}},  # stop pos dist
+                [],  # potential_matches_to_delete
+                41,  # final_stop_index
+                [],  # stop_pos_distances_remove,
+                {
+                    "last_avl_index": 2,
+                    "last_avl_time": datetime.datetime(2024, 8, 21, 7, 1, 3).replace(
+                    tzinfo=pytz.utc
+                    ),
+                    "matched_stops": {},
+                    "potential_matches": {
+                        "1": {
+                            "last_avl_index": 2,
+                            "last_distance": 11.812096582392824,
+                            "last_time_in_zone": datetime.datetime(2024, 8, 21, 7, 1, 3).replace(
+                                tzinfo=pytz.utc
+                            ),
+                        },
+                        "41": {
+                            "last_avl_index": 2,
+                            "last_distance": 10.812096582392824,
+                            "last_time_in_zone": datetime.datetime(2024, 8, 21, 7, 1, 34).replace(
+                                tzinfo=pytz.utc
+                            ),
+                        }
+                    },
+                },
+                [],
+                id="the potential match is a final stop but there're no previous matches",
             ),
         ],
     )
