@@ -1,10 +1,11 @@
-import logging
 import datetime
+import logging
 
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.matching import (
-    get_shard_filter,
     get_group_stop_history,
+    get_shard_filter,
 )
+
 from .data.get_test_data import get_shards
 
 
@@ -141,16 +142,16 @@ class TestGroupStopHistory:
                 "last_avl_time": datetime.datetime(2024, 9, 1, 11, 34, 37),
                 "last_avl_index": 6,
                 "matched_stops": {
-                    "1": {"last_match_time": datetime.datetime(2024, 9, 1, 11, 32, 5)}
+                    "1": {"last_match_time": datetime.datetime(2024, 9, 1, 11, 32, 5)},
                 },
                 "potential_matches": {
                     "2": {
                         "last_avl_index": 6,
                         "last_distance": 58.596598093401845,
                         "last_time_in_zone": datetime.datetime(2024, 9, 1, 11, 34, 37),
-                    }
+                    },
                 },
-            }
+            },
         }
         group_id = "ABC12342024-09-01"
         group_stop_history = get_group_stop_history(group_id, stop_history)
@@ -159,14 +160,14 @@ class TestGroupStopHistory:
             "last_avl_time": datetime.datetime(2024, 9, 1, 11, 34, 37),
             "last_avl_index": 6,
             "matched_stops": {
-                "1": {"last_match_time": datetime.datetime(2024, 9, 1, 11, 32, 5)}
+                "1": {"last_match_time": datetime.datetime(2024, 9, 1, 11, 32, 5)},
             },
             "potential_matches": {
                 "2": {
                     "last_avl_index": 6,
                     "last_distance": 58.596598093401845,
                     "last_time_in_zone": datetime.datetime(2024, 9, 1, 11, 34, 37),
-                }
+                },
             },
         }
 

@@ -1,11 +1,8 @@
-"""
-Helpers to Load Test Data from Files
-"""
+"""Helpers to Load Test Data from Files"""
 
-import importlib.util
-from pathlib import Path
-import json
 import csv
+import json
+from pathlib import Path
 
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.client_s3 import (
     parse_timetable,
