@@ -1,9 +1,9 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from aws_lambda_powertools import Logger
 
-from .utils import timer, utc
+from .utils import timer
 
 logger = Logger()
 
@@ -28,11 +28,11 @@ def clean_stop_history(
     for group_id, match_details in stop_history.items():
         if group_id != "control_info":
             last_avl_time_str = match_details["last_avl_time"][:19]
-            avl_utc = avl_datetime.replace(tzinfo=utc)
+            avl_utc = avl_datetime.replace(tzinfo=UTC)
             last_avl_utc = datetime.strptime(
                 last_avl_time_str,
                 "%Y-%m-%d %H:%M:%S",
-            ).replace(tzinfo=utc)
+            ).replace(tzinfo=UTC)
             difference_in_seconds = (avl_utc - last_avl_utc).total_seconds()
             difference_in_hours = difference_in_seconds / 60 / 60
             if difference_in_hours > 1:

@@ -42,13 +42,11 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             backfill_record_handler(rec, _cache["shards"])
             continue
 
-        if (
-            rec.message_attributes["key"].string_value == "timetable"
-            and "main_timetable" in _cache
-        ):
+        if rec.message_attributes["key"].string_value == "timetable":
             # Invalidate timetable cache, it will be when next needed
             # We probably want to switch to a time based TTL on the cache
-            del _cache["main_timetable"]
+            if "main_timetable" in _cache:
+                del _cache["main_timetable"]
             continue
 
         if "main_timetable" not in _cache:

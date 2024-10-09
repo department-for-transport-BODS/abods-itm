@@ -1,10 +1,9 @@
 import time
 from collections.abc import Callable
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Literal, ParamSpec, TypeVar
 
 import boto3
-import pytz
 from aws_lambda_powertools import Logger
 
 EARLY_THRESHOLD_IN_SECONDS = 60
@@ -13,7 +12,6 @@ LATE_THRESHOLD_IN_SECONDS = 359
 
 logger = Logger()
 session = boto3.Session()
-utc = pytz.utc
 
 Param = ParamSpec("Param")
 Return = TypeVar("Return")
@@ -55,7 +53,7 @@ def validate_date(date_input: datetime | str) -> datetime:
     if "T" in date_input:
         date_format = "%Y-%m-%dT%H:%M:%S"
 
-    return datetime.strptime(date_input_wo_tz, date_format).replace(tzinfo=utc)
+    return datetime.strptime(date_input_wo_tz, date_format).replace(tzinfo=UTC)
 
 
 def get_time_difference(
