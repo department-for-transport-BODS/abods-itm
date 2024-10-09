@@ -42,6 +42,9 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             backfill_record_handler(rec, _cache["shards"])
             continue
 
+        if "main_timetable" not in _cache:
+            _cache["main_timetable"] = s3_client.download_main_timetable()
+
         if (
             rec.message_attributes["key"].string_value == "timetable"
             and "main_timetable" in _cache
@@ -49,12 +52,8 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             # Invalidate timetable cache, it will be when next needed
             # We probably want to switch to a time based TTL on the cache
             del _cache["main_timetable"]
-            continue
-
-        if "main_timetable" not in _cache:
-            _cache["main_timetable"] = s3_client.download_main_timetable()
-
-        live_record_handler(rec, _cache["shards"], _cache["main_timetable"])
+        else:
+            live_record_handler(rec, _cache["shards"], _cache["main_timetable"])
 
 
 def backfill_record_handler(rec: SQSRecord, shards: dict[str, Any]) -> None:
