@@ -1,10 +1,9 @@
 import time
 from collections.abc import Callable
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Literal, ParamSpec, TypeVar
 
 import boto3
-import pytz
 from aws_lambda_powertools import Logger
 
 EARLY_THRESHOLD_IN_SECONDS = 60

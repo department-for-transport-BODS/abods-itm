@@ -1,5 +1,5 @@
-from datetime import datetime, UTC
 import os
+from datetime import UTC, datetime
 from typing import Any
 from unittest import mock
 
@@ -336,17 +336,17 @@ class TestFindMatchesInPotentialMatches:
                     "matched_stops": {
                         "4": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 32, 20, tzinfo=UTC
+                                2024, 8, 20, 11, 32, 20, tzinfo=UTC,
                             ),
                         },
                         "5": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 32, 50, tzinfo=UTC
+                                2024, 8, 20, 11, 32, 50, tzinfo=UTC,
                             ),
                         },
                         "6": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 34, 42, tzinfo=UTC
+                                2024, 8, 20, 11, 34, 42, tzinfo=UTC,
                             ),
                         },
                     },
@@ -355,7 +355,7 @@ class TestFindMatchesInPotentialMatches:
                             "last_avl_index": 29,
                             "last_distance": 142,
                             "last_time_in_zone": datetime(
-                                2024, 8, 20, 11, 34, 42, tzinfo=UTC
+                                2024, 8, 20, 11, 34, 42, tzinfo=UTC,
                             ),
                         },
                     },
@@ -379,17 +379,17 @@ class TestFindMatchesInPotentialMatches:
                     "matched_stops": {
                         "42": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 58, 43, tzinfo=UTC
+                                2024, 8, 20, 11, 58, 43, tzinfo=UTC,
                             ),
                         },
                         "43": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 59, 5, tzinfo=UTC
+                                2024, 8, 20, 11, 59, 5, tzinfo=UTC,
                             ),
                         },
                         "45": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 59, 57, tzinfo=UTC
+                                2024, 8, 20, 11, 59, 57, tzinfo=UTC,
                             ),
                         },
                     },
@@ -398,14 +398,14 @@ class TestFindMatchesInPotentialMatches:
                             "last_avl_index": 89,
                             "last_distance": 11,
                             "last_time_in_zone": datetime(
-                                2024, 8, 20, 11, 59, 57, tzinfo=UTC
+                                2024, 8, 20, 11, 59, 57, tzinfo=UTC,
                             ),
                         },
                         "44": {
                             "last_avl_index": 90,
                             "last_distance": 332.5369444168041,
                             "last_time_in_zone": datetime(
-                                2024, 8, 20, 11, 59, 27, tzinfo=UTC
+                                2024, 8, 20, 11, 59, 27, tzinfo=UTC,
                             ),
                         },
                     },
@@ -429,17 +429,17 @@ class TestFindMatchesInPotentialMatches:
                     "matched_stops": {
                         "43": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 59, 5, tzinfo=UTC
+                                2024, 8, 20, 11, 59, 5, tzinfo=UTC,
                             ),
                         },
                         "44": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 59, 27, tzinfo=UTC
+                                2024, 8, 20, 11, 59, 27, tzinfo=UTC,
                             ),
                         },
                         "45": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 59, 57, tzinfo=UTC
+                                2024, 8, 20, 11, 59, 57, tzinfo=UTC,
                             ),
                         },
                     },
@@ -448,7 +448,7 @@ class TestFindMatchesInPotentialMatches:
                             "last_avl_index": 90,
                             "last_distance": 332,
                             "last_time_in_zone": datetime(
-                                2024, 8, 20, 11, 59, 27, tzinfo=UTC
+                                2024, 8, 20, 11, 59, 27, tzinfo=UTC,
                             ),
                         },
                     },
@@ -472,17 +472,17 @@ class TestFindMatchesInPotentialMatches:
                     "matched_stops": {
                         "33": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 50, 28, tzinfo=UTC
+                                2024, 8, 20, 11, 50, 28, tzinfo=UTC,
                             ),
                         },
                         "34": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 51, 35, tzinfo=UTC
+                                2024, 8, 20, 11, 51, 35, tzinfo=UTC,
                             ),
                         },
                         "35": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 11, 53, 8, tzinfo=UTC
+                                2024, 8, 20, 11, 53, 8, tzinfo=UTC,
                             ),
                         },
                     },
@@ -491,7 +491,7 @@ class TestFindMatchesInPotentialMatches:
                             "last_avl_index": 77,
                             "last_distance": 15.608686190208905,
                             "last_time_in_zone": datetime(
-                                2024, 8, 20, 11, 54, 9, tzinfo=UTC
+                                2024, 8, 20, 11, 54, 9, tzinfo=UTC,
                             ),
                         },
                     },
@@ -518,14 +518,14 @@ class TestFindMatchesInPotentialMatches:
                             "last_avl_index": 2,
                             "last_distance": 11.812096582392824,
                             "last_time_in_zone": datetime(
-                                2024, 8, 21, 7, 1, 3, tzinfo=UTC
+                                2024, 8, 21, 7, 1, 3, tzinfo=UTC,
                             ),
                         },
                         "41": {
                             "last_avl_index": 2,
                             "last_distance": 10.812096582392824,
                             "last_time_in_zone": datetime(
-                                2024, 8, 21, 7, 1, 34, tzinfo=UTC
+                                2024, 8, 21, 7, 1, 34, tzinfo=UTC,
                             ),
                         },
                     },
@@ -549,12 +549,12 @@ class TestFindMatchesInPotentialMatches:
                     "matched_stops": {
                         "40": {
                             "last_match_time": datetime(
-                                2024, 8, 20, 7, 42, 26, tzinfo=UTC
+                                2024, 8, 20, 7, 42, 26, tzinfo=UTC,
                             ),
                         },
                         "41": {
                             "last_match_time": datetime(
-                                2024, 8, 21, 7, 43, 25, tzinfo=UTC
+                                2024, 8, 21, 7, 43, 25, tzinfo=UTC,
                             ),
                         },
                     },
@@ -563,7 +563,7 @@ class TestFindMatchesInPotentialMatches:
                             "last_avl_index": 101,
                             "last_distance": 10.812096582392824,
                             "last_time_in_zone": datetime(
-                                2024, 8, 21, 7, 43, 25, tzinfo=UTC
+                                2024, 8, 21, 7, 43, 25, tzinfo=UTC,
                             ),
                         },
                     },
@@ -787,9 +787,7 @@ class TestGetTimetableDepartureTime:
 
     def test_get_timetable_departure_time(self):
         details = self.timetable[self.group_id]
-        expected_timtable_departure_time = datetime(
-            2024, 8, 20, 11, 16, 0, tzinfo=UTC
-        )
+        expected_timtable_departure_time = datetime(2024, 8, 20, 11, 16, 0, tzinfo=UTC)
         assert (
             details[self.pm_index].timetable_departure_time
             == expected_timtable_departure_time
@@ -1118,7 +1116,7 @@ class TestMovePotentialMatchToMatch:
                 {
                     "1": {
                         "last_match_time": datetime(
-                            2024, 8, 20, 11, 15, 48, tzinfo=UTC
+                            2024, 8, 20, 11, 15, 48, tzinfo=UTC,
                         ),
                     },
                 },
@@ -1154,18 +1152,14 @@ class TestMovePotentialMatchToMatch:
                 {
                     "1": {
                         "last_match_time": datetime(
-                            2024, 8, 20, 11, 15, 48, tzinfo=UTC
+                            2024, 8, 20, 11, 15, 48, tzinfo=UTC,
                         ),
                     },
                     "2": {
-                        "last_match_time": datetime(
-                            2024, 8, 20, 11, 17, 6, tzinfo=UTC
-                        ),
+                        "last_match_time": datetime(2024, 8, 20, 11, 17, 6, tzinfo=UTC),
                     },
                     "3": {
-                        "last_match_time": datetime(
-                            2024, 8, 20, 11, 20, 4, tzinfo=UTC
-                        ),
+                        "last_match_time": datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC),
                     },
                 },
                 {
@@ -1200,18 +1194,16 @@ class TestMovePotentialMatchToMatch:
                 {
                     "20": {
                         "last_match_time": datetime(
-                            2024, 8, 20, 11, 32, 23, tzinfo=UTC
+                            2024, 8, 20, 11, 32, 23, tzinfo=UTC,
                         ),
                     },
                     "21": {
                         "last_match_time": datetime(
-                            2024, 8, 20, 11, 34, 23, tzinfo=UTC
+                            2024, 8, 20, 11, 34, 23, tzinfo=UTC,
                         ),
                     },
                     "22": {
-                        "last_match_time": datetime(
-                            2024, 8, 20, 11, 35, 6, tzinfo=UTC
-                        ),
+                        "last_match_time": datetime(2024, 8, 20, 11, 35, 6, tzinfo=UTC),
                     },
                 },
                 {group_id: {}},
@@ -1233,12 +1225,12 @@ class TestMovePotentialMatchToMatch:
                 {
                     "21": {
                         "last_match_time": datetime(
-                            2024, 8, 20, 11, 34, 23, tzinfo=UTC
+                            2024, 8, 20, 11, 34, 23, tzinfo=UTC,
                         ),
                     },
                     "23": {
                         "last_match_time": datetime(
-                            2024, 8, 20, 11, 36, 54, tzinfo=UTC
+                            2024, 8, 20, 11, 36, 54, tzinfo=UTC,
                         ),
                     },
                 },
