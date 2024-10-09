@@ -12,7 +12,6 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     remove_matched_stops,
     update_matched_stop,
     write_matched_stop_to_db,
-    get_timetable_departure_time,
     update_potential_match,
     select_potential_match_with_same_recordedattime,
     move_potential_match_to_match,
@@ -26,6 +25,7 @@ from .data.expected.TLCT37812152024_08_20 import (
     expected_set,
     expected_remove,
 )
+
 
 class TestCheckUpdateFirstStop:
     avl_record = AVLRecord(read_avl("check_update_first_stop.csv")[1][0])
@@ -159,7 +159,7 @@ class TestCheckUpdateFirstStop:
     ):
         check_update_first_stop(
             rec,
-            timetable_dict,
+            timetable_dict[rec.group_id],
             group_stop_history,
             stop_pos_distances_remove,
             current_avl_index,
@@ -650,7 +650,7 @@ class TestFindMatchesInPotentialMatches:
     ):
         find_matches_in_potential_matches(
             avl,
-            timetable_dict,
+            timetable_dict[avl.group_id],
             group_stop_history,
             current_avl_index,
             batch_id,
@@ -824,7 +824,7 @@ class TestWriteMatchedStopToDb:
     ):
         write_matched_stop_to_db(
             is_final_stop,
-            timetable_dict,
+            timetable_dict[group_id],
             stop_pos_distances,
             group_id,
             pm_index,
@@ -840,13 +840,11 @@ class TestGetTimetableDepartureTime:
     pm_index = "2"
 
     def test_get_timetable_departure_time(self):
-        timetable_departure_time = get_timetable_departure_time(
-            self.timetable, self.group_id, self.pm_index
-        )
+        details = self.timetable[self.group_id]
         expected_timtable_departure_time = datetime.datetime(
             2024, 8, 20, 11, 16, 0
         ).replace(tzinfo=pytz.utc)
-        assert timetable_departure_time == expected_timtable_departure_time
+        assert details[self.pm_index].timetable_departure_time == expected_timtable_departure_time
 
 
 class TestUpdatePotentialMatch:
@@ -1379,7 +1377,7 @@ class TestMovePotentialMatchToMatch:
     ):
         move_potential_match_to_match(
             final_stop_index,
-            timetable_dict,
+            timetable_dict[avl.group_id],
             avl,
             pm_index,
             pm_details,

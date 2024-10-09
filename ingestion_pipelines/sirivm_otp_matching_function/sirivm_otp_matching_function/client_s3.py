@@ -14,11 +14,26 @@ from aws_lambda_powertools import Logger
 from botocore.exceptions import ClientError
 from pandas import DataFrame
 
-from .matcher.models import AVLRecord
+from .matcher.models import AVLRecord, RouteDetails, StopDetails
 from .matcher.utils import timer
 
 logger = Logger()
 client = boto3.client("s3")
+
+
+def parse_timetable(timetable: dict[str, dict[str, list]]) -> dict[str, RouteDetails]:
+    parsed = {}
+    for group_id, route in timetable.items():
+        parsed[group_id] = {}
+        for key, value in route.items():
+            parsed[group_id][key] = StopDetails(
+                latitude=value[0][0],
+                longitude=value[0][1],
+                expected_time=value[1],
+                timetable_id=value[2],
+                date=value[3],
+            )
+    return parsed
 
 
 class TimetableS3Client:
@@ -79,17 +94,18 @@ class TimetableS3Client:
             raise
 
     @timer(logger)
-    def download_main_timetable(self) -> dict:
+    def download_main_timetable(self) -> dict[str, RouteDetails]:
         """
         Download Main Timetable Data
         """
-        return self._get_from_s3("timetable/timetable.json")
+        return self.download_timetable("timetable/timetable.json")
 
-    def download_timetable(self, key: str) -> dict:
+    def download_timetable(self, key: str) -> dict[str, RouteDetails]:
         """
         Download Timetable Data
         """
-        return self._get_from_s3(key)
+        data = self._get_from_s3(key)
+        return parse_timetable(data)
 
     @timer(logger)
     def get_shards(self) -> dict:

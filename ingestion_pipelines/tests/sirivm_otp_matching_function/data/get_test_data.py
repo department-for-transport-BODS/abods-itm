@@ -7,6 +7,10 @@ from pathlib import Path
 import json
 import csv
 
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.client_s3 import (
+    parse_timetable,
+)
+
 test_data_dir = Path(__file__).parent
 
 
@@ -14,7 +18,7 @@ def read_timetable(file_name: str) -> dict:
     path = test_data_dir / "timetable" / file_name
     with Path.open(path) as f:
         timetable_json = json.load(f)
-    return timetable_json
+    return parse_timetable(timetable_json)
 
 
 def read_avl(file_name: str) -> list:

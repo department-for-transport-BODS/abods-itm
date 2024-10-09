@@ -9,6 +9,7 @@ from dateutil.parser import parse
 from .client_db import TimetableDBClient
 from .client_s3 import TimetableS3Client
 from .matcher import positions_timetable_lookup, clean_stop_history
+from .matcher.models import RouteDetails
 from .matcher.utils import timer
 
 logger = Logger()
@@ -18,7 +19,7 @@ db_client = TimetableDBClient()
 
 
 @lru_cache(maxsize=1)
-def read_timetable(timetable_name: str) -> dict[str, Any]:
+def read_timetable(timetable_name: str) -> dict[str, RouteDetails]:
     timetable = s3_client.download_timetable(timetable_name)
     logger.info(f"Loaded {timetable_name}")
     return timetable
@@ -101,7 +102,7 @@ def backfill_record_handler(rec, shards: dict[str, Any]):
     )
     db_client.historic_update_success(batch_id, to_set, to_remove, avl_date_str)
     logger.info(f"{fname} historic matching successful")
-    s3_client.export_stop_history(stop_history, avl_datetime.date(), shard_no)
+    s3_client.export_stop_history(stop_history, avl_datetime, shard_no)
     logger.info(f"OTP data updated for file {fname}")
 
 
