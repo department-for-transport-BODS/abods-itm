@@ -7,9 +7,9 @@ import psycopg2.extras
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.parser import BaseModel
 from psycopg2.extras import execute_values
-from shared.db import setup_db
 
 from .matcher.utils import timer
+from .shared.db import setup_db
 
 logger = Logger()
 
