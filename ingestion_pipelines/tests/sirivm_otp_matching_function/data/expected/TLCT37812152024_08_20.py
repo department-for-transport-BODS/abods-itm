@@ -2,10 +2,10 @@ from datetime import datetime
 
 import pytz
 
-expected_set = {"TLCT37812152024-08-20": {}}
+expected_set = {"TLCT|378|1215|2024-08-20": {}}
 expected_remove = []
 expected_stop_history = {
-    "TLCT37812152024-08-20": {
+    "TLCT|378|1215|2024-08-20": {
         "last_avl_time": datetime(2024, 8, 20, 12, 0, 5).replace(tzinfo=pytz.utc),
         "last_avl_index": 91,
         "matched_stops": {
