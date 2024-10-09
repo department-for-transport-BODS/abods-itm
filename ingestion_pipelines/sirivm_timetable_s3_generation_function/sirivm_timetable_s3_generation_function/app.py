@@ -1,13 +1,14 @@
-import psycopg2
-from os import environ
-import boto3
-import logging
-from datetime import datetime, timedelta
 import json
+import logging
 import uuid
 from collections import defaultdict
-from dateutil.parser import parse
+from datetime import datetime, timedelta
+from os import environ
+
 import awswrangler as wr
+import boto3
+import psycopg2
+from dateutil.parser import parse
 
 session = boto3.Session()
 db_host = environ.get("POSTGRES_HOST")
@@ -31,10 +32,13 @@ def get_rds_token():
     try:
         region = "eu-west-2"
         token = client.generate_db_auth_token(
-            DBHostname=db_host, Port=db_port, Region=region, DBUsername=db_user
+            DBHostname=db_host,
+            Port=db_port,
+            Region=region,
+            DBUsername=db_user,
         )
     except Exception as e:
-        logging.error("could not get token ")
+        logging.exception("could not get token ")
         raise e
 
     return token
@@ -45,8 +49,6 @@ def write_to_s3(data_dict, path):
 
     client.put_object(Bucket=sirivm_bucket, Key=path, Body=data_string)
 
-    return
-
 
 def getQueue(queue):
     """Retrieve the URL for the configured queue name"""
@@ -55,13 +57,15 @@ def getQueue(queue):
 
 
 def read_historic_timetable(timetable_date):
-    """Read historic timetable in csv format
+    """
+    Read historic timetable in csv format
 
     Args:
         timetable_date (str): The date of the timetable in format YYYY-MM-DD
 
     Returns:
         list : The list of all rows in the timetable of a input date
+
     """
     timetable_filename = f"historic_timetable/{timetable_date}.csv"
     colnames = [
@@ -87,13 +91,15 @@ def read_historic_timetable(timetable_date):
 
 
 def recreate_timetable(timetable):
-    """Recreate timetable in dict format
+    """
+    Recreate timetable in dict format
 
     Args:
         timetable (list): list of rows from the input timetable
 
     Returns:
         dict: Timetable data grouped by group_id
+
     """
     recreated_timetable = {}
     logger.info("Recreating timetable")
@@ -116,7 +122,8 @@ def recreate_timetable(timetable):
 
 
 def shred_timetable(recreated_timetable, query_time, timetable_date):
-    """Shred timetable into files in every half an hour interval with a 2-hour sliding window
+    """
+    Shred timetable into files in every half an hour interval with a 2-hour sliding window
 
     Args:
         recreated_timetable (dict): The recreated timetable output from recreate_timetable function
@@ -125,6 +132,7 @@ def shred_timetable(recreated_timetable, query_time, timetable_date):
 
     Returns:
         list: A list of rows that are within the 2-hour sliding window
+
     """
     window_hours = 2
     sliding_window_minus = query_time - timedelta(hours=window_hours)
@@ -135,7 +143,8 @@ def shred_timetable(recreated_timetable, query_time, timetable_date):
         for group_id, items in recreated_timetable.items():
             for stop, details in items.items():
                 journey_time = datetime.strptime(
-                    f"{timetable_date} {details[1]}", "%Y-%m-%d %H:%M:%S"
+                    f"{timetable_date} {details[1]}",
+                    "%Y-%m-%d %H:%M:%S",
                 )
                 if (
                     journey_time > sliding_window_minus
@@ -184,17 +193,20 @@ def backfill_lambda_handler(event, context):
                 recreated_timetable = recreate_timetable(historic_timetable)
                 shredded_dir = f"timetable_shreds/YYYY={h_year}/MM={h_mon}/DD={h_day}/"
                 if "Contents" in client.list_objects(
-                    Bucket=sirivm_bucket, Prefix=shredded_dir
+                    Bucket=sirivm_bucket,
+                    Prefix=shredded_dir,
                 ):
                     shredded_timetables_list = [
                         obj["Key"]
                         for obj in client.list_objects_v2(
-                            Bucket=sirivm_bucket, Prefix=shredded_dir, Delimiter="/"
+                            Bucket=sirivm_bucket,
+                            Prefix=shredded_dir,
+                            Delimiter="/",
                         )["Contents"]
-                        if "/" != obj["Key"][-1]
+                        if obj["Key"][-1] != "/"
                     ]
                     shredded_timetables_list.sort(
-                        key=lambda x: int(x[-10:-8] + x[-7:-5])
+                        key=lambda x: int(x[-10:-8] + x[-7:-5]),
                     )
                     number_of_shredded_timetables = len(shredded_timetables_list)
                     if number_of_shredded_timetables < 48:
@@ -203,7 +215,7 @@ def backfill_lambda_handler(event, context):
                             0 if shredded_timetables_list[-1][-7:-5] == "00" else 1
                         )
                 logger.info(
-                    f"Starting shredding on {h_year}-{h_mon}-{h_day} at {start_hour}:{'00' if start_minute == 0 else '30'}"
+                    f"Starting shredding on {h_year}-{h_mon}-{h_day} at {start_hour}:{'00' if start_minute == 0 else '30'}",
                 )
                 for h in range(start_hour, 24):
                     for i in range(start_minute, 2):
@@ -221,7 +233,9 @@ def backfill_lambda_handler(event, context):
                             + f"timetable_{h_year}{h_mon}{h_day}_{hour_str}_{minute_str}.json"
                         )
                         timetable_output = shred_timetable(
-                            recreated_timetable, query_time, timetable_end_date
+                            recreated_timetable,
+                            query_time,
+                            timetable_end_date,
                         )
                         write_to_s3(timetable_output, file_name)
                         logger.info(f"Written {file_name} to s3")
@@ -232,7 +246,7 @@ def backfill_lambda_handler(event, context):
             timetable_end_datetime -= delta
     else:
         logger.error(
-            f"Input backfill date ({timetable_start_date}, {timetable_end_date}) is/are not in a valid format YYYY-MM-DD."
+            f"Input backfill date ({timetable_start_date}, {timetable_end_date}) is/are not in a valid format YYYY-MM-DD.",
         )
 
 
@@ -286,11 +300,11 @@ def live_lambda_handler(event, context):
                 MessageDeduplicationId=str(uuid.uuid4()),
                 MessageGroupId=f"{queue_name.split('.')[0]}-group",
                 MessageAttributes={
-                    "key": {"StringValue": "timetable", "DataType": "String"}
+                    "key": {"StringValue": "timetable", "DataType": "String"},
                 },
             )
             logging.info(
-                f"Send message to  {otp_queue}{shard_no+1} so timetable is refreshed."
+                f"Send message to  {otp_queue}{shard_no+1} so timetable is refreshed.",
             )
     except Exception as e:
-        logging.error(e)
+        logging.exception(e)
