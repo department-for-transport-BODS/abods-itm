@@ -1,7 +1,25 @@
 from datetime import datetime
 from typing import Optional
 
+from attr import dataclass
+
 from .utils import validate_date
+
+
+@dataclass
+class StopDetails:
+    latitude: float
+    longitude: float
+    expected_time: str
+    timetable_id: int
+    date: str
+
+    @property
+    def timetable_departure_time(self) -> datetime:
+        return validate_date(f"{self.date} {self.expected_time}")
+
+
+RouteDetails = dict[str, StopDetails]
 
 
 class AVLRecord:
