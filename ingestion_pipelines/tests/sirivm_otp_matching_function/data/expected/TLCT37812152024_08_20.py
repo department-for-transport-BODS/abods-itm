@@ -1,4 +1,5 @@
 from datetime import datetime
+
 import pytz
 
 expected_set = {"TLCT37812152024-08-20": {}}
@@ -10,8 +11,8 @@ expected_stop_history = {
         "matched_stops": {
             "43": {
                 "last_match_time": datetime(2024, 8, 20, 11, 59, 5).replace(
-                    tzinfo=pytz.utc
-                )
+                    tzinfo=pytz.utc,
+                ),
             },
             "44": {
                 "last_match_time": datetime(
@@ -21,7 +22,7 @@ expected_stop_history = {
                     11,
                     59,
                     27,
-                ).replace(tzinfo=pytz.utc)
+                ).replace(tzinfo=pytz.utc),
             },
             "45": {
                 "last_match_time": datetime(
@@ -31,7 +32,7 @@ expected_stop_history = {
                     11,
                     59,
                     57,
-                ).replace(tzinfo=pytz.utc)
+                ).replace(tzinfo=pytz.utc),
             },
         },
         "potential_matches": {
@@ -39,9 +40,9 @@ expected_stop_history = {
                 "last_avl_index": 91,
                 "last_distance": 9.786452000783465,
                 "last_time_in_zone": datetime(2024, 8, 20, 12, 00, 5).replace(
-                    tzinfo=pytz.utc
+                    tzinfo=pytz.utc,
                 ),
-            }
+            },
         },
-    }
+    },
 }
