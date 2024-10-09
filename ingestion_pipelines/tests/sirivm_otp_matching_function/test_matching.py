@@ -65,7 +65,7 @@ class TestCheckUpdateFirstStop:
         },
     }
     expected_stop_pos_distances_remove_5_mins = [
-        ("1", 893823336, "TLCT|378|1215|2024-08-20")
+        ("1", 893823336, "TLCT|378|1215|2024-08-20"),
     ]
     group_stop_history = {
         "last_avl_time": datetime(2024, 8, 20, 11, 34, 37, tzinfo=UTC),
