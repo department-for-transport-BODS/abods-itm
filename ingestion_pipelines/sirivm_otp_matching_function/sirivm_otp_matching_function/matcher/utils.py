@@ -1,6 +1,6 @@
 import time
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Literal, ParamSpec, TypeVar
 
 import boto3
@@ -13,7 +13,6 @@ LATE_THRESHOLD_IN_SECONDS = 359
 
 logger = Logger()
 session = boto3.Session()
-utc = pytz.utc
 
 Param = ParamSpec("Param")
 Return = TypeVar("Return")
@@ -55,7 +54,7 @@ def validate_date(date_input: datetime | str) -> datetime:
     if "T" in date_input:
         date_format = "%Y-%m-%dT%H:%M:%S"
 
-    return datetime.strptime(date_input_wo_tz, date_format).replace(tzinfo=utc)
+    return datetime.strptime(date_input_wo_tz, date_format).replace(tzinfo=UTC)
 
 
 def get_time_difference(
