@@ -9,7 +9,7 @@ jobs:
       - uses: astral-sh/ruff-action@v1
         name: "format"
         with:
-          args: "format --check --exit-zero" # TODO: remove --exit-zero when everything is passing
+          args: "format --check"
         continue-on-error: true
       - uses: astral-sh/ruff-action@v1
         name: "lint"

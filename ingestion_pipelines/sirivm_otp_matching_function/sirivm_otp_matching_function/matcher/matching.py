@@ -98,6 +98,10 @@ def check_update_first_stop(
                 avl,
                 f"6+7. avl is {avl_ms_distance}m, within {distance_threshold}m",
             )
+            log_specific(
+                avl,
+                f"time diff = {avl.recorded_at_time_utc - ms_last_match_time}, {avl.recorded_at_time_utc}, {ms_last_match_time}, {avl.recorded_at_time_utc - ms_last_match_time < timedelta(minutes=5)}",
+            )
             # 8. if avl is within 5 mins after the last first stop matching time
             if (avl.recorded_at_time_utc - ms_last_match_time) < timedelta(minutes=5):
                 log_specific(
@@ -135,7 +139,6 @@ def find_matches_in_potential_matches(
     potential_matches_to_delete: list,
     final_stop_index: int,
     stop_pos_distances_remove: list,
-    matched_stops_to_remove: list,
 ) -> None:
     """Find matches within the potential match list
 
@@ -149,9 +152,14 @@ def find_matches_in_potential_matches(
         potential_matches_to_delete (list): The list of matched stops to be removed from the potential match list
         final_stop_index (int): The stop index of the final stop
         stop_pos_distances_remove (list): The list of stops that needs to have matched records removed from database
-        matched_stops_to_remove (list): The list of stops that needs to have matched records removed from stop history
     """
-    potential_matches = group_stop_history.get("potential_matches")
+    # Order potential matches by stop index to make sure stops are matched in order
+    potential_matches = dict(
+        sorted(
+            group_stop_history["potential_matches"].items(),
+            key=lambda t: int(t[0]),
+        )
+    )
     log_specific(avl, "14. iterating through potential matches")
     for pm_index, pm_details in potential_matches.items():
         if pm_index in timetable_dict[avl.group_id]:
@@ -168,17 +176,17 @@ def find_matches_in_potential_matches(
                 # Distance between avl and potential match stop is less than threshold
                 # 16. check if the potential match is the final stop of the route
                 if is_final_stop:
-                    # 18-19. the final stop has not been matched yet and there is more than 1 actual match stored
+                    # 18-19. the final stop has not been matched yet and there is at least one match
                     if (
                         pm_index not in group_stop_history["matched_stops"]
-                        and len(group_stop_history["matched_stops"]) > 1
+                        and len(group_stop_history["matched_stops"]) > 0
                     ):
                         log_specific(
                             avl,
                             f"16. {pm_index} is final stop and has not been matched",
                         )
                         move_potential_match_to_match(
-                            is_final_stop,
+                            final_stop_index,
                             timetable_dict,
                             avl,
                             pm_index,
@@ -188,7 +196,6 @@ def find_matches_in_potential_matches(
                             stop_pos_distances,
                             batch_id,
                             stop_pos_distances_remove,
-                            matched_stops_to_remove,
                         )
                 else:
                     # 17.Update potential match with last_avl_index of current_index and last_distance of as last distance from stop and last_time_in_zone of AVL time
@@ -219,10 +226,14 @@ def find_matches_in_potential_matches(
                     # avl is confirmed to be getting away from the stop with last distance > 70m
                     # 31-32. check if there is more than 1 match being created with the same recordedattime
                     selected_index = select_potential_match_with_same_recordedattime(
-                        pm_index, group_stop_history, potential_matches_to_delete
+                        avl, pm_index, group_stop_history, potential_matches_to_delete
+                    )
+                    log_specific(
+                        avl,
+                        f"31-32. selected_index for matching {selected_index}",
                     )
                     move_potential_match_to_match(
-                        is_final_stop,
+                        final_stop_index,
                         timetable_dict,
                         avl,
                         selected_index,
@@ -232,7 +243,6 @@ def find_matches_in_potential_matches(
                         stop_pos_distances,
                         batch_id,
                         stop_pos_distances_remove,
-                        matched_stops_to_remove,
                     )
                 else:
                     # 19. pm last distance < distance threshold / 20. the avl potential distance < last distance, Avl is moving backwards
@@ -386,7 +396,10 @@ def get_timetable_departure_time(
 
 
 def select_potential_match_with_same_recordedattime(
-    pm_index: str, group_stop_history: dict, potential_matches_to_delete: list
+    avl: AVLRecord,
+    pm_index: str,
+    group_stop_history: dict,
+    potential_matches_to_delete: list,
 ) -> str:
     matched_stops = dict(
         sorted(group_stop_history["matched_stops"].items(), key=lambda t: int(t[0]))
@@ -413,13 +426,18 @@ def select_potential_match_with_same_recordedattime(
                 lowest_index_diff = diff
                 selected_index = index
             else:
-                # remove the potential match(es) that are not the closest to the first actual matched
-                potential_matches_to_delete.append(index)
+                if abs(int(index) - int(pm_index)) != 1:
+                    log_specific(
+                        avl,
+                        f"32. {pm_index} and {index} have the same recorded at time, remove {index} from potential matches",
+                    )
+                    # remove the potential match(es) that are not the closest to the first actual matched
+                    potential_matches_to_delete.append(index)
     return selected_index
 
 
 def move_potential_match_to_match(
-    is_final_stop: bool,
+    final_stop_index: int,
     timetable_dict: dict,
     avl: AVLRecord,
     pm_index: str,
@@ -429,12 +447,11 @@ def move_potential_match_to_match(
     stop_pos_distances: dict,
     batch_id: str,
     stop_pos_distances_remove: list,
-    matched_stops_to_remove: list,
 ) -> None:
     """Move the current potential match to be a match
 
     Args:
-        is_final_stop (bool): Current stop is a final stop
+        final_stop_index (int): Final stop index
         timetable_dict (dict): Timetable data
         avl (AVLRecord): Avl record
         pm_index (str): Potential match stop index which has become a match
@@ -444,15 +461,9 @@ def move_potential_match_to_match(
         stop_pos_distances (dict): The matched records that is going to be written into the database
         batch_id (str): Avl batch id
         stop_pos_distances_remove (list): The list of stops that needs to have matched records removed from database
-        matched_stops_to_remove (list): The list of stops that needs to have matched records removed from stop history
     """
-
-    matched_stops = dict(
-        sorted(
-            group_stop_history["matched_stops"].items(),
-            key=lambda t: t[1]["last_match_time"],
-        )
-    )
+    is_final_stop = True if int(pm_index) == final_stop_index else False
+    matched_stops = group_stop_history["matched_stops"]
     delete_potential_match = False
     last_time_in_zone = validate_date(pm_details["last_time_in_zone"])
     # 33. is this potential match the first match?
@@ -465,7 +476,7 @@ def move_potential_match_to_match(
         ordered_matched_stops_with_new_match = dict(
             sorted(
                 matched_stops_with_new_match.items(),
-                key=lambda t: t[1]["last_match_time"],
+                key=lambda t: validate_date(t[1]["last_match_time"]).timestamp(),
             )
         )
         new_highest_matched_stop_index = int(
@@ -475,27 +486,41 @@ def move_potential_match_to_match(
         lowest_matched_stop_index = int(min(matched_stops, key=lambda x: int(x)))
         # check if the new match index is higher than or equal to the highest index saved
         # 21-22. is the new match index higher than the highest index saved and Will this new match be the 3rd actual match saved
-        if len(ordered_matched_stops_with_new_match) == saved_matches_limit:
-            if (
-                int(pm_index) > highest_matched_stop_index
-                and int(pm_index) == new_highest_matched_stop_index
-                # and len(ordered_matched_stops_with_new_match) == saved_matches_limit
-            ):
-                # 23. Delete the lowest saved index from matched stops
-                matched_stops_to_remove.append(str(lowest_matched_stop_index))
-            # 20. when the new match index is lower than the highest index saved
-            # 28,29. Will this new match be the 3rd actual match saved and Is this new match the lowest index
-            if (
-                int(pm_index) < lowest_matched_stop_index
-                # and len(ordered_matched_stops_with_new_match) == saved_matches_limit
-            ):
+        if (
+            int(pm_index) > highest_matched_stop_index
+            and int(pm_index) == new_highest_matched_stop_index
+            and len(matched_stops) == saved_matches_limit
+        ):
+            log_specific(
+                avl,
+                f"{pm_index} higher than highest_matched_stop_index {highest_matched_stop_index}, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
+            )
+            # 23. Delete the lowest saved index from matched stops
+            del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
+        # 20. when the new match index is lower than the highest index saved
+        # 28,29. Will this new match be the 3rd actual match saved and Is this new match the lowest index
+        if (
+            int(pm_index) < lowest_matched_stop_index
+            and len(matched_stops) == saved_matches_limit
+        ):
+            log_specific(
+                avl,
+                f"{pm_index} lower than lowest_matched_stop_index {lowest_matched_stop_index}, remove it from potential matches",
+            )
+            # 30.Delete this new potential match
+            potential_matches_to_delete.append(pm_index)
+            delete_potential_match = True
+        if (
+            int(pm_index) < highest_matched_stop_index
+            and int(pm_index) > lowest_matched_stop_index
+        ):
+            # 29.2 is the last stop in the matched stops ordered by recorded_at_time the final stop of the journey?
+            if int(list(matched_stops.keys())[-1]) == final_stop_index:
                 log_specific(
                     avl,
-                    f"{pm_index} lower than lowest_matched_stop_index {lowest_matched_stop_index}",
+                    f"last matched stop {list(matched_stops.keys())[-1]} is final stop, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
                 )
-                # 30.Delete this new potential match
-                potential_matches_to_delete.append(pm_index)
-                delete_potential_match = True
+                del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
             else:
                 # 31.Delete the higher index stored from the db and json
                 higher_indices_in_matched = [
@@ -503,8 +528,12 @@ def move_potential_match_to_match(
                     for ind in group_stop_history["matched_stops"]
                     if int(ind) > int(pm_index)
                 ]
+                log_specific(
+                    avl,
+                    f"{pm_index} lower than highest_matched_stop_index {highest_matched_stop_index}, remove matched stop index {higher_indices_in_matched} higher than {pm_index}",
+                )
                 for index in higher_indices_in_matched:
-                    matched_stops_to_remove.append(index)
+                    del group_stop_history["matched_stops"][index]
                     timetable_id = timetable_dict[avl.group_id][index][2]
                     stop_pos_distances_remove.append(
                         (index, timetable_id, avl.group_id)
@@ -542,7 +571,7 @@ def positions_timetable_lookup(
 
     Args:
         timetable_dict (dict): Timetable data
-        shards (dict): Shards data
+        shards (dict): Shards categories
         shard_no (str): Shard number assigned
         avl_dict (list): A list of avl records
         batch_id (str, optional): Avl batch id.
@@ -579,6 +608,7 @@ def positions_timetable_lookup(
                     group_stop_history["last_avl_index"] = current_avl_index
                     # update last avl time
                     group_stop_history["last_avl_time"] = avl.recorded_at_time_utc
+                    log_specific(avl, f"avl index {current_avl_index}")
                     if len(group_stop_history["matched_stops"]) > 0:
                         # 6-10. Check if the bus is revisiting stop 1
                         check_update_first_stop(
@@ -603,7 +633,6 @@ def positions_timetable_lookup(
                     # 14-34. Find matches
                     if len(group_stop_history.get("potential_matches")) > 0:
                         potential_matches_to_remove = []
-                        matched_stops_to_remove = []
                         find_matches_in_potential_matches(
                             avl,
                             timetable_dict,
@@ -614,15 +643,11 @@ def positions_timetable_lookup(
                             potential_matches_to_remove,
                             final_stop_index,
                             stop_pos_distances_remove,
-                            matched_stops_to_remove,
                         )
                         # 22.1 remove matched stops from potential matches
                         remove_matched_stops(
                             group_stop_history,
                             "potential_matches",
                             potential_matches_to_remove,
-                        )
-                        remove_matched_stops(
-                            group_stop_history, "matched_stops", matched_stops_to_remove
                         )
     return stop_pos_distances, stop_pos_distances_remove, stop_history
