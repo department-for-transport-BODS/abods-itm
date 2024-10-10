@@ -30,4 +30,7 @@ depends = ["fmt", "lint"]
 [tasks.checks]
 depends = ["checkov", "test", "fmt:check", "lint:check"]
 
+[tasks.db_connect]
+run = "./scripts/db_connect.sh"
+
 

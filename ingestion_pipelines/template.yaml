@@ -34,7 +34,6 @@ Parameters:
 
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, 'local']]
-  IsNotProd: !Not [!Equals [!Ref Environment, 'prod']]
 
 Resources:
   ##########################################################
@@ -388,8 +387,6 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
-          POWERTOOLS_SERVICE_NAME: sirivm-db-ingestion-function
-          POWERTOOLS_LOG_LEVEL: INFO
       LoggingConfig:
         LogGroup: !Ref SiriVmDbIngestionFunctionLogGroup
 
