@@ -33,7 +33,7 @@ class TestCheckUpdateFirstStop:
     avl_record = AVLRecord(read_avl("check_update_first_stop.csv")[1][0])
     avl_record_5_mins = AVLRecord(read_avl("check_update_first_stop.csv")[0][0])
     timetable = read_timetable("TLCT37812152024-08-20.json")
-    group_id = "TLCT37812152024-08-20"
+    group_id = "TLCT|378|1215|2024-08-20"
     stop_pos_distances_remove_5_mins = []
     group_stop_history_5_mins = {
         "last_avl_time": datetime(2024, 8, 20, 11, 24, 58, tzinfo=UTC),
@@ -65,7 +65,7 @@ class TestCheckUpdateFirstStop:
         },
     }
     expected_stop_pos_distances_remove_5_mins = [
-        ("1", 893823336, "TLCT37812152024-08-20"),
+        ("1", 893823336, "TLCT|378|1215|2024-08-20"),
     ]
     group_stop_history = {
         "last_avl_time": datetime(2024, 8, 20, 11, 34, 37, tzinfo=UTC),
@@ -171,8 +171,8 @@ class TestFindMatchesInPotentialMatches:
     avl_record_6 = AVLRecord(read_avl("FSMR3507042024-08-21.csv")[101][0])
     timetable = read_timetable("TLCT37812152024-08-20.json")
     timetable_5 = read_timetable("FSMR3507042024-08-21.json")
-    group_id = "TLCT37812152024-08-20"
-    group_id_5 = "FSMR3507042024-08-21"
+    group_id = "TLCT|378|1215|2024-08-20"
+    group_id_5 = "FSMR|35|0704|2024-08-21"
     group_stop_history = {
         "last_avl_index": 30,
         "last_avl_time": datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC),
@@ -821,9 +821,9 @@ class TestUpdateMatchedStop:
 
 class TestWriteMatchedStopToDb:
     timetable = read_timetable("TLCT37812152024-08-20.json")
-    stop_pos_distances_non_final = {"TLCT37812152024-08-20": {}}
-    stop_pos_distances_final = {"TLCT37812152024-08-20": {}}
-    group_id = "TLCT37812152024-08-20"
+    stop_pos_distances_non_final = {"TLCT|378|1215|2024-08-20": {}}
+    stop_pos_distances_final = {"TLCT|378|1215|2024-08-20": {}}
+    group_id = "TLCT|378|1215|2024-08-20"
     batch_id = "123"
     last_time_in_zone_non_final = datetime(2024, 8, 20, 11, 9, 5, tzinfo=UTC)
     last_time_in_zone_final = datetime(2024, 8, 20, 11, 35, 0, tzinfo=UTC)
@@ -914,7 +914,7 @@ class TestWriteMatchedStopToDb:
 
 class TestGetTimetableDepartureTime:
     timetable = read_timetable("TLCT37812152024-08-20.json")
-    group_id = "TLCT37812152024-08-20"
+    group_id = "TLCT|378|1215|2024-08-20"
     pm_index = "2"
 
     def test_get_timetable_departure_time(self):
@@ -1109,7 +1109,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:
 class TestMovePotentialMatchToMatch:
     avl_record = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[0][0])
     timetable = read_timetable("TLCT37812152024-08-20.json")
-    group_id = "TLCT37812152024-08-20"
+    group_id = "TLCT|378|1215|2024-08-20"
     final_stop_index = "41"
     pm_details_1 = {
         "last_avl_index": 3,
