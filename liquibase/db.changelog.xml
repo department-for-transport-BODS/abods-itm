@@ -102,7 +102,7 @@
     <changeSet id="30" author="abodsuser">
         <sqlFile path="sql/30-update-perf-stats-proc.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="31" author="abodsuser">
-        <sqlFile path="sql/31-distinct-journeys.sql" splitStatements="false"/>
+    <changeSet id="32" author="abodsuser">
+        <sqlFile path="sql/32-distinct-journeys.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
