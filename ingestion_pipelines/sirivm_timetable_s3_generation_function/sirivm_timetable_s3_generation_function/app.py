@@ -253,12 +253,12 @@ def backfill_lambda_handler(event, context):
 def live_lambda_handler(event, context):
     query = """  with my_groups as (
         select distinct vehiclejourney_id
-        from public."Timetable" where date_of_journey  = now()::date
-        and expected_departure_time::time between
-        cast(current_timestamp(0) at time zone 'Europe/London' as time) - interval '120' minute
-        and cast(current_timestamp(0) at time zone 'Europe/London' as time) +  interval '120' minute
+        from public."Timetable" where date_of_journey  = (now() at time zone 'Europe/London')::date
+        and expected_departure_time between
+        current_timestamp(0) - interval '120' minute and
+        current_timestamp(0) +  interval '120' minute
     )
-    select t.group_id,row_number() over( partition by t.group_id order by t.group_id,t.expected_departure_time asc,t.stop_index  asc  ) as stop_index ,
+    select t.group_id,row_number() over( partition by t.group_id order by t.group_id,t.expected_departure_time asc,t.stop_index  asc  ) as stop_index , 
     t.stop_latitude,t.stop_longitude,t.expected_departure_time::time as expected_departure_time,t.timetable_id, t.date_of_journey
     from public."Timetable" t
     where t.date_of_journey  = now()::date
