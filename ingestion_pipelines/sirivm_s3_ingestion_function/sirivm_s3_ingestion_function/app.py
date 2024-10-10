@@ -15,7 +15,8 @@ import boto3
 import psycopg2
 from botocore.exceptions import ClientError
 from dateutil.parser import parse
-from transform_load_shared_conn import parse_xml
+
+from .transform_load_shared_conn import parse_xml
 
 s3 = boto3.client("s3")
 
