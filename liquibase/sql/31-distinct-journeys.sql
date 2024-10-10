@@ -42,5 +42,5 @@ end; $procedure$
 
 ALTER PROCEDURE public.update_distinct_routes owner to abods_rw;
 
-select cron.schedule('generate timetable', '05 15 * * *',  $$call update_all_transmodel_tables(); call update_all_naptan_tables(); call generate_timetable(current_date + 1); call generate_expected_tables(current_date + 1); call update_distinct_routes(current_date + 1);$$);
+select cron.schedule('generate timetable', '05 18 * * *',  $$call update_all_transmodel_tables(); call update_all_naptan_tables(); call generate_timetable(current_date + 1); call generate_expected_tables(current_date + 1); call update_distinct_routes(current_date + 1);$$);
 
