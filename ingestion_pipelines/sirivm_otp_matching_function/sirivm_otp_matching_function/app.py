@@ -61,7 +61,6 @@ def backfill_record_handler(rec: SQSRecord, shards: dict[str, Any]) -> None:
         fname = rec.message_attributes["key"].string_value
         shard_no = rec.message_attributes["shard"].string_value
         logger.info(f"OTP data being processed for file {fname}")
-        batch_id = ""
         # find a timetable for matching
         avl_time = fname[fname.index("avl_") + 4 : -3]
         avl_datetime = parse(avl_time)
@@ -104,7 +103,7 @@ def backfill_record_handler(rec: SQSRecord, shards: dict[str, Any]) -> None:
             None,
             clean_shard_stop_history,
         )
-        db_client.historic_update_success(batch_id, to_set, to_remove, avl_date_str)
+        db_client.historic_update_success(to_set, to_remove, avl_date_str)
         logger.info(f"{fname} historic matching successful")
         s3_client.export_stop_history(stop_history, avl_datetime, shard_no)
         logger.info(f"OTP data updated for file {fname}")
@@ -119,7 +118,7 @@ def live_record_handler(
 ) -> None:
     current_date = datetime.today()  # noqa: DTZ002 - Stop using today() later
     fname = rec.message_attributes["key"].string_value
-    batch_id = rec.message_attributes["batch_id"].string_value
+    batch_id = int(rec.message_attributes["batch_id"].string_value)
     shard_no = rec.message_attributes["shard"].string_value
     try:
         logger.info(f"OTP data being processed for file {fname}")

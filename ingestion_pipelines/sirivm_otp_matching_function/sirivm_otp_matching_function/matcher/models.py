@@ -75,3 +75,8 @@ class AVLRecord:
     def recorded_at_time_utc_str(self) -> str:
         """The recorded at time as a string"""
         return datetime.strftime(self.recorded_at_time_utc, "%Y-%m-%dT%H:%M:%S")
+
+    @property
+    def batch_id(self) -> int:
+        """The batch_id"""
+        return self._data["batch_id"]

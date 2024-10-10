@@ -188,7 +188,7 @@ class TimetableS3Client:
                 "journey_ref": str,
                 "direction_ref": str,
                 "date_of_journey": str,
-                "batch_id": str,
+                "batch_id": int,
             },
             header=None,
         )
