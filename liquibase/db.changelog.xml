@@ -105,4 +105,7 @@
     <changeSet id="31" author="abodsuser">
         <sqlFile path="sql/31-add-separator-to-group-id.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="32" author="abodsuser">
+        <sqlFile path="sql/32-distinct-journeys.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
