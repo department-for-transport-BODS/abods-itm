@@ -1,21 +1,21 @@
 import ast
-import boto3
 import csv
 import gzip
+import json
 import logging
-import psycopg2
+import time
 import urllib.parse
 import uuid
 import zipfile
 from datetime import datetime, timedelta
 from io import BytesIO
 from os import environ
-import json
-from botocore.exceptions import ClientError
-from transform_load_shared_conn import parse_xml
-from dateutil.parser import parse
-import time
 
+import boto3
+import psycopg2
+from botocore.exceptions import ClientError
+from dateutil.parser import parse
+from transform_load_shared_conn import parse_xml
 
 s3 = boto3.client("s3")
 
@@ -50,7 +50,6 @@ def setup_queues(lambda_group):
     for shard_no in range(no_of_shards):
         queue_name = f"{otp_queue}-backfill-{lambda_group}-{shard_no+1}.fifo"
         queues.append(getQueue(queue_name))
-    return
 
 
 def get_rds_token():
@@ -58,10 +57,13 @@ def get_rds_token():
     try:
         region = "eu-west-2"
         token = client.generate_db_auth_token(
-            DBHostname=db_host, Port=db_port, Region=region, DBUsername=db_user
+            DBHostname=db_host,
+            Port=db_port,
+            Region=region,
+            DBUsername=db_user,
         )
     except Exception as e:
-        logging.error("could not get token ")
+        logging.exception("could not get token ")
         raise e
 
     return token
@@ -88,7 +90,6 @@ def write_to_s3(data_dict, path):
     data_string = json.dumps(data_dict, default=str)
 
     client.put_object(Bucket=sirivm_process_bucket, Key=path, Body=data_string)
-    return
 
 
 def read_historic_matching_records(run_date):
@@ -113,10 +114,7 @@ def read_historic_matching_records(run_date):
 
 def lambda_handler(event, context):
     logging.info(
-        "Starting s3 ingestion - Time to Run [{}] seconds / Memory [{}] Mb".format(
-            round(context.get_remaining_time_in_millis() / 1000),
-            context.memory_limit_in_mb,
-        )
+        f"Starting s3 ingestion - Time to Run [{round(context.get_remaining_time_in_millis() / 1000)}] seconds / Memory [{context.memory_limit_in_mb}] Mb",
     )
     if event.get("backfill_start_date") and event.get("backfill_end_date"):
         backfill_lambda_handler(event, context)
@@ -147,7 +145,7 @@ def backfill_lambda_handler(event, context):
                 last_avl_datetime = parse(last_avl)
                 start_hour = int(last_avl_datetime.hour)
                 logging.info(
-                    f"Last avl processed: {last_avl}, Continue historic matching progress from hour: {start_hour}"
+                    f"Last avl processed: {last_avl}, Continue historic matching progress from hour: {start_hour}",
                 )
             else:
                 last_avl = 0
@@ -163,7 +161,9 @@ def backfill_lambda_handler(event, context):
                     avl_file_list = [
                         obj["Key"][obj["Key"].rindex("/") + 1 :]
                         for obj in s3.list_objects_v2(
-                            Bucket=sirivm_process_bucket, Prefix=avl_path, Delimiter="/"
+                            Bucket=sirivm_process_bucket,
+                            Prefix=avl_path,
+                            Delimiter="/",
                         )["Contents"]
                     ]
                     avl_file_list.sort(key=lambda x: int(x[4:-3]))
@@ -196,35 +196,35 @@ def backfill_lambda_handler(event, context):
                                     },
                                 )
                                 logging.debug(
-                                    f"Written to historic {fname} gzip file key to Queues"
+                                    f"Written to historic {fname} gzip file key to Queues",
                                 )
                             progress["control_info"]["last_avl"] = avl[4:-3]
                             avl_count += 1
                             time_remaining = context.get_remaining_time_in_millis()
                             if time_remaining < 5000:
-                                logging.warn(
-                                    f"s3 ingestion processing due to timeout [ts={time_remaining}], last processed hour: {hour}, last processed avl: {avl}"
+                                logging.warning(
+                                    f"s3 ingestion processing due to timeout [ts={time_remaining}], last processed hour: {hour}, last processed avl: {avl}",
                                 )
                                 write_to_s3(
                                     progress,
                                     f"timetable_avl/{year}-{month}-{day}/progress.json",
                                 )
                         else:
-                            logging.warn(
-                                f"avl is not in order/has been processed, avl: {avl}, last avl: {last_avl}"
+                            logging.warning(
+                                f"avl is not in order/has been processed, avl: {avl}, last avl: {last_avl}",
                             )
                         last_avl = progress["control_info"]["last_avl"]
                     logging.info(
-                        f"{year}-{month}-{day}: Last processed hour: {hour}, last processed avl: {progress['control_info']['last_avl']}, avl processed: {avl_count}, Time used: {time.time() - start_time_hourly}s, Time remaining: {time_remaining}ms"
+                        f"{year}-{month}-{day}: Last processed hour: {hour}, last processed avl: {progress['control_info']['last_avl']}, avl processed: {avl_count}, Time used: {time.time() - start_time_hourly}s, Time remaining: {time_remaining}ms",
                     )
                 except Exception as e:
-                    logging.error(f"Error {e}")
+                    logging.exception(f"Error {e}")
             backfill_end_datetime -= delta
             start_hour = 0
             # lambda_group += 1
     except Exception as e:
-        logging.error(
-            f"Input backfill date ({backfill_start_date}, {backfill_end_date}) is/are not in a valid format YYYY-MM-DD. Error {e}"
+        logging.exception(
+            f"Input backfill date ({backfill_start_date}, {backfill_end_date}) is/are not in a valid format YYYY-MM-DD. Error {e}",
         )
 
 
@@ -252,7 +252,8 @@ def live_lambda_handler(event, context):
         start_time = str(batch_start_time.strftime("%Y-%m-%d %H:%M:%S.%f"))
         batch_dt = str(batch_start_time.strftime("%Y-%m-%d"))
         cur.execute(
-            sqlquery, [batch_dt, start_time, "sirivm_ingestion", "", "Inprogress"]
+            sqlquery,
+            [batch_dt, start_time, "sirivm_ingestion", "", "Inprogress"],
         )
         batch_id = cur.fetchone()[0]
         try:
@@ -270,7 +271,8 @@ def live_lambda_handler(event, context):
             for rec in sirivm_event:
                 bucket = rec["s3"]["bucket"]["name"]
                 key = urllib.parse.unquote_plus(
-                    rec["s3"]["object"]["key"], encoding="utf-8"
+                    rec["s3"]["object"]["key"],
+                    encoding="utf-8",
                 )
                 logging.info(f"Processing AVL bucket {bucket} and file {key}")
                 try:
@@ -285,10 +287,13 @@ def live_lambda_handler(event, context):
                             source_type="string",
                         )
                         write_list_to_file(
-                            output_csv_file, avl_response, sirivm_process_bucket, fname
+                            output_csv_file,
+                            avl_response,
+                            sirivm_process_bucket,
+                            fname,
                         )
                         logging.info(
-                            f"Writing gzip file to S3 bucket {sirivm_process_bucket}"
+                            f"Writing gzip file to S3 bucket {sirivm_process_bucket}",
                         )
                         queue = getQueue(process_queue)
                         resp = queue.send_message(
@@ -306,7 +311,7 @@ def live_lambda_handler(event, context):
                             },
                         )
                         logging.info(
-                            f"Written to gzip file key to Queue {process_queue}"
+                            f"Written to gzip file key to Queue {process_queue}",
                         )
                         end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
                         cur.execute(
@@ -339,14 +344,12 @@ def live_lambda_handler(event, context):
                                 },
                             )
                             logging.info(
-                                f"Written to gzip file key to Queues {queue_name}"
+                                f"Written to gzip file key to Queues {queue_name}",
                             )
                     except Exception as e:
                         end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
-                        logging.error(
-                            "Lambda failed either connecting to database or processing AVL Zip file or writing to queue. Error {}".format(
-                                e
-                            )
+                        logging.exception(
+                            f"Lambda failed either connecting to database or processing AVL Zip file or writing to queue. Error {e}",
                         )
                         cur.execute(
                             "Update public.batch set s3_ingestion_status = 'Failed',s3_ingestion_end_prc_ts=%s,s3_avl_gip_key=%s where batch_id=%s ;",
@@ -356,8 +359,8 @@ def live_lambda_handler(event, context):
                         # raise e
                 except Exception as e:
                     end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
-                    logging.error(
-                        f"Error getting object {key} from bucket {bucket}. Error {e}"
+                    logging.exception(
+                        f"Error getting object {key} from bucket {bucket}. Error {e}",
                     )
                     cur.execute(
                         "Update public.batch set s3_ingestion_status = 'Failed',s3_ingestion_end_prc_ts=%s,s3_avl_gip_key=%s  where batch_id=%s ;",
@@ -368,7 +371,7 @@ def live_lambda_handler(event, context):
         except Exception as e:
             end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
             logging.info(f"Event {event}")
-            logging.error(f"Error consuming the event. Error {e}")
+            logging.exception(f"Error consuming the event. Error {e}")
             cur.execute(
                 "Update public.batch set s3_ingestion_status = 'Failed',s3_ingestion_end_prc_ts=%s where batch_id=%s ;",
                 [end_time, batch_id],
@@ -376,4 +379,4 @@ def live_lambda_handler(event, context):
             cur.close()
             # raise e
     except Exception as e:
-        logging.error(f"Error connecting to abods DB. Error {e}")
+        logging.exception(f"Error connecting to abods DB. Error {e}")

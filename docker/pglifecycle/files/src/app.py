@@ -212,7 +212,7 @@ def initialise(conn_opts: dict, event):
                 )
 
             if monitoring_opts["enabled"]:
-                log.info(f"Enabling DataDog Monitoring. Using database [postgres]")
+                log.info("Enabling DataDog Monitoring. Using database [postgres]")
                 process_entities(
                     con,
                     [

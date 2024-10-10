@@ -1,8 +1,9 @@
-import psycopg2
-from os import environ
-import petl
-import boto3
 import logging
+from os import environ
+
+import boto3
+import petl
+import psycopg2
 
 db_host = environ.get("POSTGRES_HOST")
 db_port = environ.get("POSTGRES_PORT")
@@ -19,10 +20,13 @@ def get_rds_token():
     try:
         region = "eu-west-2"
         token = client.generate_db_auth_token(
-            DBHostname=db_host, Port=db_port, Region=region, DBUsername=db_user
+            DBHostname=db_host,
+            Port=db_port,
+            Region=region,
+            DBUsername=db_user,
         )
     except Exception as e:
-        logging.error("could not get token", e)
+        logging.exception("could not get token", e)
         raise e
 
     return token
@@ -34,7 +38,7 @@ def lambda_handler(event, context):
         logging.info(f"Getting data from url {url}")
         noc_table = petl.fromcsv(url).distinct("NOCCODE")
 
-        logging.info(f"Converting data to tuples")
+        logging.info("Converting data to tuples")
         rows = tuple(
             (row["NOCCODE"], row["OperatorPublicName"], row["Licence"], row["Mode"])
             for row in noc_table.dicts()
@@ -50,9 +54,9 @@ def lambda_handler(event, context):
             sslmode="require",
         )
         with conn.cursor() as cursor:
-            logging.info(f"Attempting to create table if not exists")
+            logging.info("Attempting to create table if not exists")
             cursor.execute(
-                f"""
+                """
                     CREATE TABLE IF NOT EXISTS traveline_operators (
                         noc_code varchar NOT NULL,
                         "name" varchar NULL,
@@ -60,14 +64,14 @@ def lambda_handler(event, context):
                         "mode" varchar NULL,
                         CONSTRAINT travelinedata_pk PRIMARY KEY (noc_code)
                     );
-                """
+                """,
             )
-            logging.info(f"Mogrifying input data")
+            logging.info("Mogrifying input data")
             args_str = ",".join(
                 cursor.mogrify("(%s,%s, %s, %s)", x).decode("utf-8") for x in rows
             )
 
-            logging.info(f"Inserting input data")
+            logging.info("Inserting input data")
             cursor.execute(
                 f"""
                     INSERT INTO traveline_operators (
@@ -78,10 +82,10 @@ def lambda_handler(event, context):
                     )
                     VALUES {args_str}
                     ON CONFLICT (noc_code)
-                    do update set name = EXCLUDED.name"""
+                    do update set name = EXCLUDED.name""",
             )
 
-            logging.info(f"Committing data")
+            logging.info("Committing data")
             conn.commit()
     except Exception as e:
         print("Couldn't write to database: ", e)

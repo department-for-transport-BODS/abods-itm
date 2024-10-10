@@ -25,7 +25,10 @@ run = "pytest"
 run = "checkov --baseline .checkov.baseline -d . --skip-path ./venv"
 
 [tasks.fix]
-depends = ["fmt", "lint"]
+run = [
+    "mise tasks run lint || true",
+    "mise tasks run fmt",
+]
 
 [tasks.checks]
 depends = ["checkov", "test", "fmt:check", "lint:check"]

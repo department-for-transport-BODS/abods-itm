@@ -2,7 +2,7 @@ import boto3
 import json
 import re
 from botocore.exceptions import ClientError
-from .config import AWS_REGION, ENVIRONMENT, PROJECT_NAME
+from .config import AWS_REGION
 from .logger import log
 from os import makedirs, path, walk
 
