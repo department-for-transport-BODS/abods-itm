@@ -715,7 +715,7 @@ def positions_timetable_lookup(
     shards: dict,
     shard_no: str,
     avl_dict: list[AVLRecord],
-    batch_id: str | None,
+    batch_id: str | int | None,
     stop_history: dict,
 ) -> (dict[str, dict[str, Any]], dict[str, dict[str, Any]], dict):
     """
@@ -727,7 +727,7 @@ def positions_timetable_lookup(
         shards (dict): Shards categories
         shard_no (str): Shard number assigned
         avl_dict (list): A list of avl records
-        batch_id (str, optional): Avl batch id.
+        batch_id (str, int, optional): Avl batch id.
         stop_history (dict, optional): Full stop history of the specified shard.
 
     Returns:
@@ -754,6 +754,7 @@ def positions_timetable_lookup(
             route_details = timetable[avl.group_id]
             final_stop_index = len(route_details)
             last_avl_time = group_stop_history.get("last_avl_time")
+            batch_id = avl.batch_id if batch_id is not None else None
             # 3. check if current recorded_at_time is the same as the last avl time in group_stop_history
             if last_avl_time == "" or avl.recorded_at_time_utc != validate_date(
                 last_avl_time,

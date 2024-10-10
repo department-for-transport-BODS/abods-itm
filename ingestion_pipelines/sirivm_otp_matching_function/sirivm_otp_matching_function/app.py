@@ -61,7 +61,7 @@ def backfill_record_handler(rec: SQSRecord, shards: dict[str, Any]) -> None:
         fname = rec.message_attributes["key"].string_value
         shard_no = rec.message_attributes["shard"].string_value
         logger.info(f"OTP data being processed for file {fname}")
-        batch_id = ""
+        batch_id = None
         # find a timetable for matching
         avl_time = fname[fname.index("avl_") + 4 : -3]
         avl_datetime = parse(avl_time)
