@@ -680,15 +680,15 @@ def move_potential_match_to_match(
                 )
                 for index in higher_indices_in_matched:
                     del group_stop_history["matched_stops"][index]
-                    try:
-                        stop_details = route_details[index]
-                        stop_pos_distances_remove.append(
-                            (index, stop_details.timetable_id, avl.group_id),
-                        )
-                    except Exception:
-                        logger.exception(
+                    stop_details = route_details.get(index)
+                    if not stop_details:
+                        logger.warning(
                             f"index {index} doesn't exists in timetable, group_id: {avl.group_id}",
                         )
+                        continue
+                    stop_pos_distances_remove.append(
+                        (index, stop_details.timetable_id, avl.group_id),
+                    )
     if not delete_potential_match:
         # 24. move potential match to be a match
         update_matched_stop(
@@ -774,33 +774,35 @@ def positions_timetable_lookup(
                         current_avl_index,
                     )
 
-            # 11-14. Find potential matches
-            log_specific(avl, "11. find potential matches")
-            find_potential_matches(
-                avl,
-                route_details,
-                group_stop_history,
-                current_avl_index,
-                final_stop_index,
-            )
-
-            # Check if avl is anywhere within the zone of a potential match
-            # 14-34. Find matches
-            if len(group_stop_history.get("potential_matches")) > 0:
-                potential_matches_to_remove = []
-                find_matches_in_potential_matches(
+                # 11-14. Find potential matches
+                log_specific(avl, "11. find potential matches")
+                find_potential_matches(
                     avl,
                     route_details,
                     group_stop_history,
                     current_avl_index,
-                    batch_id,
-                    stop_pos_distances,
-                    potential_matches_to_remove,
                     final_stop_index,
-                    stop_pos_distances_remove,
                 )
-                # 22.1 remove matched stops from potential matches
-                remove_matched_stops(
-                    group_stop_history, "potential_matches", potential_matches_to_remove,
-                )
+
+                # Check if avl is anywhere within the zone of a potential match
+                # 14-34. Find matches
+                if len(group_stop_history.get("potential_matches")) > 0:
+                    potential_matches_to_remove = []
+                    find_matches_in_potential_matches(
+                        avl,
+                        route_details,
+                        group_stop_history,
+                        current_avl_index,
+                        batch_id,
+                        stop_pos_distances,
+                        potential_matches_to_remove,
+                        final_stop_index,
+                        stop_pos_distances_remove,
+                    )
+                    # 22.1 remove matched stops from potential matches
+                    remove_matched_stops(
+                        group_stop_history,
+                        "potential_matches",
+                        potential_matches_to_remove,
+                    )
     return stop_pos_distances, stop_pos_distances_remove, stop_history
