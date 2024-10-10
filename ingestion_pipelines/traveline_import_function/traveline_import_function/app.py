@@ -53,4 +53,5 @@ def lambda_handler(_event: dict, _context: dict) -> None:
                 DO UPDATE SET name = EXCLUDED.name
             """,
             rows,
+            page_size=5000,
         )

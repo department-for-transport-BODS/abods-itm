@@ -57,4 +57,5 @@ def test_lambda_handler(mock_execute_values, mock_fromcsv):
         ANY,
         ANY,
         expected_rows,
+        page_size=5000,
     )
