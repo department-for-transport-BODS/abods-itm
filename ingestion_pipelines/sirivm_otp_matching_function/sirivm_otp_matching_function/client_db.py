@@ -43,7 +43,7 @@ def _load_sql_queries() -> SQLQueries:
 
 def _update_batch_status(
     cursor: psycopg2.extensions.cursor,
-    batch_id: str,
+    batch_id: int | None,
     status: Literal["Success", "Failed"],
 ) -> None:
     """Update the OTP update status for a specific batch"""
@@ -62,7 +62,7 @@ class TimetableDBClient:
         self.connection = setup_db()
 
     @timer(logger)
-    def batch_failed(self, batch_id: str) -> None:
+    def batch_failed(self, batch_id: int) -> None:
         """Update database to reflect failed matching"""
         with self.connection.cursor() as cursor:
             _update_batch_status(cursor, batch_id, "Failed")
@@ -70,7 +70,7 @@ class TimetableDBClient:
     @timer(logger)
     def live_update_success(
         self,
-        batch_id: str,
+        batch_id: int,
         entries_to_update: dict[str, dict[str, Any]],
         entries_to_remove: list[tuple[str]],
     ) -> None:
@@ -97,7 +97,6 @@ class TimetableDBClient:
     @timer(logger)
     def historic_update_success(
         self,
-        batch_id: int,
         entries_to_update: dict[str, dict[str, Any]],
         entries_to_remove: list[tuple[str]],
         avl_date_str: str,
@@ -129,4 +128,8 @@ class TimetableDBClient:
                         v_to_set_with_date,
                     )
 
-            _update_batch_status(cursor, batch_id, "Success")
+            _update_batch_status(
+                cursor,
+                None,  # Always update same record for debugging
+                "Success",
+            )
