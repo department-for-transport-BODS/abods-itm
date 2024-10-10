@@ -108,5 +108,4 @@
     <changeSet id="32" author="abodsuser">
         <sqlFile path="sql/32-distinct-journeys.sql" splitStatements="false"/>
     </changeSet>
-
 </databaseChangeLog>
