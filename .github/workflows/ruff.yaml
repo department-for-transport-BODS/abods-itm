@@ -1,0 +1,17 @@
+name: Ruff
+on: [pull_request]
+permissions: read-all
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v1
+        name: "format"
+        with:
+          args: "format --check"
+        continue-on-error: true
+      - uses: astral-sh/ruff-action@v1
+        name: "lint"
+        with:
+          args: "check --exit-zero" # TODO: remove --exit-zero when everything is passing

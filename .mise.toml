@@ -1,8 +1,10 @@
-[tools]
-python = "3.11"
-
 [settings]
 experimental = true
+asdf_compat = true
+
+[tasks.install]
+dir = "ingestion_pipelines"
+run = "pip install -r requirements.dev.txt"
 
 [tasks.fmt]
 run = "ruff format"
@@ -10,13 +12,28 @@ run = "ruff format"
 [tasks."fmt:check"]
 run = "ruff format --check --diff"
 
+[tasks."lint"]
+run = "ruff check --fix ."
+
+[tasks."lint:check"]
+run = "ruff check ."
+
 [tasks.test]
 run = "pytest"
 
 [tasks.checkov]
 run = "checkov --baseline .checkov.baseline -d . --skip-path ./venv"
 
+[tasks.fix]
+run = [
+    "mise tasks run lint || true",
+    "mise tasks run fmt",
+]
+
 [tasks.checks]
-depends = ["checkov", "test", "fmt:check"]
+depends = ["checkov", "test", "fmt:check", "lint:check"]
+
+[tasks.db_connect]
+run = "./scripts/db_connect.sh"
 
 

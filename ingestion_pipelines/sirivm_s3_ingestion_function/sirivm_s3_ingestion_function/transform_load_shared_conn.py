@@ -1,6 +1,6 @@
-from lxml import etree
-import logging
 from datetime import datetime
+
+from lxml import etree
 
 NS = {"siri": "http://www.siri.org.uk/siri"}
 
@@ -31,7 +31,8 @@ def parse_xml(source, batch_id, source_type="string"):
     # Extract the ResponseTimestamp from the ServiceDelivery element
     # Ensure to navigate correctly considering the namespace
     service_delivery_timestamp = root.find(
-        ".//siri:ServiceDelivery/siri:ResponseTimestamp", NS
+        ".//siri:ServiceDelivery/siri:ResponseTimestamp",
+        NS,
     ).text
 
     # Convert service_delivery_timestamp to the desired format if necessary
@@ -42,7 +43,9 @@ def parse_xml(source, batch_id, source_type="string"):
     for vehicle_activity in root.findall(".//siri:VehicleActivity", NS):
         # Now pass the extracted service_delivery_timestamp to extract_data
         extracted_data = extract_data(
-            vehicle_activity, service_delivery_timestamp, batch_id
+            vehicle_activity,
+            service_delivery_timestamp,
+            batch_id,
         )
         if extracted_data:  # Ensure extracted_data is not None
             data.append(extracted_data)
@@ -63,7 +66,8 @@ def extract_data(vehicle_activity, service_delivery_timestamp, batch_id):
     direction_ref = direction_ref_elem.text if direction_ref_elem is not None else None
 
     journey_ref_1_elem = vehicle_activity.find(
-        ".//siri:FramedVehicleJourneyRef/siri:DatedVehicleJourneyRef", NS
+        ".//siri:FramedVehicleJourneyRef/siri:DatedVehicleJourneyRef",
+        NS,
     )
     journey_ref_2_elem = vehicle_activity.find(".//siri:VehicleJourneyRef", NS)
     journey_ref_1 = journey_ref_1_elem.text if journey_ref_1_elem is not None else None
