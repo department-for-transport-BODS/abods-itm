@@ -111,4 +111,7 @@
     <changeSet id="33" author="abodsuser">
         <sqlFile path="sql/33-block-size-mismatch-fix.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="34" author="abodsuser">
+        <sqlFile path="sql/34-timetable-group-id-add-quote.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
