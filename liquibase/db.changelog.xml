@@ -114,4 +114,7 @@
     <changeSet id="34" author="abodsuser">
         <sqlFile path="sql/34-timetable-group-id-add-quote.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="35" author="abodsuser">
+        <sqlFile path="sql/35-expected-journey-end-dates.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
