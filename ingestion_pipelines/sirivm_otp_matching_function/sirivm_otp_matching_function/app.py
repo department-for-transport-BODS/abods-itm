@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import datetime
 from functools import lru_cache
 from typing import Any, NotRequired, TypedDict
@@ -11,7 +12,7 @@ from dateutil.parser import parse
 from .client_db import TimetableDBClient
 from .client_s3 import TimetableS3Client
 from .matcher import clean_stop_history, positions_timetable_lookup
-from .matcher.models import OperatorShards, Timetable
+from .matcher.models import AVLRecord, OperatorShards, Timetable
 from .matcher.utils import filter_avl_list, timer
 
 logger = Logger()
@@ -119,17 +120,23 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
         logger.info("Fetching AVL data")
         avl_list = s3_client.get_avl_data(fname)
         avl_list = filter_avl_list(shard_identifier, shards, avl_list)
+        batch_id = avl_list[0].batch_id  # assuming we have at least one AVL
+    except Exception:
+        logger.exception("An error occurred when processing historic record")
+        return
+    try:
+        validate_avl_list(avl_list, batch_id)
 
         logger.info("Got data, calculating matches")
         to_set, to_remove, stop_history = positions_timetable_lookup(
             timetable,
             avl_list,
-            None,
             clean_shard_stop_history,
         )
 
         logger.info("Updating database with successful results")
         db_client.historic_update_success(
+            batch_id,
             to_set,
             to_remove,
             f"{avl_year}-{avl_month}-{avl_day}",
@@ -141,6 +148,13 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
         logger.info("Processing complete")
     except Exception:
         logger.exception("An error occurred when processing historic record")
+        db_client.batch_failed(batch_id)
+
+
+def validate_avl_list(avl_list: Sequence[AVLRecord], expected_batch_id: int) -> None:
+    for avl in avl_list:
+        if avl.batch_id != expected_batch_id:
+            raise Exception("AVLs with multiple match ids retrieved")  # noqa: TRY002 - Not worth making an exception type
 
 
 def live_record_handler(
@@ -176,12 +190,12 @@ def live_record_handler(
         logger.info("Fetching AVL data")
         avl_list = s3_client.get_avl_data(fname)
         avl_list = filter_avl_list(shard_identifier, shards, avl_list)
+        validate_avl_list(avl_list, batch_id)
 
         logger.info("Got data, calculating matches")
         to_set, to_remove, stop_history = positions_timetable_lookup(
             timetable,
             avl_list,
-            batch_id,
             clean_shard_stop_history,
         )
 

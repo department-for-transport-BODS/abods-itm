@@ -97,6 +97,7 @@ class TimetableDBClient:
     @timer(logger)
     def historic_update_success(
         self,
+        batch_id: int,
         entries_to_update: dict[str, dict[str, tuple]],
         entries_to_remove: list[tuple],
         avl_date_str: str,
@@ -130,6 +131,6 @@ class TimetableDBClient:
 
             _update_batch_status(
                 cursor,
-                None,  # Always update same record for debugging
+                batch_id,
                 "Success",
             )

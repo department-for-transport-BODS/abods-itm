@@ -299,7 +299,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             },
         },
     }
-    batch_id = 123
 
     def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
         return mock.patch.dict(os.environ, envvars)
@@ -311,7 +310,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             "timetable_dict",
             "group_stop_history",
             "current_avl_index",
-            "batch_id",
             "stop_pos_distances",
             "potential_matches_to_delete",
             "final_stop_index",
@@ -325,7 +323,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable,
                 group_stop_history,
                 30,
-                batch_id,
                 {group_id: {}},  # stop pos dist
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
@@ -392,7 +389,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable,
                 group_stop_history_2,
                 90,
-                batch_id,
                 {group_id: {}},  # stop pos dist
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
@@ -472,7 +468,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable,
                 group_stop_history_3,
                 91,
-                batch_id,
                 {group_id: {}},  # stop pos dist
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
@@ -539,7 +534,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable,
                 group_stop_history_4,
                 77,
-                batch_id,
                 {group_id: {}},  # stop pos dist
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
@@ -606,7 +600,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable_5,
                 group_stop_history_5,
                 2,
-                batch_id,
                 {group_id_5: {}},  # stop pos dist
                 [],  # potential_matches_to_delete
                 41,  # final_stop_index
@@ -652,7 +645,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable_5,
                 group_stop_history_6,
                 101,
-                batch_id,
                 {group_id_5: {}},  # stop pos dist
                 [],  # potential_matches_to_delete
                 41,  # final_stop_index
@@ -711,7 +703,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         timetable_dict: dict,
         group_stop_history: dict,
         current_avl_index: int,
-        batch_id: int,
         stop_pos_distances: dict,
         potential_matches_to_delete: list,
         final_stop_index: int,
@@ -724,7 +715,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             timetable_dict[avl.group_id],
             group_stop_history,
             current_avl_index,
-            batch_id,
             stop_pos_distances,
             potential_matches_to_delete,
             final_stop_index,
@@ -1267,7 +1257,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
             "group_stop_history",
             "potential_matches_to_delete",
             "stop_pos_distances",
-            "batch_id",
             "stop_pos_distances_remove",
             "expected_potential_matches_to_delete",
             "expected_stop_pos_distances_remove",
@@ -1284,7 +1273,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 group_stop_history_1,
                 [],
                 {group_id: {}},
-                "123",
                 [],  # stop pos distances remove
                 ["1"],  # expected pm to delete
                 [],  # expected stop pos dist remove
@@ -1308,7 +1296,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                             "11:15:48",
                             893823336,
                             group_id,
-                            "123",
+                            avl_record.batch_id,
                             datetime(2024, 8, 20, 11, 15, 48, tzinfo=UTC),
                             "OnTime",
                             "Non-final",
@@ -1326,7 +1314,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 group_stop_history_2,
                 [],
                 {group_id: {}},
-                "123",
                 [],  # stop_pos_distances_remove
                 ["3"],  # expected_potential_matches_to_delete
                 [],  # expected_stop_pos_distances_remove
@@ -1356,7 +1343,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                             "11:20:04",
                             893823358,
                             group_id,
-                            "123",
+                            avl_record.batch_id,
                             datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC),
                             "OnTime",
                             "Non-final",
@@ -1374,7 +1361,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 group_stop_history_3,
                 [],
                 {group_id: {}},
-                "123",
                 [],
                 ["15"],
                 [],
@@ -1417,7 +1403,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 group_stop_history_4,
                 [],
                 {group_id: {}},
-                "123",
                 [],  # stop_pos_distances_remove
                 ["23"],  # expected_potential_matches_to_delete
                 [("24", 893823127, group_id)],  # expected_stop_pos_distances_remove
@@ -1452,7 +1437,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                             "11:36:54",
                             893823138,
                             group_id,
-                            "123",
+                            avl_record.batch_id,
                             datetime(2024, 8, 20, 11, 36, 54, tzinfo=UTC),
                             "Late",
                             "Non-final",
@@ -1473,7 +1458,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         group_stop_history: dict,
         potential_matches_to_delete: list,
         stop_pos_distances: dict,
-        batch_id: int,
         stop_pos_distances_remove: list,
         expected_potential_matches_to_delete: list,
         expected_stop_pos_distances_remove: list,
@@ -1489,7 +1473,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
             group_stop_history,
             potential_matches_to_delete,
             stop_pos_distances,
-            batch_id,
             stop_pos_distances_remove,
         )
         assert potential_matches_to_delete == expected_potential_matches_to_delete
@@ -1515,7 +1498,6 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
         to_set, to_remove, stop_history = positions_timetable_lookup(
             self.timetable,
             self.avl_dict,
-            self.batch_id,
             self.stop_history,
         )
         assert to_set == expected_set
