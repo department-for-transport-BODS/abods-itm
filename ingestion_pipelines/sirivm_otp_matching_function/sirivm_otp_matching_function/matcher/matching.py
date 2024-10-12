@@ -1,7 +1,6 @@
 import os
 from datetime import datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
-from typing import Any
 
 from aws_lambda_powertools import Logger
 
@@ -194,7 +193,7 @@ def check_update_first_stop(
     avl: AVLRecord,
     route_details: RouteDetails,
     group_stop_history: dict,
-    stop_pos_distances_remove: list,
+    stop_pos_distances_remove: list[tuple],
     current_avl_index: int,
 ) -> None:
     """
@@ -260,10 +259,10 @@ def find_matches_in_potential_matches(
     group_stop_history: dict,
     current_avl_index: int,
     batch_id: int,
-    stop_pos_distances: dict,
+    stop_pos_distances: dict[str, dict[str, tuple]],
     potential_matches_to_delete: list,
     final_stop_index: int,
-    stop_pos_distances_remove: list,
+    stop_pos_distances_remove: list[tuple],
 ) -> None:
     """
     Find matches within the potential match list
@@ -441,7 +440,7 @@ def update_matched_stop(
 def write_matched_stop_to_db(
     is_final_stop: bool,  # noqa: FBT001 - boolean argument is fine for now
     route_details: RouteDetails,
-    stop_pos_distances: dict,
+    stop_pos_distances: dict[str, dict[str, tuple]],
     group_id: str,
     pm_index: str,
     last_time_in_zone: datetime,
@@ -598,9 +597,9 @@ def move_potential_match_to_match(
     pm_details: dict,
     group_stop_history: dict,
     potential_matches_to_delete: list,
-    stop_pos_distances: dict,
+    stop_pos_distances: dict[str, dict[str, tuple]],
     batch_id: int,
-    stop_pos_distances_remove: list,
+    stop_pos_distances_remove: list[tuple],
 ) -> None:
     """
     Move the current potential match to be a match
@@ -728,7 +727,7 @@ def positions_timetable_lookup(
     avl_dict: list[AVLRecord],
     batch_id: int | None,
     stop_history: dict,
-) -> (dict[str, dict[str, Any]], dict[str, dict[str, Any]], dict):
+) -> tuple[dict[str, dict[str, tuple]], list[tuple], dict]:
     """
     For each AVL, compare to known stops in timetable, and return updated stop history, database updates to perform
 

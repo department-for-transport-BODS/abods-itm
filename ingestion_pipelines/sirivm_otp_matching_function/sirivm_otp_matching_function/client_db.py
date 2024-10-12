@@ -1,7 +1,7 @@
 """Database Functions"""
 
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 import psycopg2.extras
 from aws_lambda_powertools import Logger
@@ -71,8 +71,8 @@ class TimetableDBClient:
     def live_update_success(
         self,
         batch_id: int,
-        entries_to_update: dict[str, dict[str, Any]],
-        entries_to_remove: list[tuple[str]],
+        entries_to_update: dict[str, dict[str, tuple]],
+        entries_to_remove: list[tuple],
     ) -> None:
         """Update database to reflect successful live matching"""
         with self.connection.cursor() as cursor:
@@ -97,8 +97,8 @@ class TimetableDBClient:
     @timer(logger)
     def historic_update_success(
         self,
-        entries_to_update: dict[str, dict[str, Any]],
-        entries_to_remove: list[tuple[str]],
+        entries_to_update: dict[str, dict[str, tuple]],
+        entries_to_remove: list[tuple],
         avl_date_str: str,
     ) -> None:
         """Update database to reflect successful historic matching"""
