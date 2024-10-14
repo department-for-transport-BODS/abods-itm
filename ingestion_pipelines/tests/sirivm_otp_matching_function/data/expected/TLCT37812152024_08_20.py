@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime  # noqa: N999 - BODS-7131
 
 expected_set = {"TLCT|378|1215|2024-08-20": {}}
 expected_remove = []

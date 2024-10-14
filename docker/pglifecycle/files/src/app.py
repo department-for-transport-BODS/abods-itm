@@ -44,7 +44,7 @@ def destroy(conn_opts: dict, event):
                     f"Role {role} dropped successfully",
                     f"Error dropping role {role}",
                 )
-    except Error as e:
+    except Error as e:  # noqa: F821 - BODS-7131
         log.error(f"An error occurred: {e}")
         return False
 
@@ -422,7 +422,7 @@ logLevel: INFO""")
     except Exception as e:
         log.error(f"An error occurred: {e}")
         return False
-    except Error as e:
+    except Error as e:  # noqa: F821 - BODS-7131
         log.error(f"An error occurred: {e}")
         return False
     finally:
