@@ -5,7 +5,7 @@ from os import getenv
 from psycopg import Error
 from utils.aws import get_secret, generate_rds_iam_auth_token
 from utils.config import ENVIRONMENT, POSTGRES_HOST, POSTGRES_PORT
-from utils.logger import log
+from utils.logger import log  # noqa: F811 - BODS-7131
 
 
 def build_conn_opts(ev):
