@@ -1069,6 +1069,15 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
             ),
             pytest.param(
                 avl_record,
+                "38",
+                group_stop_history_same_recordedattime,
+                ["4"],
+                "38",
+                ["4"],
+                id="With more than one potential matches with the same recorded_at_time, select the index closest to the lowest_index and not in the potential matches to delete",
+            ),
+            pytest.param(
+                avl_record,
                 "1",
                 group_stop_history_wo_same_recordedattime,
                 [],
