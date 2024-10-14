@@ -10,8 +10,7 @@ jobs:
         name: "format"
         with:
           args: "format --check"
-        continue-on-error: true
       - uses: astral-sh/ruff-action@v1
         name: "lint"
         with:
-          args: "check --exit-zero" # TODO: remove --exit-zero when everything is passing
+          args: "check"
