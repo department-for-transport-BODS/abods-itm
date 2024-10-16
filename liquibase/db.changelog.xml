@@ -117,4 +117,7 @@
     <changeSet id="35" author="abodsuser">
         <sqlFile path="sql/35-otc-foreign-tables.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="36" author="abodsuser">
+        <sqlFile path="sql/36-otc-operator-foreign-table.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
