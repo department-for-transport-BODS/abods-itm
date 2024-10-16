@@ -18,6 +18,7 @@ jobs:
         if: contains(fromJSON('["refs/heads/gs-test"]'), github.ref)
         with:
           script: |
+            console.log(process.env.GITHUB_REPOSITORY || context.payload)
             const branchName = context.ref.split("/")[-1]
             const nextBranch = {"sandbox": "dev", "dev": "test", "test": "main"}[branchName]
             const result = await github.rest.pulls.create({
