@@ -11,6 +11,7 @@ permissions:
 jobs:
   create-pull-request:
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - name: Create Pull Request
         uses: actions/github-script@v6
