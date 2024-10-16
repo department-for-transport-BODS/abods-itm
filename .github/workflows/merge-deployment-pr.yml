@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   merge-deployment-pr:
-    if: github.event.review.state == 'approved' && contains(fromJSON('["refs/heads/gs-test-2"]'), github.event.pull_request.base.ref)
+    if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
     steps:
     - name: Git checkout
@@ -18,6 +18,8 @@ jobs:
         fetch-depth: '0'
     - name: merge
       run: |
+        echo '${{ github.event.pull_request.base.ref }}'
+        echo '${{ github.event.pull_request.head.ref }}'
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
         
