@@ -259,8 +259,8 @@ jobs:
             const nextBranch = {"sandbox": "dev", "dev": "test", "test": "main"}[branchName]
             const result = await github.rest.pulls.create({
               title: `${branchName} -> ${nextBranch}`,
-              context.repo.owner,
-              context.repo.repo,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               head: branchName,
               base: nextBranch,
               body: 'This PR was auto-generated after a successful deployment of the ${branchName} branch. Once approved, it will be automatically merged with the correct merge strategy.'
