@@ -246,3 +246,22 @@ jobs:
             --tags "BuiltFrom=${VERSION} ProjectName=${{ vars.PROJECT_NAME }} Environment=${RC_ENV}"
 
           echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully deployed into ${RC_ENV^^}"
+
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Pull Request
+        uses: actions/github-script@v6
+        if: contains(fromJSON('["refs/heads/sandbox", "refs/heads/dev", "refs/heads/test"]'), github.ref)
+        with:
+          script: |
+            const branchName = "${{ github.ref_name }}".split("/")[-1]
+            const nextBranch = {"sandbox": "dev", "dev": "test", "test": "main"}[branchName]
+            const result = await github.rest.pulls.create({
+              title: `${branchName} -> ${nextBranch}`,
+              context.repo.owner,
+              context.repo.repo,
+              head: branchName,
+              base: nextBranch,
+              body: 'This PR was auto-generated after a successful deployment of the ${branchName} branch. Once approved, it will be automatically merged with the correct merge strategy.'
+            });
