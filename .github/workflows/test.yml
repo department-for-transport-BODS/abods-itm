@@ -1,0 +1,29 @@
+name: test-pr
+
+on:
+  push:
+    branches:
+      - "gs-*"
+
+permissions:
+  id-token: write
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Pull Request
+        uses: actions/github-script@v6
+        if: contains(fromJSON('["refs/heads/gs-test"]'), github.ref)
+        with:
+          script: |
+            const branchName = "${{ github.ref_name }}".split("/")[-1]
+            const nextBranch = {"gs-test": "gs-test-2"}[branchName]
+            const result = await github.rest.pulls.create({
+              title: `${branchName} -> ${nextBranch}`,
+              context.repo.owner,
+              context.repo.repo,
+              head: branchName,
+              base: nextBranch,
+              body: 'This PR was auto-generated after a successful deployment of the ${branchName} branch. Once approved, it will be automatically merged with the correct merge strategy.'
+            });
