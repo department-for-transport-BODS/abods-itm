@@ -547,45 +547,46 @@ def select_potential_match_with_same_recordedattime(
     potential_matches_to_delete: list,
 ) -> str:
     selected_index = pm_index
-    if pm_index not in potential_matches_to_delete:
-        matched_stops = dict(
-            sorted(
-                group_stop_history["matched_stops"].items(),
-                key=lambda t: int(t[0]),
-            ),
+    if pm_index in potential_matches_to_delete:
+        return pm_index
+    matched_stops = dict(
+        sorted(
+            group_stop_history["matched_stops"].items(),
+            key=lambda t: int(t[0]),
+        ),
+    )
+    first_matched_stop = (
+        next(iter(matched_stops.keys())) if len(matched_stops) > 1 else 0
+    )
+    potential_matches = group_stop_history["potential_matches"]
+    current_recordedattime = potential_matches[pm_index]["last_time_in_zone"]
+    index_with_same_recordedattime = [
+        ind
+        for ind, pm in potential_matches.items()
+        if pm["last_time_in_zone"] == current_recordedattime
+        and ind not in potential_matches_to_delete
+    ]
+    # 31. Is there more than 1 match being created with the same recordedattime?
+    if len(index_with_same_recordedattime) > 1:
+        log_specific(
+            avl,
+            f"{pm_index} index_with_same_recordedattime: {index_with_same_recordedattime}",
         )
-        first_matched_stop = (
-            next(iter(matched_stops.keys())) if len(matched_stops) > 1 else 0
-        )
-        potential_matches = group_stop_history["potential_matches"]
-        current_recordedattime = potential_matches[pm_index]["last_time_in_zone"]
-        index_with_same_recordedattime = [
-            ind
-            for ind, pm in potential_matches.items()
-            if pm["last_time_in_zone"] == current_recordedattime
-            and ind not in potential_matches_to_delete
-        ]
-        # 31. Is there more than 1 match being created with the same recordedattime?
-        if len(index_with_same_recordedattime) > 1:
-            log_specific(
-                avl,
-                f"{pm_index} index_with_same_recordedattime: {index_with_same_recordedattime}",
-            )
-            lowest_index_diff = None
-            # 32. Select the stop closest to the first actual in the sequence
-            for index in index_with_same_recordedattime:
-                diff = int(index) - int(first_matched_stop)
-                log_specific(avl, f"index: {index}, diff: {diff}")
-                if not lowest_index_diff or diff < lowest_index_diff:
-                    lowest_index_diff = diff
-                    selected_index = index
-                if index != pm_index and abs(int(index) - int(pm_index)) != 1:
-                    log_specific(
-                        avl,
-                        f"32. {pm_index} and {index} have the same recorded at time, remove {index} from potential matches",
-                    )
-                    # remove the potential match(es) that are not the closest to the first actual matched
-                    potential_matches_to_delete.append(index)
+        lowest_index_diff = None
+        # 32. Select the stop closest to the first actual in the sequence
+        for index in index_with_same_recordedattime:
+            diff = int(index) - int(first_matched_stop)
+            log_specific(avl, f"index: {index}, diff: {diff}")
+            if not lowest_index_diff or diff < lowest_index_diff:
+                lowest_index_diff = diff
+                selected_index = index
+            if index != pm_index and abs(int(index) - int(pm_index)) != 1:
+                log_specific(
+                    avl,
+                    f"32. {pm_index} and {index} have the same recorded at time, remove {index} from potential matches",
+                )
+                # remove the potential match(es) that are not the closest to the first actual matched
+                potential_matches_to_delete.append(index)
     return selected_index
 
 
