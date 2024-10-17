@@ -120,4 +120,7 @@
     <changeSet id="36" author="abodsuser">
         <sqlFile path="sql/36-otc-operator-foreign-table.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="37" author="abodsuser">
+        <sqlFile path="sql/37-store-headway-in-secs.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
