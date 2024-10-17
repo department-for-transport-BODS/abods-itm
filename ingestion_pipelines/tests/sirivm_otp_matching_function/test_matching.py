@@ -1013,6 +1013,31 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
             },
         },
     }
+    group_stop_history_same_recordedattime_2 = {  # noqa: RUF012 - BODS-7131
+        "last_avl_index": 40,
+        "last_avl_time": datetime(2024, 8, 23, 11, 16, 14),  # noqa: DTZ001 - BODS-7131
+        "matched_stops": {
+            "4": {"last_match_time": datetime(2024, 8, 23, 11, 15, 36)},  # noqa: DTZ001 - BODS-7131
+            "3": {"last_match_time": datetime(2024, 8, 23, 11, 15, 5)},  # noqa: DTZ001 - BODS-7131
+        },
+        "potential_matches": {
+            "38": {
+                "last_avl_index": 40,
+                "last_distance": 294.4630341883636,
+                "last_time_in_zone": datetime(2024, 8, 23, 11, 15, 36),  # noqa: DTZ001 - BODS-7131
+            },
+            "5": {
+                "last_avl_index": 40,
+                "last_distance": 17.612857082239692,
+                "last_time_in_zone": datetime(2024, 8, 23, 11, 16, 14),  # noqa: DTZ001 - BODS-7131
+            },
+            "37": {
+                "last_avl_index": 40,
+                "last_distance": 18.62101754791971,
+                "last_time_in_zone": datetime(2024, 8, 23, 11, 16),  # noqa: DTZ001 - BODS-7131
+            },
+        },
+    }
     group_stop_history_wo_same_recordedattime = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 3,
         "last_avl_time": datetime(2024, 8, 23, 10, 57, 48),  # noqa: DTZ001 - BODS-7131
@@ -1075,6 +1100,15 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
                 "38",
                 ["4"],
                 id="With more than one potential matches with the same recorded_at_time, select the index closest to the lowest_index and not in the potential matches to delete",
+            ),
+            pytest.param(
+                avl_record,
+                "38",
+                group_stop_history_same_recordedattime_2,
+                ["38"],
+                "38",
+                ["38"],
+                id="Running select potential matches with the same recorded_at_time the second time with the same batch of potential matches, skip selecting the potential match index process",
             ),
             pytest.param(
                 avl_record,
