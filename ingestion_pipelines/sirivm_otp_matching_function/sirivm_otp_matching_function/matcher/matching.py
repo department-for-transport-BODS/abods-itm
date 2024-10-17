@@ -546,8 +546,14 @@ def select_potential_match_with_same_recordedattime(
     group_stop_history: dict,
     potential_matches_to_delete: list,
 ) -> str:
+    selected_index = pm_index
+    if pm_index in potential_matches_to_delete:
+        return pm_index
     matched_stops = dict(
-        sorted(group_stop_history["matched_stops"].items(), key=lambda t: int(t[0])),
+        sorted(
+            group_stop_history["matched_stops"].items(),
+            key=lambda t: int(t[0]),
+        ),
     )
     first_matched_stop = (
         next(iter(matched_stops.keys())) if len(matched_stops) > 1 else 0
@@ -558,14 +564,19 @@ def select_potential_match_with_same_recordedattime(
         ind
         for ind, pm in potential_matches.items()
         if pm["last_time_in_zone"] == current_recordedattime
+        and ind not in potential_matches_to_delete
     ]
-    selected_index = pm_index
     # 31. Is there more than 1 match being created with the same recordedattime?
     if len(index_with_same_recordedattime) > 1:
+        log_specific(
+            avl,
+            f"{pm_index} index_with_same_recordedattime: {index_with_same_recordedattime}",
+        )
         lowest_index_diff = None
         # 32. Select the stop closest to the first actual in the sequence
         for index in index_with_same_recordedattime:
             diff = int(index) - int(first_matched_stop)
+            log_specific(avl, f"index: {index}, diff: {diff}")
             if not lowest_index_diff or diff < lowest_index_diff:
                 lowest_index_diff = diff
                 selected_index = index
