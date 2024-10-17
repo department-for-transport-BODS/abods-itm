@@ -151,20 +151,21 @@ execute format(
             from public.%I
             where service_code like ''UZ%%''
         )
-        select ot.txcfileattributes_id, ot.national_operator_code, ot.service_code, ot.line_name, ot.filename, ot.revision_id, ot.revision_number, osn.otc_service_code, osn.registration_status
-        from public.%I ot
-        join (
-                select os.registration_number, registration_code, concat_ws('':'', substring(os.registration_number, 1, 9), substring(os.registration_number, 11, 12)) as otc_service_code, os.registration_status, os.effective_date
-                from bods.%I os
-                left join bods.%I ois
-                on os.registration_number = ois.registration_number
-                and ois.registration_status = ''Registered''
-                and ois.effective_date = current_date + 1
-                where os.registration_status = ''Registered''
-                or (os.registration_status != ''Registered'' and os.effective_date > current_date + 1)
-        ) osn
-        on ot.service_code = osn.otc_service_code
-        union select * from operator_UZ_group
+		select ot.txcfileattributes_id, ot.national_operator_code, ot.service_code, ot.line_name, ot.filename, ot.revision_id, ot.revision_number, osn.otc_service_code, osn.registration_status
+		from public.%I ot
+		join (
+	            select os.registration_number, registration_code, concat_ws('':'', substring(os.registration_number, 1, 9), substring(os.registration_number, 11, 12)) as otc_service_code, os.registration_status, os.effective_date
+	            from bods.%I os
+	            left join bods.%I ois
+	            on os.registration_number = ois.registration_number
+	            and ois.registration_status = ''Registered''
+	            and ois.effective_date = current_date + 1
+	            where os.registration_status = ''Registered''
+	            or os.registration_status = ''New''
+				or (os.registration_status != ''Registered'' and os.registration_status != '''' and os.effective_date > current_date + 1)
+	    ) osn
+		on ot.service_code = osn.otc_service_code
+		union select * from operator_UZ_group
     )',
 concat('filtered_registered_organisation_timetable', timetable_suffix),
 concat('organisation_timetable', timetable_suffix),
