@@ -580,7 +580,7 @@ def select_potential_match_with_same_recordedattime(
             if not lowest_index_diff or diff < lowest_index_diff:
                 lowest_index_diff = diff
                 selected_index = index
-            if index != pm_index and abs(int(index) - int(pm_index)) != 1:
+            elif abs(int(index) - int(pm_index)) != 1:
                 log_specific(
                     avl,
                     f"32. {pm_index} and {index} have the same recorded at time, remove {index} from potential matches",
