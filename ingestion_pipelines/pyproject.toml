@@ -19,7 +19,8 @@ lint.ignore = [
     "TID252",
     "PTH123",
     "DTZ005",
-    "PLR0913"
+    "PLR0913",
+    "RUF100"
 ]
 lint.fixable = [
     "A",

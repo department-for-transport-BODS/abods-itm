@@ -58,7 +58,7 @@ def process_batch(
         """
         SELECT aws_s3.table_import_from_s3(
             %s,
-            'recorded_at_time,response_timestamp,latitude,longitude,line_name,operator_ref,vehicle_ref,journey_ref,direction_ref,date_of_journey,batch_id',
+            'recorded_at_time,response_timestamp,latitude,longitude,line_name,operator_ref,vehicle_ref,journey_ref,direction_ref,date_of_journey,batch_id,origin_ref,destination_ref,departure_time',
             '(FORMAT csv, HEADER false, DELIMITER ",")',
             %s,
             %s,

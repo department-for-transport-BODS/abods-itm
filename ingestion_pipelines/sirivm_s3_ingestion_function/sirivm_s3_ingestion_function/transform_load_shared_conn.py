@@ -76,6 +76,22 @@ def extract_data(vehicle_activity, service_delivery_timestamp, batch_id):  # noq
     journey_ref_2 = journey_ref_2_elem.text if journey_ref_2_elem is not None else None
     journey_ref = journey_ref_1 or journey_ref_2
 
+    origin_ref_elem = vehicle_activity.find(".//siri:OriginRef", NS)
+    origin_ref = origin_ref_elem.text if origin_ref_elem is not None else None
+
+    destination_ref_elem = vehicle_activity.find(".//siri:DestinationRef", NS)
+    destination_ref = (
+        destination_ref_elem.text if destination_ref_elem is not None else None
+    )
+
+    departure_time_elem = vehicle_activity.find(".//siri:OriginAimedDepartureTime", NS)
+    departure_time = (
+        departure_time_elem.text if departure_time_elem is not None else None
+    )
+
+    line_name_elem = vehicle_activity.find(".//siri:PublishedLineName", NS)
+    line_name = line_name_elem.text if line_name_elem is not None else None
+
     if not journey_ref:
         journey_ref = f"{operator_ref}_{line_name}_{vehicle_ref}_{direction_ref}_{date_of_journey}"
 
@@ -94,4 +110,7 @@ def extract_data(vehicle_activity, service_delivery_timestamp, batch_id):  # noq
         direction_ref,
         date_of_journey,
         batch_id,
+        origin_ref,
+        destination_ref,
+        departure_time,
     )
