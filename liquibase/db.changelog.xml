@@ -123,4 +123,7 @@
     <changeSet id="37" author="abodsuser">
         <sqlFile path="sql/37-store-headway-in-secs.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="38" author="abodsuser">
+        <sqlFile path="sql/38-avl-origin-destination.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
