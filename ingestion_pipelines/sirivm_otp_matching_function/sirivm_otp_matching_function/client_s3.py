@@ -15,7 +15,9 @@ from pandas import DataFrame
 
 from .matcher.models import (
     AVLRecord,
+    ControlInfo,
     OperatorShards,
+    StopHistory,
     Timetable,
     avl_data_type,
 )
@@ -23,6 +25,35 @@ from .matcher.utils import timer
 
 logger = Logger()
 client = boto3.client("s3")
+
+
+def filter_avl_list(
+    shard_identifier: str,
+    sharded_operators: OperatorShards,
+    avl_list: Sequence[AVLRecord],
+) -> Sequence[AVLRecord]:
+    """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
+    if shard_identifier == "0":
+        # Allow all operators that aren't in a shard
+        all_sharded_operators = [
+            x for id_no, operators in sharded_operators.items() for x in operators
+        ]
+        return [
+            avl for avl in avl_list if avl["operator_ref"] not in all_sharded_operators
+        ]
+
+    return [
+        avl
+        for avl in avl_list
+        if avl["operator_ref"] in sharded_operators.get(shard_identifier, [])
+    ]
+
+
+def _new_control_info(avl_time: int) -> ControlInfo:
+    return {
+        "last_avl": avl_time,
+        "last_avl_processed_time": str(datetime.now()),
+    }
 
 
 class TimetableS3Client:
@@ -93,50 +124,46 @@ class TimetableS3Client:
         self,
         query_date: datetime,
         shard_no: str,
-        avl_timestamp: int,
-    ) -> dict:
+        avl_time: int,
+    ) -> tuple[StopHistory, ControlInfo]:
         """Get Stop History"""
         date_str = query_date.strftime("%Y-%m-%d")
-        stop_history: dict = {
-            "control_info": {
-                "last_avl": avl_timestamp,
-                "last_avl_processed_time": datetime.now(),
-            },
-        }
         key = (
             f"timetable_avl/{date_str}/timetable_avl_stop_history_shard{shard_no}.json"
         )
         logger.info("Fetching Stop History", s3_key=key)
         try:
             stop_history = self._get_from_s3(key)
-            logger.info(
-                "Fetched and Parsed Stop History",
-                group_ids_count=len(stop_history.keys()),
-            )
-            if "control_info" in stop_history:
-                last_avl_filename = stop_history["control_info"]["last_avl"]
-                last_avl_processed_time = stop_history["control_info"].get(
-                    "last_avl_processed_time",
-                    "No record",
-                )
-                if int(last_avl_filename) > avl_timestamp:
-                    logger.warning(
-                        f"AVL is not in order, last avl: {stop_history['control_info']['last_avl']}, current avl: {avl_timestamp}",
-                    )
-                elif int(last_avl_filename) == avl_timestamp:
-                    logger.warning(
-                        f"Same AVL data coming in, last avl processed time: {last_avl_processed_time}, current last avl: {stop_history['control_info']['last_avl']}, current avl: {avl_timestamp}",
-                    )
         except ClientError as ex:
             if ex.response.get("Error", {}).get("Code", None) == "NoSuchKey":
                 logger.info("Stop History Not Found, Returning Empty Dict", key=key)
-                return stop_history
+                return {}, _new_control_info(avl_time)
             raise
+        logger.info(
+            "Fetched and Parsed Stop History",
+            group_ids_count=len(stop_history.keys()),
+        )
+
         if "control_info" not in stop_history:
-            stop_history["control_info"] = {}
-        stop_history["control_info"]["last_avl"] = avl_timestamp
-        stop_history["control_info"]["last_avl_processed_time"] = datetime.now()
-        return stop_history
+            return stop_history, _new_control_info(avl_time)
+
+        control_info: ControlInfo = stop_history["control_info"]
+        del stop_history["control_info"]
+
+        last_file = control_info["last_avl"]
+        last_time = control_info.get(
+            "last_avl_processed_time",
+            "No record",
+        )
+        if int(last_file) > avl_time:
+            logger.warning(
+                f"AVL is not in order, last avl: {last_file}, current avl: {avl_time}",
+            )
+        elif int(last_file) == avl_time:
+            logger.warning(
+                f"Same AVL data coming in, last avl processed time: {last_time}, current last avl: {last_file}, current avl: {avl_time}",
+            )
+        return stop_history, _new_control_info(avl_time)
 
     def get_avl_data_df(self, filename: str | list[str]) -> DataFrame:
         """Get AVL Data Dataframe"""
@@ -178,7 +205,8 @@ class TimetableS3Client:
     @timer(logger)
     def export_stop_history(
         self,
-        stop_history: dict[str, dict[str, Any]],
+        stop_history: StopHistory,
+        control_info: ControlInfo,
         current_date: datetime,
         shard_no: str,
     ) -> None:
@@ -187,12 +215,13 @@ class TimetableS3Client:
         s3_key = (
             f"timetable_avl/{date_str}/timetable_avl_stop_history_shard{shard_no}.json"
         )
+        data = {**stop_history, "control_info": control_info}
         logger.info(
             "S3 Upload: Storing Stop history",
             s3_key=s3_key,
-            group_id_count=len(stop_history.keys()),
+            group_id_count=len(data.keys()),
         )
         self._write_to_s3(
-            stop_history,
+            data,
             s3_key,
         )

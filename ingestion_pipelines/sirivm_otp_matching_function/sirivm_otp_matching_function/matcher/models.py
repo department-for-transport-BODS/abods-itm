@@ -81,3 +81,36 @@ class RecordToAdd(TypedDict):
     last_time_in_zone: datetime
     otp_state: Literal["Early", "OnTime", "Late"]
     stop_type: Literal["final", "Non-final"]
+
+
+class MatchedStop(TypedDict):
+    """Details of a stop that has been identified as departed on the current journey"""
+
+    last_match_time: str
+
+
+class PotentialMatch(TypedDict):
+    """Details of a stop that could be a match upon processing a later AVL point"""
+
+    last_avl_index: int
+    last_distance: float
+    last_time_in_zone: str
+
+
+class GroupStopHistory(TypedDict):
+    """Stored stop details for current journey matching"""
+
+    last_avl_index: int
+    last_avl_time: str
+    matched_stops: dict[str, MatchedStop]
+    potential_matches: dict[str, PotentialMatch]
+
+
+class ControlInfo(TypedDict):
+    """Control info from stop history"""
+
+    last_avl: int
+    last_avl_processed_time: str
+
+
+StopHistory = dict[str, GroupStopHistory]
