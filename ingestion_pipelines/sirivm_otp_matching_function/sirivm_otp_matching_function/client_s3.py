@@ -161,41 +161,26 @@ class TimetableS3Client:
             number_of_files=len(filename),
         )
         start_time = time.time()
+        data_type = {
+            "recorded_at_time": str,
+            "response_timestamp": str,
+            "latitude": float,
+            "longitude": float,
+            "line_name": str,
+            "operator_ref": str,
+            "vehicle_ref": str,
+            "journey_ref": str,
+            "direction_ref": str,
+            "date_of_journey": str,
+            "batch_id": int,
+        }
+        keys = list(data_type.keys())
         data = wr.s3.read_csv(
             path=paths,
             use_threads=True,
-            names=[
-                "recorded_at_time",
-                "response_timestamp",
-                "latitude",
-                "longitude",
-                "line_name",
-                "operator_ref",
-                "vehicle_ref",
-                "journey_ref",
-                "direction_ref",
-                "date_of_journey",
-                "batch_id",
-                "origin_ref",
-                "destination_ref",
-                "departure_time",
-            ],
-            dtype={
-                "recorded_at_time": str,
-                "response_timestamp": str,
-                "latitude": float,
-                "longitude": float,
-                "line_name": str,
-                "operator_ref": str,
-                "vehicle_ref": str,
-                "journey_ref": str,
-                "direction_ref": str,
-                "date_of_journey": str,
-                "batch_id": int,
-                "origin_ref": str,
-                "destination_ref": str,
-                "departure_time": str,
-            },
+            names=keys,
+            dtype=data_type,
+            usecols=keys,
             header=None,
         )
         data["line_name"] = data["line_name"].fillna("")
