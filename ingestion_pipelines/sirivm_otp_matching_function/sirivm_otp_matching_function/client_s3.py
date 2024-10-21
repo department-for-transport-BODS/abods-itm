@@ -176,6 +176,9 @@ class TimetableS3Client:
                 "direction_ref",
                 "date_of_journey",
                 "batch_id",
+                "origin_ref",
+                "destination_ref",
+                "departure_time",
             ],
             dtype={
                 "recorded_at_time": str,
@@ -189,6 +192,9 @@ class TimetableS3Client:
                 "direction_ref": str,
                 "date_of_journey": str,
                 "batch_id": int,
+                "origin_ref": str,
+                "destination_ref": str,
+                "departure_time": str,
             },
             header=None,
         )
