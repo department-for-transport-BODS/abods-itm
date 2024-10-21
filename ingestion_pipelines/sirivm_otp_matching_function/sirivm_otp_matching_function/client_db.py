@@ -103,7 +103,7 @@ class TimetableDBClient:
         """Update database to reflect successful live matching"""
         with self.connection.cursor() as cursor:
             if len(entries_to_remove) > 0:
-                execute_values_amended(
+                execute_values(
                     cur=cursor,
                     sql=self.sql_queries.remove_live_matching,
                     values=entries_to_remove,
@@ -112,7 +112,7 @@ class TimetableDBClient:
             for match_index_dict in entries_to_update.values():
                 if len(match_index_dict) > 0:
                     v_to_set = list(match_index_dict.values())
-                    execute_values_amended(
+                    execute_values(
                         cur=cursor,
                         sql=self.sql_queries.set_live_matching,
                         values=v_to_set,
@@ -143,13 +143,13 @@ class TimetableDBClient:
                 if len(match_index_dict) > 0:
                     v_to_set = match_index_dict.values()
                     v_to_set_with_date = [(*v, "".join(avl_date_str)) for v in v_to_set]
-                    execute_values_amended(
+                    execute_values(
                         cur=cursor,
                         sql=self.sql_queries.set_historic_matching,
                         values=v_to_set_with_date,
                     )
                     # Update otp state again as the otp calculation is not taking the updated time difference value
-                    execute_values_amended(
+                    execute_values(
                         cur=cursor,
                         sql=self.sql_queries.update_otp_state,
                         values=v_to_set_with_date,
