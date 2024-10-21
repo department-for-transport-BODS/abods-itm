@@ -81,6 +81,7 @@ def read_historic_timetable(timetable_date):  # noqa: ANN001, ANN201 - BODS-7131
         df = wr.s3.read_csv(  # noqa: PD901 - BODS-7131
             path=f"s3://{sirivm_bucket}/{timetable_filename}",
             names=colnames,
+            usecols=colnames,
             header=None,
         )
         timetable = df.to_dict("records")
