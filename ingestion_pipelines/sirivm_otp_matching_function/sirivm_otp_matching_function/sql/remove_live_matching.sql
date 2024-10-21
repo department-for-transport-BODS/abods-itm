@@ -1,8 +1,10 @@
-update  public."Timetable" u
-set
-    time_difference = null,
-    actual_departure_time = null,
-    otp_state = null,
+UPDATE public."Timetable" u
+SET time_difference = NULL,
+    actual_departure_time = NULL,
+    otp_state = NULL,
     load_time_stamp = now()::timestamp(0)
-from (values %s) as t(timetable_id, group_id)
-where u.timetable_id = t.timetable_id::int and date_of_journey = now()::date and u.group_id = t.group_id;
+FROM (VALUES %s) AS t(timetable_id, group_id)
+WHERE u.timetable_id = t.timetable_id::int
+  AND date_of_journey = now()::date
+  AND u.group_id = t.group_id
+RETURNING load_time_stamp;
