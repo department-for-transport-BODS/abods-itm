@@ -129,4 +129,7 @@
     <changeSet id="39" author="abodsuser">
         <sqlFile path="sql/39-expected-journey-changes.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="40" author="abodsuser">
+        <sqlFile path="sql/40-fix-obsolete-dataset-revisions.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
