@@ -14,8 +14,6 @@ from .shared.db import setup_db
 
 logger = Logger()
 
-row_count_log = environ.get("ROW_COUNT", "False")
-
 
 class SQLQueries(BaseModel):
     """SQL data loaded from file"""
@@ -57,21 +55,20 @@ def _update_batch_status(
 
 
 def log_db_updated_row_count(
-    row_count_log: str,
     entries_to_update: list,
     result: list,
 ) -> None:
     """Log the updated row counts"""
-    log_switch = row_count_log == "True"
+    if environ.get("LOG_DB_UPDATE_ROW_COUNT", "False") != "True":
+        return
     entries_count = len(entries_to_update)
     result_count = len(result)
-    if log_switch:
-        if entries_count == result_count:
-            logger.info(f"Updated all {result_count} rows")
-        if entries_count > result_count:
-            logger.warning(
-                f"{result_count} out of {entries_count} rows has been updated.",
-            )
+    if entries_count == result_count:
+        logger.info(f"Updated all {result_count} rows")
+    if entries_count > result_count:
+        logger.warning(
+            f"{result_count} out of {entries_count} rows has been updated.",
+        )
 
 
 class TimetableDBClient:
@@ -105,7 +102,6 @@ class TimetableDBClient:
                     fetch=True,
                 )
                 log_db_updated_row_count(
-                    row_count_log,
                     entries_to_remove,
                     remove_result,
                 )
@@ -119,7 +115,7 @@ class TimetableDBClient:
                         argslist=v_to_set,
                         fetch=True,
                     )
-                    log_db_updated_row_count(row_count_log, v_to_set, update_result)
+                    log_db_updated_row_count(v_to_set, update_result)
             _update_batch_status(cursor, batch_id, "Success")
 
     @timer(logger)
@@ -142,7 +138,6 @@ class TimetableDBClient:
                 fetch=True,
             )
             log_db_updated_row_count(
-                row_count_log,
                 entries_to_remove_with_date,
                 remove_result,
             )
@@ -164,7 +159,6 @@ class TimetableDBClient:
                         fetch=True,
                     )
                     log_db_updated_row_count(
-                        row_count_log,
                         v_to_set_with_date,
                         update_result,
                     )
