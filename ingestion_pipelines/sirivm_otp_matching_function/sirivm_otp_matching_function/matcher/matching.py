@@ -6,7 +6,14 @@ from math import asin, cos, radians, sin, sqrt
 from aws_lambda_powertools import Logger
 
 from .matcher_config import config
-from .models import AVLRecord, RouteDetails, StopDetails, Timetable
+from .models import (
+    AVLRecord,
+    RecordToAdd,
+    RecordToRemove,
+    RouteDetails,
+    StopDetails,
+    Timetable,
+)
 from .utils import (
     get_otp_state,
     get_time_difference,
@@ -167,7 +174,7 @@ def check_update_first_stop(
     avl: AVLRecord,
     route_details: RouteDetails,
     group_stop_history: dict,
-    stop_pos_distances_remove: list[tuple],
+    stop_pos_distances_remove: list[RecordToRemove],
     current_avl_index: int,
 ) -> None:
     """
@@ -223,7 +230,10 @@ def check_update_first_stop(
                 )
                 # 10. remove db matched details
                 stop_pos_distances_remove.append(
-                    (matched_stop_details.timetable_id, avl.group_id),
+                    {
+                        "timetable_id": matched_stop_details.timetable_id,
+                        "group_id": avl.group_id,
+                    },
                 )
 
 
@@ -232,10 +242,10 @@ def find_matches_in_potential_matches(
     route_details: RouteDetails,
     group_stop_history: dict,
     current_avl_index: int,
-    stop_pos_distances: dict[str, dict[str, tuple]],
+    stop_pos_distances: list[RecordToAdd],
     potential_matches_to_delete: list,
     final_stop_index: int,
-    stop_pos_distances_remove: list[tuple],
+    stop_pos_distances_remove: list[RecordToRemove],
 ) -> None:
     """
     Find matches within the potential match list
@@ -246,7 +256,7 @@ def find_matches_in_potential_matches(
         route_details (RouteDetails): Route stop info
         group_stop_history (dict): Stop history of the current group id
         current_avl_index (int): Current avl index
-        stop_pos_distances (dict): The matched records that is going to be written into the database
+        stop_pos_distances (list): The matched records that is going to be written into the database
         potential_matches_to_delete (list): The list of matched stops to be removed from the potential match list
         final_stop_index (int): The stop index of the final stop
         stop_pos_distances_remove (list): The list of stops that needs to have matched records removed from database
@@ -410,7 +420,7 @@ def update_matched_stop(
 def write_matched_stop_to_db(
     is_final_stop: bool,  # noqa: FBT001 - boolean argument is fine for now
     route_details: RouteDetails,
-    stop_pos_distances: dict[str, dict[str, tuple]],
+    stop_pos_distances: list[RecordToAdd],
     group_id: str,
     pm_index: str,
     last_time_in_zone: datetime,
@@ -423,32 +433,28 @@ def write_matched_stop_to_db(
     ----
         is_final_stop (bool): Current stop is a final stop
         route_details (RouteDetails): Route stop info
-        stop_pos_distances (dict): The matched records that is going to be written into the database
+        stop_pos_distances (list): The matched records that is going to be written into the database
         group_id (str): Group id
         pm_index (str): Potential match stop index which has become a match
         last_time_in_zone (datetime): Potential match last time in zone
         batch_id (int): Avl batch id
 
     """
-    stop_details = route_details[pm_index]
     timetable_departure_time = route_details[pm_index].timetable_departure_time
     time_difference = get_time_difference(last_time_in_zone, timetable_departure_time)
-    otp_state = get_otp_state(is_final_stop, time_difference)
-    stop_type = "final" if is_final_stop else "Non-final"
 
     # 23. update db with potential match details
-    stop_pos_distances[group_id].update(
+    stop_pos_distances.append(
         {
-            pm_index: (
-                time_difference,
-                str(last_time_in_zone.strftime("%H:%M:%S")),
-                stop_details.timetable_id,
-                group_id,
-                batch_id,
-                last_time_in_zone,
-                otp_state,
-                stop_type,
-            ),
+            "group_id": group_id,
+            "stop_index": pm_index,
+            "time_difference": time_difference,
+            "last_time_in_zone_str": str(last_time_in_zone.strftime("%H:%M:%S")),
+            "timetable_id": route_details[pm_index].timetable_id,
+            "batch_id": batch_id,
+            "last_time_in_zone": last_time_in_zone,
+            "otp_state": get_otp_state(is_final_stop, time_difference),
+            "stop_type": "final" if is_final_stop else "Non-final",
         },
     )
 
@@ -567,8 +573,8 @@ def move_potential_match_to_match(
     pm_details: dict,
     group_stop_history: dict,
     potential_matches_to_delete: list,
-    stop_pos_distances: dict[str, dict[str, tuple]],
-    stop_pos_distances_remove: list[tuple],
+    stop_pos_distances: list[RecordToAdd],
+    stop_pos_distances_remove: list[RecordToRemove],
 ) -> None:
     """
     Move the current potential match to be a match
@@ -582,7 +588,7 @@ def move_potential_match_to_match(
         pm_details (dict): Potential match information stored in stop history
         group_stop_history (dict): Stop history of the current group id
         potential_matches_to_delete (list): The list of matched stops to be removed from the potential match list
-        stop_pos_distances (dict): The matched records that is going to be written into the database
+        stop_pos_distances (list): The matched records that is going to be written into the database
         stop_pos_distances_remove (list): The list of stops that needs to have matched records removed from database
 
     """
@@ -665,7 +671,10 @@ def move_potential_match_to_match(
                         )
                         continue
                     stop_pos_distances_remove.append(
-                        (stop_details.timetable_id, avl.group_id),
+                        {
+                            "timetable_id": stop_details.timetable_id,
+                            "group_id": avl.group_id,
+                        },
                     )
     if not delete_potential_match:
         # 24. move potential match to be a match
@@ -692,7 +701,7 @@ def positions_timetable_lookup(
     timetable: Timetable,
     avl_dict: Sequence[AVLRecord],
     stop_history: dict,
-) -> tuple[dict[str, dict[str, tuple]], list[tuple], dict]:
+) -> tuple[Sequence[RecordToAdd], Sequence[RecordToRemove], dict]:
     """
     For each AVL, compare to known stops in timetable, and return updated stop history, database updates to perform
 
@@ -708,12 +717,11 @@ def positions_timetable_lookup(
         stop_history (dict): The updated full stop history
 
     """
-    stop_pos_distances = {}
-    stop_pos_distances_remove = []
+    stop_pos_distances: list[RecordToAdd] = []
+    stop_pos_distances_remove: list[RecordToRemove] = []
     for avl in avl_dict:
         # 1. check if group id exists in timetable
         if avl.group_id in timetable:
-            stop_pos_distances.setdefault(avl.group_id, {})
             log_specific(avl, f"group_id {avl.group_id} in timetable")
 
             # 2. check if group id exists in stop_history, if not, create a blank group stop history
