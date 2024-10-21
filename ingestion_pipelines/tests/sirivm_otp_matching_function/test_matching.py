@@ -299,7 +299,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             },
         },
     }
-    batch_id = "123"
+    batch_id = 123
 
     def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
         return mock.patch.dict(os.environ, envvars)
@@ -711,7 +711,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         timetable_dict: dict,
         group_stop_history: dict,
         current_avl_index: int,
-        batch_id: str,
+        batch_id: int,
         stop_pos_distances: dict,
         potential_matches_to_delete: list,
         final_stop_index: int,
@@ -824,7 +824,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
     stop_pos_distances_non_final = {"TLCT|378|1215|2024-08-20": {}}  # noqa: RUF012 - BODS-7131
     stop_pos_distances_final = {"TLCT|378|1215|2024-08-20": {}}  # noqa: RUF012 - BODS-7131
     group_id = "TLCT|378|1215|2024-08-20"
-    batch_id = "123"
+    batch_id = 123
     last_time_in_zone_non_final = datetime(2024, 8, 20, 11, 9, 5, tzinfo=UTC)
     last_time_in_zone_final = datetime(2024, 8, 20, 11, 35, 0, tzinfo=UTC)
 
@@ -897,7 +897,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
         group_id: str,
         pm_index: str,
         last_time_in_zone: datetime,
-        batch_id: str,
+        batch_id: int,
         expected_stop_pos_distances: Any,  # noqa: ANN401 - BODS-7131
     ):
         write_matched_stop_to_db(
@@ -1473,7 +1473,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         group_stop_history: dict,
         potential_matches_to_delete: list,
         stop_pos_distances: dict,
-        batch_id: str,
+        batch_id: int,
         stop_pos_distances_remove: list,
         expected_potential_matches_to_delete: list,
         expected_stop_pos_distances_remove: list,
@@ -1506,7 +1506,7 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     for avl in avl_list:
         avl_dict.append(AVLRecord(avl[0]))  # noqa: PERF401 - BODS-7131
     timetable = read_timetable("TLCT37812152024-08-20.json")
-    batch_id = "123"
+    batch_id = 123
     stop_history = {}  # noqa: RUF012 - BODS-7131
 
     def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
