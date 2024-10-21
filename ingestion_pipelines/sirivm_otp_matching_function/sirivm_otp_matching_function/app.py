@@ -123,8 +123,6 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
         logger.info("Got data, calculating matches")
         to_set, to_remove, stop_history = positions_timetable_lookup(
             timetable,
-            shards,
-            shard_identifier,
             avl_list,
             None,
             clean_shard_stop_history,
@@ -182,8 +180,6 @@ def live_record_handler(
         logger.info("Got data, calculating matches")
         to_set, to_remove, stop_history = positions_timetable_lookup(
             timetable,
-            shards,
-            shard_identifier,
             avl_list,
             batch_id,
             clean_shard_stop_history,
