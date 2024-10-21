@@ -126,4 +126,7 @@
     <changeSet id="38" author="abodsuser">
         <sqlFile path="sql/38-avl-origin-destination.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="39" author="abodsuser">
+        <sqlFile path="sql/39-expected-journey-changes.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
