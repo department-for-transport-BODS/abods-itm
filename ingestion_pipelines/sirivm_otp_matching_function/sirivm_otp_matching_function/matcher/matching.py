@@ -697,7 +697,7 @@ def move_potential_match_to_match(
 def positions_timetable_lookup(
     timetable: Timetable,
     avl_dict: Sequence[AVLRecord],
-    batch_id: str | None,
+    batch_id: int | None,
     stop_history: dict,
 ) -> tuple[dict[str, dict[str, tuple]], list[tuple], dict]:
     """
