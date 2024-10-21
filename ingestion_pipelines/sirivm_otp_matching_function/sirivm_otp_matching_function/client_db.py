@@ -1,5 +1,6 @@
 """Database Functions"""
 
+from os import environ
 from pathlib import Path
 from typing import Literal
 
@@ -53,6 +54,23 @@ def _update_batch_status(
     )
 
 
+def log_db_updated_row_count(
+    entries_to_update: list,
+    result: list,
+) -> None:
+    """Log the updated row counts"""
+    if environ.get("LOG_DB_UPDATE_ROW_COUNT", "False") != "True":
+        return
+    entries_count = len(entries_to_update)
+    result_count = len(result)
+    if entries_count == result_count:
+        logger.info(f"Updated all {result_count} rows")
+    if entries_count > result_count:
+        logger.warning(
+            f"{result_count} out of {entries_count} rows has been updated.",
+        )
+
+
 class TimetableDBClient:
     """Client for interacting with database"""
 
@@ -77,21 +95,27 @@ class TimetableDBClient:
         """Update database to reflect successful live matching"""
         with self.connection.cursor() as cursor:
             if len(entries_to_remove) > 0:
-                execute_values(
-                    cursor,
-                    self.sql_queries.remove_live_matching,
+                remove_result = execute_values(
+                    cur=cursor,
+                    sql=self.sql_queries.remove_live_matching,
+                    argslist=entries_to_remove,
+                    fetch=True,
+                )
+                log_db_updated_row_count(
                     entries_to_remove,
+                    remove_result,
                 )
 
             for match_index_dict in entries_to_update.values():
                 if len(match_index_dict) > 0:
                     v_to_set = list(match_index_dict.values())
-                    execute_values(
-                        cursor,
-                        self.sql_queries.set_live_matching,
-                        v_to_set,
+                    update_result = execute_values(
+                        cur=cursor,
+                        sql=self.sql_queries.set_live_matching,
+                        argslist=v_to_set,
+                        fetch=True,
                     )
-
+                    log_db_updated_row_count(v_to_set, update_result)
             _update_batch_status(cursor, batch_id, "Success")
 
     @timer(logger)
@@ -107,10 +131,15 @@ class TimetableDBClient:
             (*entry, "".join(avl_date_str)) for entry in entries_to_remove
         ]
         with self.connection.cursor() as cursor:
-            execute_values(
-                cursor,
-                self.sql_queries.remove_historic_matching,
+            remove_result = execute_values(
+                cur=cursor,
+                sql=self.sql_queries.remove_historic_matching,
+                argslist=entries_to_remove_with_date,
+                fetch=True,
+            )
+            log_db_updated_row_count(
                 entries_to_remove_with_date,
+                remove_result,
             )
 
             for match_index_dict in entries_to_update.values():
@@ -123,10 +152,15 @@ class TimetableDBClient:
                         v_to_set_with_date,
                     )
                     # Update otp state again as the otp calculation is not taking the updated time difference value
-                    execute_values(
-                        cursor,
-                        self.sql_queries.update_otp_state,
+                    update_result = execute_values(
+                        cur=cursor,
+                        sql=self.sql_queries.update_otp_state,
+                        argslist=v_to_set_with_date,
+                        fetch=True,
+                    )
+                    log_db_updated_row_count(
                         v_to_set_with_date,
+                        update_result,
                     )
 
             _update_batch_status(

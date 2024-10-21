@@ -65,7 +65,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
         },
     }
     expected_stop_pos_distances_remove_5_mins = [  # noqa: RUF012 - BODS-7131
-        ("1", 893823336, "TLCT|378|1215|2024-08-20"),
+        (893823336, "TLCT|378|1215|2024-08-20"),
     ]
     group_stop_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": datetime(2024, 8, 20, 11, 34, 37, tzinfo=UTC),
@@ -1405,7 +1405,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 {group_id: {}},
                 [],  # stop_pos_distances_remove
                 ["23"],  # expected_potential_matches_to_delete
-                [("24", 893823127, group_id)],  # expected_stop_pos_distances_remove
+                [(893823127, group_id)],  # expected_stop_pos_distances_remove
                 {
                     "21": {
                         "last_match_time": datetime(
