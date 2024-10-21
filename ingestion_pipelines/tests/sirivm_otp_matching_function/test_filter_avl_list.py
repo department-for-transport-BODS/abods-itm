@@ -1,6 +1,3 @@
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
-    AVLRecord,
-)
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.utils import (
     filter_avl_list,
 )
@@ -16,9 +13,9 @@ def test_first_shard():
         "3": ["BNSM"],
     }
     avl_list = [
-        AVLRecord({"operator_ref": shard_1_operator_id}),
-        AVLRecord({"operator_ref": shard_2_operator_id}),
-        AVLRecord({"operator_ref": "TEST"}),
+        {"operator_ref": shard_1_operator_id},
+        {"operator_ref": shard_2_operator_id},
+        {"operator_ref": "TEST"},
     ]
     assert filter_avl_list("1", shards, avl_list) == [avl_list[0]]
 
@@ -30,9 +27,9 @@ def test_no_shard():
         "3": ["BNSM"],
     }
     avl_list = [
-        AVLRecord({"operator_ref": shard_1_operator_id}),
-        AVLRecord({"operator_ref": shard_2_operator_id}),
-        AVLRecord({"operator_ref": "TEST"}),
+        {"operator_ref": shard_1_operator_id},
+        {"operator_ref": shard_2_operator_id},
+        {"operator_ref": "TEST"},
     ]
     assert filter_avl_list("0", shards, avl_list) == [avl_list[2]]
 
@@ -44,8 +41,8 @@ def test_unknown_shard():
         "3": ["BNSM"],
     }
     avl_list = [
-        AVLRecord({"operator_ref": shard_1_operator_id}),
-        AVLRecord({"operator_ref": shard_2_operator_id}),
-        AVLRecord({"operator_ref": "TEST"}),
+        {"operator_ref": shard_1_operator_id},
+        {"operator_ref": shard_2_operator_id},
+        {"operator_ref": "TEST"},
     ]
     assert filter_avl_list("4", shards, avl_list) == []

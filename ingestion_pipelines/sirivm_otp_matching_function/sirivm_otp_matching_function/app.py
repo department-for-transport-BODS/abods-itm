@@ -120,7 +120,7 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
         logger.info("Fetching AVL data")
         avl_list = s3_client.get_avl_data(fname)
         avl_list = filter_avl_list(shard_identifier, shards, avl_list)
-        batch_id = avl_list[0].batch_id  # assuming we have at least one AVL
+        batch_id = avl_list[0]["batch_id"]  # assuming we have at least one AVL
     except Exception:
         logger.exception("An error occurred when processing historic record")
         return
@@ -153,7 +153,7 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
 
 def validate_avl_list(avl_list: Sequence[AVLRecord], expected_batch_id: int) -> None:
     for avl in avl_list:
-        if avl.batch_id != expected_batch_id:
+        if avl["batch_id"] != expected_batch_id:
             raise Exception("AVLs with multiple match ids retrieved")  # noqa: TRY002 - Not worth making an exception type
 
 

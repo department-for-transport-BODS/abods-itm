@@ -1,28 +1,29 @@
 """Helpers to Load Test Data from Files"""
 
-import csv
 import json
 from pathlib import Path
 
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.client_s3 import (
-    parse_timetable,
+import pandas as pd
+
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
+    AVLRecord,
+    Timetable,
+    avl_data_type,
 )
 
 test_data_dir = Path(__file__).parent
 
 
-def read_timetable(file_name: str) -> dict:
+def read_timetable(file_name: str) -> Timetable:
     path = test_data_dir / "timetable" / file_name
     with Path.open(path) as f:
-        timetable_json = json.load(f)
-    return parse_timetable(timetable_json)
+        return json.load(f)
 
 
-def read_avl(file_name: str) -> list:
+def read_avl(file_name: str) -> list[AVLRecord]:
     path = test_data_dir / "avl" / file_name
-    avl_reader = csv.DictReader(Path.open(path))
-    avl_list = list(avl_reader)
-    avl_dicts = []
-    for avl in avl_list:
-        avl_dicts.append([avl])  # noqa: PERF401 - BODS-7131
-    return avl_dicts
+    data = pd.read_csv(path, dtype=avl_data_type, header=0)
+    data["line_name"] = data["line_name"].fillna("")
+    data["direction_ref"] = data["direction_ref"].fillna("")
+
+    return data.to_dict("records")

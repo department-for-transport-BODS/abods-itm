@@ -18,14 +18,17 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
 )
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
     AVLRecord,
+    avl_group_id,
+    avl_recorded_at_time_utc,
+    stop_departure_time,
 )
 
 from .data.get_test_data import read_avl, read_timetable
 
 
 class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
-    avl_record = AVLRecord(read_avl("check_update_first_stop.csv")[1][0])
-    avl_record_5_mins = AVLRecord(read_avl("check_update_first_stop.csv")[0][0])
+    avl_record = read_avl("check_update_first_stop.csv")[1]
+    avl_record_5_mins = read_avl("check_update_first_stop.csv")[0]
     timetable = read_timetable("TLCT37812152024-08-20.json")
     group_id = "tlct|378|1215|2024-08-20"
     stop_pos_distances_remove_5_mins = []  # noqa: RUF012 - BODS-7131
@@ -50,7 +53,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
         "1": {
             "last_avl_index": 8,
             "last_distance": 37.35876375439114,
-            "last_time_in_zone": avl_record_5_mins.recorded_at_time_utc,
+            "last_time_in_zone": avl_recorded_at_time_utc(avl_record_5_mins),
         },
         "2": {
             "last_avl_index": 6,
@@ -149,7 +152,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
     ):
         check_update_first_stop(
             rec,
-            timetable_dict[rec.group_id],
+            timetable_dict[avl_group_id(rec)],
             group_stop_history,
             stop_pos_distances_remove,
             current_avl_index,
@@ -160,12 +163,12 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
 
 
 class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
-    avl_record = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[73][0])
-    avl_record_2 = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[220][0])
-    avl_record_3 = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[222][0])
-    avl_record_4 = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[183][0])
-    avl_record_5 = AVLRecord(read_avl("FSMR3507042024-08-21.csv")[0][0])
-    avl_record_6 = AVLRecord(read_avl("FSMR3507042024-08-21.csv")[101][0])
+    avl_record = read_avl("TLCT37812152024-08-20.csv")[73]
+    avl_record_2 = read_avl("TLCT37812152024-08-20.csv")[220]
+    avl_record_3 = read_avl("TLCT37812152024-08-20.csv")[222]
+    avl_record_4 = read_avl("TLCT37812152024-08-20.csv")[183]
+    avl_record_5 = read_avl("FSMR3507042024-08-21.csv")[0]
+    avl_record_6 = read_avl("FSMR3507042024-08-21.csv")[101]
     timetable = read_timetable("TLCT37812152024-08-20.json")
     timetable_5 = read_timetable("FSMR3507042024-08-21.json")
     group_id = "tlct|378|1215|2024-08-20"
@@ -709,7 +712,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
     ):
         find_matches_in_potential_matches(
             avl,
-            timetable_dict[avl.group_id],
+            timetable_dict[avl_group_id(avl)],
             group_stop_history,
             current_avl_index,
             stop_pos_distances,
@@ -758,7 +761,7 @@ class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
 
 
 class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
-    avl_record = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[0][0])
+    avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
     pm_index = "1"
     last_time_in_zone = datetime(2024, 9, 1, 11, 32, 5)  # noqa: DTZ001 - BODS-7131
     group_stop_history = {  # noqa: RUF012 - BODS-7131
@@ -810,7 +813,11 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
     timetable = read_timetable("TLCT37812152024-08-20.json")
     stop_pos_distances_non_final = []  # noqa: RUF012 - BODS-7131
     stop_pos_distances_final = []  # noqa: RUF012 - BODS-7131
-    group_id = "tlct|378|1215|2024-08-20"
+    operator_ref = "TLCT"
+    line_name = "378"
+    journey_ref = "1215"
+    date_of_journey = "2024-08-20"
+    group_id = f"{operator_ref}|{line_name}|{journey_ref}|{date_of_journey}".lower()
     batch_id = 123
     last_time_in_zone_non_final = datetime(2024, 8, 20, 11, 9, 5, tzinfo=UTC)
     last_time_in_zone_final = datetime(2024, 8, 20, 11, 35, 0, tzinfo=UTC)
@@ -820,10 +827,8 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
             "is_final_stop",
             "timetable_dict",
             "stop_pos_distances",
-            "group_id",
             "pm_index",
             "last_time_in_zone",
-            "batch_id",
             "expected_stop_pos_distances",
         ),
         [
@@ -831,10 +836,8 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                 False,
                 timetable,
                 stop_pos_distances_non_final,
-                group_id,
                 "1",
                 last_time_in_zone_non_final,
-                batch_id,
                 [
                     {
                         "group_id": group_id,
@@ -854,10 +857,8 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                 True,
                 timetable,
                 stop_pos_distances_final,
-                group_id,
                 "45",
                 last_time_in_zone_final,
-                batch_id,
                 [
                     {
                         "group_id": group_id,
@@ -880,20 +881,24 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
         is_final_stop: bool,  # noqa: FBT001 - BODS-7131
         timetable_dict: dict,
         stop_pos_distances: list,
-        group_id: str,
         pm_index: str,
         last_time_in_zone: datetime,
-        batch_id: int,
         expected_stop_pos_distances: list,  # noqa: ANN401 - BODS-7131
     ):
+        avl = {
+            "operator_ref": self.operator_ref,
+            "line_name": self.line_name,
+            "journey_ref": self.journey_ref,
+            "date_of_journey": self.date_of_journey,
+            "batch_id": self.batch_id,
+        }
         write_matched_stop_to_db(
             is_final_stop,
-            timetable_dict[group_id],
+            timetable_dict[self.group_id],
             stop_pos_distances,
-            group_id,
+            avl,
             pm_index,
             last_time_in_zone,
-            batch_id,
         )
         assert stop_pos_distances == expected_stop_pos_distances
 
@@ -907,14 +912,14 @@ class TestGetTimetableDepartureTime:  # noqa: D101 - BODS-7131
         details = self.timetable[self.group_id]
         expected_timtable_departure_time = datetime(2024, 8, 20, 11, 16, 0, tzinfo=UTC)
         assert (
-            details[self.pm_index].timetable_departure_time
+            stop_departure_time(details[self.pm_index])
             == expected_timtable_departure_time
         )
 
 
 class TestUpdatePotentialMatch:  # noqa: D101 - BODS-7131
-    avl_record = AVLRecord(read_avl("update_potential_match.csv")[0][0])
-    avl_record_wo_datetime = AVLRecord(read_avl("update_potential_match.csv")[1][0])
+    avl_record = read_avl("update_potential_match.csv")[0]
+    avl_record_wo_datetime = read_avl("update_potential_match.csv")[1]
     pm_index = "1"
     current_avl_index = 4
     expected_pm_details_w_datetime = {  # noqa: RUF012 - BODS-7131
@@ -1053,7 +1058,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
         },
         "matched_stops": {},
     }
-    avl_record = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[0][0])
+    avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
 
     def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
         return mock.patch.dict(os.environ, envvars)
@@ -1136,7 +1141,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
 
 
 class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
-    avl_record = AVLRecord(read_avl("TLCT37812152024-08-20.csv")[0][0])
+    avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
     timetable = read_timetable("TLCT37812152024-08-20.json")
     group_id = "tlct|378|1215|2024-08-20"
     final_stop_index = "41"
@@ -1292,7 +1297,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "time_difference": 48.0,
                         "last_time_in_zone_str": "11:15:48",
                         "timetable_id": 893823336,
-                        "batch_id": avl_record.batch_id,
+                        "batch_id": avl_record["batch_id"],
                         "last_time_in_zone": datetime(
                             2024,
                             8,
@@ -1346,7 +1351,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "time_difference": 184.0,
                         "last_time_in_zone_str": "11:20:04",
                         "timetable_id": 893823358,
-                        "batch_id": avl_record.batch_id,
+                        "batch_id": avl_record["batch_id"],
                         "last_time_in_zone": datetime(
                             2024,
                             8,
@@ -1449,7 +1454,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "time_difference": 534.0,
                         "last_time_in_zone_str": "11:36:54",
                         "timetable_id": 893823138,
-                        "batch_id": avl_record.batch_id,
+                        "batch_id": avl_record["batch_id"],
                         "last_time_in_zone": datetime(
                             2024,
                             8,
@@ -1485,7 +1490,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
     ):
         move_potential_match_to_match(
             final_stop_index,
-            timetable_dict[avl.group_id],
+            timetable_dict[avl_group_id(avl)],
             avl,
             pm_index,
             pm_details,
@@ -1507,7 +1512,7 @@ def test_positions_timetable_lookup():
         expected_stop_history,
     )
 
-    avl_list = [AVLRecord(avl[0]) for avl in read_avl("TLCT37812152024-08-20.csv")]
+    avl_list = read_avl("TLCT37812152024-08-20.csv")
     timetable = read_timetable("TLCT37812152024-08-20.json")
 
     stop_history = {}
