@@ -223,7 +223,7 @@ def check_update_first_stop(
                 )
                 # 10. remove db matched details
                 stop_pos_distances_remove.append(
-                    (ms_index, matched_stop_details.timetable_id, avl.group_id),
+                    (matched_stop_details.timetable_id, avl.group_id),
                 )
 
 
@@ -665,7 +665,7 @@ def move_potential_match_to_match(
                         )
                         continue
                     stop_pos_distances_remove.append(
-                        (index, stop_details.timetable_id, avl.group_id),
+                        (stop_details.timetable_id, avl.group_id),
                     )
     if not delete_potential_match:
         # 24. move potential match to be a match
