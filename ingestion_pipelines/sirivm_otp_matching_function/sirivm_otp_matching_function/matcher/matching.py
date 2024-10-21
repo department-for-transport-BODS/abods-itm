@@ -1,11 +1,12 @@
 import os
+from collections.abc import Sequence
 from datetime import datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
 
 from aws_lambda_powertools import Logger
 
 from .matcher_config import config
-from .models import AVLRecord, RouteDetails, StopDetails
+from .models import AVLRecord, RouteDetails, StopDetails, Timetable
 from .utils import (
     get_otp_state,
     get_time_difference,
@@ -135,33 +136,6 @@ def find_potential_matches(
                 avl,
                 f"13. potential match (stop{i}) created: {group_stop_history['potential_matches'][str(i)]}",
             )
-
-
-def get_shard_filter(shards: dict, shard_no: str) -> list[str]:
-    """
-    Get a shard filter by a specified shard number
-
-    Args:
-    ----
-        shards (dict): Shards data
-        shard_no (str): Shard number assigned in s3 ingestion queue message
-
-    Returns:
-    -------
-        list[str]: A list of operators in the specified shard
-
-    """
-    no_of_shards = len(shards["shards"])
-    shard_filter = []
-    if isinstance(shard_no, str):
-        if shard_no == "0":
-            for n in range(1, no_of_shards + 1):
-                shard_filter.extend(shards["shards"][str(n)])
-        elif int(shard_no) <= no_of_shards:
-            shard_filter = shards["shards"][shard_no]
-    else:
-        logger.exception(f"shard_no {shard_no} data type {type(shard_no)} is not a str")
-    return shard_filter
 
 
 def get_group_stop_history(group_id: str, stop_history: dict[str, dict]) -> dict:
@@ -721,11 +695,9 @@ def move_potential_match_to_match(
 
 @timer(logger)
 def positions_timetable_lookup(
-    timetable: dict[str, RouteDetails],
-    shards: dict,
-    shard_no: str,
-    avl_dict: list[AVLRecord],
-    batch_id: int | None,
+    timetable: Timetable,
+    avl_dict: Sequence[AVLRecord],
+    batch_id: str | None,
     stop_history: dict,
 ) -> tuple[dict[str, dict[str, tuple]], list[tuple], dict]:
     """
@@ -734,8 +706,6 @@ def positions_timetable_lookup(
     Args:
     ----
         timetable (dict): Timetable data
-        shards (dict): Shards categories
-        shard_no (str): Shard number assigned
         avl_dict (list): A list of avl records
         batch_id (int, optional): Avl batch id.
         stop_history (dict): Full stop history of the specified shard.
@@ -748,13 +718,9 @@ def positions_timetable_lookup(
     """
     stop_pos_distances = {}
     stop_pos_distances_remove = []
-    shard_filter = get_shard_filter(shards, shard_no)
     for avl in avl_dict:
         # 1. check if group id exists in timetable
-        if (
-            (shard_no != "0" and avl.operator_ref in shard_filter)
-            or (shard_no == "0" and avl.operator_ref not in shard_filter)
-        ) and avl.group_id in timetable:
+        if avl.group_id in timetable:
             stop_pos_distances.update({avl.group_id: {}})
             log_specific(avl, f"group_id {avl.group_id} in timetable")
 

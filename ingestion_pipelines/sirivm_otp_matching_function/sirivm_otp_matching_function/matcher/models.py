@@ -1,3 +1,4 @@
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 
 from attr import dataclass
@@ -21,13 +22,15 @@ class StopDetails:
         return validate_date(f"{self.date} {self.expected_time}")
 
 
-RouteDetails = dict[str, StopDetails]
+RouteDetails = Mapping[str, StopDetails]
+Timetable = Mapping[str, RouteDetails]
+OperatorShards = Mapping[str, Sequence[str]]
 
 
 class AVLRecord:
     """Wrapper class with convenience methods for an AVL"""
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: Mapping) -> None:
         """Construct an AVL record given a dict record from a CSV"""
         self._data = data
 

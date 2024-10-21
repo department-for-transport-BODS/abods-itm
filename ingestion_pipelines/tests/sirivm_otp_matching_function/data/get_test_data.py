@@ -26,10 +26,3 @@ def read_avl(file_name: str) -> list:
     for avl in avl_list:
         avl_dicts.append([avl])  # noqa: PERF401 - BODS-7131
     return avl_dicts
-
-
-def get_shards(file_name: str) -> dict:
-    path = test_data_dir / file_name
-    with Path.open(path) as f:
-        shards = json.load(f)
-    return shards

@@ -26,7 +26,7 @@ from .data.expected.TLCT37812152024_08_20 import (
     expected_set,
     expected_stop_history,
 )
-from .data.get_test_data import get_shards, read_avl, read_timetable
+from .data.get_test_data import read_avl, read_timetable
 
 
 class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
@@ -1499,8 +1499,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
 
 
 class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
-    shards = get_shards("shards.json")
-    shard_no = "0"
     avl_list = read_avl("TLCT37812152024-08-20.csv")
     avl_dict = []  # noqa: RUF012 - BODS-7131
     for avl in avl_list:
@@ -1516,8 +1514,6 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     def test_positions_timetable_lookup(self):  # noqa: D102 - BODS-7131
         to_set, to_remove, stop_history = positions_timetable_lookup(
             self.timetable,
-            self.shards,
-            self.shard_no,
             self.avl_dict,
             self.batch_id,
             self.stop_history,
