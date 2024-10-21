@@ -28,8 +28,8 @@ db_database = environ.get("POSTGRES_DB")
 sirivm_process_bucket = environ.get("SIRIVM_BUCKET")
 process_queue = environ.get("SIRIVM_PROCESS_QUEUE")
 otp_queue = environ.get("SIRIVM_OTP_QUEUE")
-output_csv_file = "/tmp/avl.csv"
-output_gzip_file = "/tmp/avl.gzip"
+output_csv_file = "/tmp/avl.csv"  # noqa: S108 - BODS-7131
+output_gzip_file = "/tmp/avl.gzip"  # noqa: S108 - BODS-7131
 logging.getLogger().setLevel("INFO")
 sqs = boto3.resource("sqs")
 no_of_shards = 7
@@ -39,21 +39,21 @@ queues = []
 client = boto3.client("s3")
 
 
-def getQueue(queue):
+def getQueue(queue):  # noqa: ANN001, ANN201, N802 - BODS-7131
     """Retrieve the URL for the configured queue name"""
     q = sqs.get_queue_by_name(QueueName=queue)
     return q
 
 
-def setup_queues(lambda_group):
-    global queues
+def setup_queues(lambda_group):  # noqa: ANN001, ANN201 - BODS-7131
+    global queues  # noqa: PLW0603 - BODS-7131
     queues = []
     for shard_no in range(no_of_shards):
         queue_name = f"{otp_queue}-backfill-{lambda_group}-{shard_no+1}.fifo"
         queues.append(getQueue(queue_name))
 
 
-def get_rds_token():
+def get_rds_token():  # noqa: ANN201 - BODS-7131
     client = session.client("rds")
     try:
         region = "eu-west-2"
@@ -65,18 +65,18 @@ def get_rds_token():
         )
     except Exception as e:
         logging.exception("could not get token ")
-        raise e
+        raise e  # noqa: TRY201 - BODS-7131
 
     return token
 
 
-def write_list_to_file(output_csv_file, lst, sirivm_process_bucket, fname):
+def write_list_to_file(output_csv_file, lst, sirivm_process_bucket, fname):  # noqa: ANN001, ANN201 - BODS-7131
     with open(output_csv_file, "w") as f:
         writer = csv.writer(f)
         writer.writerows(lst)
-        with open(output_csv_file, "rb") as f:
+        with open(output_csv_file, "rb") as f:  # noqa: PLW2901 - BODS-7131
             file_content = f.read()
-        with gzip.open(output_gzip_file, "wb") as f:
+        with gzip.open(output_gzip_file, "wb") as f:  # noqa: PLW2901 - BODS-7131
             f.write(file_content)
         s3.upload_file(
             output_gzip_file,
@@ -87,13 +87,13 @@ def write_list_to_file(output_csv_file, lst, sirivm_process_bucket, fname):
         logging.info(f"gzip file {fname} uploaded to {sirivm_process_bucket} created")
 
 
-def write_to_s3(data_dict, path):
+def write_to_s3(data_dict, path):  # noqa: ANN001, ANN201 - BODS-7131
     data_string = json.dumps(data_dict, default=str)
 
     client.put_object(Bucket=sirivm_process_bucket, Key=path, Body=data_string)
 
 
-def read_historic_matching_records(run_date):
+def read_historic_matching_records(run_date):  # noqa: ANN001, ANN201 - BODS-7131
     try:
         progress_file = (
             client.get_object(
@@ -113,7 +113,7 @@ def read_historic_matching_records(run_date):
     return progress
 
 
-def lambda_handler(event, context):
+def lambda_handler(event, context):  # noqa: ANN001, ANN201 - BODS-7131
     logging.info(
         f"Starting s3 ingestion - Time to Run [{round(context.get_remaining_time_in_millis() / 1000)}] seconds / Memory [{context.memory_limit_in_mb}] Mb",
     )
@@ -123,13 +123,13 @@ def lambda_handler(event, context):
         live_lambda_handler(event, context)
 
 
-def backfill_lambda_handler(event, context):
+def backfill_lambda_handler(event, context):  # noqa: ANN001, ANN201, PLR0915 - BODS-7131
     backfill_start_date = event.get("backfill_start_date")
     backfill_end_date = event.get("backfill_end_date")
     concurrency = int(event.get("concurrency", 10))
     try:
-        backfill_start_datetime = datetime.strptime(backfill_start_date, "%Y-%m-%d")
-        backfill_end_datetime = datetime.strptime(backfill_end_date, "%Y-%m-%d")
+        backfill_start_datetime = datetime.strptime(backfill_start_date, "%Y-%m-%d")  # noqa: DTZ007 - BODS-7131
+        backfill_end_datetime = datetime.strptime(backfill_end_date, "%Y-%m-%d")  # noqa: DTZ007 - BODS-7131
         delta = timedelta(days=1)
         lambda_group = concurrency
         setup_queues(lambda_group)
@@ -139,7 +139,7 @@ def backfill_lambda_handler(event, context):
             day = str(backfill_end_datetime.day).zfill(2)
             start_hour = 0
             # if lambda_group > concurrency:
-            #     lambda_group = 1
+            #     lambda_group = 1  # noqa: ERA001 - BODS-7131
             progress = read_historic_matching_records(f"{year}-{month}-{day}")
             if progress["control_info"]["last_avl"] != "":
                 last_avl = progress["control_info"]["last_avl"]
@@ -173,7 +173,7 @@ def backfill_lambda_handler(event, context):
                             fname = avl_path + avl
                             for shard_no in range(len(queues)):
                                 queue_name = f"{otp_queue}-backfill-{lambda_group}-{shard_no+1}.fifo"
-                                resp = queues[shard_no].send_message(
+                                resp = queues[shard_no].send_message(  # noqa: F841 - BODS-7131
                                     MessageBody="AVL to process",
                                     MessageDeduplicationId=str(uuid.uuid4()),
                                     MessageGroupId=f"{queue_name.split('.')[0]}-group",
@@ -202,7 +202,7 @@ def backfill_lambda_handler(event, context):
                             progress["control_info"]["last_avl"] = avl[4:-3]
                             avl_count += 1
                             time_remaining = context.get_remaining_time_in_millis()
-                            if time_remaining < 5000:
+                            if time_remaining < 5000:  # noqa: PLR2004 - BODS-7131
                                 logging.warning(
                                     f"s3 ingestion processing due to timeout [ts={time_remaining}], last processed hour: {hour}, last processed avl: {avl}",
                                 )
@@ -219,17 +219,17 @@ def backfill_lambda_handler(event, context):
                         f"{year}-{month}-{day}: Last processed hour: {hour}, last processed avl: {progress['control_info']['last_avl']}, avl processed: {avl_count}, Time used: {time.time() - start_time_hourly}s, Time remaining: {time_remaining}ms",
                     )
                 except Exception as e:
-                    logging.exception(f"Error {e}")
+                    logging.exception(f"Error {e}")  # noqa: TRY401 - BODS-7131
             backfill_end_datetime -= delta
             start_hour = 0
-            # lambda_group += 1
+            # lambda_group += 1  # noqa: ERA001 - BODS-7131
     except Exception as e:
         logging.exception(
-            f"Input backfill date ({backfill_start_date}, {backfill_end_date}) is/are not in a valid format YYYY-MM-DD. Error {e}",
+            f"Input backfill date ({backfill_start_date}, {backfill_end_date}) is/are not in a valid format YYYY-MM-DD. Error {e}",  # noqa: TRY401 - BODS-7131
         )
 
 
-def live_lambda_handler(event, context):
+def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001, PLR0915 - BODS-7131
     try:
         now = datetime.now()
         year = datetime.strftime(now, "%Y")
@@ -268,7 +268,7 @@ def live_lambda_handler(event, context):
                 message_subset = ast.literal_eval(event_subset["Message"])
                 sirivm_event = message_subset["Records"]
             else:
-                raise ValueError("No Events or Message")
+                raise ValueError("No Events or Message")  # noqa: TRY301 - BODS-7131
             for rec in sirivm_event:
                 bucket = rec["s3"]["bucket"]["name"]
                 key = urllib.parse.unquote_plus(
@@ -324,7 +324,7 @@ def live_lambda_handler(event, context):
                         for shard_no in range(no_of_shards):
                             queue_name = f"{otp_queue}{shard_no+1}.fifo"
                             queue = getQueue(queue_name)
-                            resp = queue.send_message(
+                            resp = queue.send_message(  # noqa: F841 - BODS-7131
                                 MessageBody="Put gzip file to S3",
                                 MessageDeduplicationId=str(uuid.uuid4()),
                                 MessageGroupId=f"{queue_name.split('.')[0]}-group",
@@ -350,7 +350,7 @@ def live_lambda_handler(event, context):
                     except Exception as e:
                         end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
                         logging.exception(
-                            f"Lambda failed either connecting to database or processing AVL Zip file or writing to queue. Error {e}",
+                            f"Lambda failed either connecting to database or processing AVL Zip file or writing to queue. Error {e}",  # noqa: TRY401 - BODS-7131
                         )
                         cur.execute(
                             "Update public.batch set s3_ingestion_status = 'Failed',s3_ingestion_end_prc_ts=%s,s3_avl_gip_key=%s where batch_id=%s ;",
@@ -361,7 +361,7 @@ def live_lambda_handler(event, context):
                 except Exception as e:
                     end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
                     logging.exception(
-                        f"Error getting object {key} from bucket {bucket}. Error {e}",
+                        f"Error getting object {key} from bucket {bucket}. Error {e}",  # noqa: TRY401 - BODS-7131
                     )
                     cur.execute(
                         "Update public.batch set s3_ingestion_status = 'Failed',s3_ingestion_end_prc_ts=%s,s3_avl_gip_key=%s  where batch_id=%s ;",
@@ -372,7 +372,7 @@ def live_lambda_handler(event, context):
         except Exception as e:
             end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
             logging.info(f"Event {event}")
-            logging.exception(f"Error consuming the event. Error {e}")
+            logging.exception(f"Error consuming the event. Error {e}")  # noqa: TRY401 - BODS-7131
             cur.execute(
                 "Update public.batch set s3_ingestion_status = 'Failed',s3_ingestion_end_prc_ts=%s where batch_id=%s ;",
                 [end_time, batch_id],
@@ -380,4 +380,4 @@ def live_lambda_handler(event, context):
             cur.close()
             # raise e
     except Exception as e:
-        logging.exception(f"Error connecting to abods DB. Error {e}")
+        logging.exception(f"Error connecting to abods DB. Error {e}")  # noqa: TRY401 - BODS-7131

@@ -259,7 +259,7 @@ def find_matches_in_potential_matches(
     route_details: RouteDetails,
     group_stop_history: dict,
     current_avl_index: int,
-    batch_id: str,
+    batch_id: int,
     stop_pos_distances: dict,
     potential_matches_to_delete: list,
     final_stop_index: int,
@@ -274,7 +274,7 @@ def find_matches_in_potential_matches(
         route_details (RouteDetails): Route stop info
         group_stop_history (dict): Stop history of the current group id
         current_avl_index (int): Current avl index
-        batch_id (str): Avl batch id
+        batch_id (int): Avl batch id
         stop_pos_distances (dict): The matched records that is going to be written into the database
         potential_matches_to_delete (list): The list of matched stops to be removed from the potential match list
         final_stop_index (int): The stop index of the final stop
@@ -445,7 +445,7 @@ def write_matched_stop_to_db(
     group_id: str,
     pm_index: str,
     last_time_in_zone: datetime,
-    batch_id: str,
+    batch_id: int,
 ) -> None:
     """
     Update stop_pos_distances with the newly matched stop which will be written to the database
@@ -458,7 +458,7 @@ def write_matched_stop_to_db(
         group_id (str): Group id
         pm_index (str): Potential match stop index which has become a match
         last_time_in_zone (datetime): Potential match last time in zone
-        batch_id (str): Avl batch id
+        batch_id (int): Avl batch id
 
     """
     stop_details = route_details[pm_index]
@@ -546,8 +546,14 @@ def select_potential_match_with_same_recordedattime(
     group_stop_history: dict,
     potential_matches_to_delete: list,
 ) -> str:
+    selected_index = pm_index
+    if pm_index in potential_matches_to_delete:
+        return pm_index
     matched_stops = dict(
-        sorted(group_stop_history["matched_stops"].items(), key=lambda t: int(t[0])),
+        sorted(
+            group_stop_history["matched_stops"].items(),
+            key=lambda t: int(t[0]),
+        ),
     )
     first_matched_stop = (
         next(iter(matched_stops.keys())) if len(matched_stops) > 1 else 0
@@ -558,14 +564,19 @@ def select_potential_match_with_same_recordedattime(
         ind
         for ind, pm in potential_matches.items()
         if pm["last_time_in_zone"] == current_recordedattime
+        and ind not in potential_matches_to_delete
     ]
-    selected_index = pm_index
     # 31. Is there more than 1 match being created with the same recordedattime?
     if len(index_with_same_recordedattime) > 1:
+        log_specific(
+            avl,
+            f"{pm_index} index_with_same_recordedattime: {index_with_same_recordedattime}",
+        )
         lowest_index_diff = None
         # 32. Select the stop closest to the first actual in the sequence
         for index in index_with_same_recordedattime:
             diff = int(index) - int(first_matched_stop)
+            log_specific(avl, f"index: {index}, diff: {diff}")
             if not lowest_index_diff or diff < lowest_index_diff:
                 lowest_index_diff = diff
                 selected_index = index
@@ -588,7 +599,7 @@ def move_potential_match_to_match(
     group_stop_history: dict,
     potential_matches_to_delete: list,
     stop_pos_distances: dict,
-    batch_id: str,
+    batch_id: int,
     stop_pos_distances_remove: list,
 ) -> None:
     """
@@ -604,7 +615,7 @@ def move_potential_match_to_match(
         group_stop_history (dict): Stop history of the current group id
         potential_matches_to_delete (list): The list of matched stops to be removed from the potential match list
         stop_pos_distances (dict): The matched records that is going to be written into the database
-        batch_id (str): Avl batch id
+        batch_id (int): Avl batch id
         stop_pos_distances_remove (list): The list of stops that needs to have matched records removed from database
 
     """
@@ -715,7 +726,7 @@ def positions_timetable_lookup(
     shards: dict,
     shard_no: str,
     avl_dict: list[AVLRecord],
-    batch_id: str | None,
+    batch_id: int | None,
     stop_history: dict,
 ) -> (dict[str, dict[str, Any]], dict[str, dict[str, Any]], dict):
     """
@@ -727,8 +738,8 @@ def positions_timetable_lookup(
         shards (dict): Shards categories
         shard_no (str): Shard number assigned
         avl_dict (list): A list of avl records
-        batch_id (str, optional): Avl batch id.
-        stop_history (dict, optional): Full stop history of the specified shard.
+        batch_id (int, optional): Avl batch id.
+        stop_history (dict): Full stop history of the specified shard.
 
     Returns:
     -------
@@ -793,7 +804,7 @@ def positions_timetable_lookup(
                         route_details,
                         group_stop_history,
                         current_avl_index,
-                        batch_id,
+                        batch_id or avl.batch_id,
                         stop_pos_distances,
                         potential_matches_to_remove,
                         final_stop_index,

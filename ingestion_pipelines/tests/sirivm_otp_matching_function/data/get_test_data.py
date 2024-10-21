@@ -24,7 +24,7 @@ def read_avl(file_name: str) -> list:
     avl_list = list(avl_reader)
     avl_dicts = []
     for avl in avl_list:
-        avl_dicts.append([avl])
+        avl_dicts.append([avl])  # noqa: PERF401 - BODS-7131
     return avl_dicts
 
 

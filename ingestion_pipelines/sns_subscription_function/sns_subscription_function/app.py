@@ -9,10 +9,10 @@ sns = session.client("sns")
 sqs = session.client("sqs")
 
 
-def check_subscription_status(topic_arn, queue_arn):
+def check_subscription_status(topic_arn, queue_arn):  # noqa: ANN001, ANN201 - BODS-7131
     """
     Queries the SNS queue for existing subscriptions to determine the status of pre-existing subscriptions.
-    """
+    """  # noqa: D200, D401 - BODS-7131
     response = sns.list_subscriptions_by_topic(TopicArn=topic_arn)
 
     for subscription in response["Subscriptions"]:
@@ -24,16 +24,16 @@ def check_subscription_status(topic_arn, queue_arn):
     return None, False
 
 
-def confirm_subscription(
-    topic_arn,
-    queue_arn,
-    queue_url,
-    timeout_seconds=180,
-    poll_interval=10,
+def confirm_subscription(  # noqa: ANN201 - BODS-7131
+    topic_arn,  # noqa: ANN001 - BODS-7131
+    queue_arn,  # noqa: ANN001 - BODS-7131
+    queue_url,  # noqa: ANN001 - BODS-7131
+    timeout_seconds=180,  # noqa: ANN001 - BODS-7131
+    poll_interval=10,  # noqa: ANN001 - BODS-7131
 ):
     """
     Polls the SQS queue to find and confirm the subscription confirmation message.
-    """
+    """  # noqa: D200, D401 - BODS-7131
     subscription_arn, is_confirmed = check_subscription_status(topic_arn, queue_arn)
 
     if not is_confirmed:
@@ -62,7 +62,7 @@ def confirm_subscription(
     return True
 
 
-def lambda_handler(event, context):
+def lambda_handler(event, context):  # noqa: ANN001, ANN201 - BODS-7131
     request_type = event["RequestType"]
     props = event["ResourceProperties"]
 
@@ -86,7 +86,7 @@ def lambda_handler(event, context):
                     sqs_queue_url,
                 )
                 if not confirmation_received:
-                    raise TimeoutError(
+                    raise TimeoutError(  # noqa: TRY301 - BODS-7131
                         "Subscription confirmation not received in time.",
                     )
 
@@ -102,8 +102,8 @@ def lambda_handler(event, context):
             sns.unsubscribe(SubscriptionArn=subscription_arn)
 
             cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, subscription_arn)
-    except Exception as e:
-        print(e)
+    except Exception as e:  # noqa: BLE001 - BODS-7131
+        print(e)  # noqa: T201 - BODS-7131
         cfnresponse.send(
             event,
             context,

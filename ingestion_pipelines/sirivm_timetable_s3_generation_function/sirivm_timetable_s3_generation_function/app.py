@@ -27,7 +27,7 @@ no_of_shards = 7
 sqs = boto3.resource("sqs")
 
 
-def get_rds_token():
+def get_rds_token():  # noqa: ANN201 - BODS-7131
     client = session.client("rds")
     try:
         region = "eu-west-2"
@@ -39,24 +39,24 @@ def get_rds_token():
         )
     except Exception as e:
         logging.exception("could not get token ")
-        raise e
+        raise e  # noqa: TRY201 - BODS-7131
 
     return token
 
 
-def write_to_s3(data_dict, path):
+def write_to_s3(data_dict, path):  # noqa: ANN001, ANN201 - BODS-7131
     data_string = json.dumps(data_dict, default=str)
 
     client.put_object(Bucket=sirivm_bucket, Key=path, Body=data_string)
 
 
-def getQueue(queue):
+def getQueue(queue):  # noqa: ANN001, ANN201, N802 - BODS-7131
     """Retrieve the URL for the configured queue name"""
     q = sqs.get_queue_by_name(QueueName=queue)
     return q
 
 
-def read_historic_timetable(timetable_date):
+def read_historic_timetable(timetable_date):  # noqa: ANN001, ANN201 - BODS-7131
     """
     Read historic timetable in csv format
 
@@ -78,19 +78,19 @@ def read_historic_timetable(timetable_date):
         "date_of_journey",
     ]
     try:
-        df = wr.s3.read_csv(
+        df = wr.s3.read_csv(  # noqa: PD901 - BODS-7131
             path=f"s3://{sirivm_bucket}/{timetable_filename}",
             names=colnames,
             header=None,
         )
         timetable = df.to_dict("records")
         logger.info(f"Retrieved timetable {timetable_filename}")
-    except Exception as e:
-        logger.error(e)
+    except Exception as e:  # noqa: BLE001 - BODS-7131
+        logger.error(e)  # noqa: TRY400 - BODS-7131
     return timetable
 
 
-def recreate_timetable(timetable):
+def recreate_timetable(timetable):  # noqa: ANN001, ANN201 - BODS-7131
     """
     Recreate timetable in dict format
 
@@ -105,7 +105,7 @@ def recreate_timetable(timetable):
     logger.info("Recreating timetable")
     count = 0
     for row in timetable:
-        count += 1
+        count += 1  # noqa: SIM113 - BODS-7131
         group_id = row["group_id"]
         if group_id not in recreated_timetable:
             recreated_timetable[group_id] = {}
@@ -121,7 +121,7 @@ def recreate_timetable(timetable):
     return recreated_timetable
 
 
-def shred_timetable(recreated_timetable, query_time, timetable_date):
+def shred_timetable(recreated_timetable, query_time, timetable_date):  # noqa: ANN001, ANN201 - BODS-7131
     """
     Shred timetable into files in every half an hour interval with a 2-hour sliding window
 
@@ -141,31 +141,31 @@ def shred_timetable(recreated_timetable, query_time, timetable_date):
     logger.info(f"Shredding timetable at {query_time}")
     try:
         for group_id, items in recreated_timetable.items():
-            for stop, details in items.items():
-                journey_time = datetime.strptime(
+            for stop, details in items.items():  # noqa: B007, PERF102 - BODS-7131
+                journey_time = datetime.strptime(  # noqa: DTZ007 - BODS-7131
                     f"{timetable_date} {details[1]}",
                     "%Y-%m-%d %H:%M:%S",
                 )
-                if (
+                if (  # noqa: SIM102 - BODS-7131
                     journey_time > sliding_window_minus
                     and journey_time < sliding_window_plus
                 ):
                     if group_id not in selected_rows:
                         selected_rows[group_id] = items
-                        # logging.info(f"Adding {group_id} into selected rows")
-    except Exception as e:
-        logger.error(e)
+                        # logging.info(f"Adding {group_id} into selected rows")  # noqa: ERA001 - BODS-7131
+    except Exception as e:  # noqa: BLE001 - BODS-7131
+        logger.error(e)  # noqa: TRY400 - BODS-7131
     return selected_rows
 
 
-def lambda_handler(event, context):
+def lambda_handler(event, context):  # noqa: ANN001, ANN201 - BODS-7131
     if event.get("backfill_start_date") and event.get("backfill_end_date"):
         backfill_lambda_handler(event, context)
     else:
         live_lambda_handler(event, context)
 
 
-def backfill_lambda_handler(event, context):
+def backfill_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001, PLR0915 - BODS-7131
     """Receive an event, get backfill start date and end date and start from time and shred the historic timetable into files in every half an hour interval with a 2-hour sliding window"""
     timetable_start_date = event.get("backfill_start_date")
     timetable_end_date = event.get("backfill_end_date")
@@ -179,9 +179,9 @@ def backfill_lambda_handler(event, context):
     delta = timedelta(days=1)
     start_date_split = timetable_start_date.split("-")
     end_date_split = timetable_end_date.split("-")
-    timetable_start_datetime = datetime.strptime(timetable_start_date, "%Y-%m-%d")
-    timetable_end_datetime = datetime.strptime(timetable_end_date, "%Y-%m-%d")
-    if len(start_date_split) == 3 and len(end_date_split) == 3:
+    timetable_start_datetime = datetime.strptime(timetable_start_date, "%Y-%m-%d")  # noqa: DTZ007 - BODS-7131
+    timetable_end_datetime = datetime.strptime(timetable_end_date, "%Y-%m-%d")  # noqa: DTZ007 - BODS-7131
+    if len(start_date_split) == 3 and len(end_date_split) == 3:  # noqa: PLR2004 - BODS-7131
         while timetable_end_datetime >= timetable_start_datetime:
             timetable_end_date = datetime.strftime(timetable_end_datetime, "%Y-%m-%d")
             end_datetime = parse(timetable_end_date)
@@ -209,7 +209,7 @@ def backfill_lambda_handler(event, context):
                         key=lambda x: int(x[-10:-8] + x[-7:-5]),
                     )
                     number_of_shredded_timetables = len(shredded_timetables_list)
-                    if number_of_shredded_timetables < 48:
+                    if number_of_shredded_timetables < 48:  # noqa: PLR2004 - BODS-7131
                         start_hour = int(shredded_timetables_list[-1][-10:-8])
                         start_minute = (
                             0 if shredded_timetables_list[-1][-7:-5] == "00" else 1
@@ -219,12 +219,12 @@ def backfill_lambda_handler(event, context):
                 )
                 for h in range(start_hour, 24):
                     for i in range(start_minute, 2):
-                        if i == 0:
+                        if i == 0:  # noqa: SIM108 - BODS-7131
                             minute_str = "00"
                         else:
                             minute_str = "30"
                         hour_str = str(h).zfill(2)
-                        query_time = datetime.strptime(
+                        query_time = datetime.strptime(  # noqa: DTZ007 - BODS-7131
                             f"{timetable_end_date} {hour_str}{minute_str}",
                             "%Y-%m-%d %H%M",
                         )
@@ -241,8 +241,8 @@ def backfill_lambda_handler(event, context):
                         logger.info(f"Written {file_name} to s3")
                     start_minute = 0
                 start_hour = 0
-            except Exception as e:
-                logger.error(e)
+            except Exception as e:  # noqa: BLE001 - BODS-7131
+                logger.error(e)  # noqa: TRY400 - BODS-7131
             timetable_end_datetime -= delta
     else:
         logger.error(
@@ -250,27 +250,27 @@ def backfill_lambda_handler(event, context):
         )
 
 
-def live_lambda_handler(event, context):
+def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
     query = """  with my_groups as (
         select distinct vehiclejourney_id
-        from public."Timetable" where date_of_journey  = now()::date
-        and expected_departure_time::time between
-        cast(current_timestamp(0) at time zone 'Europe/London' as time) - interval '120' minute
-        and cast(current_timestamp(0) at time zone 'Europe/London' as time) +  interval '120' minute
+        from public."Timetable" where date_of_journey  = (now() at time zone 'Europe/London')::date
+        and expected_departure_time between
+        current_timestamp(0) - interval '120' minute and
+        current_timestamp(0) +  interval '120' minute
     )
-    select t.group_id,row_number() over( partition by t.group_id order by t.group_id,t.expected_departure_time asc,t.stop_index  asc  ) as stop_index ,
+    select t.group_id,row_number() over( partition by t.group_id order by t.group_id,t.expected_departure_time asc,t.stop_index  asc  ) as stop_index , 
     t.stop_latitude,t.stop_longitude,t.expected_departure_time::time as expected_departure_time,t.timetable_id, t.date_of_journey
     from public."Timetable" t
     where t.date_of_journey  = now()::date
     and t.vehiclejourney_id in (select vehiclejourney_id from my_groups)
-    order by t.group_id,t.expected_departure_time asc,t.stop_index  asc; """
+    order by t.group_id,t.expected_departure_time asc,t.stop_index  asc; """  # noqa: W291 - BODS-7131
     now = datetime.now()
     year = datetime.strftime(now, "%Y")
     mon = datetime.strftime(now, "%m")
     day = datetime.strftime(now, "%d")
     hour = datetime.strftime(now, "%H")
     minute = datetime.strftime(now, "%M")
-    minute_standardised = "30" if int(minute) >= 30 else "00"
+    minute_standardised = "30" if int(minute) >= 30 else "00"  # noqa: PLR2004 - BODS-7131
     fname = f"timetable_shreds/YYYY={year}/MM={mon}/DD={day}/timetable_{year}{mon}{day}_{hour}_{minute_standardised}.json"
 
     try:
@@ -295,7 +295,7 @@ def live_lambda_handler(event, context):
         for shard_no in range(no_of_shards):
             queue_name = f"{otp_queue}{shard_no+1}.fifo"
             queue = getQueue(queue_name)
-            resp = queue.send_message(
+            resp = queue.send_message(  # noqa: F841 - BODS-7131
                 MessageBody="Put gzip file to S3",
                 MessageDeduplicationId=str(uuid.uuid4()),
                 MessageGroupId=f"{queue_name.split('.')[0]}-group",
@@ -307,4 +307,4 @@ def live_lambda_handler(event, context):
                 f"Send message to  {otp_queue}{shard_no+1} so timetable is refreshed.",
             )
     except Exception as e:
-        logging.exception(e)
+        logging.exception(e)  # noqa: TRY401 - BODS-7131
