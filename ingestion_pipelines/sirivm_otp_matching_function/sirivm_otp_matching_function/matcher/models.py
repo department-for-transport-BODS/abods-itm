@@ -1,5 +1,6 @@
 from collections.abc import Mapping, Sequence
 from datetime import datetime
+from typing import Literal, TypedDict
 
 from attr import dataclass
 
@@ -83,3 +84,24 @@ class AVLRecord:
     def batch_id(self) -> int:
         """The batch_id"""
         return self._data["batch_id"]
+
+
+class RecordToRemove(TypedDict):
+    """Represents a record to be removed from the DB after matching"""
+
+    timetable_id: int
+    group_id: str
+
+
+class RecordToAdd(TypedDict):
+    """Represents a record to be added to the DB after matching"""
+
+    stop_index: str
+    group_id: str
+    time_difference: float
+    last_time_in_zone_str: str
+    timetable_id: int
+    batch_id: int
+    last_time_in_zone: datetime
+    otp_state: Literal["Early", "OnTime", "Late"]
+    stop_type: Literal["final", "Non-final"]

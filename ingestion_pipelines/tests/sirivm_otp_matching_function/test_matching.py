@@ -1,6 +1,5 @@
 import os
 from datetime import UTC, datetime
-from typing import Any
 from unittest import mock
 
 import pytest
@@ -60,7 +59,10 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
         },
     }
     expected_stop_pos_distances_remove_5_mins = [  # noqa: RUF012 - BODS-7131
-        (893823336, "TLCT|378|1215|2024-08-20"),
+        {
+            "timetable_id": 893823336,
+            "group_id": "TLCT|378|1215|2024-08-20",
+        },
     ]
     group_stop_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": datetime(2024, 8, 20, 11, 34, 37, tzinfo=UTC),
@@ -318,7 +320,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable,
                 group_stop_history,
                 30,
-                {group_id: {}},  # stop pos dist
+                [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
                 [],  # stop_pos_distances_remove,
@@ -384,7 +386,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable,
                 group_stop_history_2,
                 90,
-                {group_id: {}},  # stop pos dist
+                [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
                 [],  # stop_pos_distances_remove,
@@ -463,7 +465,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable,
                 group_stop_history_3,
                 91,
-                {group_id: {}},  # stop pos dist
+                [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
                 [],  # stop_pos_distances_remove,
@@ -529,7 +531,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable,
                 group_stop_history_4,
                 77,
-                {group_id: {}},  # stop pos dist
+                [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 45,  # final_stop_index
                 [],  # stop_pos_distances_remove,
@@ -595,7 +597,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable_5,
                 group_stop_history_5,
                 2,
-                {group_id_5: {}},  # stop pos dist
+                [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 41,  # final_stop_index
                 [],  # stop_pos_distances_remove,
@@ -640,7 +642,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 timetable_5,
                 group_stop_history_6,
                 101,
-                {group_id_5: {}},  # stop pos dist
+                [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 41,  # final_stop_index
                 [],  # stop_pos_distances_remove,
@@ -698,7 +700,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         timetable_dict: dict,
         group_stop_history: dict,
         current_avl_index: int,
-        stop_pos_distances: dict,
+        stop_pos_distances: list,
         potential_matches_to_delete: list,
         final_stop_index: int,
         stop_pos_distances_remove: list,
@@ -806,37 +808,12 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
 
 class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
     timetable = read_timetable("TLCT37812152024-08-20.json")
-    stop_pos_distances_non_final = {"TLCT|378|1215|2024-08-20": {}}  # noqa: RUF012 - BODS-7131
-    stop_pos_distances_final = {"TLCT|378|1215|2024-08-20": {}}  # noqa: RUF012 - BODS-7131
+    stop_pos_distances_non_final = []  # noqa: RUF012 - BODS-7131
+    stop_pos_distances_final = []  # noqa: RUF012 - BODS-7131
     group_id = "TLCT|378|1215|2024-08-20"
     batch_id = 123
     last_time_in_zone_non_final = datetime(2024, 8, 20, 11, 9, 5, tzinfo=UTC)
     last_time_in_zone_final = datetime(2024, 8, 20, 11, 35, 0, tzinfo=UTC)
-
-    expected_stop_pos_distances_non_final = {  # noqa: RUF012 - BODS-7131
-        "1": (
-            -355.0,
-            "11:09:05",
-            893823336,
-            group_id,
-            batch_id,
-            last_time_in_zone_non_final,
-            "Early",
-            "Non-final",
-        ),
-    }
-    expected_stop_pos_distances_final = {  # noqa: RUF012 - BODS-7131
-        "45": (
-            -420.0,
-            "11:35:00",
-            893822665,
-            group_id,
-            batch_id,
-            last_time_in_zone_final,
-            "OnTime",
-            "final",
-        ),
-    }
 
     @pytest.mark.parametrize(
         (
@@ -858,7 +835,19 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                 "1",
                 last_time_in_zone_non_final,
                 batch_id,
-                expected_stop_pos_distances_non_final,
+                [
+                    {
+                        "group_id": group_id,
+                        "stop_index": "1",
+                        "time_difference": -355.0,
+                        "last_time_in_zone_str": "11:09:05",
+                        "timetable_id": 893823336,
+                        "batch_id": batch_id,
+                        "last_time_in_zone": last_time_in_zone_non_final,
+                        "otp_state": "Early",
+                        "stop_type": "Non-final",
+                    },
+                ],
                 id="Write non-final stop to db",
             ),
             pytest.param(
@@ -869,7 +858,19 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                 "45",
                 last_time_in_zone_final,
                 batch_id,
-                expected_stop_pos_distances_final,
+                [
+                    {
+                        "group_id": group_id,
+                        "stop_index": "45",
+                        "time_difference": -420.0,
+                        "last_time_in_zone_str": "11:35:00",
+                        "timetable_id": 893822665,
+                        "batch_id": batch_id,
+                        "last_time_in_zone": last_time_in_zone_final,
+                        "otp_state": "OnTime",
+                        "stop_type": "final",
+                    },
+                ],
                 id="Write final stop to db",
             ),
         ],
@@ -878,12 +879,12 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
         self,
         is_final_stop: bool,  # noqa: FBT001 - BODS-7131
         timetable_dict: dict,
-        stop_pos_distances: dict,
+        stop_pos_distances: list,
         group_id: str,
         pm_index: str,
         last_time_in_zone: datetime,
         batch_id: int,
-        expected_stop_pos_distances: Any,  # noqa: ANN401 - BODS-7131
+        expected_stop_pos_distances: list,  # noqa: ANN401 - BODS-7131
     ):
         write_matched_stop_to_db(
             is_final_stop,
@@ -894,7 +895,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
             last_time_in_zone,
             batch_id,
         )
-        assert stop_pos_distances[group_id] == expected_stop_pos_distances
+        assert stop_pos_distances == expected_stop_pos_distances
 
 
 class TestGetTimetableDepartureTime:  # noqa: D101 - BODS-7131
@@ -1267,7 +1268,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 pm_details_1,
                 group_stop_history_1,
                 [],
-                {group_id: {}},
+                [],
                 [],  # stop pos distances remove
                 ["1"],  # expected pm to delete
                 [],  # expected stop pos dist remove
@@ -1284,20 +1285,27 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         ),
                     },
                 },
-                {
-                    group_id: {
-                        "1": (
-                            48.0,
-                            "11:15:48",
-                            893823336,
-                            group_id,
-                            avl_record.batch_id,
-                            datetime(2024, 8, 20, 11, 15, 48, tzinfo=UTC),
-                            "OnTime",
-                            "Non-final",
+                [
+                    {
+                        "group_id": group_id,
+                        "stop_index": "1",
+                        "time_difference": 48.0,
+                        "last_time_in_zone_str": "11:15:48",
+                        "timetable_id": 893823336,
+                        "batch_id": avl_record.batch_id,
+                        "last_time_in_zone": datetime(
+                            2024,
+                            8,
+                            20,
+                            11,
+                            15,
+                            48,
+                            tzinfo=UTC,
                         ),
+                        "otp_state": "OnTime",
+                        "stop_type": "Non-final",
                     },
-                },
+                ],
                 id="first match",
             ),
             pytest.param(
@@ -1308,7 +1316,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 pm_details_2,
                 group_stop_history_2,
                 [],
-                {group_id: {}},
+                [],
                 [],  # stop_pos_distances_remove
                 ["3"],  # expected_potential_matches_to_delete
                 [],  # expected_stop_pos_distances_remove
@@ -1331,20 +1339,27 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "last_match_time": datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC),
                     },
                 },
-                {
-                    group_id: {
-                        "3": (
-                            184.0,
-                            "11:20:04",
-                            893823358,
-                            group_id,
-                            avl_record.batch_id,
-                            datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC),
-                            "OnTime",
-                            "Non-final",
+                [
+                    {
+                        "group_id": group_id,
+                        "stop_index": "3",
+                        "time_difference": 184.0,
+                        "last_time_in_zone_str": "11:20:04",
+                        "timetable_id": 893823358,
+                        "batch_id": avl_record.batch_id,
+                        "last_time_in_zone": datetime(
+                            2024,
+                            8,
+                            20,
+                            11,
+                            20,
+                            4,
+                            tzinfo=UTC,
                         ),
+                        "otp_state": "OnTime",
+                        "stop_type": "Non-final",
                     },
-                },
+                ],
                 id="not first match, the pm index higher than the highest match index saved and it will be the third actual match, move the potential match to be a match and remove the lowest match index from matched stops",
             ),
             pytest.param(
@@ -1355,7 +1370,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 pm_details_3,
                 group_stop_history_3,
                 [],
-                {group_id: {}},
+                [],
                 [],
                 ["15"],
                 [],
@@ -1386,7 +1401,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "last_match_time": datetime(2024, 8, 20, 11, 35, 6, tzinfo=UTC),
                     },
                 },
-                {group_id: {}},
+                [],
                 id="not first match, the pm index lower than the lowest match index saved, remove current potential match from potential matches",
             ),
             pytest.param(
@@ -1397,10 +1412,12 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 pm_details_4,
                 group_stop_history_4,
                 [],
-                {group_id: {}},
+                [],
                 [],  # stop_pos_distances_remove
                 ["23"],  # expected_potential_matches_to_delete
-                [(893823127, group_id)],  # expected_stop_pos_distances_remove
+                [
+                    {"timetable_id": 893823127, "group_id": group_id},
+                ],  # expected_stop_pos_distances_remove
                 {
                     "21": {
                         "last_match_time": datetime(
@@ -1425,20 +1442,27 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         ),
                     },
                 },
-                {
-                    group_id: {
-                        "23": (
-                            534.0,
-                            "11:36:54",
-                            893823138,
-                            group_id,
-                            avl_record.batch_id,
-                            datetime(2024, 8, 20, 11, 36, 54, tzinfo=UTC),
-                            "Late",
-                            "Non-final",
+                [
+                    {
+                        "group_id": group_id,
+                        "stop_index": "23",
+                        "time_difference": 534.0,
+                        "last_time_in_zone_str": "11:36:54",
+                        "timetable_id": 893823138,
+                        "batch_id": avl_record.batch_id,
+                        "last_time_in_zone": datetime(
+                            2024,
+                            8,
+                            20,
+                            11,
+                            36,
+                            54,
+                            tzinfo=UTC,
                         ),
+                        "otp_state": "Late",
+                        "stop_type": "Non-final",
                     },
-                },
+                ],
                 id="not first match, the pm index lower than the highest match index saved and it will be the third actual match, move the potential match to be a match and delete the indices that are higher than the current potential match index in the matched stops",
             ),
         ],
@@ -1452,12 +1476,12 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         pm_details: dict,
         group_stop_history: dict,
         potential_matches_to_delete: list,
-        stop_pos_distances: dict,
+        stop_pos_distances: list,
         stop_pos_distances_remove: list,
         expected_potential_matches_to_delete: list,
         expected_stop_pos_distances_remove: list,
         expected_matched_stops: dict,
-        expected_stop_pos_distances: dict,
+        expected_stop_pos_distances: list,
     ):
         move_potential_match_to_match(
             final_stop_index,
@@ -1487,8 +1511,8 @@ def test_positions_timetable_lookup():
     timetable = read_timetable("TLCT37812152024-08-20.json")
 
     stop_history = {}
-    to_set_total = {}
-    to_remove_total = {}
+    to_set_total = []
+    to_remove_total = []
 
     for avl in avl_list:
         # Simulate invoking the lambda once per AVL for the group id
@@ -1499,8 +1523,7 @@ def test_positions_timetable_lookup():
             stop_history,
         )
         to_remove_total = [*to_remove_total, *to_remove]
-        for key, value in to_set.items():
-            to_set_total.setdefault(key, {}).update(value)
+        to_set_total = [*to_set_total, *to_set]
 
     assert to_set_total == expected_set
     assert to_remove_total == expected_remove

@@ -1,5 +1,6 @@
 """Database Functions"""
 
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Literal
 
@@ -8,6 +9,7 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.parser import BaseModel
 from psycopg2.extras import execute_values
 
+from .matcher.models import RecordToAdd, RecordToRemove
 from .matcher.utils import timer
 from .shared.db import setup_db
 
@@ -97,26 +99,40 @@ class TimetableDBClient:
     def live_update_success(
         self,
         batch_id: int,
-        entries_to_update: dict[str, dict[str, tuple]],
-        entries_to_remove: list[tuple],
+        entries_to_update: Sequence[RecordToAdd],
+        entries_to_remove: Sequence[RecordToRemove],
     ) -> None:
         """Update database to reflect successful live matching"""
+        grouped = _prepare_new_entries(entries_to_update)
         with self.connection.cursor() as cursor:
             if len(entries_to_remove) > 0:
                 execute_values_amended(
                     cur=cursor,
                     sql=self.sql_queries.remove_live_matching,
-                    values=entries_to_remove,
+                    values=[
+                        (entry["timetable_id"], entry["group_id"])
+                        for entry in entries_to_remove
+                    ],
                 )
 
-            for match_index_dict in entries_to_update.values():
-                if len(match_index_dict) > 0:
-                    v_to_set = list(match_index_dict.values())
-                    execute_values_amended(
-                        cur=cursor,
-                        sql=self.sql_queries.set_live_matching,
-                        values=v_to_set,
-                    )
+            for records in grouped.values():
+                execute_values_amended(
+                    cur=cursor,
+                    sql=self.sql_queries.remove_live_matching,
+                    values=[
+                        (
+                            record["time_difference"],
+                            record["last_time_in_zone_str"],
+                            record["timetable_id"],
+                            record["group_id"],
+                            record["batch_id"],
+                            record["last_time_in_zone"],
+                            record["otp_state"],
+                            record["stop_type"],
+                        )
+                        for record in records
+                    ],
+                )
 
             _update_batch_status(cursor, batch_id, "Success")
 
@@ -124,35 +140,68 @@ class TimetableDBClient:
     def historic_update_success(
         self,
         batch_id: int,
-        entries_to_update: dict[str, dict[str, tuple]],
-        entries_to_remove: list[tuple],
+        entries_to_update: Sequence[RecordToAdd],
+        entries_to_remove: Sequence[RecordToRemove],
         avl_date_str: str,
     ) -> None:
         """Update database to reflect successful historic matching"""
-        entries_to_remove_with_date = [
-            (*entry, "".join(avl_date_str)) for entry in entries_to_remove
-        ]
+        grouped = _prepare_new_entries(entries_to_update)
         with self.connection.cursor() as cursor:
-            execute_values_amended(
-                cur=cursor,
-                sql=self.sql_queries.remove_historic_matching,
-                values=entries_to_remove_with_date,
-            )
+            if len(entries_to_remove) > 0:
+                execute_values_amended(
+                    cur=cursor,
+                    sql=self.sql_queries.remove_historic_matching,
+                    values=[
+                        (
+                            entry["timetable_id"],
+                            entry["group_id"],
+                            avl_date_str,
+                        )
+                        for entry in entries_to_remove
+                    ],
+                )
 
-            for match_index_dict in entries_to_update.values():
-                if len(match_index_dict) > 0:
-                    v_to_set = match_index_dict.values()
-                    v_to_set_with_date = [(*v, "".join(avl_date_str)) for v in v_to_set]
-                    execute_values_amended(
-                        cur=cursor,
-                        sql=self.sql_queries.set_historic_matching,
-                        values=v_to_set_with_date,
+            for records in grouped.values():
+                values = [
+                    (
+                        record["time_difference"],
+                        record["last_time_in_zone_str"],
+                        record["timetable_id"],
+                        record["group_id"],
+                        record["batch_id"],
+                        record["last_time_in_zone"],
+                        record["otp_state"],
+                        record["stop_type"],
+                        avl_date_str,
                     )
-                    # Update otp state again as the otp calculation is not taking the updated time difference value
-                    execute_values_amended(
-                        cur=cursor,
-                        sql=self.sql_queries.update_otp_state,
-                        values=v_to_set_with_date,
-                    )
+                    for record in records
+                ]
+                execute_values_amended(
+                    cur=cursor,
+                    sql=self.sql_queries.set_historic_matching,
+                    values=values,
+                )
+                # Update otp state again as the otp calculation is not taking the updated time difference value
+                execute_values_amended(
+                    cur=cursor,
+                    sql=self.sql_queries.update_otp_state,
+                    values=values,
+                )
 
             _update_batch_status(cursor, batch_id, "Success")
+
+
+def _prepare_new_entries(
+    entries_to_update: Sequence[RecordToAdd],
+) -> Mapping[str, Sequence[RecordToAdd]]:
+    # deduplicate any stop_index entries for the same group
+    grouped: dict[str, dict[str, RecordToAdd]] = {}
+    for entry in entries_to_update:
+        grouped.setdefault(entry["group_id"], {})[entry["stop_index"]] = entry
+
+    # flatten by group id
+    by_group_id = {}
+    for group_id, match_index_dict in grouped.items():
+        by_group_id[group_id] = list(match_index_dict.values())
+
+    return by_group_id
