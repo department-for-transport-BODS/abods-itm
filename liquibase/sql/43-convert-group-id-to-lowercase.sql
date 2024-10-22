@@ -522,7 +522,7 @@ execute format(
 		expected_departure_time,
 		actual_departure_time,
 		is_timing_point,
-		LOWER(group_id),
+		group_id,
 		previous_group_id,
 		otp_state,
 		expected_headway,
@@ -1186,7 +1186,7 @@ execute format(
 		expected_departure_time,
 		actual_departure_time,
 		is_timing_point,
-		LOWER(group_id),
+		group_id,
 		previous_group_id,
 		otp_state,
 		expected_headway,
@@ -1299,7 +1299,7 @@ AS $function$
 begin
 
 INSERT INTO public."SiriVMPositions"
-    (operator_ref,line_name,journey_ref,date_of_journey, direction_ref,recorded_at_time, response_time_stamp, Latitude, Longitude, vehicle_ref, batch_id, LOWER(group_id), origin_ref, destination_ref, departure_time)
+    (operator_ref,line_name,journey_ref,date_of_journey, direction_ref,recorded_at_time, response_time_stamp, Latitude, Longitude, vehicle_ref, batch_id, group_id, origin_ref, destination_ref, departure_time)
 SELECT 
     operator_ref,
     coalesce(line_name,''),
@@ -1349,7 +1349,7 @@ BEGIN
 	EXECUTE format('ALTER TABLE public.%I OWNER TO abods_rw', tablename);
 
 	EXECUTE format('INSERT INTO public.%I 
-(operator_ref,line_name,journey_ref,date_of_journey, direction_ref,recorded_at_time, response_time_stamp, Latitude, Longitude, vehicle_ref, batch_id, LOWER(group_id))
+(operator_ref,line_name,journey_ref,date_of_journey, direction_ref,recorded_at_time, response_time_stamp, Latitude, Longitude, vehicle_ref, batch_id, group_id)
 
 select 
 operator_ref,
