@@ -77,7 +77,8 @@ def execute_values_amended(
         result_timetable_id = [r[0] for r in result]
         not_updated = [v for v in values if v[0] not in result_timetable_id]
         logger.warning(
-            f"An unexpected number of rows were updated, stop(s) that have not been updated {not_updated}",
+            "An unexpected number of rows were updated",
+            not_updated=not_updated,
             expected=expected,
             actual=actual,
         )
