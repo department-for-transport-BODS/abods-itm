@@ -38,7 +38,7 @@ class AVLRecord:
     @property
     def group_id(self) -> str:
         """The group_id of the avl record with | as separator"""
-        return f"{self.operator_ref}|{self.line_name}|{self.journey_ref}|{self.date_of_journey}"
+        return f"{self.operator_ref}|{self.line_name}|{self.journey_ref}|{self.date_of_journey}".lower()
 
     @property
     def date_of_journey(self) -> str:
