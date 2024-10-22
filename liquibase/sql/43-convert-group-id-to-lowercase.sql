@@ -556,7 +556,7 @@ execute format(
 		departure_time as expected_departure_time,
 		null as actual_departure_time,
 		is_timing_point,
-		group_id as group_id,
+		LOWER(group_id) as group_id,
 		lag(group_id) over(partition by operator_ref,line_name,date_of_journey,stop_id,stop_index  order by stop_id,stop_index, departure_time  asc  )  as previous_group_id,
 		null as otp_state,
 		cast(extract( epoch from departure_time::time - lag(departure_time::time) over(partition by operator_ref,line_name,date_of_journey,stop_id,stop_index  order by stop_id,stop_index, departure_time  asc  ) )/60 as int) as expected_headway,
@@ -1220,7 +1220,7 @@ execute format(
 		departure_time as expected_departure_time,
 		null as actual_departure_time,
 		is_timing_point,
-		group_id as group_id,
+		LOWER(group_id) as group_id,
 		lag(group_id) over(partition by operator_ref,line_name,date_of_journey,stop_id,stop_index  order by stop_id,stop_index, departure_time  asc  )  as previous_group_id,
 		null as otp_state,
 		cast(extract( epoch from departure_time::time - lag(departure_time::time) over(partition by operator_ref,line_name,date_of_journey,stop_id,stop_index  order by stop_id,stop_index, departure_time  asc  ) )/60 as int) as expected_headway,
@@ -1312,7 +1312,7 @@ SELECT
     longitude::real,
     vehicle_ref,
     batch_id,
-    concat_ws('|', operator_ref, coalesce(line_name,''), journey_ref, to_char(date_of_journey,'YYYY-MM-DD')) as group_id,
+    LOWER(concat_ws('|', operator_ref, coalesce(line_name,''), journey_ref, to_char(date_of_journey,'YYYY-MM-DD'))) as group_id,
     origin_ref,
     destination_ref,
     departure_time::timestamp(0) at TIME zone 'utc'
@@ -1363,7 +1363,7 @@ latitude::real,
 longitude::real,
 vehicle_ref,
 batch_id,
-concat_ws(''|'',operator_ref,coalesce(line_name,''''),journey_ref,to_char(date_of_journey,''YYYY-MM-DD'')) as group_id
+LOWER(concat_ws(''|'',operator_ref,coalesce(line_name,''''),journey_ref,to_char(date_of_journey,''YYYY-MM-DD''))) as group_id
 
 from public.staging_avl_positions_historic pos 
 
