@@ -124,9 +124,9 @@ class TimetableDBClient:
                     sql=self.sql_queries.remove_live_matching,
                     values=[
                         (
+                            record["timetable_id"],
                             record["time_difference"],
                             record["last_time_in_zone_str"],
-                            record["timetable_id"],
                             record["group_id"],
                             record["batch_id"],
                             record["last_time_in_zone"],
@@ -167,9 +167,9 @@ class TimetableDBClient:
             for records in grouped.values():
                 values = [
                     (
+                        record["timetable_id"],
                         record["time_difference"],
                         record["last_time_in_zone_str"],
-                        record["timetable_id"],
                         record["group_id"],
                         record["batch_id"],
                         record["last_time_in_zone"],
