@@ -21,11 +21,6 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     AVLRecord,
 )
 
-from .data.expected.TLCT37812152024_08_20 import (
-    expected_remove,
-    expected_set,
-    expected_stop_history,
-)
 from .data.get_test_data import read_avl, read_timetable
 
 
@@ -1481,25 +1476,32 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         assert stop_pos_distances == expected_stop_pos_distances
 
 
-class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
-    avl_list = read_avl("TLCT37812152024-08-20.csv")
-    avl_dict = []  # noqa: RUF012 - BODS-7131
-    for avl in avl_list:
-        avl_dict.append(AVLRecord(avl[0]))  # noqa: PERF401 - BODS-7131
+def test_positions_timetable_lookup():
+    from .data.expected.TLCT37812152024_08_20 import (
+        expected_remove,
+        expected_set,
+        expected_stop_history,
+    )
+
+    avl_list = [AVLRecord(avl[0]) for avl in read_avl("TLCT37812152024-08-20.csv")]
     timetable = read_timetable("TLCT37812152024-08-20.json")
-    batch_id = 123
-    stop_history = {}  # noqa: RUF012 - BODS-7131
 
-    def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
-        return mock.patch.dict(os.environ, envvars)
+    stop_history = {}
+    to_set_total = {}
+    to_remove_total = {}
 
-    @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
-    def test_positions_timetable_lookup(self):  # noqa: D102 - BODS-7131
+    for avl in avl_list:
+        # Simulate invoking the lambda once per AVL for the group id
+        # In practice there is only one AVL for a given group id in each batch
         to_set, to_remove, stop_history = positions_timetable_lookup(
-            self.timetable,
-            self.avl_dict,
-            self.stop_history,
+            timetable,
+            [avl],
+            stop_history,
         )
-        assert to_set == expected_set
-        assert to_remove == expected_remove
-        assert self.stop_history == expected_stop_history
+        to_remove_total = [*to_remove_total, *to_remove]
+        for key, value in to_set.items():
+            to_set_total.setdefault(key, {}).update(value)
+
+    assert to_set_total == expected_set
+    assert to_remove_total == expected_remove
+    assert stop_history == expected_stop_history

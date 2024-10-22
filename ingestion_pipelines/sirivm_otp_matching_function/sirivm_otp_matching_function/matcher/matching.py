@@ -713,7 +713,7 @@ def positions_timetable_lookup(
     for avl in avl_dict:
         # 1. check if group id exists in timetable
         if avl.group_id in timetable:
-            stop_pos_distances.update({avl.group_id: {}})
+            stop_pos_distances.setdefault(avl.group_id, {})
             log_specific(avl, f"group_id {avl.group_id} in timetable")
 
             # 2. check if group id exists in stop_history, if not, create a blank group stop history
