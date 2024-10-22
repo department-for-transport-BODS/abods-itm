@@ -3,7 +3,7 @@ from datetime import UTC, datetime  # noqa: N999 - BODS-7131
 expected_set = [
     {
         "batch_id": "812384",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 28, 22, tzinfo=UTC),
         "last_time_in_zone_str": "11:28:22",
         "otp_state": "Late",
@@ -14,7 +14,7 @@ expected_set = [
     },
     {
         "batch_id": "812398",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 30, 50, tzinfo=UTC),
         "last_time_in_zone_str": "11:30:50",
         "otp_state": "Late",
@@ -25,7 +25,7 @@ expected_set = [
     },
     {
         "batch_id": "812404",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 31, 53, tzinfo=UTC),
         "last_time_in_zone_str": "11:31:53",
         "otp_state": "Late",
@@ -36,7 +36,7 @@ expected_set = [
     },
     {
         "batch_id": "812406",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 32, 20, tzinfo=UTC),
         "last_time_in_zone_str": "11:32:20",
         "otp_state": "Late",
@@ -47,7 +47,7 @@ expected_set = [
     },
     {
         "batch_id": "812408",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 32, 50, tzinfo=UTC),
         "last_time_in_zone_str": "11:32:50",
         "otp_state": "Late",
@@ -58,7 +58,7 @@ expected_set = [
     },
     {
         "batch_id": "812420",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 34, 42, tzinfo=UTC),
         "last_time_in_zone_str": "11:34:42",
         "otp_state": "Late",
@@ -69,7 +69,7 @@ expected_set = [
     },
     {
         "batch_id": "812423",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC),
         "last_time_in_zone_str": "11:35:25",
         "otp_state": "Late",
@@ -80,7 +80,7 @@ expected_set = [
     },
     {
         "batch_id": "812423",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC),
         "last_time_in_zone_str": "11:35:25",
         "otp_state": "Late",
@@ -91,7 +91,7 @@ expected_set = [
     },
     {
         "batch_id": "812428",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 36, 14, tzinfo=UTC),
         "last_time_in_zone_str": "11:36:14",
         "otp_state": "Late",
@@ -102,7 +102,7 @@ expected_set = [
     },
     {
         "batch_id": "812431",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 36, 47, tzinfo=UTC),
         "last_time_in_zone_str": "11:36:47",
         "otp_state": "Late",
@@ -113,7 +113,7 @@ expected_set = [
     },
     {
         "batch_id": "812436",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 36, 55, tzinfo=UTC),
         "last_time_in_zone_str": "11:36:55",
         "otp_state": "Late",
@@ -124,7 +124,7 @@ expected_set = [
     },
     {
         "batch_id": "812439",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 37, 37, tzinfo=UTC),
         "last_time_in_zone_str": "11:37:37",
         "otp_state": "Late",
@@ -135,7 +135,7 @@ expected_set = [
     },
     {
         "batch_id": "812439",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 37, 37, tzinfo=UTC),
         "last_time_in_zone_str": "11:37:37",
         "otp_state": "Late",
@@ -146,7 +146,7 @@ expected_set = [
     },
     {
         "batch_id": "812445",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 38, 47, tzinfo=UTC),
         "last_time_in_zone_str": "11:38:47",
         "otp_state": "Late",
@@ -157,7 +157,7 @@ expected_set = [
     },
     {
         "batch_id": "812448",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 39, 20, tzinfo=UTC),
         "last_time_in_zone_str": "11:39:20",
         "otp_state": "Late",
@@ -168,7 +168,7 @@ expected_set = [
     },
     {
         "batch_id": "812458",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 40, 46, tzinfo=UTC),
         "last_time_in_zone_str": "11:40:46",
         "otp_state": "Late",
@@ -179,7 +179,7 @@ expected_set = [
     },
     {
         "batch_id": "812470",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 41, 52, tzinfo=UTC),
         "last_time_in_zone_str": "11:41:52",
         "otp_state": "Late",
@@ -190,7 +190,7 @@ expected_set = [
     },
     {
         "batch_id": "812472",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 43, 8, tzinfo=UTC),
         "last_time_in_zone_str": "11:43:08",
         "otp_state": "Late",
@@ -201,7 +201,7 @@ expected_set = [
     },
     {
         "batch_id": "812472",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 43, 8, tzinfo=UTC),
         "last_time_in_zone_str": "11:43:08",
         "otp_state": "Late",
@@ -212,7 +212,7 @@ expected_set = [
     },
     {
         "batch_id": "812473",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 43, 44, tzinfo=UTC),
         "last_time_in_zone_str": "11:43:44",
         "otp_state": "Late",
@@ -223,7 +223,7 @@ expected_set = [
     },
     {
         "batch_id": "812479",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 44, 34, tzinfo=UTC),
         "last_time_in_zone_str": "11:44:34",
         "otp_state": "Late",
@@ -234,7 +234,7 @@ expected_set = [
     },
     {
         "batch_id": "812487",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 46, 22, tzinfo=UTC),
         "last_time_in_zone_str": "11:46:22",
         "otp_state": "Late",
@@ -245,7 +245,7 @@ expected_set = [
     },
     {
         "batch_id": "812491",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 46, 45, tzinfo=UTC),
         "last_time_in_zone_str": "11:46:45",
         "otp_state": "Late",
@@ -256,7 +256,7 @@ expected_set = [
     },
     {
         "batch_id": "812495",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 46, 58, tzinfo=UTC),
         "last_time_in_zone_str": "11:46:58",
         "otp_state": "Late",
@@ -267,7 +267,7 @@ expected_set = [
     },
     {
         "batch_id": "812496",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 47, 30, tzinfo=UTC),
         "last_time_in_zone_str": "11:47:30",
         "otp_state": "Late",
@@ -278,7 +278,7 @@ expected_set = [
     },
     {
         "batch_id": "812498",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 48, 19, tzinfo=UTC),
         "last_time_in_zone_str": "11:48:19",
         "otp_state": "Late",
@@ -289,7 +289,7 @@ expected_set = [
     },
     {
         "batch_id": "812502",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 48, 30, tzinfo=UTC),
         "last_time_in_zone_str": "11:48:30",
         "otp_state": "Late",
@@ -300,7 +300,7 @@ expected_set = [
     },
     {
         "batch_id": "812514",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 50, 28, tzinfo=UTC),
         "last_time_in_zone_str": "11:50:28",
         "otp_state": "Late",
@@ -311,7 +311,7 @@ expected_set = [
     },
     {
         "batch_id": "812520",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 51, 35, tzinfo=UTC),
         "last_time_in_zone_str": "11:51:35",
         "otp_state": "Late",
@@ -322,7 +322,7 @@ expected_set = [
     },
     {
         "batch_id": "812531",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 53, 8, tzinfo=UTC),
         "last_time_in_zone_str": "11:53:08",
         "otp_state": "Late",
@@ -333,7 +333,7 @@ expected_set = [
     },
     {
         "batch_id": "812535",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 54, 9, tzinfo=UTC),
         "last_time_in_zone_str": "11:54:09",
         "otp_state": "Late",
@@ -344,7 +344,7 @@ expected_set = [
     },
     {
         "batch_id": "812538",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 54, 29, tzinfo=UTC),
         "last_time_in_zone_str": "11:54:29",
         "otp_state": "Late",
@@ -355,7 +355,7 @@ expected_set = [
     },
     {
         "batch_id": "812549",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 55, 53, tzinfo=UTC),
         "last_time_in_zone_str": "11:55:53",
         "otp_state": "Late",
@@ -366,7 +366,7 @@ expected_set = [
     },
     {
         "batch_id": "812555",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 57, 23, tzinfo=UTC),
         "last_time_in_zone_str": "11:57:23",
         "otp_state": "Late",
@@ -377,7 +377,7 @@ expected_set = [
     },
     {
         "batch_id": "812561",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 58, 3, tzinfo=UTC),
         "last_time_in_zone_str": "11:58:03",
         "otp_state": "Late",
@@ -388,7 +388,7 @@ expected_set = [
     },
     {
         "batch_id": "812563",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 58, 43, tzinfo=UTC),
         "last_time_in_zone_str": "11:58:43",
         "otp_state": "Late",
@@ -399,7 +399,7 @@ expected_set = [
     },
     {
         "batch_id": "812566",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 59, 5, tzinfo=UTC),
         "last_time_in_zone_str": "11:59:05",
         "otp_state": "Late",
@@ -410,7 +410,7 @@ expected_set = [
     },
     {
         "batch_id": "812566",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC),
         "last_time_in_zone_str": "11:59:57",
         "otp_state": "Late",
@@ -421,7 +421,7 @@ expected_set = [
     },
     {
         "batch_id": "812568",
-        "group_id": "TLCT|378|1215|2024-08-20",
+        "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 59, 27, tzinfo=UTC),
         "last_time_in_zone_str": "11:59:27",
         "otp_state": "Late",
@@ -433,7 +433,7 @@ expected_set = [
 ]
 expected_remove = []
 expected_stop_history = {
-    "TLCT|378|1215|2024-08-20": {
+    "tlct|378|1215|2024-08-20": {
         "last_avl_time": datetime(2024, 8, 20, 12, 0, 5, tzinfo=UTC),
         "last_avl_index": 91,
         "matched_stops": {
