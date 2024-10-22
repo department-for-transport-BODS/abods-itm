@@ -74,8 +74,10 @@ def execute_values_amended(
     if expected == actual:
         logger.debug("Updated all rows", expected=expected, actual=actual)
     else:
+        result_timetable_id = [r[0] for r in result]
+        not_updated = [v for v in values if v[0] not in result_timetable_id]
         logger.warning(
-            "An unexpected number of rows were updated",
+            f"An unexpected number of rows were updated, stop(s) that have not been updated {not_updated}",
             expected=expected,
             actual=actual,
         )

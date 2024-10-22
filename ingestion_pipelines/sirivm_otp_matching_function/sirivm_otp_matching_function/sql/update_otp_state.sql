@@ -13,4 +13,4 @@ WHERE u.timetable_id = t.timetable_id::int
               EXTRACT (epoch FROM (t.last_time_in_zone_utc::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time)) ,
               0
       ) > -7200
-RETURNING load_time_stamp;
+RETURNING u.timetable_id;

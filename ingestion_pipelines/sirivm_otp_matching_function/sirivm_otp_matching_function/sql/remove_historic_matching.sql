@@ -7,4 +7,4 @@ FROM (VALUES %s) AS t(timetable_id, group_id, journey_date)
 WHERE u.timetable_id = t.timetable_id::int
   AND date_of_journey = t.journey_date::date
   AND u.group_id = t.group_id
-RETURNING load_time_stamp;
+RETURNING u.timetable_id;
