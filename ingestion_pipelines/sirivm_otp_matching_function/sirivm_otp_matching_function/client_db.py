@@ -74,8 +74,11 @@ def execute_values_amended(
     if expected == actual:
         logger.debug("Updated all rows", expected=expected, actual=actual)
     else:
+        result_timetable_id = [r[0] for r in result]
+        not_updated = [v for v in values if v[0] not in result_timetable_id]
         logger.warning(
             "An unexpected number of rows were updated",
+            not_updated=not_updated,
             expected=expected,
             actual=actual,
         )
@@ -121,9 +124,9 @@ class TimetableDBClient:
                     sql=self.sql_queries.remove_live_matching,
                     values=[
                         (
+                            record["timetable_id"],
                             record["time_difference"],
                             record["last_time_in_zone_str"],
-                            record["timetable_id"],
                             record["group_id"],
                             record["batch_id"],
                             record["last_time_in_zone"],
@@ -164,9 +167,9 @@ class TimetableDBClient:
             for records in grouped.values():
                 values = [
                     (
+                        record["timetable_id"],
                         record["time_difference"],
                         record["last_time_in_zone_str"],
-                        record["timetable_id"],
                         record["group_id"],
                         record["batch_id"],
                         record["last_time_in_zone"],
