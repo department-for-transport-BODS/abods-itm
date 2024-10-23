@@ -6,5 +6,5 @@ SET time_difference = NULL,
 FROM (VALUES %s) AS t(timetable_id, group_id)
 WHERE u.timetable_id = t.timetable_id::int
   AND date_of_journey = now()::date
-  AND u.group_id = t.group_id
+  AND u.group_id = t.group_id::text
 RETURNING u.timetable_id;
