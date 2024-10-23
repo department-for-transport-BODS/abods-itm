@@ -121,7 +121,7 @@ class TimetableDBClient:
             for records in grouped.values():
                 execute_values_amended(
                     cur=cursor,
-                    sql=self.sql_queries.remove_live_matching,
+                    sql=self.sql_queries.set_live_matching,
                     values=[
                         (
                             record["timetable_id"],
