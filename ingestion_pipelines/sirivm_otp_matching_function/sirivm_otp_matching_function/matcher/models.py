@@ -2,88 +2,64 @@ from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import Literal, TypedDict
 
-from attr import dataclass
-
 from .utils import validate_date
 
-
-@dataclass
-class StopDetails:
-    """Represents a stop within a timetabled route"""
-
-    latitude: float
-    longitude: float
-    expected_time: str
-    timetable_id: int
-    date: str
-
-    @property
-    def timetable_departure_time(self) -> datetime:
-        """Datetime of the expected stop departure"""
-        return validate_date(f"{self.date} {self.expected_time}")
-
-
+StopDetails = tuple[tuple[float, float], str, int, str]
 RouteDetails = Mapping[str, StopDetails]
 Timetable = Mapping[str, RouteDetails]
 OperatorShards = Mapping[str, Sequence[str]]
 
 
-class AVLRecord:
-    """Wrapper class with convenience methods for an AVL"""
+def stop_latitude(stop: StopDetails) -> float:
+    return stop[0][0]
 
-    def __init__(self, data: Mapping) -> None:
-        """Construct an AVL record given a dict record from a CSV"""
-        self._data = data
 
-    @property
-    def group_id(self) -> str:
-        """The group_id of the avl record with | as separator"""
-        return f"{self.operator_ref}|{self.line_name}|{self.journey_ref}|{self.date_of_journey}".lower()
+def stop_longitude(stop: StopDetails) -> float:
+    return stop[0][1]
 
-    @property
-    def date_of_journey(self) -> str:
-        """The date of the journey for this avl"""
-        return str(self._data["date_of_journey"])
 
-    @property
-    def journey_ref(self) -> str:
-        """The journey reference of the avl"""
-        return self._data["journey_ref"]
+def stop_expected_time(stop: StopDetails) -> str:
+    return stop[1]
 
-    @property
-    def operator_ref(self) -> str:
-        """The operator reference of the avl"""
-        return self._data["operator_ref"]
 
-    @property
-    def line_name(self) -> str:
-        """The line name of the avl"""
-        return self._data["line_name"]
+def stop_timetable_id(stop: StopDetails) -> int:
+    return stop[2]
 
-    @property
-    def latitude(self) -> float:
-        """The latitude of the avl"""
-        return float(self._data["latitude"])
 
-    @property
-    def longitude(self) -> float:
-        """The longitude of the avl"""
-        return float(self._data["longitude"])
+def stop_date(stop: StopDetails) -> str:
+    return stop[3]
 
-    @property
-    def recorded_at_time_utc(self) -> datetime:
-        """The recorded at time"""
-        return validate_date(self._data["recorded_at_time"][:19])
 
-    @property
-    def recorded_at_time_utc_str(self) -> str:
-        """The recorded at time as a string"""
-        return datetime.strftime(self.recorded_at_time_utc, "%Y-%m-%dT%H:%M:%S")
+def stop_departure_time(stop: StopDetails) -> datetime:
+    """Datetime of the expected stop departure"""
+    return validate_date(f"{stop_date(stop)} {stop_expected_time(stop)}")
 
-    @property
-    def batch_id(self) -> int:
-        """The batch_id"""
-        return self._data["batch_id"]
+
+class AVLRecord(TypedDict):
+    """AVL record"""
+
+    recorded_at_time: str
+    response_timestamp: str
+    latitude: float
+    longitude: float
+    line_name: str
+    operator_ref: str
+    vehicle_ref: str
+    journey_ref: str
+    direction_ref: str
+    date_of_journey: str
+    batch_id: int
+
+
+avl_data_type = AVLRecord.__annotations__
+
+
+def avl_group_id(avl: AVLRecord) -> str:
+    return f'{avl["operator_ref"]}|{avl["line_name"]}|{avl["journey_ref"]}|{avl["date_of_journey"]}'.lower()
+
+
+def avl_recorded_at_time_utc(avl: AVLRecord) -> datetime:
+    return validate_date(avl["recorded_at_time"][:19])
 
 
 class RecordToRemove(TypedDict):

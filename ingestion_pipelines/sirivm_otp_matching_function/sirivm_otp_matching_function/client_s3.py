@@ -13,26 +13,16 @@ from aws_lambda_powertools import Logger
 from botocore.exceptions import ClientError
 from pandas import DataFrame
 
-from .matcher.models import AVLRecord, OperatorShards, StopDetails, Timetable
+from .matcher.models import (
+    AVLRecord,
+    OperatorShards,
+    Timetable,
+    avl_data_type,
+)
 from .matcher.utils import timer
 
 logger = Logger()
 client = boto3.client("s3")
-
-
-def parse_timetable(timetable: dict[str, dict[str, list]]) -> Timetable:
-    parsed = {}
-    for group_id, route in timetable.items():
-        parsed[group_id] = {}
-        for key, value in route.items():
-            parsed[group_id][key] = StopDetails(
-                latitude=value[0][0],
-                longitude=value[0][1],
-                expected_time=value[1],
-                timetable_id=value[2],
-                date=value[3],
-            )
-    return parsed
 
 
 class TimetableS3Client:
@@ -91,8 +81,7 @@ class TimetableS3Client:
 
     def download_timetable(self, key: str) -> Timetable:
         """Download Timetable Data"""
-        data = self._get_from_s3(key)
-        return parse_timetable(data)
+        return self._get_from_s3(key)
 
     @timer(logger)
     def get_shards(self) -> OperatorShards:
@@ -162,25 +151,12 @@ class TimetableS3Client:
             number_of_files=len(filename),
         )
         start_time = time.time()
-        data_type = {
-            "recorded_at_time": str,
-            "response_timestamp": str,
-            "latitude": float,
-            "longitude": float,
-            "line_name": str,
-            "operator_ref": str,
-            "vehicle_ref": str,
-            "journey_ref": str,
-            "direction_ref": str,
-            "date_of_journey": str,
-            "batch_id": int,
-        }
-        keys = list(data_type.keys())
+        keys = list(avl_data_type.keys())
         data = wr.s3.read_csv(
             path=paths,
             use_threads=True,
             names=keys,
-            dtype=data_type,
+            dtype=avl_data_type,
             usecols=keys,
             header=None,
         )
@@ -197,8 +173,7 @@ class TimetableS3Client:
     def get_avl_data(self, filename: str | list[str]) -> Sequence[AVLRecord]:
         """Get AVL Data from S3 and return a list of AVLData models"""
         data = self.get_avl_data_df(filename)
-        avl_list = data.to_dict("records")
-        return [AVLRecord(r) for r in avl_list]
+        return data.to_dict("records")
 
     @timer(logger)
     def export_stop_history(

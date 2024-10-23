@@ -2,7 +2,7 @@ from datetime import UTC, datetime  # noqa: N999 - BODS-7131
 
 expected_set = [
     {
-        "batch_id": "812384",
+        "batch_id": 812384,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 28, 22, tzinfo=UTC),
         "last_time_in_zone_str": "11:28:22",
@@ -13,7 +13,7 @@ expected_set = [
         "timetable_id": 893823336,
     },
     {
-        "batch_id": "812398",
+        "batch_id": 812398,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 30, 50, tzinfo=UTC),
         "last_time_in_zone_str": "11:30:50",
@@ -24,7 +24,7 @@ expected_set = [
         "timetable_id": 893822951,
     },
     {
-        "batch_id": "812404",
+        "batch_id": 812404,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 31, 53, tzinfo=UTC),
         "last_time_in_zone_str": "11:31:53",
@@ -35,7 +35,7 @@ expected_set = [
         "timetable_id": 893823358,
     },
     {
-        "batch_id": "812406",
+        "batch_id": 812406,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 32, 20, tzinfo=UTC),
         "last_time_in_zone_str": "11:32:20",
@@ -46,7 +46,7 @@ expected_set = [
         "timetable_id": 893822544,
     },
     {
-        "batch_id": "812408",
+        "batch_id": 812408,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 32, 50, tzinfo=UTC),
         "last_time_in_zone_str": "11:32:50",
@@ -57,7 +57,7 @@ expected_set = [
         "timetable_id": 893822533,
     },
     {
-        "batch_id": "812420",
+        "batch_id": 812420,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 34, 42, tzinfo=UTC),
         "last_time_in_zone_str": "11:34:42",
@@ -68,7 +68,7 @@ expected_set = [
         "timetable_id": 893822511,
     },
     {
-        "batch_id": "812423",
+        "batch_id": 812423,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC),
         "last_time_in_zone_str": "11:35:25",
@@ -79,7 +79,7 @@ expected_set = [
         "timetable_id": 893823017,
     },
     {
-        "batch_id": "812423",
+        "batch_id": 812423,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC),
         "last_time_in_zone_str": "11:35:25",
@@ -90,7 +90,7 @@ expected_set = [
         "timetable_id": 893823182,
     },
     {
-        "batch_id": "812428",
+        "batch_id": 812428,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 36, 14, tzinfo=UTC),
         "last_time_in_zone_str": "11:36:14",
@@ -101,7 +101,7 @@ expected_set = [
         "timetable_id": 893823149,
     },
     {
-        "batch_id": "812431",
+        "batch_id": 812431,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 36, 47, tzinfo=UTC),
         "last_time_in_zone_str": "11:36:47",
@@ -112,7 +112,7 @@ expected_set = [
         "timetable_id": 893823193,
     },
     {
-        "batch_id": "812436",
+        "batch_id": 812436,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 36, 55, tzinfo=UTC),
         "last_time_in_zone_str": "11:36:55",
@@ -123,7 +123,7 @@ expected_set = [
         "timetable_id": 893823281,
     },
     {
-        "batch_id": "812439",
+        "batch_id": 812439,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 37, 37, tzinfo=UTC),
         "last_time_in_zone_str": "11:37:37",
@@ -134,7 +134,7 @@ expected_set = [
         "timetable_id": 893823303,
     },
     {
-        "batch_id": "812439",
+        "batch_id": 812439,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 37, 37, tzinfo=UTC),
         "last_time_in_zone_str": "11:37:37",
@@ -145,7 +145,7 @@ expected_set = [
         "timetable_id": 893823094,
     },
     {
-        "batch_id": "812445",
+        "batch_id": 812445,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 38, 47, tzinfo=UTC),
         "last_time_in_zone_str": "11:38:47",
@@ -156,7 +156,7 @@ expected_set = [
         "timetable_id": 893823039,
     },
     {
-        "batch_id": "812448",
+        "batch_id": 812448,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 39, 20, tzinfo=UTC),
         "last_time_in_zone_str": "11:39:20",
@@ -167,7 +167,7 @@ expected_set = [
         "timetable_id": 893823325,
     },
     {
-        "batch_id": "812458",
+        "batch_id": 812458,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 40, 46, tzinfo=UTC),
         "last_time_in_zone_str": "11:40:46",
@@ -178,7 +178,7 @@ expected_set = [
         "timetable_id": 893823072,
     },
     {
-        "batch_id": "812470",
+        "batch_id": 812470,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 41, 52, tzinfo=UTC),
         "last_time_in_zone_str": "11:41:52",
@@ -189,7 +189,7 @@ expected_set = [
         "timetable_id": 893822467,
     },
     {
-        "batch_id": "812472",
+        "batch_id": 812472,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 43, 8, tzinfo=UTC),
         "last_time_in_zone_str": "11:43:08",
@@ -200,7 +200,7 @@ expected_set = [
         "timetable_id": 893822489,
     },
     {
-        "batch_id": "812472",
+        "batch_id": 812472,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 43, 8, tzinfo=UTC),
         "last_time_in_zone_str": "11:43:08",
@@ -211,7 +211,7 @@ expected_set = [
         "timetable_id": 893823171,
     },
     {
-        "batch_id": "812473",
+        "batch_id": 812473,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 43, 44, tzinfo=UTC),
         "last_time_in_zone_str": "11:43:44",
@@ -222,7 +222,7 @@ expected_set = [
         "timetable_id": 893823127,
     },
     {
-        "batch_id": "812479",
+        "batch_id": 812479,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 44, 34, tzinfo=UTC),
         "last_time_in_zone_str": "11:44:34",
@@ -233,7 +233,7 @@ expected_set = [
         "timetable_id": 893823116,
     },
     {
-        "batch_id": "812487",
+        "batch_id": 812487,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 46, 22, tzinfo=UTC),
         "last_time_in_zone_str": "11:46:22",
@@ -244,7 +244,7 @@ expected_set = [
         "timetable_id": 893822588,
     },
     {
-        "batch_id": "812491",
+        "batch_id": 812491,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 46, 45, tzinfo=UTC),
         "last_time_in_zone_str": "11:46:45",
@@ -255,7 +255,7 @@ expected_set = [
         "timetable_id": 893822599,
     },
     {
-        "batch_id": "812495",
+        "batch_id": 812495,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 46, 58, tzinfo=UTC),
         "last_time_in_zone_str": "11:46:58",
@@ -266,7 +266,7 @@ expected_set = [
         "timetable_id": 893822610,
     },
     {
-        "batch_id": "812496",
+        "batch_id": 812496,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 47, 30, tzinfo=UTC),
         "last_time_in_zone_str": "11:47:30",
@@ -277,7 +277,7 @@ expected_set = [
         "timetable_id": 893822874,
     },
     {
-        "batch_id": "812498",
+        "batch_id": 812498,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 48, 19, tzinfo=UTC),
         "last_time_in_zone_str": "11:48:19",
@@ -288,7 +288,7 @@ expected_set = [
         "timetable_id": 893822852,
     },
     {
-        "batch_id": "812502",
+        "batch_id": 812502,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 48, 30, tzinfo=UTC),
         "last_time_in_zone_str": "11:48:30",
@@ -299,7 +299,7 @@ expected_set = [
         "timetable_id": 893822819,
     },
     {
-        "batch_id": "812514",
+        "batch_id": 812514,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 50, 28, tzinfo=UTC),
         "last_time_in_zone_str": "11:50:28",
@@ -310,7 +310,7 @@ expected_set = [
         "timetable_id": 893822412,
     },
     {
-        "batch_id": "812520",
+        "batch_id": 812520,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 51, 35, tzinfo=UTC),
         "last_time_in_zone_str": "11:51:35",
@@ -321,7 +321,7 @@ expected_set = [
         "timetable_id": 893822423,
     },
     {
-        "batch_id": "812531",
+        "batch_id": 812531,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 53, 8, tzinfo=UTC),
         "last_time_in_zone_str": "11:53:08",
@@ -332,7 +332,7 @@ expected_set = [
         "timetable_id": 893822940,
     },
     {
-        "batch_id": "812535",
+        "batch_id": 812535,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 54, 9, tzinfo=UTC),
         "last_time_in_zone_str": "11:54:09",
@@ -343,7 +343,7 @@ expected_set = [
         "timetable_id": 893822907,
     },
     {
-        "batch_id": "812538",
+        "batch_id": 812538,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 54, 29, tzinfo=UTC),
         "last_time_in_zone_str": "11:54:29",
@@ -354,7 +354,7 @@ expected_set = [
         "timetable_id": 893822885,
     },
     {
-        "batch_id": "812549",
+        "batch_id": 812549,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 55, 53, tzinfo=UTC),
         "last_time_in_zone_str": "11:55:53",
@@ -365,7 +365,7 @@ expected_set = [
         "timetable_id": 893822775,
     },
     {
-        "batch_id": "812555",
+        "batch_id": 812555,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 57, 23, tzinfo=UTC),
         "last_time_in_zone_str": "11:57:23",
@@ -376,7 +376,7 @@ expected_set = [
         "timetable_id": 893822753,
     },
     {
-        "batch_id": "812561",
+        "batch_id": 812561,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 58, 3, tzinfo=UTC),
         "last_time_in_zone_str": "11:58:03",
@@ -387,7 +387,7 @@ expected_set = [
         "timetable_id": 893822731,
     },
     {
-        "batch_id": "812563",
+        "batch_id": 812563,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 58, 43, tzinfo=UTC),
         "last_time_in_zone_str": "11:58:43",
@@ -398,7 +398,7 @@ expected_set = [
         "timetable_id": 893822709,
     },
     {
-        "batch_id": "812566",
+        "batch_id": 812566,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 59, 5, tzinfo=UTC),
         "last_time_in_zone_str": "11:59:05",
@@ -409,7 +409,7 @@ expected_set = [
         "timetable_id": 893822698,
     },
     {
-        "batch_id": "812566",
+        "batch_id": 812566,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC),
         "last_time_in_zone_str": "11:59:57",
@@ -420,7 +420,7 @@ expected_set = [
         "timetable_id": 893822665,
     },
     {
-        "batch_id": "812568",
+        "batch_id": 812568,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 59, 27, tzinfo=UTC),
         "last_time_in_zone_str": "11:59:27",

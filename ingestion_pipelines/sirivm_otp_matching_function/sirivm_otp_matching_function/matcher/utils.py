@@ -112,11 +112,11 @@ def filter_avl_list(
             x for id_no, operators in sharded_operators.items() for x in operators
         ]
         return [
-            avl for avl in avl_list if avl.operator_ref not in all_sharded_operators
+            avl for avl in avl_list if avl["operator_ref"] not in all_sharded_operators
         ]
 
     return [
         avl
         for avl in avl_list
-        if avl.operator_ref in sharded_operators.get(shard_identifier, [])
+        if avl["operator_ref"] in sharded_operators.get(shard_identifier, [])
     ]

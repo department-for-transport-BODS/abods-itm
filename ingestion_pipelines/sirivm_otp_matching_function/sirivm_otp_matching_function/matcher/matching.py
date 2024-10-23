@@ -13,6 +13,12 @@ from .models import (
     RouteDetails,
     StopDetails,
     Timetable,
+    avl_group_id,
+    avl_recorded_at_time_utc,
+    stop_departure_time,
+    stop_latitude,
+    stop_longitude,
+    stop_timetable_id,
 )
 from .utils import (
     get_otp_state,
@@ -39,9 +45,9 @@ def log_specific(avl: AVLRecord, log_message: str) -> None:
     """
     if (
         "OPERATOR_REF" in os.environ
-        and os.environ["OPERATOR_REF"] == avl.operator_ref
+        and os.environ["OPERATOR_REF"] == avl["operator_ref"]
         and "LINE_NAME" in os.environ
-        and os.environ["LINE_NAME"] == avl.line_name
+        and os.environ["LINE_NAME"] == avl["line_name"]
     ):
         logger.info(log_message)
 
@@ -61,8 +67,8 @@ def haversine(avl: AVLRecord, stop: StopDetails) -> float:
 
     """
     # convert decimal degrees to radians
-    lat1, lon1 = avl.latitude, avl.longitude
-    lat2, lon2 = stop.latitude, stop.longitude
+    lat1, lon1 = avl["latitude"], avl["longitude"]
+    lat2, lon2 = stop_latitude(stop), stop_longitude(stop)
 
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
 
@@ -135,7 +141,7 @@ def find_potential_matches(
                     str(i): {
                         "last_avl_index": current_avl_index,
                         "last_distance": avl_next_stop_distance,
-                        "last_time_in_zone": avl.recorded_at_time_utc,
+                        "last_time_in_zone": avl_recorded_at_time_utc(avl),
                     },
                 },
             )
@@ -204,10 +210,12 @@ def check_update_first_stop(
             )
             log_specific(
                 avl,
-                f"time diff = {avl.recorded_at_time_utc - ms_last_match_time}, {avl.recorded_at_time_utc}, {ms_last_match_time}, {avl.recorded_at_time_utc - ms_last_match_time < timedelta(minutes=5)}",
+                f"time diff = {avl_recorded_at_time_utc(avl) - ms_last_match_time}, {avl_recorded_at_time_utc(avl)}, {ms_last_match_time}, {avl_recorded_at_time_utc(avl) - ms_last_match_time < timedelta(minutes=5)}",
             )
             # 8. if avl is within 5 mins after the last first stop matching time
-            if (avl.recorded_at_time_utc - ms_last_match_time) < timedelta(minutes=5):
+            if (avl_recorded_at_time_utc(avl) - ms_last_match_time) < timedelta(
+                minutes=5,
+            ):
                 log_specific(
                     avl,
                     "8. Last match time is witin 5 mins after recorded at time",
@@ -220,7 +228,7 @@ def check_update_first_stop(
                         ms_index: {
                             "last_avl_index": current_avl_index,
                             "last_distance": avl_ms_distance,
-                            "last_time_in_zone": avl.recorded_at_time_utc,
+                            "last_time_in_zone": avl_recorded_at_time_utc(avl),
                         },
                     },
                 )
@@ -231,8 +239,8 @@ def check_update_first_stop(
                 # 10. remove db matched details
                 stop_pos_distances_remove.append(
                     {
-                        "timetable_id": matched_stop_details.timetable_id,
-                        "group_id": avl.group_id,
+                        "timetable_id": stop_timetable_id(matched_stop_details),
+                        "group_id": avl_group_id(avl),
                     },
                 )
 
@@ -421,10 +429,9 @@ def write_matched_stop_to_db(
     is_final_stop: bool,  # noqa: FBT001 - boolean argument is fine for now
     route_details: RouteDetails,
     stop_pos_distances: list[RecordToAdd],
-    group_id: str,
+    avl: AVLRecord,
     pm_index: str,
     last_time_in_zone: datetime,
-    batch_id: int,
 ) -> None:
     """
     Update stop_pos_distances with the newly matched stop which will be written to the database
@@ -434,24 +441,23 @@ def write_matched_stop_to_db(
         is_final_stop (bool): Current stop is a final stop
         route_details (RouteDetails): Route stop info
         stop_pos_distances (list): The matched records that is going to be written into the database
-        group_id (str): Group id
+        avl (AVLRecord): The avl that caused the match
         pm_index (str): Potential match stop index which has become a match
         last_time_in_zone (datetime): Potential match last time in zone
-        batch_id (int): Avl batch id
 
     """
-    timetable_departure_time = route_details[pm_index].timetable_departure_time
+    timetable_departure_time = stop_departure_time(route_details[pm_index])
     time_difference = get_time_difference(last_time_in_zone, timetable_departure_time)
 
     # 23. update db with potential match details
     stop_pos_distances.append(
         {
-            "group_id": group_id,
+            "group_id": avl_group_id(avl),
             "stop_index": pm_index,
             "time_difference": time_difference,
             "last_time_in_zone_str": str(last_time_in_zone.strftime("%H:%M:%S")),
-            "timetable_id": route_details[pm_index].timetable_id,
-            "batch_id": batch_id,
+            "timetable_id": stop_timetable_id(route_details[pm_index]),
+            "batch_id": avl["batch_id"],
             "last_time_in_zone": last_time_in_zone,
             "otp_state": get_otp_state(is_final_stop, time_difference),
             "stop_type": "final" if is_final_stop else "Non-final",
@@ -505,7 +511,7 @@ def update_potential_match_with_recorded_at_time(
         avl_pm_distance (float): The distance between the avl record and the stop
 
     """
-    pm_details["last_time_in_zone"] = avl.recorded_at_time_utc
+    pm_details["last_time_in_zone"] = avl_recorded_at_time_utc(avl)
     update_potential_match_without_recorded_at_time(
         avl,
         pm_index,
@@ -667,13 +673,13 @@ def move_potential_match_to_match(
                     stop_details = route_details.get(index)
                     if not stop_details:
                         logger.warning(
-                            f"index {index} doesn't exists in timetable, group_id: {avl.group_id}",
+                            f"index {index} doesn't exists in timetable, group_id: {avl_group_id(avl)}",
                         )
                         continue
                     stop_pos_distances_remove.append(
                         {
-                            "timetable_id": stop_details.timetable_id,
-                            "group_id": avl.group_id,
+                            "timetable_id": stop_timetable_id(stop_details),
+                            "group_id": (avl_group_id(avl)),
                         },
                     )
     if not delete_potential_match:
@@ -689,10 +695,9 @@ def move_potential_match_to_match(
             is_final_stop,
             route_details,
             stop_pos_distances,
-            avl.group_id,
+            avl,
             pm_index,
             last_time_in_zone,
-            avl.batch_id,
         )
 
 
@@ -721,24 +726,24 @@ def positions_timetable_lookup(
     stop_pos_distances_remove: list[RecordToRemove] = []
     for avl in avl_dict:
         # 1. check if group id exists in timetable
-        if avl.group_id in timetable:
-            log_specific(avl, f"group_id {avl.group_id} in timetable")
+        if avl_group_id(avl) in timetable:
+            log_specific(avl, f"group_id {avl_group_id(avl)} in timetable")
 
             # 2. check if group id exists in stop_history, if not, create a blank group stop history
-            group_stop_history = get_group_stop_history(avl.group_id, stop_history)
+            group_stop_history = get_group_stop_history(avl_group_id(avl), stop_history)
             current_avl_index = group_stop_history.get("last_avl_index")
-            route_details = timetable[avl.group_id]
+            route_details = timetable[avl_group_id(avl)]
             final_stop_index = len(route_details)
             last_avl_time = group_stop_history.get("last_avl_time")
             # 3. check if current recorded_at_time is the same as the last avl time in group_stop_history
-            if last_avl_time == "" or avl.recorded_at_time_utc != validate_date(
+            if last_avl_time == "" or avl_recorded_at_time_utc(avl) != validate_date(
                 last_avl_time,
             ):
                 # 4. increment last avl index by 1 and update the time
                 current_avl_index += 1
                 group_stop_history["last_avl_index"] = current_avl_index
                 # update last avl time
-                group_stop_history["last_avl_time"] = avl.recorded_at_time_utc
+                group_stop_history["last_avl_time"] = avl_recorded_at_time_utc(avl)
                 log_specific(avl, f"avl index {current_avl_index}")
                 if len(group_stop_history["matched_stops"]) > 0:
                     # 6-10. Check if the bus is revisiting stop 1
