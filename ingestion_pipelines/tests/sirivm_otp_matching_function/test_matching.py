@@ -1183,9 +1183,12 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
 
 class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
     avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
+    avl_record_2 = read_avl("COAC4116302024-10-17.csv")[0]
     timetable = read_timetable("TLCT37812152024-08-20.json")
+    timetable_2 = read_timetable("COAC4116302024-10-17.json")
     group_id = "tlct|378|1215|2024-08-20"
     final_stop_index = "41"
+    final_stop_index_2 = "34"
     pm_details_1 = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 3,
         "last_distance": 75.1243252308765,
@@ -1281,6 +1284,41 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
             },
             "24": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 35, 6, tzinfo=UTC)),
+            },
+        },
+    }
+
+    pm_details_5 = {  # noqa: RUF012 - BODS-7131
+        "last_avl_index": 6,
+        "last_distance": 833.8772724535825,
+        "last_time_in_zone": str(
+            datetime(2024, 10, 17, 15, 12, 18, tzinfo=UTC),
+        ),
+    }
+    group_stop_history_5 = {  # noqa: RUF012 - BODS-7131
+        "last_avl_time": datetime(2024, 10, 17, 15, 15, 41, tzinfo=UTC),
+        "last_avl_index": 7,
+        "matched_stops": {
+            "10": {
+                "last_match_time": str(
+                    datetime(2024, 10, 17, 15, 10, 6, tzinfo=UTC),
+                ),
+            },
+        },
+        "potential_matches": {
+            "7": {
+                "last_avl_index": 6,
+                "last_distance": 833.8772724535825,
+                "last_time_in_zone": str(
+                    datetime(2024, 10, 17, 15, 12, 18, tzinfo=UTC),
+                ),
+            },
+            "2": {
+                "last_avl_index": 6,
+                "last_distance": 35.482760472101006,
+                "last_time_in_zone": str(
+                    datetime(2024, 10, 17, 15, 14, 58, tzinfo=UTC),
+                ),
             },
         },
     }
@@ -1528,6 +1566,50 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                     },
                 ],
                 id="not first match, the pm index lower than the highest match index saved and it will be the third actual match, move the potential match to be a match and delete the indices that are higher than the current potential match index in the matched stops",
+            ),
+            pytest.param(
+                final_stop_index_2,
+                timetable_2,
+                avl_record_2,
+                "7",
+                pm_details_5,
+                group_stop_history_5,
+                [],
+                [],
+                [],  # stop_pos_distances_remove
+                ["7"],  # expected_potential_matches_to_delete
+                [
+                    {"timetable_id": 1091293465, "group_id": "coac|41|1630|2024-10-17"},
+                ],  # expected_stop_pos_distances_remove
+                {
+                    "7": {
+                        "last_match_time": str(
+                            datetime(2024, 10, 17, 15, 12, 18, tzinfo=UTC),
+                        ),
+                    },
+                },
+                [
+                    {
+                        "group_id": "coac|41|1630|2024-10-17",
+                        "stop_index": "7",
+                        "time_difference": -1375.0,
+                        "last_time_in_zone_str": "15:12:18",
+                        "timetable_id": 1091293263,
+                        "batch_id": avl_record_2["batch_id"],
+                        "last_time_in_zone": datetime(
+                            2024,
+                            10,
+                            17,
+                            15,
+                            12,
+                            18,
+                            tzinfo=UTC,
+                        ),
+                        "otp_state": "Early",
+                        "stop_type": "Non-final",
+                    },
+                ],
+                id="bus going to the starting point to start the journey and matching backwards, when matching the second bus stop and there's only one actual match, delete the first matched stop",
             ),
         ],
     )

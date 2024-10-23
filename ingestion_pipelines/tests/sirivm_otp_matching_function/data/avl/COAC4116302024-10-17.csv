@@ -1,0 +1,2 @@
+siri_vm_positions_id,operator_ref,line_name,journey_ref,direction_ref,date_of_journey,latitude,longitude,vehicle_ref,batch_id,recorded_at_time,response_time_stamp,load_time_stamp,group_id
+6211720663,COAC,"41","1630","outbound",2024-10-17,51.584854,-2.099641,YJ14_BWA,474992,2024-10-17 16:15:41.000 +0100,2024-10-17 16:15:48.000 +0100,2024-10-17 16:16:00.201 +0100,coac|41|1630|2024-10-17
