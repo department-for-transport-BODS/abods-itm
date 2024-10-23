@@ -1,4 +1,4 @@
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.utils import (
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.client_s3 import (
     filter_avl_list,
 )
 

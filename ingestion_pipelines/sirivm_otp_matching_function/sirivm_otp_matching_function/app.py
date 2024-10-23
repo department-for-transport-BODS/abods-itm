@@ -10,10 +10,10 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from dateutil.parser import parse
 
 from .client_db import TimetableDBClient
-from .client_s3 import TimetableS3Client
+from .client_s3 import TimetableS3Client, filter_avl_list
 from .matcher import clean_stop_history, positions_timetable_lookup
 from .matcher.models import AVLRecord, OperatorShards, Timetable
-from .matcher.utils import filter_avl_list, timer
+from .matcher.utils import timer
 
 logger = Logger()
 
@@ -92,14 +92,14 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
         logger.append_keys(avl_time=avl_time, avl_datetime=avl_datetime)
 
         logger.info("Fetching stop history")
-        shard_stop_history = s3_client.get_stop_history(
+        shard_stop_history, control_info = s3_client.get_stop_history(
             avl_datetime,
             shard_identifier,
             int(avl_time),
         )
 
         # for recovery, only process avl file that is greater than last process avl file
-        if int(avl_time) < int(shard_stop_history["control_info"]["last_avl"]):
+        if int(avl_time) < int(control_info["last_avl"]):
             logger.info("Record has already been processed, skipping")
             return
 
@@ -143,7 +143,12 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
         )
 
         logger.info("Saving stop history")
-        s3_client.export_stop_history(stop_history, avl_datetime, shard_identifier)
+        s3_client.export_stop_history(
+            stop_history,
+            control_info,
+            avl_datetime,
+            shard_identifier,
+        )
 
         logger.info("Processing complete")
     except Exception:
@@ -178,7 +183,7 @@ def live_record_handler(
 
         logger.info("Fetching stop history")
         current_date = datetime.today()  # noqa: DTZ002 - Stop using today() later
-        shard_stop_history = s3_client.get_stop_history(
+        shard_stop_history, control_info = s3_client.get_stop_history(
             current_date,
             shard_identifier,
             avl_time_val,
@@ -203,7 +208,12 @@ def live_record_handler(
         db_client.live_update_success(batch_id, to_set, to_remove)
 
         logger.info("Updating S3")
-        s3_client.export_stop_history(stop_history, current_date, shard_identifier)
+        s3_client.export_stop_history(
+            stop_history,
+            control_info,
+            current_date,
+            shard_identifier,
+        )
 
         logger.info("Processing complete")
     except Exception:
