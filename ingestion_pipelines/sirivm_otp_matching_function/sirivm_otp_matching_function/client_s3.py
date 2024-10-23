@@ -215,13 +215,12 @@ class TimetableS3Client:
         s3_key = (
             f"timetable_avl/{date_str}/timetable_avl_stop_history_shard{shard_no}.json"
         )
-        data = {**stop_history, "control_info": control_info}
         logger.info(
             "S3 Upload: Storing Stop history",
             s3_key=s3_key,
-            group_id_count=len(data.keys()),
+            group_id_count=len(stop_history.keys()),
         )
         self._write_to_s3(
-            data,
+            {**stop_history, "control_info": control_info},
             s3_key,
         )
