@@ -1649,10 +1649,13 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
 class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     from .data.expected.expected_results import (
         expected_remove_coac,
+        expected_remove_slea,
         expected_remove_tlct,
         expected_set_coac,
+        expected_set_slea,
         expected_set_tlct,
         expected_stop_history_coac,
+        expected_stop_history_slea,
         expected_stop_history_tlct,
     )
 
@@ -1660,6 +1663,8 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     timetable_tlct = read_timetable("TLCT37812152024-08-20.json")
     avl_list_coac = read_avl("COAC4116302024-10-17.csv")
     timetable_coac = read_timetable("COAC4116302024-10-17.json")
+    avl_list_slea = read_avl("sleait110302024-10-23.csv")
+    timetable_slea = read_timetable("sleait110302024-10-23.json")
 
     @pytest.mark.parametrize(
         (
@@ -1688,6 +1693,15 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
                 expected_remove_coac,
                 expected_stop_history_coac,
                 id="Bus going to starting point to start the journey and matching backwards",
+            ),
+            pytest.param(
+                timetable_slea,
+                avl_list_slea,
+                {},
+                expected_set_slea,
+                expected_remove_slea,
+                expected_stop_history_slea,
+                id="Bus matching first stop and matching a much higher index next",
             ),
         ],
     )
