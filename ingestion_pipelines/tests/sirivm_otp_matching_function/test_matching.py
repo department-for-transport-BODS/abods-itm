@@ -1183,7 +1183,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
 
 class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
     avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
-    avl_record_2 = read_avl("COAC4116302024-10-17.csv")[0]
+    avl_record_2 = read_avl("COAC4116302024-10-17.csv")[7]
     timetable = read_timetable("TLCT37812152024-08-20.json")
     timetable_2 = read_timetable("COAC4116302024-10-17.json")
     group_id = "tlct|378|1215|2024-08-20"
@@ -1292,16 +1292,16 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_avl_index": 6,
         "last_distance": 833.8772724535825,
         "last_time_in_zone": str(
-            datetime(2024, 10, 17, 15, 12, 18, tzinfo=UTC),
+            datetime(2024, 10, 17, 16, 12, 18, tzinfo=UTC),
         ),
     }
     group_stop_history_5 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": datetime(2024, 10, 17, 15, 15, 41, tzinfo=UTC),
+        "last_avl_time": datetime(2024, 10, 17, 16, 15, 41, tzinfo=UTC),
         "last_avl_index": 7,
         "matched_stops": {
             "10": {
                 "last_match_time": str(
-                    datetime(2024, 10, 17, 15, 10, 6, tzinfo=UTC),
+                    datetime(2024, 10, 17, 16, 10, 6, tzinfo=UTC),
                 ),
             },
         },
@@ -1310,14 +1310,14 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_avl_index": 6,
                 "last_distance": 833.8772724535825,
                 "last_time_in_zone": str(
-                    datetime(2024, 10, 17, 15, 12, 18, tzinfo=UTC),
+                    datetime(2024, 10, 17, 16, 12, 18, tzinfo=UTC),
                 ),
             },
             "2": {
                 "last_avl_index": 6,
                 "last_distance": 35.482760472101006,
                 "last_time_in_zone": str(
-                    datetime(2024, 10, 17, 15, 14, 58, tzinfo=UTC),
+                    datetime(2024, 10, 17, 16, 14, 58, tzinfo=UTC),
                 ),
             },
         },
@@ -1584,7 +1584,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 {
                     "7": {
                         "last_match_time": str(
-                            datetime(2024, 10, 17, 15, 12, 18, tzinfo=UTC),
+                            datetime(2024, 10, 17, 16, 12, 18, tzinfo=UTC),
                         ),
                     },
                 },
@@ -1593,14 +1593,14 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "group_id": "coac|41|1630|2024-10-17",
                         "stop_index": "7",
                         "time_difference": -1375.0,
-                        "last_time_in_zone_str": "15:12:18",
+                        "last_time_in_zone_str": "16:12:18",
                         "timetable_id": 1091293263,
                         "batch_id": avl_record_2["batch_id"],
                         "last_time_in_zone": datetime(
                             2024,
                             10,
                             17,
-                            15,
+                            16,
                             12,
                             18,
                             tzinfo=UTC,
@@ -1646,31 +1646,75 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         assert stop_pos_distances == expected_stop_pos_distances
 
 
-def test_positions_timetable_lookup():
-    from .data.expected.TLCT37812152024_08_20 import (
-        expected_remove,
-        expected_set,
-        expected_stop_history,
+class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
+    from .data.expected.expected_results import (
+        expected_remove_coac,
+        expected_remove_tlct,
+        expected_set_coac,
+        expected_set_tlct,
+        expected_stop_history_coac,
+        expected_stop_history_tlct,
     )
 
-    avl_list = read_avl("TLCT37812152024-08-20.csv")
-    timetable = read_timetable("TLCT37812152024-08-20.json")
+    avl_list_tlct = read_avl("TLCT37812152024-08-20.csv")
+    timetable_tlct = read_timetable("TLCT37812152024-08-20.json")
+    avl_list_coac = read_avl("COAC4116302024-10-17.csv")
+    timetable_coac = read_timetable("COAC4116302024-10-17.json")
 
-    stop_history = {}
-    to_set_total = []
-    to_remove_total = []
+    @pytest.mark.parametrize(
+        (
+            "timetable",
+            "avl_list",
+            "stop_history",
+            "expected_to_set",
+            "expected_to_remove",
+            "expected_stop_history",
+        ),
+        [
+            pytest.param(
+                timetable_tlct,
+                avl_list_tlct,
+                {},
+                expected_set_tlct,
+                expected_remove_tlct,
+                expected_stop_history_tlct,
+                id="Normal route",
+            ),
+            pytest.param(
+                timetable_coac,
+                avl_list_coac,
+                {},
+                expected_set_coac,
+                expected_remove_coac,
+                expected_stop_history_coac,
+                id="Bus going to starting point to start the journey and matching backwards",
+            ),
+        ],
+    )
+    def test_positions_timetable_lookup(  # noqa: D102 - BODS-7131
+        self,
+        timetable,
+        avl_list,
+        stop_history,
+        expected_to_set,
+        expected_to_remove,
+        expected_stop_history,
+    ):
+        stop_history = {}
+        to_set_total = []
+        to_remove_total = []
 
-    for avl in avl_list:
-        # Simulate invoking the lambda once per AVL for the group id
-        # In practice there is only one AVL for a given group id in each batch
-        to_set, to_remove, stop_history = positions_timetable_lookup(
-            timetable,
-            [avl],
-            stop_history,
-        )
-        to_remove_total = [*to_remove_total, *to_remove]
-        to_set_total = [*to_set_total, *to_set]
+        for avl in avl_list:
+            # Simulate invoking the lambda once per AVL for the group id
+            # In practice there is only one AVL for a given group id in each batch
+            to_set, to_remove, stop_history = positions_timetable_lookup(
+                timetable,
+                [avl],
+                stop_history,
+            )
+            to_remove_total = [*to_remove_total, *to_remove]
+            to_set_total = [*to_set_total, *to_set]
 
-    assert to_set_total == expected_set
-    assert to_remove_total == expected_remove
-    assert stop_history == expected_stop_history
+        assert to_set_total == expected_to_set
+        assert to_remove_total == expected_to_remove
+        assert stop_history == expected_stop_history
