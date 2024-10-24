@@ -593,7 +593,7 @@ def move_potential_match_to_match(
         highest_matched_stop_index = int(max(matched_stops, key=lambda x: int(x)))
         lowest_matched_stop_index = int(min(matched_stops, key=lambda x: int(x)))
         # check if the new match index is higher than or equal to the highest index saved
-        # 21-22. is the new match index higher than the highest index saved and Will this new match be the 3rd actual match saved
+        # 21-22. is the new match index higher than the highest index saved and Will this new match be the 4th actual match saved
         if (
             int(pm_index) > highest_matched_stop_index
             and int(pm_index) == new_highest_matched_stop_index
@@ -606,7 +606,7 @@ def move_potential_match_to_match(
             # 23. Delete the lowest saved index from matched stops
             del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
         # 20. when the new match index is lower than the highest index saved
-        # 28,29. Will this new match be the 3rd actual match saved and Is this new match the lowest index
+        # 28,29. Will this new match be the 4th actual match saved and Is this new match the lowest index
         if (
             int(pm_index) < lowest_matched_stop_index
             and len(matched_stops) == saved_matches_limit
@@ -618,9 +618,8 @@ def move_potential_match_to_match(
             # 30.Delete this new potential match
             potential_matches_to_delete.append(pm_index)
             delete_potential_match = True
-        if (
-            int(pm_index) < highest_matched_stop_index
-            and int(pm_index) > lowest_matched_stop_index
+        if int(pm_index) < highest_matched_stop_index and (
+            int(pm_index) > lowest_matched_stop_index or len(matched_stops) == 1
         ):
             # 29.2 is the last stop in the matched stops ordered by recorded_at_time the final stop of the journey?
             if int(list(matched_stops.keys())[-1]) == final_stop_index:
@@ -684,13 +683,14 @@ def positions_timetable_lookup(
 
     Args:
     ----
-        timetable (dict): Timetable data
-        avl_dict (list): A list of avl records
+        timetable (Timetable): Timetable data
+        avl_dict (Sequence): A list of avl records
         stop_history (StopHistory): Full stop history of the specified shard.
 
     Returns:
     -------
-        timetable_output (dict): The matched stops which require updates in the database
+        stop_pos_distances (Sequence): The matched stops which require updates in the database
+        stop_pos_distances_remove (Sequence): The matched stops that need to have matched records removed from database
         stop_history (StopHistory): The updated full stop history
 
     """
