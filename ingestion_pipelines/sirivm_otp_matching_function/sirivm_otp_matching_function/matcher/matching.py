@@ -35,6 +35,7 @@ logger = Logger()
 
 distance_threshold = config.get("distance_threshold")
 saved_matches_limit = config.get("saved_matches_limit")
+journey_stops_min_threshold = config.get("journey_stops_min_threshold")
 
 
 def create_matched_stop(last_time_in_zone: datetime) -> MatchedStop:
@@ -146,7 +147,21 @@ def find_potential_matches(
     """
     # 11-12. get the stop index to start for finding potential matches
     lowest_matched_stop_index = get_lowest_matched_stop_index(group_stop_history)
+    num_of_matched_stops = len(group_stop_history["matched_stops"])
     for i in range(int(lowest_matched_stop_index), final_stop_index + 1):
+        # 12.1 Is there 1 actual match saved?
+        # 12.2 Is the last stop index < 3 stops?
+        # 12.3 Is this index less than 3/4*last stop index?
+        if (
+            num_of_matched_stops == 0
+            and final_stop_index > journey_stops_min_threshold
+            and i > int(final_stop_index * 3 / 4)
+        ):
+            log_specific(
+                avl,
+                f"12.1/2/3 Number of matched stops is {num_of_matched_stops}, the final stop index {final_stop_index} > 3 and stop index {i} is greater than {int(final_stop_index * 3/4)} 3/4 of the final stop index. Skip stop {i} from being a potential match",
+            )
+            continue
         next_stop_details = route_details[str(i)]
         avl_next_stop_distance = haversine(avl, next_stop_details)
         # 13. If avl and the next stop distance < threshold
@@ -619,6 +634,7 @@ def move_potential_match_to_match(
             # 30.Delete this new potential match
             potential_matches_to_delete.append(pm_index)
             delete_potential_match = True
+        #  29. It's in the middle of the matched stop sequence or there's only one matched stop
         if int(pm_index) < highest_matched_stop_index and (
             int(pm_index) > lowest_matched_stop_index or len(matched_stops) == 1
         ):
