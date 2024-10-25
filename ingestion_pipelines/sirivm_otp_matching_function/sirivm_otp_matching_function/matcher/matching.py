@@ -121,7 +121,7 @@ def get_lowest_matched_stop_index(group_stop_history: GroupStopHistory) -> int:
         lowest_matched_stop_index = min(list(matched_stops.keys()), key=int)
     else:
         # 12. Select all stops
-        lowest_matched_stop_index = 0
+        lowest_matched_stop_index = 1
     return lowest_matched_stop_index
 
 
@@ -146,7 +146,7 @@ def find_potential_matches(
     """
     # 11-12. get the stop index to start for finding potential matches
     lowest_matched_stop_index = get_lowest_matched_stop_index(group_stop_history)
-    for i in range(int(lowest_matched_stop_index) + 1, final_stop_index + 1):
+    for i in range(int(lowest_matched_stop_index), final_stop_index + 1):
         next_stop_details = route_details[str(i)]
         avl_next_stop_distance = haversine(avl, next_stop_details)
         # 13. If avl and the next stop distance < threshold
@@ -327,21 +327,22 @@ def find_matches_in_potential_matches(
                         group_stop_history,
                         potential_matches_to_delete,
                     )
-                    log_specific(
-                        avl,
-                        f"31-32. selected_index for matching {selected_index}",
-                    )
-                    move_potential_match_to_match(
-                        final_stop_index,
-                        route_details,
-                        avl,
-                        selected_index,
-                        pm_details,
-                        group_stop_history,
-                        potential_matches_to_delete,
-                        stop_pos_distances,
-                        stop_pos_distances_remove,
-                    )
+                    if selected_index not in potential_matches_to_delete:
+                        log_specific(
+                            avl,
+                            f"31-32. selected_index for matching {selected_index}",
+                        )
+                        move_potential_match_to_match(
+                            final_stop_index,
+                            route_details,
+                            avl,
+                            selected_index,
+                            pm_details,
+                            group_stop_history,
+                            potential_matches_to_delete,
+                            stop_pos_distances,
+                            stop_pos_distances_remove,
+                        )
                 else:
                     # 19. pm last distance < distance threshold / 20. the avl potential distance < last distance, Avl is moving backwards
                     # 34. update potential match with current avl index and distance between potential match stop and avl location
