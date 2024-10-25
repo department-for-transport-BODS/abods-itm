@@ -7,6 +7,7 @@ import pytest
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.matching import (
     check_update_first_stop,
     find_matches_in_potential_matches,
+    find_potential_matches,
     move_potential_match_to_match,
     positions_timetable_lookup,
     remove_matched_stops,
@@ -18,6 +19,9 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
 )
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
     AVLRecord,
+    GroupStopHistory,
+    PotentialMatch,
+    RouteDetails,
     avl_group_id,
     avl_recorded_at_time_utc,
     stop_departure_time,
@@ -160,6 +164,90 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
         assert group_stop_history["matched_stops"] == expected_matched_stops
         assert group_stop_history["potential_matches"] == expected_potential_matches
         assert stop_pos_distances_remove == expected_stop_pos_distances_remove
+
+
+class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
+    avl_record = read_avl("FSRV9509052024-10-10.csv")[0]
+    avl_record_2 = read_avl("FSRV9509052024-10-10.csv")[1]
+    timetable = read_timetable("FSRV9509052024-10-10.json")
+    route_details = timetable[avl_group_id(avl_record)]
+    final_stop_index = 19
+    group_stop_history = {  # noqa: RUF012 - BODS-7131
+        "last_avl_index": 1,
+        "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC)),
+        "matched_stops": {},
+        "potential_matches": {},
+    }
+    group_stop_history_2 = {  # noqa: RUF012 - BODS-7131
+        "last_avl_index": 62,
+        "last_avl_time": str(datetime(2024, 10, 10, 8, 25, 56, tzinfo=UTC)),
+        "matched_stops": {
+            "14": {
+                "last_match_time": str(datetime(2024, 10, 10, 8, 25, 6, tzinfo=UTC)),
+            },
+        },
+        "potential_matches": {},
+    }
+
+    def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
+        return mock.patch.dict(os.environ, envvars)
+
+    @mockenv(OPERATOR_REF="FSRV", LINE_NAME="95")
+    @pytest.mark.parametrize(
+        (
+            "avl",
+            "route_details",
+            "group_stop_history",
+            "current_avl_index",
+            "final_stop_index",
+            "expected_potential_matches",
+        ),
+        [
+            pytest.param(
+                avl_record,
+                route_details,
+                group_stop_history,
+                1,
+                final_stop_index,
+                {},
+                id="Drivers changing journey code early, reaching stop 15, no potential matches should be created",
+            ),
+            pytest.param(
+                avl_record_2,
+                route_details,
+                group_stop_history_2,
+                62,
+                final_stop_index,
+                {
+                    "15": {
+                        "last_avl_index": 62,
+                        "last_distance": 13.738176401886017,
+                        "last_time_in_zone": str(
+                            datetime(2024, 10, 10, 8, 25, 56, tzinfo=UTC),
+                        ),
+                    },
+                },
+                id="Drivers reaching stop 15 and there's one actual match",
+            ),
+        ],
+    )
+    def test_find_potential_matches(  # noqa: D102 - BODS-7131
+        self,
+        avl: AVLRecord,
+        route_details: RouteDetails,
+        group_stop_history: GroupStopHistory,
+        current_avl_index: int,
+        final_stop_index: int,
+        expected_potential_matches: dict[str, PotentialMatch],
+    ):
+        find_potential_matches(
+            avl,
+            route_details,
+            group_stop_history,
+            current_avl_index,
+            final_stop_index,
+        )
+        assert group_stop_history["potential_matches"] == expected_potential_matches
 
 
 class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
