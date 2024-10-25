@@ -619,6 +619,7 @@ def move_potential_match_to_match(
             # 30.Delete this new potential match
             potential_matches_to_delete.append(pm_index)
             delete_potential_match = True
+        #  29. It's in the middle of the matched stop sequence or there's only one matched stop
         if int(pm_index) < highest_matched_stop_index and (
             int(pm_index) > lowest_matched_stop_index or len(matched_stops) == 1
         ):
