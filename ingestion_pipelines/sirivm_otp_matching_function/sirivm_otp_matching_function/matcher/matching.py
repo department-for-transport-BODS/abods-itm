@@ -609,7 +609,7 @@ def move_potential_match_to_match(
         highest_matched_stop_index = int(max(matched_stops, key=lambda x: int(x)))
         lowest_matched_stop_index = int(min(matched_stops, key=lambda x: int(x)))
         # check if the new match index is higher than or equal to the highest index saved
-        # 21-22. is the new match index higher than the highest index saved and Will this new match be the 4th actual match saved
+        # 21-22. is the new match index higher than the highest index saved and Will this new match be the (saved match limit + 1) actual match saved
         if (
             int(pm_index) > highest_matched_stop_index
             and int(pm_index) == new_highest_matched_stop_index
@@ -622,10 +622,11 @@ def move_potential_match_to_match(
             # 23. Delete the lowest saved index from matched stops
             del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
         # 20. when the new match index is lower than the highest index saved
-        # 28,29. Will this new match be the 4th actual match saved and Is this new match the lowest index
-        if (
-            int(pm_index) < lowest_matched_stop_index
-            and len(matched_stops) == saved_matches_limit
+        # 28,29. Will this new match be the (saved match limit + 1) actual match saved and Is this new match the lowest index
+        # 29.1 Do the two actual match index's saved have a difference of 1
+        if int(pm_index) <= lowest_matched_stop_index and (
+            len(matched_stops) == saved_matches_limit
+            or highest_matched_stop_index - lowest_matched_stop_index == 1
         ):
             log_specific(
                 avl,
@@ -647,23 +648,17 @@ def move_potential_match_to_match(
                 del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
             else:
                 # 31.Delete the higher index stored from the db and json
-                higher_indices_in_matched = [
-                    ind
-                    for ind in group_stop_history["matched_stops"]
-                    if int(ind) > int(pm_index)
-                ]
                 log_specific(
                     avl,
-                    f"{pm_index} lower than highest_matched_stop_index {highest_matched_stop_index}, remove matched stop index {higher_indices_in_matched} higher than {pm_index}",
+                    f"{pm_index} lower than highest_matched_stop_index {highest_matched_stop_index}, remove matched stop index {highest_matched_stop_index} higher than {pm_index}",
                 )
-                for index in higher_indices_in_matched:
-                    del group_stop_history["matched_stops"][index]
-                    stop_details = route_details.get(index)
-                    if not stop_details:
-                        logger.warning(
-                            f"index {index} doesn't exists in timetable, group_id: {avl_group_id(avl)}",
-                        )
-                        continue
+                del group_stop_history["matched_stops"][str(highest_matched_stop_index)]
+                stop_details = route_details.get(str(highest_matched_stop_index))
+                if not stop_details:
+                    logger.warning(
+                        f"index {highest_matched_stop_index} doesn't exists in timetable, group_id: {avl_group_id(avl)}",
+                    )
+                else:
                     stop_pos_distances_remove.append(
                         {
                             "timetable_id": stop_timetable_id(stop_details),
