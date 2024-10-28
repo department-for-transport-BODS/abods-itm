@@ -623,9 +623,10 @@ def move_potential_match_to_match(
             del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
         # 20. when the new match index is lower than the highest index saved
         # 28,29. Will this new match be the (saved match limit + 1) actual match saved and Is this new match the lowest index
-        if (
-            int(pm_index) < lowest_matched_stop_index
-            and len(matched_stops) == saved_matches_limit
+        # 29.1 Do the two actual match index's saved have a difference of 1
+        if int(pm_index) <= lowest_matched_stop_index and (
+            len(matched_stops) == saved_matches_limit
+            or highest_matched_stop_index - lowest_matched_stop_index == 1
         ):
             log_specific(
                 avl,
@@ -636,13 +637,10 @@ def move_potential_match_to_match(
             delete_potential_match = True
         #  29. It's in the middle of the matched stop sequence or there's only one matched stop
         if int(pm_index) < highest_matched_stop_index and (
-            int(pm_index) >= lowest_matched_stop_index or len(matched_stops) == 1
+            int(pm_index) > lowest_matched_stop_index or len(matched_stops) == 1
         ):
-            # 29.1 Do the two actual match index's saved have a difference of 1
-            if highest_matched_stop_index - lowest_matched_stop_index == 1:
-                delete_potential_match = True
             # 29.2 is the last stop in the matched stops ordered by recorded_at_time the final stop of the journey?
-            elif int(list(matched_stops.keys())[-1]) == final_stop_index:
+            if int(list(matched_stops.keys())[-1]) == final_stop_index:
                 log_specific(
                     avl,
                     f"last matched stop {list(matched_stops.keys())[-1]} is final stop, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
