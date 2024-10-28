@@ -660,12 +660,13 @@ def move_potential_match_to_match(
                     logger.warning(
                         f"index {highest_matched_stop_index} doesn't exists in timetable, group_id: {avl_group_id(avl)}",
                     )
-                stop_pos_distances_remove.append(
-                    {
-                        "timetable_id": stop_timetable_id(stop_details),
-                        "group_id": (avl_group_id(avl)),
-                    },
-                )
+                else:
+                    stop_pos_distances_remove.append(
+                        {
+                            "timetable_id": stop_timetable_id(stop_details),
+                            "group_id": (avl_group_id(avl)),
+                        },
+                    )
     if not delete_potential_match:
         # 24. move potential match to be a match
         update_matched_stop(
