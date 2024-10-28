@@ -837,17 +837,6 @@ expected_set_slea = [
         "timetable_id": 1738075346,
     },
     {
-        "batch_id": 1358036,
-        "group_id": "slea|it1|1030|2024-10-23",
-        "last_time_in_zone": datetime(2024, 10, 23, 10, 41, 49, tzinfo=UTC),
-        "last_time_in_zone_str": "10:41:49",
-        "otp_state": "OnTime",
-        "stop_index": "12",
-        "stop_type": "Non-final",
-        "time_difference": 109.0,
-        "timetable_id": 1738075484,
-    },
-    {
         "batch_id": 1358039,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 42, 7, tzinfo=UTC),

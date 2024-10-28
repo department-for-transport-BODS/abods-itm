@@ -636,7 +636,7 @@ def move_potential_match_to_match(
             delete_potential_match = True
         #  29. It's in the middle of the matched stop sequence or there's only one matched stop
         if int(pm_index) < highest_matched_stop_index and (
-            int(pm_index) > lowest_matched_stop_index or len(matched_stops) == 1
+            int(pm_index) >= lowest_matched_stop_index or len(matched_stops) == 1
         ):
             # 29.1 Do the two actual match index's saved have a difference of 1
             if highest_matched_stop_index - lowest_matched_stop_index == 1:
