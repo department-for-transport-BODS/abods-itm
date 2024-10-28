@@ -1208,8 +1208,10 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
 class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
     avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
     avl_record_2 = read_avl("COAC4116302024-10-17.csv")[7]
+    avl_record_3 = read_avl("sleait110302024-10-23.csv")[7]
     timetable = read_timetable("TLCT37812152024-08-20.json")
     timetable_2 = read_timetable("COAC4116302024-10-17.json")
+    timetable_3 = read_timetable("sleait110302024-10-23.json")
     group_id = "tlct|378|1215|2024-08-20"
     final_stop_index = "41"
     final_stop_index_2 = "34"
@@ -1339,6 +1341,60 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_distance": 35.482760472101006,
                 "last_time_in_zone": str(
                     datetime(2024, 10, 17, 16, 14, 58, tzinfo=UTC),
+                ),
+            },
+        },
+    }
+
+    pm_details_6 = {  # noqa: RUF012 - BODS-7131
+        "last_avl_index": 90,
+        "last_distance": 193.02253400101122,
+        "last_time_in_zone": str(
+            datetime(2024, 10, 23, 15, 39, 4, tzinfo=UTC),
+        ),
+    }
+    group_stop_history_6 = {  # noqa: RUF012 - BODS-7131
+        "last_avl_time": datetime(2024, 10, 23, 15, 39, 33, tzinfo=UTC),
+        "last_avl_index": 91,
+        "matched_stops": {
+            "12": {
+                "last_match_time": str(
+                    datetime(2024, 10, 23, 15, 37, 43, tzinfo=UTC),
+                ),
+            },
+            "13": {
+                "last_match_time": str(
+                    datetime(2024, 10, 23, 15, 38, 44, tzinfo=UTC),
+                ),
+            },
+        },
+        "potential_matches": {
+            "11": {
+                "last_avl_index": 90,
+                "last_distance": 178.07106589653134,
+                "last_time_in_zone": str(
+                    datetime(2024, 10, 23, 15, 39, 4, tzinfo=UTC),
+                ),
+            },
+            "12": {
+                "last_avl_index": 90,
+                "last_distance": 193.02253400101122,
+                "last_time_in_zone": str(
+                    datetime(2024, 10, 23, 15, 39, 4, tzinfo=UTC),
+                ),
+            },
+            "14": {
+                "last_avl_index": 90,
+                "last_distance": 47.3828826762825,
+                "last_time_in_zone": str(
+                    datetime(2024, 10, 23, 15, 39, 27, tzinfo=UTC),
+                ),
+            },
+            "15": {
+                "last_avl_index": 91,
+                "last_distance": 37.35516130497534,
+                "last_time_in_zone": str(
+                    datetime(2024, 10, 23, 15, 39, 33, tzinfo=UTC),
                 ),
             },
         },
@@ -1605,6 +1661,33 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                     },
                 ],
                 id="bus going to the starting point to start the journey and matching backwards, when matching the second bus stop and there's only one actual match, delete the first matched stop",
+            ),
+            pytest.param(
+                40,
+                timetable_3,
+                avl_record_3,
+                "11",
+                pm_details_6,
+                group_stop_history_6,
+                [],
+                [],
+                [],  # stop_pos_distances_remove
+                ["11"],  # expected_potential_matches_to_delete
+                [],  # expected_stop_pos_distances_remove
+                {
+                    "12": {
+                        "last_match_time": str(
+                            datetime(2024, 10, 23, 15, 37, 43, tzinfo=UTC),
+                        ),
+                    },
+                    "13": {
+                        "last_match_time": str(
+                            datetime(2024, 10, 23, 15, 38, 44, tzinfo=UTC),
+                        ),
+                    },
+                },
+                [],
+                id="bus going from A to B to A again, A should not be rematched",
             ),
         ],
     )
