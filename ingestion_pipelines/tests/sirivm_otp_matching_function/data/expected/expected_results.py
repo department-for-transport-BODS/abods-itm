@@ -437,9 +437,6 @@ expected_stop_history_tlct = {
         "last_avl_time": str(datetime(2024, 8, 20, 12, 0, 5, tzinfo=UTC)),
         "last_avl_index": 91,
         "matched_stops": {
-            "43": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 59, 5, tzinfo=UTC)),
-            },
             "44": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 59, 27, tzinfo=UTC)),
             },
@@ -634,9 +631,6 @@ expected_stop_history_coac = {
         "last_avl_time": str(datetime(2024, 10, 17, 17, 7, 59, tzinfo=UTC)),
         "last_avl_index": 110,
         "matched_stops": {
-            "26": {
-                "last_match_time": str(datetime(2024, 10, 17, 17, 2, 22, tzinfo=UTC)),
-            },
             "29": {
                 "last_match_time": str(datetime(2024, 10, 17, 17, 4, 6, tzinfo=UTC)),
             },
@@ -799,17 +793,6 @@ expected_set_slea = [
         "timetable_id": 1738075640,
     },
     {
-        "batch_id": 1358018,
-        "group_id": "slea|it1|1030|2024-10-23",
-        "last_time_in_zone": datetime(2024, 10, 23, 10, 38, 34, tzinfo=UTC),
-        "last_time_in_zone_str": "10:38:34",
-        "otp_state": "OnTime",
-        "stop_index": "7",
-        "stop_type": "Non-final",
-        "time_difference": 154.0,
-        "timetable_id": 1738075849,
-    },
-    {
         "batch_id": 1358021,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 39, 7, tzinfo=UTC),
@@ -852,17 +835,6 @@ expected_set_slea = [
         "stop_type": "Non-final",
         "time_difference": 77.0,
         "timetable_id": 1738075346,
-    },
-    {
-        "batch_id": 1358036,
-        "group_id": "slea|it1|1030|2024-10-23",
-        "last_time_in_zone": datetime(2024, 10, 23, 10, 41, 49, tzinfo=UTC),
-        "last_time_in_zone_str": "10:41:49",
-        "otp_state": "OnTime",
-        "stop_index": "11",
-        "stop_type": "Non-final",
-        "time_difference": 169.0,
-        "timetable_id": 1738075884,
     },
     {
         "batch_id": 1358036,
@@ -1113,10 +1085,6 @@ expected_remove_slea = [
         "group_id": "slea|it1|1030|2024-10-23",
         "timetable_id": 1738075640,
     },
-    {
-        "group_id": "slea|it1|1030|2024-10-23",
-        "timetable_id": 1738075346,
-    },
 ]
 expected_stop_history_slea = {
     "slea|it1|1030|2024-10-23": {
@@ -1128,9 +1096,6 @@ expected_stop_history_slea = {
             },
             "34": {
                 "last_match_time": str(datetime(2024, 10, 23, 10, 57, 1, tzinfo=UTC)),
-            },
-            "31": {
-                "last_match_time": str(datetime(2024, 10, 23, 10, 56, 17, tzinfo=UTC)),
             },
         },
         "potential_matches": {

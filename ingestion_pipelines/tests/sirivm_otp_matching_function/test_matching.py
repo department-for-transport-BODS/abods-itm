@@ -265,9 +265,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         "last_avl_index": 30,
         "last_avl_time": str(datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC)),
         "matched_stops": {
-            "3": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 31, 53, tzinfo=UTC)),
-            },
             "4": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 32, 20, tzinfo=UTC)),
             },
@@ -287,9 +284,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         "last_avl_index": 90,
         "last_avl_time": str(datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC)),
         "matched_stops": {
-            "41": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 58, 3, tzinfo=UTC)),
-            },
             "42": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 58, 43, tzinfo=UTC)),
             },
@@ -314,9 +308,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         "last_avl_index": 91,
         "last_avl_time": str(datetime(2024, 8, 20, 12, 00, 5, tzinfo=UTC)),
         "matched_stops": {
-            "42": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 58, 43, tzinfo=UTC)),
-            },
             "43": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 59, 5, tzinfo=UTC)),
             },
@@ -336,9 +327,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         "last_avl_index": 77,
         "last_avl_time": str(datetime(2024, 8, 20, 11, 54, 9, tzinfo=UTC)),
         "matched_stops": {
-            "33": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 50, 28, tzinfo=UTC)),
-            },
             "34": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 51, 35, tzinfo=UTC)),
             },
@@ -419,19 +407,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                     "last_avl_index": 30,
                     "last_avl_time": str(datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC)),
                     "matched_stops": {
-                        "4": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    32,
-                                    20,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                        },
                         "5": {
                             "last_match_time": str(
                                 datetime(
@@ -493,19 +468,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                     "last_avl_index": 90,
                     "last_avl_time": str(datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC)),
                     "matched_stops": {
-                        "42": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    58,
-                                    43,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                        },
                         "43": {
                             "last_match_time": str(
                                 datetime(
@@ -582,19 +544,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                     "last_avl_index": 91,
                     "last_avl_time": str(datetime(2024, 8, 20, 12, 00, 5, tzinfo=UTC)),
                     "matched_stops": {
-                        "43": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    59,
-                                    5,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                        },
                         "44": {
                             "last_match_time": str(
                                 datetime(
@@ -656,19 +605,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                     "last_avl_index": 77,
                     "last_avl_time": str(datetime(2024, 8, 20, 11, 54, 9, tzinfo=UTC)),
                     "matched_stops": {
-                        "33": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    50,
-                                    28,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                        },
                         "34": {
                             "last_match_time": str(
                                 datetime(
@@ -1339,9 +1275,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
             },
         },
         "matched_stops": {
-            "20": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 32, 23, tzinfo=UTC)),
-            },
             "21": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 34, 23, tzinfo=UTC)),
             },
@@ -1495,19 +1428,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 ["3"],  # expected_potential_matches_to_delete
                 [],  # expected_stop_pos_distances_remove
                 {
-                    "1": {
-                        "last_match_time": str(
-                            datetime(
-                                2024,
-                                8,
-                                20,
-                                11,
-                                15,
-                                48,
-                                tzinfo=UTC,
-                            ),
-                        ),
-                    },
                     "2": {
                         "last_match_time": str(
                             datetime(2024, 8, 20, 11, 17, 6, tzinfo=UTC),
@@ -1555,19 +1475,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 ["15"],
                 [],
                 {
-                    "20": {
-                        "last_match_time": str(
-                            datetime(
-                                2024,
-                                8,
-                                20,
-                                11,
-                                32,
-                                23,
-                                tzinfo=UTC,
-                            ),
-                        ),
-                    },
                     "21": {
                         "last_match_time": str(
                             datetime(

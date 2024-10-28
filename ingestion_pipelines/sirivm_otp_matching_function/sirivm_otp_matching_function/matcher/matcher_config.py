@@ -2,6 +2,6 @@
 
 config = {
     "distance_threshold": 70,
-    "saved_matches_limit": 3,
+    "saved_matches_limit": 2,
     "journey_stops_min_threshold": 3,
 }
