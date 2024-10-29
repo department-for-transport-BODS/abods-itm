@@ -11,8 +11,6 @@ on:
       - "ingestion_pipelines/**"
       - "liquibase/**"
       - "VERSION"
-  repository_dispatch:
-    types: [merge-sandbox-to-dev]
 
 concurrency:
   group:
