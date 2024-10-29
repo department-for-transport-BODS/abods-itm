@@ -258,11 +258,16 @@ jobs:
           script: |
             const branchName = context.ref.split("/").pop()
             const nextBranch = {"sandbox": "dev", "dev": "test", "test": "main"}[branchName]
-            const result = await github.rest.pulls.create({
-              title: `${branchName} -> ${nextBranch}`,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head: branchName,
-              base: nextBranch,
-              body: `This PR was auto-generated after a successful deployment of the ${branchName} branch. Once approved, it will be automatically merged with the correct merge strategy.`
-            });
+            try {
+              const result = await github.rest.pulls.create({
+                title: `${branchName} -> ${nextBranch}`,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: branchName,
+                base: nextBranch,
+                body: `This PR was auto-generated after a successful deployment of the ${branchName} branch. Once approved, it will be automatically merged with the correct merge strategy.`
+              });
+            } catch (err) {
+              console.log(err)
+              if (err.message !== `A pull request already exists for ${context.repo.owner}:${branchName}.`) throw err
+            }
