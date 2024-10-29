@@ -3,17 +3,13 @@ name: Merge deployment pull request
 on:
   pull_request_review:
     types: [submitted]
-    branches:
-      - 'dev'
-      - 'test'
-      - 'main'
 
 permissions:
   id-token: write
 
 jobs:
   merge-deployment-pr:
-    if: github.event.review.state == 'approved'
+    if: github.event.review.state == 'approved' && contains(fromJSON('["dev", "test", "main"]'), github.event.pull_request.base.ref)
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
