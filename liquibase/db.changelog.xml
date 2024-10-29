@@ -144,4 +144,7 @@
     <changeSet id="44" author="abodsuser">
         <sqlFile path="sql/44-fix-headway.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="45" author="abodsuser">
+        <sqlFile path="sql/45-update-generate-retro-timetable.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
