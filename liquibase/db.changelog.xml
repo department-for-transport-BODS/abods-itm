@@ -141,7 +141,10 @@
     <changeSet id="43" author="abodsuser">
         <sqlFile path="sql/43-convert-group-id-to-lowercase.sql" splitStatements="false" />
     </changeSet>
-    <changeSet id="44" author="abodsuser">
+    <changeSet id="45" author="abodsuser">
         <sqlFile path="sql/44-add-feedmon.sql" splitStatements="false" />
+    </changeSet>
+    <changeSet id="46" author="abodsuser">
+        <sqlFile path="sql/46-add-line-level-reporting.sql" splitStatements="false" />
     </changeSet>
 </databaseChangeLog>
