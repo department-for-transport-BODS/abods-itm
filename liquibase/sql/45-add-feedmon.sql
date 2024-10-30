@@ -28,7 +28,7 @@ alter table public.feed_monitor_hourly_summary owner to abods_rw;
 
 create table if not exists public.feed_monitor_summary (
 	id bigserial NOT NULL,
-	operator_noc text NOT NULL,
+	operator_noc text UNIQUE NOT NULL,
 	last_outage timestamptz,
 	unavailable_since timestamptz,
 	update_frequency int,
@@ -369,6 +369,10 @@ begin
 	start_hour,
 	end_hour;
 
+	--
+	-- Create a summary of all expected vs actual for the hour, calculating outages
+	--
+
 	drop table if exists temp_generate_feed_monitor_summary_all;
 
 	create temporary table temp_generate_feed_monitor_summary_all as
@@ -378,6 +382,7 @@ begin
 			received_interval,
 			expected,
 			actual,
+			count(*) over (partition by operator_noc) as minutes_with_expected,
 			live_locations,
 			case
 				when actual = 0
@@ -415,6 +420,7 @@ begin
 		received_interval,
 		expected,
 		actual,
+		minutes_with_expected,
 		live_locations,
 		is_outage,
 		case when is_outage
@@ -468,11 +474,49 @@ begin
 	select 
 		*
 	from outage_lengths;
+
+	--
+	-- Create availabilities for the last 24h for all the expected nocs this hour
+	--
+
+	drop table if exists temp_generate_feed_monitor_summary_update_frequencies;
+
+	create temporary table temp_generate_feed_monitor_summary_update_frequencies as
+	select -- calculate update frequencies for last 24h if available
+		operator_noc,
+		case when sum(live_locations) = 0
+			then null
+		when sum(live_locations) is null
+			then null
+		else
+			round(
+				(
+					sum(actual::numeric) / sum(live_locations)
+				)
+				*60,
+				0
+			)
+		end as update_frequency,
+		sum(case when actual > 0 then 1 else 0 end)::numeric / sum(case when expected > 0 then 1 else 0 end)::numeric as availability
+	from public.feed_monitor_minute_summary
+	where (
+		date_of_journey= date_trunc('day', start_hour)::date
+		or 
+		date_of_journey= date_trunc('day', start_hour)::date - interval '1 day'
+	)
+	and received_interval >= end_hour - interval '1 day'
+	and received_interval < end_hour
+	and operator_noc in (select distinct operator_noc from temp_generate_feed_monitor_summary_all)
+	group by operator_noc;
+
+	--
+	-- Create a summary grouped by noc with latest outage and comparators from current summary
+	--
 	
 	drop table if exists temp_generate_feed_monitor_summary_by_noc;
 
 	create temporary table temp_generate_feed_monitor_summary_by_noc as 
-	with outage_summary as (
+	with outage_summary as ( -- generate summary of outages
 	select 
 		operator_noc,
 		outage_group,
@@ -485,7 +529,7 @@ begin
 	from temp_generate_feed_monitor_summary_all
 	where is_outage
 	),
-	last_outages as (
+	last_outages as ( --calculate when the last outage of the hour was created
 	select
 		operator_noc,
 		outage_group_length,
@@ -506,34 +550,13 @@ begin
 		is_unavailable
 	order by operator_noc, outage_group
 	),
-	update_frequencies as (
-		select
-			operator_noc,
-			case when sum(live_locations) = 0
-				then null
-			when sum(live_locations) is null
-				then null
-			else
-				round(
-					(
-						sum(actual::numeric) / sum(live_locations)
-					)
-					*60,
-					0
-				)
-			end as update_frequency,
-			sum(case when actual > 0 then 1 else 0 end)::numeric / sum(case when expected > 0 then 1 else 0 end)::numeric as availability
-		from
-		temp_generate_feed_monitor_summary_all
-		group by operator_noc
-	),
-	distinct_operators as (
+	minimum_expected_filter as (
 		select distinct operator_noc
-		from expected_operators
-		where date_of_journey >= current_date - interval '30 day'
+		from temp_generate_feed_monitor_summary_all
+		where minutes_with_expected >= consecutive_missing 
 	)
-	select 
-		dos.operator_noc,
+	select -- aggregate distinct operators with outages update frequencies and full join with existing records to ensure all data available
+		mef.operator_noc,
 		lo.outage_group_length as outage_length,
 		lo.outage_start,
 		lo.outage_end-lo.outage_start as outage_length_time,
@@ -545,14 +568,17 @@ begin
 		fms.unavailable_since as previous_unavailable_since,
 		fms.update_frequency as previous_update_frequency,
 		fms.availability as previous_availabiliy
-	from distinct_operators dos
+	from minimum_expected_filter mef
 	left join last_outages lo
-	on dos.operator_noc = lo.operator_noc
-	left join update_frequencies uf 
-	on dos.operator_noc = uf.operator_noc
-	full outer join public.feed_monitor_summary fms
-	on  dos.operator_noc = fms.operator_noc;
+	on mef.operator_noc=lo.operator_noc
+	left join temp_generate_feed_monitor_summary_update_frequencies uf 
+	on mef.operator_noc = uf.operator_noc
+	left join public.feed_monitor_summary fms
+	on  mef.operator_noc = fms.operator_noc;
 
+	--
+	-- Create update values to upsert into the feed monitoring summary
+	--
 
 	drop table if exists temp_generate_feed_monitor_new_values;
 
@@ -565,36 +591,35 @@ begin
 		else availability
 	end as availability,
 	case
-		when is_unavailable = false then null
+		when is_unavailable = false then null -- if its available then unset unavailable since
+		when is_unavailable is null then null -- if its available then unset unavailable since
 		when is_unavailable = true
 		then
 		case
 			when is_total_outage = true
 			then case
 				when previous_unavailable_since is not null
-					then previous_unavailable_since
-				else start_hour
+					then previous_unavailable_since -- if unavailable and total outage and there's a previous unavailable set here
+				else start_hour -- if unavailable and total outage and there's no previous unavailable set to star of calculated hour
 			end
-			else outage_start
-		end
-		when is_unavailable is null and availability is null
-		then case
-			when previous_unavailable_since is null 
-			then start_hour
-			else previous_unavailable_since
+			else outage_start  -- if unavailable and not total outage then the start of the last outage
 		end
 	end as unavailable_since,
 	case 
-		when is_unavailable = false or (is_unavailable is null and update_frequency is not null) then 
+		when is_unavailable = false or is_unavailable is null then 
 		case
-			when outage_start is not null then outage_start
-			else previous_last_outage
+			when outage_start is not null then outage_start -- if available and there's a last outage this hour then last outage
+			else 
+			case
+				when previous_unavailable_since is not null
+				then previous_unavailable_since -- if available and was previously unavailable then time of previous outage
+				else previous_last_outage -- or whatever previous last outage was
+			end
 		end	
 	end as last_outage
 	from temp_generate_feed_monitor_summary_by_noc
 	;
 
-	delete from public.feed_monitor_summary;
 
 	insert into public.feed_monitor_summary (
 		operator_noc,
@@ -609,7 +634,19 @@ begin
 		availability,
 		unavailable_since,
 		last_outage
-	from temp_generate_feed_monitor_new_values;
+	from temp_generate_feed_monitor_new_values
+	on conflict (operator_noc) do update set (
+		update_frequency,
+		availability,
+		unavailable_since,
+		last_outage
+	) = (
+		EXCLUDED.update_frequency,
+		EXCLUDED.availability,
+		EXCLUDED.unavailable_since,
+		EXCLUDED.last_outage	
+	)
+	;
 
 end;
 $procedure$
@@ -677,4 +714,4 @@ $procedure$
 
 alter procedure public.generate_feed_monitoring_daily_summary owner to abods_rw;
 
-select cron.schedule('update feed hourly stats', '15 0 * * *',  $$call public.generate_feed_monitoring_daily_summary();$$);
+select cron.schedule('update feed hourly stats', '15 1 * * *',  $$call public.generate_feed_monitoring_daily_summary();$$);
