@@ -528,6 +528,7 @@ begin
 		is_unavailable
 	from temp_generate_feed_monitor_summary_all
 	where is_outage
+	and outage_group_length >= consecutive_missing -- filter on configured minimum consecutive missing
 	),
 	last_outages as ( --calculate when the last outage of the hour was created
 	select
