@@ -169,9 +169,13 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
 class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
     avl_record = read_avl("FSRV9509052024-10-10.csv")[0]
     avl_record_2 = read_avl("FSRV9509052024-10-10.csv")[1]
+    avl_record_scem = read_avl("scem9132024-10-31.csv")[5]
     timetable = read_timetable("FSRV9509052024-10-10.json")
+    timetable_scem = read_timetable("scem9132024-10-31.json")
     route_details = timetable[avl_group_id(avl_record)]
+    route_details_scem = timetable_scem[avl_group_id(avl_record_scem)]
     final_stop_index = 19
+    final_stop_index_scem = 71
     group_stop_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 1,
         "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC)),
@@ -182,11 +186,28 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         "last_avl_index": 62,
         "last_avl_time": str(datetime(2024, 10, 10, 8, 25, 56, tzinfo=UTC)),
         "matched_stops": {
+            "13": {
+                "last_match_time": str(datetime(2024, 10, 10, 8, 24, 26, tzinfo=UTC)),
+            },
             "14": {
                 "last_match_time": str(datetime(2024, 10, 10, 8, 25, 6, tzinfo=UTC)),
             },
         },
         "potential_matches": {},
+    }
+    group_stop_history_scem = {  # noqa: RUF012 - BODS-7131
+        "last_avl_time": datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC),
+        "last_avl_index": 6,
+        "matched_stops": {
+            "3": {"last_match_time": datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC)},
+        },
+        "potential_matches": {  # noqa: RUF012 - BODS-7131
+            "2": {
+                "last_avl_index": 5,
+                "last_distance": 61.599382260785646,
+                "last_time_in_zone": str(datetime(2024, 10, 31, 8, 7, 56, tzinfo=UTC)),
+            },
+        },
     }
 
     def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
@@ -227,7 +248,31 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
                         ),
                     },
                 },
-                id="Drivers reaching stop 15 and there's one actual match",
+                id="Bus reaching stop 15 and there's one actual match",
+            ),
+            pytest.param(
+                avl_record_scem,
+                route_details_scem,
+                group_stop_history_scem,
+                6,
+                final_stop_index_scem,
+                {
+                    "2": {
+                        "last_avl_index": 6,
+                        "last_distance": 48.83984813250945,
+                        "last_time_in_zone": str(
+                            datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC),
+                        ),
+                    },
+                    "1": {
+                        "last_avl_index": 6,
+                        "last_distance": 53.71237107009338,
+                        "last_time_in_zone": str(
+                            datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC),
+                        ),
+                    },
+                },
+                id="Bus started early, matched with stop 3 and go back to the starting/end stop, final stop should not become a potential match",
             ),
         ],
     )
