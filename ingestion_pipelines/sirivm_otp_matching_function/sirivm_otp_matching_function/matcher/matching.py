@@ -3,11 +3,14 @@ from collections.abc import Sequence
 from datetime import datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
 
+import pyproj
 from aws_lambda_powertools import Logger
+from shapely import LineString, Point, intersection
 
 from .matcher_config import config
 from .models import (
     AVLRecord,
+    EstimatedMatch,
     GroupStopHistory,
     MatchedStop,
     PotentialMatch,
@@ -24,18 +27,24 @@ from .models import (
     stop_longitude,
     stop_timetable_id,
 )
-from .utils import (
-    get_otp_state,
-    get_time_difference,
-    timer,
-    validate_date,
-)
+from .utils import get_otp_state, get_time_difference, timer, validate_date
 
 logger = Logger()
 
 distance_threshold = config.get("distance_threshold")
 saved_matches_limit = config.get("saved_matches_limit")
 journey_stops_min_threshold = config.get("journey_stops_min_threshold")
+estimated_matching_intersection_limit = config.get(
+    "estimated_matching_intersection_limit",
+)
+estimated_matching_time_upper_limit_in_seconds = config.get(
+    "estimated_matching_time_upper_limit_in_seconds",
+)
+
+source_crs = pyproj.CRS("EPSG:4326")
+target_crs = pyproj.CRS("EPSG:27700")
+
+transformer = pyproj.Transformer.from_crs(source_crs, target_crs, always_xy=True)
 
 
 def create_matched_stop(last_time_in_zone: datetime) -> MatchedStop:
@@ -126,6 +135,74 @@ def get_lowest_matched_stop_index(group_stop_history: GroupStopHistory) -> int:
     return lowest_matched_stop_index
 
 
+def check_estimated_match(
+    avl: AVLRecord,
+    group_stop_history: GroupStopHistory,
+    stop: StopDetails,
+) -> EstimatedMatch | None:
+    previous_avl_time = validate_date(group_stop_history["last_avl_time"][:19])
+    current_avl_time = avl_recorded_at_time_utc(avl)
+
+    time_diff = (current_avl_time - previous_avl_time).total_seconds()
+
+    if time_diff > estimated_matching_time_upper_limit_in_seconds:
+        return None
+
+    previous_avl_location = Point(
+        transformer.transform(
+            group_stop_history["last_avl_longitude"],
+            group_stop_history["last_avl_latitude"],
+        ),
+    )
+
+    current_avl_location = Point(
+        transformer.transform(
+            avl["longitude"],
+            avl["latitude"],
+        ),
+    )
+
+    line_segment = LineString([previous_avl_location, current_avl_location])
+    circle_centre = Point(
+        transformer.transform(
+            stop_longitude(stop),
+            stop_latitude(stop),
+        ),
+    )
+
+    # create bounding circle around stop point
+    stop_circle = circle_centre.buffer(
+        distance_threshold,
+    ).boundary
+
+    stop_intersections = intersection(line_segment, stop_circle)
+
+    # check if the line intersects the circle twice
+    if (
+        stop_intersections.geom_type == "MultiPoint"
+        and stop_intersections.geoms
+        and len(stop_intersections.geoms) == 2  # noqa: PLR2004
+    ):
+        # second intersection will be the exit point from the bounding circle
+        _, exit_point = sorted(
+            stop_intersections.geoms,
+            key=lambda p: line_segment.project(p),
+        )
+
+        # get ratio of distance to exit point to the full line length
+        exit_time_factor = line_segment.project(exit_point) / line_segment.length
+
+        exit_time = previous_avl_time + timedelta(
+            seconds=exit_time_factor * time_diff,
+        )
+
+        return {
+            "last_time_in_zone": exit_time.isoformat(),
+        }
+
+    return None
+
+
 def find_potential_matches(
     avl: AVLRecord,
     route_details: RouteDetails,
@@ -146,8 +223,11 @@ def find_potential_matches(
 
     """
     # 11-12. get the stop index to start for finding potential matches
-    lowest_matched_stop_index = get_lowest_matched_stop_index(group_stop_history)
+    lowest_matched_stop_index = get_lowest_matched_stop_index(
+        group_stop_history,
+    )
     num_of_matched_stops = len(group_stop_history["matched_stops"])
+    estimated_matches: list[tuple[str, EstimatedMatch]] = []
     for i in range(int(lowest_matched_stop_index), final_stop_index + 1):
         # 12.1 Is there 1 actual match saved?
         # 12.2 Is the last stop index < 3 stops?
@@ -180,6 +260,24 @@ def find_potential_matches(
                 avl,
                 f"13. potential match (stop{i}) created: {group_stop_history['potential_matches'][str(i)]}",
             )
+        else:
+            estimated_match = check_estimated_match(
+                avl,
+                group_stop_history,
+                next_stop_details,
+            )
+
+            if estimated_match:
+                estimated_matches.append((str(i), estimated_match))
+
+    if len(estimated_matches) <= estimated_matching_intersection_limit:
+        for e in estimated_matches:
+            group_stop_history["estimated_matches"][e[0]] = e[1]
+
+    # update last avl time, longitude and latitude
+    group_stop_history["last_avl_time"] = str(avl_recorded_at_time_utc(avl))
+    group_stop_history["last_avl_longitude"] = avl["longitude"]
+    group_stop_history["last_avl_latitude"] = avl["latitude"]
 
 
 def check_update_first_stop(
@@ -718,8 +816,11 @@ def positions_timetable_lookup(
                 default_group_stop_history: GroupStopHistory = {
                     "last_avl_time": "",
                     "last_avl_index": 0,
+                    "last_avl_longitude": None,
+                    "last_avl_latitude": None,
                     "matched_stops": {},
                     "potential_matches": {},
+                    "estimated_matches": {},
                 }
                 stop_history[avl_group_id(avl)] = default_group_stop_history
             group_stop_history = stop_history[avl_group_id(avl)]
@@ -732,8 +833,6 @@ def positions_timetable_lookup(
                 # 4. increment last avl index by 1 and update the time
                 current_avl_index += 1
                 group_stop_history["last_avl_index"] = current_avl_index
-                # update last avl time
-                group_stop_history["last_avl_time"] = current_avl_time
                 log_specific(avl, f"avl index {current_avl_index}")
                 if len(group_stop_history["matched_stops"]) > 0:
                     # 6-10. Check if the bus is revisiting stop 1

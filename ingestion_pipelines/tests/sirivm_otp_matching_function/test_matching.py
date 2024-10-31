@@ -6,6 +6,7 @@ import pytest
 
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.matching import (
     check_update_first_stop,
+    find_estimated_matches,
     find_matches_in_potential_matches,
     find_potential_matches,
     move_potential_match_to_match,
@@ -19,9 +20,11 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
 )
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
     AVLRecord,
+    EstimatedMatch,
     GroupStopHistory,
     PotentialMatch,
     RouteDetails,
+    StopDetails,
     avl_group_id,
     avl_recorded_at_time_utc,
     stop_departure_time,
@@ -1810,3 +1813,48 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
         assert to_set_total == expected_to_set
         assert to_remove_total == expected_to_remove
         assert stop_history == expected_stop_history
+
+
+class TestFindEstimatedMatches:  # noqa: D101 - BODS-7131
+    avl_record = read_avl("FSRV9509052024-10-10.csv")[0]
+    avl_record_2 = read_avl("FSRV9509052024-10-10.csv")[2]
+    timetable = read_timetable("FSRV9509052024-10-10.json")
+    stop = timetable[avl_group_id(avl_record)]["1"]
+    print(stop)
+    final_stop_index = 19
+    group_stop_history = {  # noqa: RUF012 - BODS-7131
+        "last_avl_index": 1,
+        "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC)),
+        "last_avl_longitude": avl_record["longitude"],
+        "last_avl_latitude": avl_record["latitude"],
+        "matched_stops": {},
+        "potential_matches": {},
+        "estimated_matches": {},
+    }
+
+    @pytest.mark.parametrize(
+        (
+            "avl",
+            "stop",
+            "group_stop_history",
+            "expected_estimated_match",
+        ),
+        [
+            pytest.param(
+                avl_record_2,
+                stop,
+                group_stop_history,
+                None,
+                id="Drivers changing journey code early, reaching stop 15, no potential matches should be created",
+            ),
+        ],
+    )
+    def test_find_estimated_matches(  # noqa: D102
+        self,
+        avl: AVLRecord,
+        stop: StopDetails,
+        group_stop_history: GroupStopHistory,
+        expected_estimated_match: EstimatedMatch,
+    ):
+        estimated_match = find_estimated_matches(avl, group_stop_history, stop)
+        assert estimated_match == expected_estimated_match
