@@ -1847,14 +1847,17 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     from .data.expected.expected_results import (
         expected_remove_coac,
         expected_remove_scem,
+        expected_remove_coac30,
         expected_remove_slea,
         expected_remove_tlct,
         expected_set_coac,
         expected_set_scem,
+        expected_set_coac30,
         expected_set_slea,
         expected_set_tlct,
         expected_stop_history_coac,
         expected_stop_history_scem,
+        expected_stop_history_coac30,
         expected_stop_history_slea,
         expected_stop_history_tlct,
     )
@@ -1867,6 +1870,8 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     timetable_slea = read_timetable("sleait110302024-10-23.json")
     avl_list_scem = read_avl("scem9112024-10-31.csv")
     timetable_scem = read_timetable("scem9112024-10-31.json")
+    avl_list_coac30 = read_avl("coac9917102024-10-30.csv")
+    timetable_coac30 = read_timetable("coac9917102024-10-30.json")
 
     @pytest.mark.parametrize(
         (
@@ -1913,6 +1918,15 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
                 expected_remove_scem,
                 expected_stop_history_scem,
                 id="Bus starting early",
+            ),
+            pytest.param(
+                timetable_coac30,
+                avl_list_coac30,
+                {},
+                expected_set_coac30,
+                expected_remove_coac30,
+                expected_stop_history_coac30,
+                id="Circular route, bus matching a higher index but its last time in zone is earlier than the highest index match time, it should delete the potential match",
             ),
         ],
     )

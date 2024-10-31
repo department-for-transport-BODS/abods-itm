@@ -624,9 +624,15 @@ def move_potential_match_to_match(
         # 20. when the new match index is lower than the highest index saved
         # 28,29. Will this new match be the (saved match limit + 1) actual match saved and Is this new match the lowest index
         # 29.1 Do the two actual match index's saved have a difference of 1
-        if int(pm_index) <= lowest_matched_stop_index and (
-            len(matched_stops) == saved_matches_limit
-            or highest_matched_stop_index - lowest_matched_stop_index == 1
+        if (
+            int(pm_index) <= lowest_matched_stop_index
+            and (
+                len(matched_stops) == saved_matches_limit
+                or highest_matched_stop_index - lowest_matched_stop_index == 1
+            )
+        ) or (
+            int(pm_index) > highest_matched_stop_index
+            and int(pm_index) != new_highest_matched_stop_index
         ):
             log_specific(
                 avl,
