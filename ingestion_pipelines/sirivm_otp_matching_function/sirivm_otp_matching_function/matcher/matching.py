@@ -153,7 +153,7 @@ def find_potential_matches(
         # 12.2 Is the last stop index < 3 stops?
         # 12.3 Is this index less than 3/4*last stop index?
         if (
-            num_of_matched_stops == 0
+            num_of_matched_stops <= 1
             and final_stop_index > journey_stops_min_threshold
             and i > int(final_stop_index * 3 / 4)
         ):
