@@ -140,10 +140,16 @@ def check_estimated_match(
     group_stop_history: GroupStopHistory,
     stop: StopDetails,
 ) -> EstimatedMatch | None:
-    previous_avl_time = validate_date(group_stop_history["last_avl_time"][:19])
-    current_avl_time = avl_recorded_at_time_utc(avl)
+    if (
+        not group_stop_history["last_avl_longitude"]
+        or not group_stop_history["last_avl_latitude"]
+        or not group_stop_history["last_avl_time"]
+    ):
+        return None
 
-    time_diff = (current_avl_time - previous_avl_time).total_seconds()
+    previous_avl_time = validate_date(group_stop_history["last_avl_time"][:19])
+
+    time_diff = (avl_recorded_at_time_utc(avl) - previous_avl_time).total_seconds()
 
     if time_diff > estimated_matching_time_upper_limit_in_seconds:
         return None
@@ -156,18 +162,12 @@ def check_estimated_match(
     )
 
     current_avl_location = Point(
-        transformer.transform(
-            avl["longitude"],
-            avl["latitude"],
-        ),
+        transformer.transform(avl["longitude"], avl["latitude"]),
     )
 
     line_segment = LineString([previous_avl_location, current_avl_location])
     circle_centre = Point(
-        transformer.transform(
-            stop_longitude(stop),
-            stop_latitude(stop),
-        ),
+        transformer.transform(stop_longitude(stop), stop_latitude(stop)),
     )
 
     # create bounding circle around stop point
@@ -227,7 +227,7 @@ def find_potential_matches(
         group_stop_history,
     )
     num_of_matched_stops = len(group_stop_history["matched_stops"])
-    estimated_matches: list[tuple[str, EstimatedMatch]] = []
+
     for i in range(int(lowest_matched_stop_index), final_stop_index + 1):
         # 12.1 Is there 1 actual match saved?
         # 12.2 Is the last stop index < 3 stops?
@@ -268,11 +268,15 @@ def find_potential_matches(
             )
 
             if estimated_match:
-                estimated_matches.append((str(i), estimated_match))
-
-    if len(estimated_matches) <= estimated_matching_intersection_limit:
-        for e in estimated_matches:
-            group_stop_history["estimated_matches"][e[0]] = e[1]
+                logger.info(
+                    "Estimated match found",
+                    extra={
+                        "stop_index": i,
+                        "last_avl_time": group_stop_history["last_avl_time"],
+                        "current_avl_time": avl["recorded_at_time"],
+                        "last_time_in_zone": estimated_match["last_time_in_zone"],
+                    },
+                )
 
     # update last avl time, longitude and latitude
     group_stop_history["last_avl_time"] = str(avl_recorded_at_time_utc(avl))
@@ -820,7 +824,6 @@ def positions_timetable_lookup(
                     "last_avl_latitude": None,
                     "matched_stops": {},
                     "potential_matches": {},
-                    "estimated_matches": {},
                 }
                 stop_history[avl_group_id(avl)] = default_group_stop_history
             group_stop_history = stop_history[avl_group_id(avl)]

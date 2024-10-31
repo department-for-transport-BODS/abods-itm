@@ -5,8 +5,8 @@ from unittest import mock
 import pytest
 
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.matching import (
+    check_estimated_match,
     check_update_first_stop,
-    find_estimated_matches,
     find_matches_in_potential_matches,
     find_potential_matches,
     move_potential_match_to_match,
@@ -178,12 +178,16 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
     group_stop_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 1,
         "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC)),
+        "last_avl_longitude": None,
+        "last_avl_latitude": None,
         "matched_stops": {},
         "potential_matches": {},
     }
     group_stop_history_2 = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 62,
         "last_avl_time": str(datetime(2024, 10, 10, 8, 25, 56, tzinfo=UTC)),
+        "last_avl_longitude": None,
+        "last_avl_latitude": None,
         "matched_stops": {
             "14": {
                 "last_match_time": str(datetime(2024, 10, 10, 8, 25, 6, tzinfo=UTC)),
@@ -1815,46 +1819,91 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
         assert stop_history == expected_stop_history
 
 
-class TestFindEstimatedMatches:  # noqa: D101 - BODS-7131
-    avl_record = read_avl("FSRV9509052024-10-10.csv")[0]
-    avl_record_2 = read_avl("FSRV9509052024-10-10.csv")[2]
-    timetable = read_timetable("FSRV9509052024-10-10.json")
-    stop = timetable[avl_group_id(avl_record)]["1"]
-    print(stop)
-    final_stop_index = 19
-    group_stop_history = {  # noqa: RUF012 - BODS-7131
-        "last_avl_index": 1,
-        "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC)),
-        "last_avl_longitude": avl_record["longitude"],
-        "last_avl_latitude": avl_record["latitude"],
-        "matched_stops": {},
-        "potential_matches": {},
-        "estimated_matches": {},
-    }
-
+class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
     @pytest.mark.parametrize(
         (
             "avl",
-            "stop",
             "group_stop_history",
+            "stop",
             "expected_estimated_match",
         ),
         [
             pytest.param(
-                avl_record_2,
-                stop,
-                group_stop_history,
+                {
+                    "longitude": -1.648382,
+                    "latitude": 53.817693,
+                    "recorded_at_time": str(
+                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
+                    ),
+                },
+                {
+                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
+                    "last_avl_longitude": -1.659246,
+                    "last_avl_latitude": 53.822937,
+                },
+                ((53.820328, -1.654394), 0),
+                {"last_time_in_zone": "2024-10-10T07:49:26.153817+00:00"},
+                id="Line between 2 AVL points on straight road gives an estimated match",
+            ),
+            pytest.param(
+                {
+                    "longitude": -1.654394,
+                    "latitude": 53.820328,
+                    "recorded_at_time": str(
+                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
+                    ),
+                },
+                {
+                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
+                    "last_avl_longitude": -1.659246,
+                    "last_avl_latitude": 53.822937,
+                },
+                ((53.820328, -1.654394), 0),
                 None,
-                id="Drivers changing journey code early, reaching stop 15, no potential matches should be created",
+                id="AVL point within stop zone does not give estimated match",
+            ),
+            pytest.param(
+                {
+                    "longitude": -1.648382,
+                    "latitude": 53.817693,
+                    "recorded_at_time": str(
+                        datetime(2024, 10, 10, 7, 50, 40, tzinfo=UTC),
+                    ),
+                },
+                {
+                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
+                    "last_avl_longitude": -1.659246,
+                    "last_avl_latitude": 53.822937,
+                },
+                ((53.820328, -1.654394), 0),
+                None,
+                id="Longer than threshold time between AVL stops does not give estimated match",
+            ),
+            pytest.param(
+                {
+                    "longitude": -1.648382,
+                    "latitude": 53.817693,
+                    "recorded_at_time": str(
+                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
+                    ),
+                },
+                {
+                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
+                    "last_avl_longitude": None,
+                    "last_avl_latitude": None,
+                },
+                ((53.820328, -1.654394), 0),
+                None,
+                id="No previous AVL does not give estimated match",
             ),
         ],
     )
-    def test_find_estimated_matches(  # noqa: D102
+    def test_find_estimated_matches(  # noqa: D102 - BODS-7131
         self,
         avl: AVLRecord,
-        stop: StopDetails,
         group_stop_history: GroupStopHistory,
+        stop: StopDetails,
         expected_estimated_match: EstimatedMatch,
     ):
-        estimated_match = find_estimated_matches(avl, group_stop_history, stop)
+        estimated_match = check_estimated_match(avl, group_stop_history, stop)
         assert estimated_match == expected_estimated_match
