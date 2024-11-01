@@ -1846,18 +1846,18 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
 class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     from .data.expected.expected_results import (
         expected_remove_coac,
-        expected_remove_scem,
         expected_remove_coac30,
+        expected_remove_scem,
         expected_remove_slea,
         expected_remove_tlct,
         expected_set_coac,
-        expected_set_scem,
         expected_set_coac30,
+        expected_set_scem,
         expected_set_slea,
         expected_set_tlct,
         expected_stop_history_coac,
-        expected_stop_history_scem,
         expected_stop_history_coac30,
+        expected_stop_history_scem,
         expected_stop_history_slea,
         expected_stop_history_tlct,
     )
