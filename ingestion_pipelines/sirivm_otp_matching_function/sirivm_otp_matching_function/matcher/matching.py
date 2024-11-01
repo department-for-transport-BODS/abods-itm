@@ -153,7 +153,7 @@ def find_potential_matches(
         # 12.2 Is the last stop index < 3 stops?
         # 12.3 Is this index less than 3/4*last stop index?
         if (
-            num_of_matched_stops == 0
+            num_of_matched_stops <= 1
             and final_stop_index > journey_stops_min_threshold
             and i > int(final_stop_index * 3 / 4)
         ):
@@ -640,10 +640,10 @@ def move_potential_match_to_match(
             int(pm_index) > lowest_matched_stop_index or len(matched_stops) == 1
         ):
             # 29.2 is the last stop in the matched stops ordered by recorded_at_time the final stop of the journey?
-            if int(list(matched_stops.keys())[-1]) == final_stop_index:
+            if new_highest_matched_stop_index == final_stop_index:
                 log_specific(
                     avl,
-                    f"last matched stop {list(matched_stops.keys())[-1]} is final stop, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
+                    f"last matched stop in new match sequence {new_highest_matched_stop_index} is final stop, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
                 )
                 del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
             else:
