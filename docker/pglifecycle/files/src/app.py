@@ -6,24 +6,21 @@ from utils.db import (
     build_conn_opts,
     create_database_sql,
     create_extension_sql,
-    create_monitoring_function_sql,
     create_role_sql,
     create_schema_sql,
     create_server_sql,
     create_user_sql,
     create_user_mapping_sql,
+    grant_privileges,
+    log_and_execute,
+    process_entities,
+    remove_datadog_monitoring,
+    setup_datadog_monitoring,
 )
 from utils.logger import log
 
 
 def destroy(conn_opts: dict, event):
-    def log_and_execute(con, sql, success_msg, error_msg=None):
-        try:
-            con.execute_sql(sql)
-            log.info(success_msg)
-        except Exception as e:
-            log.error(error_msg if error_msg else str(e))
-
     log.info(f"""DATABASE DESTROY
     Target Database: {event["targetDatabase"]}
     Role(s) to be Destroyed: {", ".join(event["roles"])}""")
@@ -44,6 +41,8 @@ def destroy(conn_opts: dict, event):
                     f"Role {role} dropped successfully",
                     f"Error dropping role {role}",
                 )
+
+            remove_datadog_monitoring(con)
     except Error as e:  # noqa: F821 - BODS-7131
         log.error(f"An error occurred: {e}")
         return False
@@ -53,146 +52,25 @@ def destroy(conn_opts: dict, event):
 
 
 def initialise(conn_opts: dict, event):
-    def log_and_execute(con, sql, success_msg, error_msg=None):
-        try:
-            con.execute_sql(sql)
-            log.info(success_msg)
-        except Exception as e:
-            log.error(error_msg if error_msg else str(e))
-
-    def process_entities(
-        con, entities_to_create, create_sql_func, entity_type, existing_entities=None
-    ):
-        if existing_entities is None:
-            existing_entities = []
-
-        for entity in entities_to_create:
-            if all(isinstance(item, dict) for item in entities_to_create):
-                entity_name = entity["name"]
-            elif all(isinstance(item, str) for item in entities_to_create):
-                entity_name = entity
-            else:
-                raise TypeError("entities_to_create must be either a dict or a list")
-
-            if entity_name not in existing_entities:
-                create_sql, success_msg = create_sql_func(entity)
-                log_and_execute(
-                    con,
-                    create_sql,
-                    success_msg,
-                    f"Error creating {entity_type} {entity_name}",
-                )
-            else:
-                log.warning(f"{entity_type.capitalize()} {entity_name} already exists")
-
-    def grant_privileges(
-        con, role_name, database_name, role_kind, schemas, role_schemas
-    ):
-        if role_schemas is None:
-            role_schemas = []
-
-        if role_kind == "ro":
-            log_and_execute(
-                con,
-                f"GRANT CONNECT ON DATABASE {database_name} TO {role_name}",
-                f"Granted CONNECT on {database_name} to {role_name}",
-            )
-            for schema in schemas + role_schemas:
-                log_and_execute(
-                    con,
-                    f"GRANT USAGE ON SCHEMA {schema} TO {role_name}",
-                    f"Granted USAGE on schema {schema} to {role_name}",
-                )
-                log_and_execute(
-                    con,
-                    f"GRANT SELECT ON ALL TABLES IN SCHEMA {schema} TO {role_name}",
-                    f"Granted SELECT on all tables in schema {schema} to {role_name}",
-                )
-                log_and_execute(
-                    con,
-                    f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT SELECT ON TABLES TO {role_name}",
-                    f"Defaulted grant for SELECT on all tables in schema {schema} to {role_name}",
-                )
-                log_and_execute(
-                    con,
-                    f"GRANT SELECT ON ALL SEQUENCES IN SCHEMA {schema} TO {role_name}",
-                    f"Granted SELECT on all sequences in schema {schema} to {role_name}",
-                )
-                log_and_execute(
-                    con,
-                    f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT SELECT ON SEQUENCES TO {role_name}",
-                    f"Defaulted grant for SELECT on all sequences in schema {schema} to {role_name}",
-                )
-                log_and_execute(
-                    con,
-                    f"REVOKE CREATE ON SCHEMA {schema} FROM {role_name};",
-                    f"Revoked CREATE on schema {schema} from {role_name}",
-                )
-
-        elif role_kind == "rw":
-            log_and_execute(
-                con,
-                f"GRANT ALL PRIVILEGES ON DATABASE {database_name} TO {role_name}",
-                f"Granted ALL privileges on {database_name} to {role_name}",
-            )
-            for schema in schemas + role_schemas:
-                log_and_execute(
-                    con,
-                    f"GRANT ALL ON SCHEMA {schema} TO {role_name}",
-                    f"Granted ALL on schema {schema} to {role_name}",
-                )
-                log_and_execute(
-                    con,
-                    f"GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA {schema} TO {role_name}",
-                    f"Granted ALL privileges on all tables in schema {schema} to {role_name}",
-                )
-                log_and_execute(
-                    con,
-                    f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT ALL ON TABLES TO {role_name}",
-                    f"Defaulted grant for ALL on all tables in schema {schema} to {role_name}",
-                )
-                log_and_execute(
-                    con,
-                    f"GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA {schema} TO {role_name}",
-                    f"Granted ALL privileges on all functions in schema {schema} to {role_name}",
-                )
-                log_and_execute(
-                    con,
-                    f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT ALL ON FUNCTIONS TO {role_name}",
-                    f"Defaulted grant for ALL on all functions in schema {schema} to {role_name}",
-                )
-                log_and_execute(
-                    con,
-                    f"GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA {schema} TO {role_name}",
-                    f"Granted ALL privileges on all sequences in schema {schema} to {role_name}",
-                )
-                log_and_execute(
-                    con,
-                    f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT ALL ON SEQUENCES TO {role_name}",
-                    f"Defaulted grant for ALL on all sequences in schema {schema} to {role_name}",
-                )
-
-        elif role_kind == "monitoring":
-            for schema in schemas + role_schemas:
-                log_and_execute(
-                    con,
-                    f"GRANT USAGE ON SCHEMA {schema} TO {role_name}",
-                    f"Granted USAGE on schema {schema} to {role_name}",
-                )
-
     log.info(f"""DATABASE INITIALISATION
     Target Database(s): {", ".join(database["name"] for database in event["databases"])}
     Role(s) to be Created: {", ".join(role["name"] for role in event["roles"])}""")
+
+    monitoring_opts = (
+        event["datadogMonitoring"]
+        if "datadogMonitoring" in event
+        else json.loads('{"enabled": false}')
+    )
+
     try:
-        monitoring_opts = (
-            event["datadogMonitoring"]
-            if "datadogMonitoring" in event
-            else json.loads('{"enabled": false}')
-        )
         with DatabaseUtils(**conn_opts) as con:
             existing_databases = [
                 row[0] for row in con.execute_sql("SELECT datname from pg_database;", 2)
             ]
+            existing_roles = [
+                row[0] for row in con.execute_sql("SELECT rolname FROM pg_roles;", 2)
+            ]
+
             process_entities(
                 con,
                 event["databases"],
@@ -200,9 +78,6 @@ def initialise(conn_opts: dict, event):
                 "database",
                 existing_databases,
             )
-            existing_roles = [
-                row[0] for row in con.execute_sql("SELECT rolname FROM pg_roles;", 2)
-            ]
             process_entities(
                 con, event["roles"], create_role_sql, "role", existing_roles
             )
@@ -212,39 +87,21 @@ def initialise(conn_opts: dict, event):
                 )
 
             if monitoring_opts["enabled"]:
-                log.info("Enabling DataDog Monitoring. Using database [postgres]")
-                process_entities(
+                database_name = con.execute_sql(
+                    "SELECT current_database();",
+                    1,
+                )
+                existing_schemas = [
+                    row[0]
+                    for row in con.execute_sql("SELECT nspname FROM pg_namespace", 2)
+                ]
+                setup_datadog_monitoring(
                     con,
-                    [
-                        dict(
-                            monitoring_opts,
-                            **{"name": "datadog", "roleName": "pg_monitor"},
-                        )
-                    ],
-                    create_user_sql,
-                    "user",
+                    database_name,
                     existing_roles,
-                )
-                process_entities(con, ["datadog"], create_schema_sql, "schema")
-                grant_privileges(
-                    con,
-                    "datadog",
-                    "postgres",
-                    "monitoring",
-                    ["public", "datadog"],
-                    None,
-                )
-                process_entities(
-                    con,
-                    ["pg_stat_statements:public"],
-                    create_extension_sql,
-                    "extension",
-                )
-                process_entities(
-                    con,
-                    ["datadog"],
-                    create_monitoring_function_sql,
-                    "monitoring function",
+                    existing_schemas,
+                    monitoring_opts,
+                    create_role=True,
                 )
 
     except Exception as e:
@@ -257,6 +114,13 @@ def initialise(conn_opts: dict, event):
         conn_opts.update({"dbname": database_name})
         try:
             with DatabaseUtils(**conn_opts) as con:
+                existing_servers = [
+                    row[0]
+                    for row in con.execute_sql(
+                        "SELECT srvname from pg_foreign_server;", 2
+                    )
+                ]
+
                 log_and_execute(
                     con,
                     "REVOKE ALL PRIVILEGES ON SCHEMA public FROM PUBLIC;",
@@ -266,13 +130,6 @@ def initialise(conn_opts: dict, event):
                 process_entities(
                     con, database["extensions"], create_extension_sql, "extension"
                 )
-
-                existing_servers = [
-                    row[0]
-                    for row in con.execute_sql(
-                        "SELECT srvname from pg_foreign_server;", 2
-                    )
-                ]
                 process_entities(
                     con,
                     database["servers"],
@@ -311,29 +168,19 @@ def initialise(conn_opts: dict, event):
                     )
 
                 if monitoring_opts["enabled"]:
-                    log.info(
-                        f"Enabling DataDog Monitoring. Using database [{database_name}]"
-                    )
-                    process_entities(con, ["datadog"], create_schema_sql, "schema")
-                    grant_privileges(
+                    existing_schemas = [
+                        row[0]
+                        for row in con.execute_sql(
+                            "SELECT nspname FROM pg_namespace", 2
+                        )
+                    ]
+                    setup_datadog_monitoring(
                         con,
-                        "datadog",
-                        "postgres",
-                        "monitoring",
-                        ["public", "datadog"],
+                        database_name,
                         None,
-                    )
-                    process_entities(
-                        con,
-                        ["pg_stat_statements:public"],
-                        create_extension_sql,
-                        "extension",
-                    )
-                    process_entities(
-                        con,
-                        ["datadog"],
-                        create_monitoring_function_sql,
-                        "monitoring function",
+                        existing_schemas,
+                        monitoring_opts,
+                        create_role=False,
                     )
 
         except Exception as e:
