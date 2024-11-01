@@ -1254,12 +1254,15 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
     avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
     avl_record_2 = read_avl("COAC4116302024-10-17.csv")[7]
     avl_record_3 = read_avl("sleait110302024-10-23.csv")[7]
+    avl_record_4 = read_avl("scem9132024-10-31.csv")[98]
     timetable = read_timetable("TLCT37812152024-08-20.json")
     timetable_2 = read_timetable("COAC4116302024-10-17.json")
     timetable_3 = read_timetable("sleait110302024-10-23.json")
+    timetable_4 = read_timetable("scem9132024-10-31.json")
     group_id = "tlct|378|1215|2024-08-20"
-    final_stop_index = "41"
-    final_stop_index_2 = "34"
+    final_stop_index = 41
+    final_stop_index_2 = 34
+    final_stop_index_4 = 71
     pm_details_1 = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 3,
         "last_distance": 75.1243252308765,
@@ -1441,6 +1444,28 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_time_in_zone": str(
                     datetime(2024, 10, 23, 15, 39, 33, tzinfo=UTC),
                 ),
+            },
+        },
+    }
+    pm_details_7 = {  # noqa: RUF012 - BODS-7131
+        "last_avl_index": 97,
+        "last_distance": 37.80104206056258,
+        "last_time_in_zone": str(datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC)),
+    }
+    group_stop_history_7 = {  # noqa: RUF012 - BODS-7131
+        "last_avl_time": str(datetime(2024, 10, 31, 8, 39, 43, tzinfo=UTC)),
+        "last_avl_index": 99,
+        "matched_stops": {
+            "3": {"last_match_time": str(datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC))},
+            "71": {
+                "last_match_time": str(datetime(2024, 10, 31, 8, 36, 21, tzinfo=UTC)),
+            },
+        },
+        "potential_matches": {
+            "70": {
+                "last_avl_index": 98,
+                "last_distance": 73.61235793637137,
+                "last_time_in_zone": str(datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC)),
             },
         },
     }
@@ -1733,6 +1758,55 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 },
                 [],
                 id="bus going from A to B to A again, A should not be rematched",
+            ),
+            pytest.param(
+                final_stop_index_4,
+                timetable_4,
+                avl_record_4,
+                "70",
+                pm_details_7,
+                group_stop_history_7,
+                [],
+                [],
+                [],  # stop_pos_distances_remove
+                ["70"],  # expected_potential_matches_to_delete
+                [
+                    {"timetable_id": 1231325785, "group_id": "scem|9|13|2024-10-31"},
+                ],  # expected_stop_pos_distances_remove
+                {
+                    "3": {
+                        "last_match_time": str(
+                            datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC),
+                        ),
+                    },
+                    "70": {
+                        "last_match_time": str(
+                            datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC),
+                        ),
+                    },
+                },
+                [
+                    {
+                        "batch_id": 591355,
+                        "group_id": "scem|9|13|2024-10-31",
+                        "last_time_in_zone": datetime(
+                            2024,
+                            10,
+                            31,
+                            8,
+                            39,
+                            3,
+                            tzinfo=UTC,
+                        ),
+                        "last_time_in_zone_str": "08:39:03",
+                        "otp_state": "Early",
+                        "stop_index": "70",
+                        "stop_type": "Non-final",
+                        "time_difference": -4377.0,
+                        "timetable_id": 1231325656,
+                    },
+                ],
+                id="bus matched final stops, then non-final stop, the final stop match should be removed",
             ),
         ],
     )
