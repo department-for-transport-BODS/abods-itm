@@ -3,9 +3,7 @@ from collections.abc import Sequence
 from datetime import datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
 
-import pyproj
 from aws_lambda_powertools import Logger
-from shapely import LineString, Point, intersection
 
 from .matcher_config import config
 from .models import (
@@ -27,24 +25,24 @@ from .models import (
     stop_longitude,
     stop_timetable_id,
 )
-from .utils import get_otp_state, get_time_difference, timer, validate_date
+from .utils import (
+    create_boundary,
+    create_line_string,
+    create_point,
+    get_otp_state,
+    get_time_difference,
+    timer,
+    validate_date,
+)
 
 logger = Logger()
 
 distance_threshold = config.get("distance_threshold")
 saved_matches_limit = config.get("saved_matches_limit")
 journey_stops_min_threshold = config.get("journey_stops_min_threshold")
-estimated_matching_intersection_limit = config.get(
-    "estimated_matching_intersection_limit",
-)
 estimated_matching_time_upper_limit_in_seconds = config.get(
     "estimated_matching_time_upper_limit_in_seconds",
 )
-
-source_crs = pyproj.CRS("EPSG:4326")
-target_crs = pyproj.CRS("EPSG:27700")
-
-transformer = pyproj.Transformer.from_crs(source_crs, target_crs, always_xy=True)
 
 
 def create_matched_stop(last_time_in_zone: datetime) -> MatchedStop:
@@ -140,6 +138,16 @@ def check_estimated_match(
     group_stop_history: GroupStopHistory,
     stop: StopDetails,
 ) -> EstimatedMatch | None:
+    """
+    Check if there is an estimated match between the current and previous avl points
+
+    Args:
+    ----
+        avl (AVLRecord): Avl record
+        group_stop_history (GroupStopHistory): Stop history of the current group id
+        stop (StopDetails): Stop to check for match against
+
+    """
     if (
         not group_stop_history["last_avl_longitude"]
         or not group_stop_history["last_avl_latitude"]
@@ -154,53 +162,48 @@ def check_estimated_match(
     if time_diff > estimated_matching_time_upper_limit_in_seconds:
         return None
 
-    previous_avl_location = Point(
-        transformer.transform(
-            group_stop_history["last_avl_longitude"],
-            group_stop_history["last_avl_latitude"],
-        ),
+    previous_avl_location = create_point(
+        group_stop_history["last_avl_longitude"],
+        group_stop_history["last_avl_latitude"],
     )
 
-    current_avl_location = Point(
-        transformer.transform(avl["longitude"], avl["latitude"]),
-    )
+    current_avl_location = create_point(avl["longitude"], avl["latitude"])
 
-    line_segment = LineString([previous_avl_location, current_avl_location])
-    circle_centre = Point(
-        transformer.transform(stop_longitude(stop), stop_latitude(stop)),
-    )
+    line_segment = create_line_string(previous_avl_location, current_avl_location)
 
     # create bounding circle around stop point
-    stop_circle = circle_centre.buffer(
+    stop_circle = create_boundary(
+        stop_longitude(stop),
+        stop_latitude(stop),
         distance_threshold,
-    ).boundary
+    )
 
-    stop_intersections = intersection(line_segment, stop_circle)
+    stop_intersections = line_segment.intersection(stop_circle)
 
     # check if the line intersects the circle twice
     if (
-        stop_intersections.geom_type == "MultiPoint"
-        and stop_intersections.geoms
-        and len(stop_intersections.geoms) == 2  # noqa: PLR2004
+        stop_intersections.geom_type != "MultiPoint"
+        or not stop_intersections.geoms
+        or len(stop_intersections.geoms) != 2  # noqa: PLR2004
     ):
-        # second intersection will be the exit point from the bounding circle
-        _, exit_point = sorted(
-            stop_intersections.geoms,
-            key=lambda p: line_segment.project(p),
-        )
+        return None
 
-        # get ratio of distance to exit point to the full line length
-        exit_time_factor = line_segment.project(exit_point) / line_segment.length
+    # second intersection will be the exit point from the bounding circle
+    _, exit_point = sorted(
+        stop_intersections.geoms,
+        key=lambda p: line_segment.project(p),
+    )
 
-        exit_time = previous_avl_time + timedelta(
-            seconds=exit_time_factor * time_diff,
-        )
+    # get ratio of distance to exit point to the full line length
+    exit_time_factor = line_segment.project(exit_point) / line_segment.length
 
-        return {
-            "last_time_in_zone": exit_time.isoformat(),
-        }
+    exit_time = previous_avl_time + timedelta(
+        seconds=exit_time_factor * time_diff,
+    )
 
-    return None
+    return {
+        "last_time_in_zone": exit_time.isoformat(),
+    }
 
 
 def find_potential_matches(
