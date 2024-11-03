@@ -20,7 +20,7 @@ RAISE NOTICE 'Updating distinct_routes for % at %', partition_date, clock_timest
 
 RAISE NOTICE 'Creating temp_distinct_route_calcs for % at %', partition_date, clock_timestamp();
 
-drop table if exists temp_distinct_route_calcs;
+drop table if exists temp_distinct_route_calc;
 create temporary table temp_distinct_route_calc as   
 select
     distinct 
@@ -63,7 +63,7 @@ select distinct
 	dr.id,
 	ter.noc_and_line_and_servicecode
 from temp_distinct_route_calc ter
-left join public.distinct_routes_test dr
+join public.distinct_routes dr
 on dr.route = ter.route
 on conflict(
 	distinct_route_id,
@@ -74,3 +74,5 @@ RAISE NOTICE 'Done at %', clock_timestamp();
 
 end; 
 $$;
+
+
