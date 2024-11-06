@@ -5,7 +5,6 @@ from unittest import mock
 import pytest
 
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.matching import (
-    check_estimated_match,
     check_update_first_stop,
     find_matches_in_potential_matches,
     find_potential_matches,
@@ -20,11 +19,9 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
 )
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
     AVLRecord,
-    EstimatedMatch,
     GroupStopHistory,
     PotentialMatch,
     RouteDetails,
-    StopDetails,
     avl_group_id,
     avl_recorded_at_time_utc,
     stop_departure_time,
@@ -182,16 +179,12 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
     group_stop_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 1,
         "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC)),
-        "last_avl_longitude": None,
-        "last_avl_latitude": None,
         "matched_stops": {},
         "potential_matches": {},
     }
     group_stop_history_2 = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 62,
         "last_avl_time": str(datetime(2024, 10, 10, 8, 25, 56, tzinfo=UTC)),
-        "last_avl_longitude": None,
-        "last_avl_latitude": None,
         "matched_stops": {
             "13": {
                 "last_match_time": str(datetime(2024, 10, 10, 8, 24, 26, tzinfo=UTC)),
@@ -203,10 +196,8 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         "potential_matches": {},
     }
     group_stop_history_scem = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC)),
+        "last_avl_time": datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC),
         "last_avl_index": 6,
-        "last_avl_latitude": 51.565052,
-        "last_avl_longitude": -1.784906,
         "matched_stops": {
             "3": {"last_match_time": datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC)},
         },
@@ -233,6 +224,32 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
             "expected_potential_matches",
         ),
         [
+            pytest.param(
+                avl_record,
+                route_details,
+                group_stop_history,
+                1,
+                final_stop_index,
+                {},
+                id="Drivers changing journey code early, reaching stop 15, no potential matches should be created",
+            ),
+            pytest.param(
+                avl_record_2,
+                route_details,
+                group_stop_history_2,
+                62,
+                final_stop_index,
+                {
+                    "15": {
+                        "last_avl_index": 62,
+                        "last_distance": 13.738176401886017,
+                        "last_time_in_zone": str(
+                            datetime(2024, 10, 10, 8, 25, 56, tzinfo=UTC),
+                        ),
+                    },
+                },
+                id="Bus reaching stop 15 and there's one actual match",
+            ),
             pytest.param(
                 avl_record_scem,
                 route_details_scem,
@@ -826,34 +843,24 @@ class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
 
     def test_remove_matched_stops(self):  # noqa: D102 - BODS-7131
         group_stop_history = {
-            "last_avl_time": str(
-                datetime(2024, 9, 1, 11, 34, 37),
-            ),
+            "last_avl_time": str(datetime(2024, 9, 1, 11, 34, 37)),  # noqa: DTZ001 - BODS-7131
             "last_avl_index": 6,
             "matched_stops": {
-                "1": {
-                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5)),
-                },
+                "1": {"last_match_time": str(datetime(2024, 9, 1, 11, 32, 5))},  # noqa: DTZ001 - BODS-7131
             },
             "potential_matches": {
                 "2": {
                     "last_avl_index": 6,
                     "last_distance": 58.596598093401845,
-                    "last_time_in_zone": str(
-                        datetime(2024, 9, 1, 11, 34, 37),
-                    ),
+                    "last_time_in_zone": str(datetime(2024, 9, 1, 11, 34, 37)),  # noqa: DTZ001 - BODS-7131
                 },
             },
         }
         expected_group_stop_history = {
-            "last_avl_time": str(
-                datetime(2024, 9, 1, 11, 34, 37),
-            ),
+            "last_avl_time": str(datetime(2024, 9, 1, 11, 34, 37)),  # noqa: DTZ001 - BODS-7131
             "last_avl_index": 6,
             "matched_stops": {
-                "1": {
-                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5)),
-                },
+                "1": {"last_match_time": str(datetime(2024, 9, 1, 11, 32, 5))},  # noqa: DTZ001 - BODS-7131
             },
             "potential_matches": {},
         }
@@ -867,20 +874,16 @@ class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
 class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
     avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
     pm_index = "1"
-    last_time_in_zone = datetime(2024, 9, 1, 11, 32, 5)
+    last_time_in_zone = datetime(2024, 9, 1, 11, 32, 5)  # noqa: DTZ001 - BODS-7131
     group_stop_history = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(
-            datetime(2024, 9, 1, 11, 30, 57),
-        ),
+        "last_avl_time": str(datetime(2024, 9, 1, 11, 30, 57)),  # noqa: DTZ001 - BODS-7131
         "last_avl_index": 3,
         "matched_stops": {},
         "potential_matches": {
             "1": {
                 "last_avl_index": 3,
                 "last_distance": 58.596598093401845,
-                "last_time_in_zone": str(
-                    datetime(2024, 9, 1, 11, 30, 57),
-                ),
+                "last_time_in_zone": str(datetime(2024, 9, 1, 11, 30, 57)),  # noqa: DTZ001 - BODS-7131
             },
         },
     }
@@ -899,22 +902,16 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
             self.potential_matches_to_delete,
         )
         expected_group_stop_history = {
-            "last_avl_time": str(
-                datetime(2024, 9, 1, 11, 30, 57),
-            ),
+            "last_avl_time": str(datetime(2024, 9, 1, 11, 30, 57)),  # noqa: DTZ001 - BODS-7131
             "last_avl_index": 3,
             "matched_stops": {
-                "1": {
-                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5)),
-                },
+                "1": {"last_match_time": str(datetime(2024, 9, 1, 11, 32, 5))},  # noqa: DTZ001 - BODS-7131
             },
             "potential_matches": {
                 "1": {
                     "last_avl_index": 3,
                     "last_distance": 58.596598093401845,
-                    "last_time_in_zone": str(
-                        datetime(2024, 9, 1, 11, 30, 57),
-                    ),
+                    "last_time_in_zone": str(datetime(2024, 9, 1, 11, 30, 57)),  # noqa: DTZ001 - BODS-7131
                 },
             },
         }
@@ -1089,120 +1086,84 @@ class TestUpdatePotentialMatch:  # noqa: D101 - BODS-7131
 class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
     group_stop_history_same_recordedattime = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 40,
-        "last_avl_time": str(
-            datetime(2024, 8, 23, 11, 16, 14),
-        ),
+        "last_avl_time": str(datetime(2024, 8, 23, 11, 16, 14)),  # noqa: DTZ001 - BODS-7131
         "matched_stops": {
-            "39": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 14, 41)),
-            },
-            "3": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 5)),
-            },
+            "39": {"last_match_time": str(datetime(2024, 8, 23, 11, 14, 41))},  # noqa: DTZ001 - BODS-7131
+            "3": {"last_match_time": str(datetime(2024, 8, 23, 11, 15, 5))},  # noqa: DTZ001 - BODS-7131
         },
         "potential_matches": {
             "4": {
                 "last_avl_index": 40,
                 "last_distance": 311.19398802530185,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 15, 36),
-                ),
+                "last_time_in_zone": str(datetime(2024, 8, 23, 11, 15, 36)),  # noqa: DTZ001 - BODS-7131
             },
             "38": {
                 "last_avl_index": 40,
                 "last_distance": 294.4630341883636,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 15, 36),
-                ),
+                "last_time_in_zone": str(datetime(2024, 8, 23, 11, 15, 36)),  # noqa: DTZ001 - BODS-7131
             },
             "5": {
                 "last_avl_index": 40,
                 "last_distance": 17.612857082239692,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16, 14),
-                ),
+                "last_time_in_zone": str(datetime(2024, 8, 23, 11, 16, 14)),  # noqa: DTZ001 - BODS-7131
             },
             "37": {
                 "last_avl_index": 40,
                 "last_distance": 18.62101754791971,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16),
-                ),
+                "last_time_in_zone": str(datetime(2024, 8, 23, 11, 16)),  # noqa: DTZ001 - BODS-7131
             },
         },
     }
     group_stop_history_same_recordedattime_2 = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 40,
-        "last_avl_time": str(
-            datetime(2024, 8, 23, 11, 16, 14),
-        ),
+        "last_avl_time": str(datetime(2024, 8, 23, 11, 16, 14)),  # noqa: DTZ001 - BODS-7131
         "matched_stops": {
-            "4": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 36)),
-            },
-            "3": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 5)),
-            },
+            "4": {"last_match_time": str(datetime(2024, 8, 23, 11, 15, 36))},  # noqa: DTZ001 - BODS-7131
+            "3": {"last_match_time": str(datetime(2024, 8, 23, 11, 15, 5))},  # noqa: DTZ001 - BODS-7131
         },
         "potential_matches": {
             "38": {
                 "last_avl_index": 40,
                 "last_distance": 294.4630341883636,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 15, 36),
-                ),
+                "last_time_in_zone": str(datetime(2024, 8, 23, 11, 15, 36)),  # noqa: DTZ001 - BODS-7131
             },
             "5": {
                 "last_avl_index": 40,
                 "last_distance": 17.612857082239692,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16, 14),
-                ),
+                "last_time_in_zone": str(datetime(2024, 8, 23, 11, 16, 14)),  # noqa: DTZ001 - BODS-7131
             },
             "37": {
                 "last_avl_index": 40,
                 "last_distance": 18.62101754791971,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16),
-                ),
+                "last_time_in_zone": str(datetime(2024, 8, 23, 11, 16)),  # noqa: DTZ001 - BODS-7131
             },
         },
     }
     group_stop_history_wo_same_recordedattime = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 3,
-        "last_avl_time": str(
-            datetime(2024, 8, 23, 10, 57, 48),
-        ),
+        "last_avl_time": str(datetime(2024, 8, 23, 10, 57, 48)),  # noqa: DTZ001 - BODS-7131
         "potential_matches": {
             "1": {
                 "last_avl_index": 3,
                 "last_distance": 40.03840622665115,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 10, 57, 48),
-                ),
+                "last_time_in_zone": str(datetime(2024, 8, 23, 10, 57, 48)),  # noqa: DTZ001 - BODS-7131
             },
         },
         "matched_stops": {},
     }
     group_stop_history_consecutive_index_same_recordedattime = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 3,
-        "last_avl_time": str(
-            datetime(2024, 8, 23, 10, 57, 48),
-        ),
+        "last_avl_time": str(datetime(2024, 8, 23, 10, 57, 48)),  # noqa: DTZ001 - BODS-7131
         "potential_matches": {
             "2": {
                 "last_avl_index": 3,
                 "last_distance": 40.03840622665115,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 10, 57, 48),
-                ),
+                "last_time_in_zone": str(datetime(2024, 8, 23, 10, 57, 48)),  # noqa: DTZ001 - BODS-7131
             },
             "3": {
                 "last_avl_index": 3,
                 "last_distance": 23.1234325,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 10, 57, 48),
-                ),
+                "last_time_in_zone": str(datetime(2024, 8, 23, 10, 57, 48)),  # noqa: DTZ001 - BODS-7131
             },
         },
         "matched_stops": {},
@@ -2010,93 +1971,3 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
         assert to_set_total == expected_to_set
         assert to_remove_total == expected_to_remove
         assert stop_history == expected_stop_history
-
-
-class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
-    @pytest.mark.parametrize(
-        (
-            "avl",
-            "group_stop_history",
-            "stop",
-            "expected_estimated_match",
-        ),
-        [
-            pytest.param(
-                {
-                    "longitude": -1.648382,
-                    "latitude": 53.817693,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                    "last_avl_longitude": -1.659246,
-                    "last_avl_latitude": 53.822937,
-                },
-                ((53.820328, -1.654394), 0),
-                {"last_time_in_zone": "2024-10-10T07:49:26.153817+00:00"},
-                id="Line between 2 AVL points on straight road gives an estimated match",
-            ),
-            pytest.param(
-                {
-                    "longitude": -1.654394,
-                    "latitude": 53.820328,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                    "last_avl_longitude": -1.659246,
-                    "last_avl_latitude": 53.822937,
-                },
-                ((53.820328, -1.654394), 0),
-                None,
-                id="AVL point within stop zone does not give estimated match",
-            ),
-            pytest.param(
-                {
-                    "longitude": -1.648382,
-                    "latitude": 53.817693,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 50, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                    "last_avl_longitude": -1.659246,
-                    "last_avl_latitude": 53.822937,
-                },
-                ((53.820328, -1.654394), 0),
-                None,
-                id="Longer than threshold time between AVL stops does not give estimated match",
-            ),
-            pytest.param(
-                {
-                    "longitude": -1.648382,
-                    "latitude": 53.817693,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                    "last_avl_longitude": None,
-                    "last_avl_latitude": None,
-                },
-                ((53.820328, -1.654394), 0),
-                None,
-                id="No previous AVL does not give estimated match",
-            ),
-        ],
-    )
-    def test_find_estimated_matches(  # noqa: D102 - BODS-7131
-        self,
-        avl: AVLRecord,
-        group_stop_history: GroupStopHistory,
-        stop: StopDetails,
-        expected_estimated_match: EstimatedMatch,
-    ):
-        estimated_match = check_estimated_match(avl, group_stop_history, stop)
-        assert estimated_match == expected_estimated_match
