@@ -172,9 +172,13 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
 class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
     avl_record = read_avl("FSRV9509052024-10-10.csv")[0]
     avl_record_2 = read_avl("FSRV9509052024-10-10.csv")[1]
+    avl_record_scem = read_avl("scem9132024-10-31.csv")[5]
     timetable = read_timetable("FSRV9509052024-10-10.json")
+    timetable_scem = read_timetable("scem9132024-10-31.json")
     route_details = timetable[avl_group_id(avl_record)]
+    route_details_scem = timetable_scem[avl_group_id(avl_record_scem)]
     final_stop_index = 19
+    final_stop_index_scem = 71
     group_stop_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 1,
         "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC)),
@@ -189,11 +193,28 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         "last_avl_longitude": None,
         "last_avl_latitude": None,
         "matched_stops": {
+            "13": {
+                "last_match_time": str(datetime(2024, 10, 10, 8, 24, 26, tzinfo=UTC)),
+            },
             "14": {
                 "last_match_time": str(datetime(2024, 10, 10, 8, 25, 6, tzinfo=UTC)),
             },
         },
         "potential_matches": {},
+    }
+    group_stop_history_scem = {  # noqa: RUF012 - BODS-7131
+        "last_avl_time": datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC),
+        "last_avl_index": 6,
+        "matched_stops": {
+            "3": {"last_match_time": datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC)},
+        },
+        "potential_matches": {  # noqa: RUF012 - BODS-7131
+            "2": {
+                "last_avl_index": 5,
+                "last_distance": 61.599382260785646,
+                "last_time_in_zone": str(datetime(2024, 10, 31, 8, 7, 56, tzinfo=UTC)),
+            },
+        },
     }
 
     def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
@@ -234,7 +255,31 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
                         ),
                     },
                 },
-                id="Drivers reaching stop 15 and there's one actual match",
+                id="Bus reaching stop 15 and there's one actual match",
+            ),
+            pytest.param(
+                avl_record_scem,
+                route_details_scem,
+                group_stop_history_scem,
+                6,
+                final_stop_index_scem,
+                {
+                    "2": {
+                        "last_avl_index": 6,
+                        "last_distance": 48.83984813250945,
+                        "last_time_in_zone": str(
+                            datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC),
+                        ),
+                    },
+                    "1": {
+                        "last_avl_index": 6,
+                        "last_distance": 53.71237107009338,
+                        "last_time_in_zone": str(
+                            datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC),
+                        ),
+                    },
+                },
+                id="Bus started early, matched with stop 3 and go back to the starting/end stop, final stop should not become a potential match",
             ),
         ],
     )
@@ -1216,12 +1261,15 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
     avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
     avl_record_2 = read_avl("COAC4116302024-10-17.csv")[7]
     avl_record_3 = read_avl("sleait110302024-10-23.csv")[7]
+    avl_record_4 = read_avl("scem9132024-10-31.csv")[98]
     timetable = read_timetable("TLCT37812152024-08-20.json")
     timetable_2 = read_timetable("COAC4116302024-10-17.json")
     timetable_3 = read_timetable("sleait110302024-10-23.json")
+    timetable_4 = read_timetable("scem9132024-10-31.json")
     group_id = "tlct|378|1215|2024-08-20"
-    final_stop_index = "41"
-    final_stop_index_2 = "34"
+    final_stop_index = 41
+    final_stop_index_2 = 34
+    final_stop_index_4 = 71
     pm_details_1 = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 3,
         "last_distance": 75.1243252308765,
@@ -1403,6 +1451,28 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_time_in_zone": str(
                     datetime(2024, 10, 23, 15, 39, 33, tzinfo=UTC),
                 ),
+            },
+        },
+    }
+    pm_details_7 = {  # noqa: RUF012 - BODS-7131
+        "last_avl_index": 97,
+        "last_distance": 37.80104206056258,
+        "last_time_in_zone": str(datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC)),
+    }
+    group_stop_history_7 = {  # noqa: RUF012 - BODS-7131
+        "last_avl_time": str(datetime(2024, 10, 31, 8, 39, 43, tzinfo=UTC)),
+        "last_avl_index": 99,
+        "matched_stops": {
+            "3": {"last_match_time": str(datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC))},
+            "71": {
+                "last_match_time": str(datetime(2024, 10, 31, 8, 36, 21, tzinfo=UTC)),
+            },
+        },
+        "potential_matches": {
+            "70": {
+                "last_avl_index": 98,
+                "last_distance": 73.61235793637137,
+                "last_time_in_zone": str(datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC)),
             },
         },
     }
@@ -1696,6 +1766,55 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 [],
                 id="bus going from A to B to A again, A should not be rematched",
             ),
+            pytest.param(
+                final_stop_index_4,
+                timetable_4,
+                avl_record_4,
+                "70",
+                pm_details_7,
+                group_stop_history_7,
+                [],
+                [],
+                [],  # stop_pos_distances_remove
+                ["70"],  # expected_potential_matches_to_delete
+                [
+                    {"timetable_id": 1231325785, "group_id": "scem|9|13|2024-10-31"},
+                ],  # expected_stop_pos_distances_remove
+                {
+                    "3": {
+                        "last_match_time": str(
+                            datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC),
+                        ),
+                    },
+                    "70": {
+                        "last_match_time": str(
+                            datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC),
+                        ),
+                    },
+                },
+                [
+                    {
+                        "batch_id": 591355,
+                        "group_id": "scem|9|13|2024-10-31",
+                        "last_time_in_zone": datetime(
+                            2024,
+                            10,
+                            31,
+                            8,
+                            39,
+                            3,
+                            tzinfo=UTC,
+                        ),
+                        "last_time_in_zone_str": "08:39:03",
+                        "otp_state": "Early",
+                        "stop_index": "70",
+                        "stop_type": "Non-final",
+                        "time_difference": -4377.0,
+                        "timetable_id": 1231325656,
+                    },
+                ],
+                id="bus matched final stops, then non-final stop, the final stop match should be removed",
+            ),
         ],
     )
     def test_move_potential_match_to_match(  # noqa: D102 - BODS-7131
@@ -1734,12 +1853,18 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
 class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     from .data.expected.expected_results import (
         expected_remove_coac,
+        expected_remove_coac30,
+        expected_remove_scem,
         expected_remove_slea,
         expected_remove_tlct,
         expected_set_coac,
+        expected_set_coac30,
+        expected_set_scem,
         expected_set_slea,
         expected_set_tlct,
         expected_stop_history_coac,
+        expected_stop_history_coac30,
+        expected_stop_history_scem,
         expected_stop_history_slea,
         expected_stop_history_tlct,
     )
@@ -1750,6 +1875,10 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     timetable_coac = read_timetable("COAC4116302024-10-17.json")
     avl_list_slea = read_avl("sleait110302024-10-23.csv")
     timetable_slea = read_timetable("sleait110302024-10-23.json")
+    avl_list_scem = read_avl("scem9112024-10-31.csv")
+    timetable_scem = read_timetable("scem9112024-10-31.json")
+    avl_list_coac30 = read_avl("coac9917102024-10-30.csv")
+    timetable_coac30 = read_timetable("coac9917102024-10-30.json")
 
     @pytest.mark.parametrize(
         (
@@ -1787,6 +1916,24 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
                 expected_remove_slea,
                 expected_stop_history_slea,
                 id="Bus matching first stop and matching a much higher index next",
+            ),
+            pytest.param(
+                timetable_scem,
+                avl_list_scem,
+                {},
+                expected_set_scem,
+                expected_remove_scem,
+                expected_stop_history_scem,
+                id="Bus starting early",
+            ),
+            pytest.param(
+                timetable_coac30,
+                avl_list_coac30,
+                {},
+                expected_set_coac30,
+                expected_remove_coac30,
+                expected_stop_history_coac30,
+                id="Circular route, bus matching a higher index but its last time in zone is earlier than the highest index match time, it should delete the potential match",
             ),
         ],
     )

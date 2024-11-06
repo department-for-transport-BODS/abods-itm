@@ -236,7 +236,7 @@ def find_potential_matches(
         # 12.2 Is the last stop index < 3 stops?
         # 12.3 Is this index less than 3/4*last stop index?
         if (
-            num_of_matched_stops == 0
+            num_of_matched_stops <= 1
             and final_stop_index > journey_stops_min_threshold
             and i > int(final_stop_index * 3 / 4)
         ):
@@ -708,7 +708,7 @@ def move_potential_match_to_match(
                 key=lambda t: validate_date(t[1]["last_match_time"]).timestamp(),
             ),
         )
-        new_highest_matched_stop_index = int(
+        stop_index_with_latest_match_timestamp = int(
             list(ordered_matched_stops_with_new_match.keys())[-1],
         )
         highest_matched_stop_index = int(max(matched_stops, key=lambda x: int(x)))
@@ -717,7 +717,7 @@ def move_potential_match_to_match(
         # 21-22. is the new match index higher than the highest index saved and Will this new match be the (saved match limit + 1) actual match saved
         if (
             int(pm_index) > highest_matched_stop_index
-            and int(pm_index) == new_highest_matched_stop_index
+            and int(pm_index) == stop_index_with_latest_match_timestamp
             and len(matched_stops) == saved_matches_limit
         ):
             log_specific(
@@ -729,9 +729,15 @@ def move_potential_match_to_match(
         # 20. when the new match index is lower than the highest index saved
         # 28,29. Will this new match be the (saved match limit + 1) actual match saved and Is this new match the lowest index
         # 29.1 Do the two actual match index's saved have a difference of 1
-        if int(pm_index) <= lowest_matched_stop_index and (
-            len(matched_stops) == saved_matches_limit
-            or highest_matched_stop_index - lowest_matched_stop_index == 1
+        if (
+            int(pm_index) <= lowest_matched_stop_index
+            and (
+                len(matched_stops) == saved_matches_limit
+                or highest_matched_stop_index - lowest_matched_stop_index == 1
+            )
+        ) or (
+            int(pm_index) > highest_matched_stop_index
+            and int(pm_index) != stop_index_with_latest_match_timestamp
         ):
             log_specific(
                 avl,
@@ -745,10 +751,10 @@ def move_potential_match_to_match(
             int(pm_index) > lowest_matched_stop_index or len(matched_stops) == 1
         ):
             # 29.2 is the last stop in the matched stops ordered by recorded_at_time the final stop of the journey?
-            if int(list(matched_stops.keys())[-1]) == final_stop_index:
+            if stop_index_with_latest_match_timestamp == final_stop_index:
                 log_specific(
                     avl,
-                    f"last matched stop {list(matched_stops.keys())[-1]} is final stop, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
+                    f"last matched stop in new match sequence {stop_index_with_latest_match_timestamp} is final stop, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
                 )
                 del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
             else:
