@@ -263,23 +263,23 @@ def find_potential_matches(
                 avl,
                 f"13. potential match (stop{i}) created: {group_stop_history['potential_matches'][str(i)]}",
             )
-        else:
-            estimated_match = check_estimated_match(
-                avl,
-                group_stop_history,
-                next_stop_details,
-            )
 
-            if estimated_match:
-                logger.info(
-                    "Estimated match found",
-                    extra={
-                        "stop_index": i,
-                        "last_avl_time": group_stop_history["last_avl_time"],
-                        "current_avl_time": avl["recorded_at_time"],
-                        "last_time_in_zone": estimated_match["last_time_in_zone"],
-                    },
-                )
+        estimated_match = check_estimated_match(
+            avl,
+            group_stop_history,
+            next_stop_details,
+        )
+
+        if estimated_match:
+            logger.info(
+                "Estimated match found",
+                extra={
+                    "stop_index": i,
+                    "last_avl_time": group_stop_history["last_avl_time"],
+                    "current_avl_time": avl["recorded_at_time"],
+                    "last_time_in_zone": estimated_match["last_time_in_zone"],
+                },
+            )
 
     # update last avl time, longitude and latitude
     group_stop_history["last_avl_time"] = str(avl_recorded_at_time_utc(avl))

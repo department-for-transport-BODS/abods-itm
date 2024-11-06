@@ -18,8 +18,8 @@ session = boto3.Session()
 Param = ParamSpec("Param")
 Return = TypeVar("Return")
 
-source_crs = pyproj.CRS("EPSG:4326")
-target_crs = pyproj.CRS("EPSG:27700")
+source_crs = pyproj.CRS("EPSG:4326")  # WGS 84 - World Geodetic System
+target_crs = pyproj.CRS("EPSG:27700")  # British National Grid
 
 crs_transformer = pyproj.Transformer.from_crs(source_crs, target_crs, always_xy=True)
 
