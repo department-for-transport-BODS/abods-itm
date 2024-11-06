@@ -436,8 +436,6 @@ expected_stop_history_tlct = {
     "tlct|378|1215|2024-08-20": {
         "last_avl_time": str(datetime(2024, 8, 20, 12, 0, 5, tzinfo=UTC)),
         "last_avl_index": 91,
-        "last_avl_latitude": 53.660963,
-        "last_avl_longitude": -1.857058,
         "matched_stops": {
             "44": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 59, 27, tzinfo=UTC)),
@@ -632,8 +630,6 @@ expected_stop_history_coac = {
     "coac|41|1630|2024-10-17": {
         "last_avl_time": str(datetime(2024, 10, 17, 17, 7, 59, tzinfo=UTC)),
         "last_avl_index": 110,
-        "last_avl_latitude": 51.539658,
-        "last_avl_longitude": -2.410061,
         "matched_stops": {
             "29": {
                 "last_match_time": str(datetime(2024, 10, 17, 17, 4, 6, tzinfo=UTC)),
@@ -1083,8 +1079,6 @@ expected_stop_history_slea = {
     "slea|it1|1030|2024-10-23": {
         "last_avl_time": str(datetime(2024, 10, 23, 10, 57, 13, tzinfo=UTC)),
         "last_avl_index": 124,
-        "last_avl_latitude": 52.996857,
-        "last_avl_longitude": -0.40885,
         "matched_stops": {
             "32": {
                 "last_match_time": str(datetime(2024, 10, 23, 10, 56, 49, tzinfo=UTC)),
@@ -2057,8 +2051,6 @@ expected_stop_history_scem = {
     "scem|9|11|2024-10-31": {
         "last_avl_index": 384,
         "last_avl_time": str(datetime(2024, 10, 31, 9, 49, 26, tzinfo=UTC)),
-        "last_avl_latitude": 53.226475,
-        "last_avl_longitude": -0.53755,
         "matched_stops": {
             "79": {
                 "last_match_time": str(datetime(2024, 10, 31, 9, 43, 41, tzinfo=UTC)),
@@ -2658,8 +2650,6 @@ expected_stop_history_coac30 = {
     "coac|99|1710|2024-10-30": {
         "last_avl_index": 398,
         "last_avl_time": str(datetime(2024, 10, 30, 18, 58, 34, tzinfo=UTC)),
-        "last_avl_latitude": 51.565052,
-        "last_avl_longitude": -1.784906,
         "matched_stops": {
             "73": {
                 "last_match_time": str(datetime(2024, 10, 30, 18, 56, 18, tzinfo=UTC)),

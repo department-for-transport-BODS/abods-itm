@@ -4,5 +4,4 @@ checkov==3.1.47
 boto3-stubs[essential]==1.35.32
 types-psycopg2==2.9.21.20240819
 lxml-stubs==0.5.1
-shapely==2.0.6
-pyproj==3.7.0
+

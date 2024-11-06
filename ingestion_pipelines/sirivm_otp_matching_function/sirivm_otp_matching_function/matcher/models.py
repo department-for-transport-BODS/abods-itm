@@ -97,19 +97,11 @@ class PotentialMatch(TypedDict):
     last_time_in_zone: str
 
 
-class EstimatedMatch(TypedDict):
-    """Details of an estimated match based on the intersection of the line between two AVL points intersecting a stop boundary"""
-
-    last_time_in_zone: str
-
-
 class GroupStopHistory(TypedDict):
     """Stored stop details for current journey matching"""
 
     last_avl_index: int
     last_avl_time: str
-    last_avl_longitude: float
-    last_avl_latitude: float
     matched_stops: dict[str, MatchedStop]
     potential_matches: dict[str, PotentialMatch]
 
