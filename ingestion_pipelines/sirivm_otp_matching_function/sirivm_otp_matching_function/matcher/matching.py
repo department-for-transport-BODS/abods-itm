@@ -245,6 +245,14 @@ def find_potential_matches(
                 f"12.1/2/3 Number of matched stops is {num_of_matched_stops}, the final stop index {final_stop_index} > 3 and stop index {i} is greater than {int(final_stop_index * 3/4)} 3/4 of the final stop index. Skip stop {i} from being a potential match",
             )
             continue
+
+        # final stop has already been matched, don't need to check for potentials
+        if (
+            i == final_stop_index
+            and str(final_stop_index) in group_stop_history["matched_stops"]
+        ):
+            continue
+
         next_stop_details = route_details[str(i)]
         avl_next_stop_distance = haversine(avl, next_stop_details)
         # 13. If avl and the next stop distance < threshold
@@ -379,26 +387,23 @@ def find_matches_in_potential_matches(
     # Order potential matches by stop index to make sure stops are matched in order
     for pm_index in sorted(group_stop_history["potential_matches"].keys(), key=int):
         pm_details = group_stop_history["potential_matches"][pm_index]
+
         if pm_index in route_details:
             stop_details = route_details[pm_index]
             # calculate distance between avl and potential match stops
             avl_pm_distance = haversine(avl, stop_details)
             last_distance = pm_details["last_distance"]
-            is_final_stop = int(pm_index) == final_stop_index
+
             # 15. If the distance between avl and potential match is less than threshold
             if avl_pm_distance < distance_threshold:
                 log_specific(
                     avl,
                     f"15. avl is {avl_pm_distance}m from stop {pm_index}, less than {distance_threshold}m",
                 )
-                # Distance between avl and potential match stop is less than threshold
                 # 16. check if the potential match is the final stop of the route
-                if is_final_stop:
+                if int(pm_index) == final_stop_index:
                     # 18-19. the final stop has not been matched yet and there is at least one match
-                    if (
-                        pm_index not in group_stop_history["matched_stops"]
-                        and len(group_stop_history["matched_stops"]) > 0
-                    ):
+                    if len(group_stop_history["matched_stops"]) > 0:
                         log_specific(
                             avl,
                             f"16. {pm_index} is final stop and has not been matched",
