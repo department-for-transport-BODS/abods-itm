@@ -112,7 +112,6 @@ class GroupStopHistory(TypedDict):
     last_avl_latitude: float
     matched_stops: dict[str, MatchedStop]
     potential_matches: dict[str, PotentialMatch]
-    estimated_matches: dict[str, EstimatedMatch]
 
 
 class ControlInfo(TypedDict):

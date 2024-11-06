@@ -2057,6 +2057,8 @@ expected_stop_history_scem = {
     "scem|9|11|2024-10-31": {
         "last_avl_index": 384,
         "last_avl_time": str(datetime(2024, 10, 31, 9, 49, 26, tzinfo=UTC)),
+        "last_avl_latitude": 53.226475,
+        "last_avl_longitude": -0.53755,
         "matched_stops": {
             "79": {
                 "last_match_time": str(datetime(2024, 10, 31, 9, 43, 41, tzinfo=UTC)),
@@ -2656,6 +2658,8 @@ expected_stop_history_coac30 = {
     "coac|99|1710|2024-10-30": {
         "last_avl_index": 398,
         "last_avl_time": str(datetime(2024, 10, 30, 18, 58, 34, tzinfo=UTC)),
+        "last_avl_latitude": 51.565052,
+        "last_avl_longitude": -1.784906,
         "matched_stops": {
             "73": {
                 "last_match_time": str(datetime(2024, 10, 30, 18, 56, 18, tzinfo=UTC)),
