@@ -4,9 +4,7 @@ from datetime import UTC, datetime
 from typing import Literal, ParamSpec, TypeVar
 
 import boto3
-import pyproj
 from aws_lambda_powertools import Logger
-from shapely import LineString, MultiLineString, Point
 
 EARLY_THRESHOLD_IN_SECONDS = 60
 LATE_THRESHOLD_IN_SECONDS = 359
@@ -17,11 +15,6 @@ session = boto3.Session()
 
 Param = ParamSpec("Param")
 Return = TypeVar("Return")
-
-source_crs = pyproj.CRS("EPSG:4326")  # WGS 84 - World Geodetic System
-target_crs = pyproj.CRS("EPSG:27700")  # British National Grid
-
-crs_transformer = pyproj.Transformer.from_crs(source_crs, target_crs, always_xy=True)
 
 
 def timer(passed_logger: Logger) -> Callable[Param, Return]:
@@ -99,24 +92,3 @@ def get_otp_state(
         return "Late"
 
     return "OnTime"
-
-
-def create_point(longitude: float, latitude: float) -> Point:
-    """Transform coordinates to a Point."""
-    return Point(crs_transformer.transform(longitude, latitude))
-
-
-def create_line_string(point_a: Point, point_b: Point) -> LineString:
-    """Create a line between 2 points"""
-    return LineString([point_a, point_b])
-
-
-def create_boundary(
-    centre_longitude: float,
-    centre_latitude: float,
-    radius: int,
-) -> MultiLineString:
-    """Create a bounding circle around a point."""
-    circle_centre = create_point(centre_longitude, centre_latitude)
-
-    return circle_centre.buffer(radius).boundary
