@@ -75,7 +75,7 @@ lint.extend-select = ["I", "B"]
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402", "D100", "D101", "D102", "D103", "D104"]
 "__about__.py" = ["E402", "D100", "D101", "D102", "D103", "D104"]
-"**/{tests,docs}/*" = ["E402", "INP001", "T201", "ANN001", "ANN201", "PLR2004"]
+"**/{tests,docs}/*" = ["E402", "INP001", "T201", "ANN001", "ANN201", "PLR2004", "DTZ001"]
 
 [tool.ruff.lint.isort]
 case-sensitive = true
