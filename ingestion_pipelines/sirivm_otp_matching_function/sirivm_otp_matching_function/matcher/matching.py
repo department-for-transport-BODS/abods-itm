@@ -26,9 +26,8 @@ from .models import (
     stop_timetable_id,
 )
 from .utils import (
-    create_boundary,
-    create_line_string,
-    create_point,
+    calculate_line_circle_intersection_ratios,
+    crs_transform,
     get_otp_state,
     get_time_difference,
     timer,
@@ -162,40 +161,30 @@ def check_estimated_match(
     if time_diff > estimated_matching_time_upper_limit_in_seconds:
         return None
 
-    previous_avl_location = create_point(
+    previous_avl_location = crs_transform(
         group_stop_history["last_avl_longitude"],
         group_stop_history["last_avl_latitude"],
     )
 
-    current_avl_location = create_point(avl["longitude"], avl["latitude"])
-
-    line_segment = create_line_string(previous_avl_location, current_avl_location)
+    current_avl_location = crs_transform(avl["longitude"], avl["latitude"])
 
     # create bounding circle around stop point
-    stop_circle = create_boundary(
-        stop_longitude(stop),
-        stop_latitude(stop),
-        distance_threshold,
-    )
+    stop_circle_centre = crs_transform(stop_longitude(stop), stop_latitude(stop))
 
-    stop_intersections = line_segment.intersection(stop_circle)
+    stop_intersection_ratios = calculate_line_circle_intersection_ratios(
+        stop_circle_centre,
+        distance_threshold,
+        previous_avl_location,
+        current_avl_location,
+    )
 
     # check if the line intersects the circle twice
     if (
-        stop_intersections.geom_type != "MultiPoint"
-        or not stop_intersections.geoms
-        or len(stop_intersections.geoms) != 2  # noqa: PLR2004
+        len(stop_intersection_ratios) != 2  # noqa: PLR2004
     ):
         return None
 
-    # second intersection will be the exit point from the bounding circle
-    _, exit_point = sorted(
-        stop_intersections.geoms,
-        key=lambda p: line_segment.project(p),
-    )
-
-    # get ratio of distance to exit point to the full line length
-    exit_time_factor = line_segment.project(exit_point) / line_segment.length
+    exit_time_factor = stop_intersection_ratios[1]
 
     exit_time = previous_avl_time + timedelta(
         seconds=exit_time_factor * time_diff,

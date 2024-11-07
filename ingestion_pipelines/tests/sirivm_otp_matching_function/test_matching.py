@@ -2021,7 +2021,7 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
                     "last_avl_latitude": 53.822937,
                 },
                 ((53.820328, -1.654394), 0),
-                {"last_time_in_zone": "2024-10-10T07:49:26.153817+00:00"},
+                {"last_time_in_zone": "2024-10-10T07:49:26.156720+00:00"},
                 id="Line between 2 AVL points on straight road gives an estimated match",
             ),
             pytest.param(
@@ -2039,7 +2039,24 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
                 },
                 ((53.820328, -1.654394), 0),
                 None,
-                id="AVL point within stop zone does not give estimated match",
+                id="Starting AVL point within stop zone does not give estimated match",
+            ),
+            pytest.param(
+                {
+                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
+                    "last_avl_longitude": -1.659246,
+                    "last_avl_latitude": 53.822937,
+                },
+                {
+                    "longitude": -1.654394,
+                    "latitude": 53.820328,
+                    "recorded_at_time": str(
+                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
+                    ),
+                },
+                ((53.820328, -1.654394), 0),
+                None,
+                id="Ending AVL point within stop zone does not give estimated match",
             ),
             pytest.param(
                 {

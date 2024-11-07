@@ -1,3 +1,4 @@
+import math
 import time
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -6,7 +7,6 @@ from typing import Literal, ParamSpec, TypeVar
 import boto3
 import pyproj
 from aws_lambda_powertools import Logger
-from shapely import LineString, MultiLineString, Point
 
 EARLY_THRESHOLD_IN_SECONDS = 60
 LATE_THRESHOLD_IN_SECONDS = 359
@@ -101,22 +101,58 @@ def get_otp_state(
     return "OnTime"
 
 
-def create_point(longitude: float, latitude: float) -> Point:
-    """Transform coordinates to a Point."""
-    return Point(crs_transformer.transform(longitude, latitude))
+def crs_transform(x: float, y: float) -> tuple[float, float]:
+    return crs_transformer.transform(x, y)
 
 
-def create_line_string(point_a: Point, point_b: Point) -> LineString:
-    """Create a line between 2 points"""
-    return LineString([point_a, point_b])
+def calculate_line_circle_intersection_ratios(
+    circle_centre_point: tuple[float, float],
+    circle_radius: float,
+    line_point_1: tuple[float, float],
+    line_point_2: tuple[float, float],
+) -> list[float]:
+    # Unpack input tuples
+    h, k = circle_centre_point
+    r = circle_radius
+    x1, y1 = line_point_1
+    x2, y2 = line_point_2
 
+    # Calculate the line coefficients
+    dx = x2 - x1
+    dy = y2 - y1
 
-def create_boundary(
-    centre_longitude: float,
-    centre_latitude: float,
-    radius: int,
-) -> MultiLineString:
-    """Create a bounding circle around a point."""
-    circle_centre = create_point(centre_longitude, centre_latitude)
+    # Quadratic formula components
+    a = dx**2 + dy**2
+    b = 2 * (dx * (x1 - h) + dy * (y1 - k))
+    c = (x1 - h) ** 2 + (y1 - k) ** 2 - r**2
 
-    return circle_centre.buffer(radius).boundary
+    # Discriminant to check for intersections
+    discriminant = b**2 - 4 * a * c
+
+    # To store results with distances
+    distances_to_intersection_ratios: list[float] = []
+
+    if discriminant < 0:
+        # No intersection
+        return []
+
+    if discriminant == 0:
+        # One intersection (tangent to the circle)
+        t = -b / (2 * a)
+        if 0 <= t <= 1:
+            return [t]
+
+    # Two intersections
+    sqrt_discriminant = math.sqrt(discriminant)
+
+    # First intersect
+    t1 = (-b - sqrt_discriminant) / (2 * a)
+    if 0 <= t1 <= 1:
+        distances_to_intersection_ratios.append(t1)
+
+    # Second intersect
+    t2 = (-b + sqrt_discriminant) / (2 * a)
+    if 0 <= t2 <= 1:
+        distances_to_intersection_ratios.append(t2)
+
+    return distances_to_intersection_ratios
