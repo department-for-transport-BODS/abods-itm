@@ -34,6 +34,7 @@ Parameters:
 
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, 'local']]
+  IsSandbox: !Equals [!Ref Environment, 'sandbox']
 
 Resources:
   ##########################################################
@@ -721,6 +722,7 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
+          ENABLE_ESTIMATED_MATCHING: !If [IsSandbox, "true", "false"]
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -989,6 +991,7 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
+          ENABLE_ESTIMATED_MATCHING: !If [IsSandbox, "true", "false"]
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -1056,6 +1059,7 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
+          ENABLE_ESTIMATED_MATCHING: !If [IsSandbox, "true", "false"]
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -1123,6 +1127,7 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
+          ENABLE_ESTIMATED_MATCHING: !If [IsSandbox, "true", "false"]
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -1190,6 +1195,7 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
+          ENABLE_ESTIMATED_MATCHING: !If [IsSandbox, "true", "false"]
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -1257,6 +1263,7 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
+          ENABLE_ESTIMATED_MATCHING: !If [IsSandbox, "true", "false"]
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -1324,6 +1331,7 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
+          ENABLE_ESTIMATED_MATCHING: !If [IsSandbox, "true", "false"]
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -1391,6 +1399,7 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
+          ENABLE_ESTIMATED_MATCHING: !If [IsSandbox, "true", "false"]
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 

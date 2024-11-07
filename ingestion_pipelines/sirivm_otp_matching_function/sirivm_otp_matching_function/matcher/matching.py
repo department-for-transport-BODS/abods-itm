@@ -147,6 +147,9 @@ def check_estimated_match(
         stop (StopDetails): Stop to check for match against
 
     """
+    if os.getenv("ESTIMATED_MATCHING_ENABLED") != "true":
+        return None
+
     if (
         not group_stop_history["last_avl_longitude"]
         or not group_stop_history["last_avl_latitude"]

@@ -102,6 +102,16 @@ def get_otp_state(
 
 
 def crs_transform(x: float, y: float) -> tuple[float, float]:
+    """
+    Project geodetic coordinates onto a flat plane
+
+    Args:
+        x (float): x-coordinate
+        y (float): y-coordinate
+    Returns:
+        tuple[float, float]: The projected coordinates
+
+    """
     return crs_transformer.transform(x, y)
 
 
@@ -111,7 +121,18 @@ def calculate_line_circle_intersection_ratios(
     line_point_1: tuple[float, float],
     line_point_2: tuple[float, float],
 ) -> list[float]:
-    # Unpack input tuples
+    """
+    Calculate the ratios of the distances from the start of a line segment to the points it intersects a circle to the total length of the line segment
+
+    Args:
+        circle_centre_point (tuple[float, float]): Co-ordinates of centre of circle
+        circle_radius (float): Radius of circle
+        line_point_1 (tuple[float, float]): Co-ordinates of start of line segment
+        line_point_2 (tuple[float, float]): Co-ordinates of end of line segment
+    Returns:
+        list[float]: Intersection distance ratios
+
+    """
     h, k = circle_centre_point
     r = circle_radius
     x1, y1 = line_point_1
