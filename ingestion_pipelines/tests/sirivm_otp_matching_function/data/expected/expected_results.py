@@ -2798,6 +2798,8 @@ expected_stop_history_scem2 = {
     "scem|9|27|2024-11-06": {
         "last_avl_index": 371,
         "last_avl_time": "2024-11-06 14:16:06+00:00",
+        "last_avl_latitude": 53.20123,
+        "last_avl_longitude": -0.587637,
         "matched_stops": {
             "70": {
                 "last_match_time": "2024-11-06 13:12:35+00:00",

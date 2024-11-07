@@ -142,6 +142,9 @@ def calculate_line_circle_intersection_ratios(
     dx = x2 - x1
     dy = y2 - y1
 
+    if dx == 0 and dy == 0:
+        return []
+
     # Quadratic formula components
     a = dx**2 + dy**2
     b = 2 * (dx * (x1 - h) + dy * (y1 - k))

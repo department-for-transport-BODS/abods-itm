@@ -2013,6 +2013,8 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
 
 
 class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
+    os.environ["ESTIMATED_MATCHING_ENABLED"] = "true"
+
     @pytest.mark.parametrize(
         (
             "avl",
@@ -2057,16 +2059,16 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
             ),
             pytest.param(
                 {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                    "last_avl_longitude": -1.659246,
-                    "last_avl_latitude": 53.822937,
-                },
-                {
-                    "longitude": -1.654394,
-                    "latitude": 53.820328,
+                    "longitude": -1.659246,
+                    "latitude": 53.822937,
                     "recorded_at_time": str(
                         datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
                     ),
+                },
+                {
+                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
+                    "last_avl_longitude": -1.654394,
+                    "last_avl_latitude": 53.820328,
                 },
                 ((53.820328, -1.654394), 0),
                 None,
