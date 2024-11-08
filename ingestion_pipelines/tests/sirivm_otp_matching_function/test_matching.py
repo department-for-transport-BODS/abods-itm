@@ -2118,6 +2118,21 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
                 },
                 {
                     "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
+                },
+                ((53.820328, -1.654394), 0),
+                None,
+                id="Missing required keys does not give estimated match and does not throw error",
+            ),
+            pytest.param(
+                {
+                    "longitude": -1.648382,
+                    "latitude": 53.817693,
+                    "recorded_at_time": str(
+                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
+                    ),
+                },
+                {
+                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
                     "last_avl_longitude": -1.648382,
                     "last_avl_latitude": 53.817693,
                 },
