@@ -146,7 +146,7 @@ def check_estimated_match(
         stop (StopDetails): Stop to check for match against
 
     """
-    if os.getenv("ESTIMATED_MATCHING_ENABLED") != "true":
+    if os.getenv("ENABLE_ESTIMATED_MATCHING") != "true":
         return None
 
     if (
