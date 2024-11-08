@@ -26,11 +26,10 @@ from .models import (
     stop_timetable_id,
 )
 from .utils import (
-    calculate_line_circle_intersection_ratios,
-    crs_transform,
     get_otp_state,
     get_time_difference,
     timer,
+    transform_coordinates_and_calculate_intersections,
     validate_date,
 )
 
@@ -164,21 +163,14 @@ def check_estimated_match(
     if time_diff > estimated_matching_time_upper_limit_in_seconds:
         return None
 
-    previous_avl_location = crs_transform(
-        group_stop_history["last_avl_longitude"],
-        group_stop_history["last_avl_latitude"],
-    )
-
-    current_avl_location = crs_transform(avl["longitude"], avl["latitude"])
-
-    # create bounding circle around stop point
-    stop_circle_centre = crs_transform(stop_longitude(stop), stop_latitude(stop))
-
-    stop_intersection_ratios = calculate_line_circle_intersection_ratios(
-        stop_circle_centre,
+    stop_intersection_ratios = transform_coordinates_and_calculate_intersections(
+        (stop_longitude(stop), stop_latitude(stop)),
         distance_threshold,
-        previous_avl_location,
-        current_avl_location,
+        (
+            group_stop_history["last_avl_longitude"],
+            group_stop_history["last_avl_latitude"],
+        ),
+        (avl["longitude"], avl["latitude"]),
     )
 
     # check if the line intersects the circle twice

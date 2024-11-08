@@ -115,6 +115,41 @@ def crs_transform(x: float, y: float) -> tuple[float, float]:
     return crs_transformer.transform(x, y)
 
 
+def transform_coordinates_and_calculate_intersections(
+    circle_centre_point: tuple[float, float],
+    circle_radius: float,
+    line_point_1: tuple[float, float],
+    line_point_2: tuple[float, float],
+) -> list[float]:
+    """
+    Transform the geodetic coordinates onto flat plane and calculates the ratios of the distances from the start of a line segment to the points it intersects a circle to the total length of the line segment
+
+    Args:
+        circle_centre_point (tuple[float, float]): Co-ordinates of centre of circle
+        circle_radius (float): Radius of circle
+        line_point_1 (tuple[float, float]): Co-ordinates of start of line segment
+        line_point_2 (tuple[float, float]): Co-ordinates of end of line segment
+    Returns:
+        list[float]: Intersection distance ratios
+
+    """
+    transformed_line_point_1 = crs_transform(line_point_1[0], line_point_1[1])
+    transformed_line_point_2 = crs_transform(line_point_2[0], line_point_2[1])
+
+    # create bounding circle around stop point
+    transformed_circle_centre_point = crs_transform(
+        circle_centre_point[0],
+        circle_centre_point[1],
+    )
+
+    return calculate_line_circle_intersection_ratios(
+        transformed_circle_centre_point,
+        circle_radius,
+        transformed_line_point_1,
+        transformed_line_point_2,
+    )
+
+
 def calculate_line_circle_intersection_ratios(
     circle_centre_point: tuple[float, float],
     circle_radius: float,
