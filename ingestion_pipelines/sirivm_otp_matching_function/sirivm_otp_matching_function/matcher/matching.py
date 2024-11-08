@@ -270,6 +270,7 @@ def find_potential_matches(
                     "last_avl_time": group_stop_history["last_avl_time"],
                     "current_avl_time": avl["recorded_at_time"],
                     "last_time_in_zone": estimated_match["last_time_in_zone"],
+                    "group_id": avl_group_id(avl),
                 },
             )
 
