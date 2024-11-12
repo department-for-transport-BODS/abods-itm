@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS public.feed_monitor_minute_summary (
 	expected int4 NOT NULL,
 	actual int4 NOT NULL,
 	live_locations int4 NOT NULL,
-	CONSTRAINT feed_monitor_minute_summary PRIMARY KEY (id, date_of_journey)
+	CONSTRAINT feed_monitor_by_minute_pk PRIMARY KEY (id, date_of_journey)
 )
 PARTITION BY RANGE (date_of_journey);
 
