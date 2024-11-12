@@ -24,4 +24,5 @@ npm-debug.log*
 test.ipynb
 
 .idea
+.vscode
 .DS_Store
