@@ -1,9 +1,11 @@
+import math
 import time
 from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Literal, ParamSpec, TypeVar
 
 import boto3
+import pyproj
 from aws_lambda_powertools import Logger
 
 EARLY_THRESHOLD_IN_SECONDS = 60
@@ -15,6 +17,11 @@ session = boto3.Session()
 
 Param = ParamSpec("Param")
 Return = TypeVar("Return")
+
+source_crs = pyproj.CRS("EPSG:4326")  # WGS 84 - World Geodetic System
+target_crs = pyproj.CRS("EPSG:27700")  # British National Grid
+
+crs_transformer = pyproj.Transformer.from_crs(source_crs, target_crs, always_xy=True)
 
 
 def timer(passed_logger: Logger) -> Callable[Param, Return]:
@@ -92,3 +99,119 @@ def get_otp_state(
         return "Late"
 
     return "OnTime"
+
+
+def crs_transform(x: float, y: float) -> tuple[float, float]:
+    """
+    Project geodetic coordinates onto a flat plane
+
+    Args:
+        x (float): x-coordinate
+        y (float): y-coordinate
+    Returns:
+        tuple[float, float]: The projected coordinates
+
+    """
+    return crs_transformer.transform(x, y)
+
+
+def transform_coordinates_and_calculate_intersections(
+    circle_centre_point: tuple[float, float],
+    circle_radius: float,
+    line_point_1: tuple[float, float],
+    line_point_2: tuple[float, float],
+) -> list[float]:
+    """
+    Transform the geodetic coordinates onto flat plane and calculates the ratios of the distances from the start of a line segment to the points it intersects a circle to the total length of the line segment
+
+    Args:
+        circle_centre_point (tuple[float, float]): Co-ordinates of centre of circle
+        circle_radius (float): Radius of circle
+        line_point_1 (tuple[float, float]): Co-ordinates of start of line segment
+        line_point_2 (tuple[float, float]): Co-ordinates of end of line segment
+    Returns:
+        list[float]: Intersection distance ratios
+
+    """
+    transformed_line_point_1 = crs_transform(line_point_1[0], line_point_1[1])
+    transformed_line_point_2 = crs_transform(line_point_2[0], line_point_2[1])
+
+    # create bounding circle around stop point
+    transformed_circle_centre_point = crs_transform(
+        circle_centre_point[0],
+        circle_centre_point[1],
+    )
+
+    return calculate_line_circle_intersection_ratios(
+        transformed_circle_centre_point,
+        circle_radius,
+        transformed_line_point_1,
+        transformed_line_point_2,
+    )
+
+
+def calculate_line_circle_intersection_ratios(
+    circle_centre_point: tuple[float, float],
+    circle_radius: float,
+    line_point_1: tuple[float, float],
+    line_point_2: tuple[float, float],
+) -> list[float]:
+    """
+    Calculate the ratios of the distances from the start of a line segment to the points it intersects a circle to the total length of the line segment
+
+    Args:
+        circle_centre_point (tuple[float, float]): Co-ordinates of centre of circle
+        circle_radius (float): Radius of circle
+        line_point_1 (tuple[float, float]): Co-ordinates of start of line segment
+        line_point_2 (tuple[float, float]): Co-ordinates of end of line segment
+    Returns:
+        list[float]: Intersection distance ratios
+
+    """
+    h, k = circle_centre_point
+    r = circle_radius
+    x1, y1 = line_point_1
+    x2, y2 = line_point_2
+
+    # Calculate the line coefficients
+    dx = x2 - x1
+    dy = y2 - y1
+
+    if dx == 0 and dy == 0:
+        return []
+
+    # Quadratic formula components
+    a = dx**2 + dy**2
+    b = 2 * (dx * (x1 - h) + dy * (y1 - k))
+    c = (x1 - h) ** 2 + (y1 - k) ** 2 - r**2
+
+    # Discriminant to check for intersections
+    discriminant = b**2 - 4 * a * c
+
+    # To store results with distances
+    distances_to_intersection_ratios: list[float] = []
+
+    if discriminant < 0:
+        # No intersection
+        return []
+
+    if discriminant == 0:
+        # One intersection (tangent to the circle)
+        t = -b / (2 * a)
+        if 0 <= t <= 1:
+            return [t]
+
+    # Two intersections
+    sqrt_discriminant = math.sqrt(discriminant)
+
+    # First intersect
+    t1 = (-b - sqrt_discriminant) / (2 * a)
+    if 0 <= t1 <= 1:
+        distances_to_intersection_ratios.append(t1)
+
+    # Second intersect
+    t2 = (-b + sqrt_discriminant) / (2 * a)
+    if 0 <= t2 <= 1:
+        distances_to_intersection_ratios.append(t2)
+
+    return distances_to_intersection_ratios

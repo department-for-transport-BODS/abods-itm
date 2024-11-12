@@ -147,4 +147,13 @@
     <changeSet id="45" author="abodsuser">
         <sqlFile path="sql/45-update-generate-retro-timetable.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="46" author="abodsuser">
+        <sqlFile path="sql/46-add-feedmon.sql" splitStatements="false" />
+    </changeSet>
+    <changeSet id="47" author="abodsuser">
+        <sqlFile path="sql/47-add-line-level-reporting.sql" splitStatements="false" />
+    </changeSet>
+    <changeSet id="48" author="abodsuser">
+        <sqlFile path="sql/48-journey-to-service-mapping.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
