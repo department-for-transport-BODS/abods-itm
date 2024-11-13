@@ -50,7 +50,7 @@ env:
   RC_VER:
     ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.release_version ||
     github.event_name == 'release' && github.event.release.tag_name || 'null' }}
-  RC_SRC: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET_PREFIX }}
+  RC_SRC: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET }}
 
 permissions:
   id-token: write
