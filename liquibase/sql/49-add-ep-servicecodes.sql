@@ -847,7 +847,7 @@ execute format(
 	            and ois.registration_status = ''Registered''
 	            and ois.effective_date = %L + 1
 	            where os.registration_status = ''Registered''
-				or os.registration_status = ''''
+	            or os.registration_status = ''''
 	            or os.registration_status = ''New''
 				or (os.registration_status != ''Registered'' and os.registration_status != '''' and os.effective_date > %L + 1)
 	    ) osn
