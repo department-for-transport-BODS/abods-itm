@@ -1,3 +1,7 @@
+DROP PROCEDURE IF EXISTS public.generate_retrospective_timetable_v3;
+
+
+
 CREATE OR REPLACE PROCEDURE public.generate_timetable(IN partition_date date)
  LANGUAGE plpgsql
 AS $procedure$
