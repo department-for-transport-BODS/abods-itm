@@ -63,7 +63,7 @@ jobs:
         environment:
           - sandbox
           - dev
-          - prod
+          - prod-build
 
     steps:
       - name: checkout
