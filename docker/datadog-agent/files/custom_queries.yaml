@@ -1,0 +1,26 @@
+custom_queries:
+  - query: |
+      SELECT j.jobname,
+             jrd.command,
+             EXTRACT(epoch FROM avg(jrd.end_time-jrd.start_time)) AS average_time_s,
+             SUM(CASE WHEN jrd.status = 'succeeded' THEN 1 ELSE 0 END) AS succeeded,
+             SUM(CASE WHEN jrd.status != 'succeeded' THEN 1 ELSE 0 END) AS failed 
+      FROM cron.job j
+      LEFT JOIN cron.job_run_details jrd ON j.jobid = jrd.jobid
+      WHERE jrd.start_time >= current_timestamp AT TIME ZONE 'utc' - INTERVAL '7 day'
+      GROUP BY j.jobname, jrd.command;
+    columns:
+      - name: jobname
+        type: tag
+      - name: command
+        type: tag
+      - name: average_time_s
+        type: gauge
+      - name: succeeded
+        type: gauge
+      - name: failed
+        type: gauge
+    metric_prefix: postgresql
+    tags:
+      - Service:cron_job_monitor
+      - QueryType:custom_metric
