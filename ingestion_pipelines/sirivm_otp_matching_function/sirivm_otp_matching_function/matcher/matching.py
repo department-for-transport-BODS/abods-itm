@@ -69,13 +69,7 @@ def log_specific(avl: AVLRecord, log_message: str) -> None:
         log_message (str): Log message
 
     """
-    if (
-        "OPERATOR_REF" in os.environ
-        and os.environ["OPERATOR_REF"] == avl["operator_ref"]
-        and "LINE_NAaME" in os.environ
-        and os.environ["LINE_NAME"] == avl["line_name"]
-    ):
-        logger.info(log_message)
+    logger.debug(log_message)
 
 
 def haversine(avl: AVLRecord, stop: StopDetails) -> float:
