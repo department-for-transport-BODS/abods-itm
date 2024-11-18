@@ -132,6 +132,7 @@ class TimetableDBClient:
                             record["last_time_in_zone"],
                             record["otp_state"],
                             record["stop_type"],
+                            record["timestamp_after_estimate"],
                         )
                         for record in records
                     ],
@@ -176,6 +177,7 @@ class TimetableDBClient:
                         record["otp_state"],
                         record["stop_type"],
                         avl_date_str,
+                        record["timestamp_after_estimate"],
                     )
                     for record in records
                 ]

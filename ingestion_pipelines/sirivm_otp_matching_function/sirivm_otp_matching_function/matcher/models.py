@@ -75,10 +75,11 @@ class RecordToAdd(TypedDict):
     stop_index: str
     group_id: str
     time_difference: float
-    last_time_in_zone_str: str
+    last_time_in_zone_str: str | None
     timetable_id: int
     batch_id: int
-    last_time_in_zone: datetime
+    last_time_in_zone: datetime | None
+    timestamp_after_estimate: datetime | None
     otp_state: Literal["Early", "OnTime", "Late"]
     stop_type: Literal["final", "Non-final"]
 
@@ -87,6 +88,7 @@ class MatchedStop(TypedDict):
     """Details of a stop that has been identified as departed on the current journey"""
 
     last_match_time: str
+    is_estimate: bool
 
 
 class PotentialMatch(TypedDict):
@@ -95,12 +97,13 @@ class PotentialMatch(TypedDict):
     last_avl_index: int
     last_distance: float
     last_time_in_zone: str
+    is_estimate: bool
 
 
 class EstimatedMatch(TypedDict):
     """Details of an estimated match based on the intersection of the line between two AVL points intersecting a stop boundary"""
 
-    last_time_in_zone: str
+    timestamp_after_estimate: str
 
 
 class GroupStopHistory(TypedDict):
