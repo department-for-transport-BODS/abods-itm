@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: ./docker/postgres/Dockerfile
+    container_name: postgres
+    hostname: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ${PWD}/sql/local:/docker-entrypoint-initdb.d:ro
+      - postgres-data:/var/lib/postgresql/data
+    command: ["-c", "config_file=/etc/postgresql/postgresql.conf"]
+    restart: unless-stopped
+    networks:
+    - lambda-local
+
+  pgadmin:
+    build:
+      context: .
+      dockerfile: ./docker/pgadmin/Dockerfile
+      args:
+        - POSTGRES_PORT=${POSTGRES_PORT}
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_HOST="postgres"
+    container_name: pgadmin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - postgres
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD}
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+    restart: unless-stopped
+    networks: 
+    - lambda-local
+
+volumes:
+  postgres-data:
+
+networks:
+  lambda-local:
+    name: lambda-local
+    driver: bridge
