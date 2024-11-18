@@ -126,12 +126,8 @@ class TimetableDBClient:
                         (
                             record["timetable_id"],
                             record["time_difference"],
-                            record["last_time_in_zone_str"],
-                            record["group_id"],
-                            record["batch_id"],
                             record["last_time_in_zone"],
                             record["otp_state"],
-                            record["stop_type"],
                             record["timestamp_after_estimate"],
                         )
                         for record in records
@@ -170,11 +166,7 @@ class TimetableDBClient:
                     (
                         record["timetable_id"],
                         record["time_difference"],
-                        record["last_time_in_zone_str"],
-                        record["group_id"],
-                        record["batch_id"],
                         record["last_time_in_zone"],
-                        record["otp_state"],
                         record["stop_type"],
                         avl_date_str,
                         record["timestamp_after_estimate"],

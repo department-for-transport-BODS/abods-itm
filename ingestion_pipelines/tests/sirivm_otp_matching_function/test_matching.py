@@ -20,7 +20,6 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
 )
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
     AVLRecord,
-    EstimatedMatch,
     GroupStopHistory,
     PotentialMatch,
     RouteDetails,
@@ -2255,7 +2254,7 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
         avl: AVLRecord,
         group_stop_history: GroupStopHistory,
         stop: StopDetails,
-        expected_estimated_match: EstimatedMatch,
+        expected_estimated_match: str,
     ):
         estimated_match = check_estimated_match(avl, group_stop_history, stop)
         assert estimated_match == expected_estimated_match

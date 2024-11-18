@@ -1,6 +1,6 @@
 from collections.abc import Mapping, Sequence
 from datetime import datetime
-from typing import Literal, TypedDict
+from typing import Literal, NotRequired, TypedDict
 
 from .utils import validate_date
 
@@ -97,13 +97,7 @@ class PotentialMatch(TypedDict):
     last_avl_index: int
     last_distance: float
     last_time_in_zone: str
-    is_estimate: bool
-
-
-class EstimatedMatch(TypedDict):
-    """Details of an estimated match based on the intersection of the line between two AVL points intersecting a stop boundary"""
-
-    timestamp_after_estimate: str
+    is_estimate: NotRequired[bool]
 
 
 class GroupStopHistory(TypedDict):

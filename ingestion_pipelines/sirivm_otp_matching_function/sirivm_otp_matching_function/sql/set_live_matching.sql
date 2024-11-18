@@ -4,7 +4,7 @@ SET time_difference = t.time_difference::int,
     timestamp_after_estimate = t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC',
     otp_state = t.otp_state::TEXT,
     load_time_stamp = now()::timestamp(0)
-FROM (VALUES %s) AS t(timetable_id, time_difference, last_time_in_zone_str, group_id, batch_id, last_time_in_zone_utc, otp_state, is_final_stop, timestamp_after_estimate)
+FROM (VALUES %s) AS t(timetable_id, time_difference, last_time_in_zone_utc, otp_state, timestamp_after_estimate)
 WHERE u.timetable_id = t.timetable_id::int
   AND date_of_journey = now()::date
   AND COALESCE(
