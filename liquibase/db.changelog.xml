@@ -156,4 +156,7 @@
     <changeSet id="48" author="abodsuser">
         <sqlFile path="sql/48-journey-to-service-mapping.sql" splitStatements="false" />
     </changeSet>
+        <changeSet id="49" author="abodsuser">
+        <sqlFile path="sql/49-add-ep-servicecodes.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>

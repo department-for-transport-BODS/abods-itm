@@ -81,10 +81,34 @@
             ]
         },
         {
+            "file": "/docker/pgadmin/Dockerfile",
+            "findings": [
+                {
+                    "resource": "/docker/pgadmin/Dockerfile.",
+                    "check_ids": [
+                        "CKV_DOCKER_2",
+                        "CKV_DOCKER_3"
+                    ]
+                }
+            ]
+        },
+        {
             "file": "/docker/pglifecycle/Dockerfile",
             "findings": [
                 {
                     "resource": "/docker/pglifecycle/Dockerfile.",
+                    "check_ids": [
+                        "CKV_DOCKER_2",
+                        "CKV_DOCKER_3"
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "/docker/postgres/Dockerfile",
+            "findings": [
+                {
+                    "resource": "/docker/postgres/Dockerfile.",
                     "check_ids": [
                         "CKV_DOCKER_2",
                         "CKV_DOCKER_3"
