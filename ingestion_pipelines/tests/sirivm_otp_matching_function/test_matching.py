@@ -892,7 +892,6 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
     @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
     def test_update_matched_stop(self):  # noqa: D102 - BODS-7131
         update_matched_stop(
-            self.avl_record,
             self.pm_index,
             self.last_time_in_zone,
             self.group_stop_history,
@@ -1077,7 +1076,6 @@ class TestUpdatePotentialMatch:  # noqa: D101 - BODS-7131
             "last_time_in_zone": str(datetime(2024, 8, 20, 11, 25, 57, tzinfo=UTC)),
         }
         update_potential_match_without_recorded_at_time(
-            self.avl_record,
             self.pm_index,
             pm_details,
             self.current_avl_index,
@@ -1215,7 +1213,6 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
     @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
     @pytest.mark.parametrize(
         (
-            "avl_record",
             "pm_index",
             "group_stop_history",
             "potential_matches_to_delete",
@@ -1224,7 +1221,6 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
         ),
         [
             pytest.param(
-                avl_record,
                 "4",
                 group_stop_history_same_recordedattime,
                 [],
@@ -1233,7 +1229,6 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
                 id="With more than one potential matches with the same recorded_at_time, select the index closest to the lowest_index",
             ),
             pytest.param(
-                avl_record,
                 "38",
                 group_stop_history_same_recordedattime,
                 ["4"],
@@ -1242,7 +1237,6 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
                 id="With more than one potential matches with the same recorded_at_time, select the index closest to the lowest_index and not in the potential matches to delete",
             ),
             pytest.param(
-                avl_record,
                 "38",
                 group_stop_history_same_recordedattime_2,
                 ["38"],
@@ -1251,7 +1245,6 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
                 id="Running select potential matches with the same recorded_at_time the second time with the same batch of potential matches, skip selecting the potential match index process",
             ),
             pytest.param(
-                avl_record,
                 "1",
                 group_stop_history_wo_same_recordedattime,
                 [],
@@ -1260,7 +1253,6 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
                 id="No potential matches are with the same recorded_at_time, return the current potential index",
             ),
             pytest.param(
-                avl_record,
                 "2",
                 group_stop_history_consecutive_index_same_recordedattime,
                 [],
@@ -1272,7 +1264,6 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
     )
     def test_select_potential_match_with_same_recordedattime(  # noqa: D102 - BODS-7131
         self,
-        avl_record: AVLRecord,
         pm_index: str,
         group_stop_history: dict,
         potential_matches_to_delete: list,
@@ -1280,7 +1271,6 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
         expected_potential_matches_to_delete: list,
     ):
         selected_index = select_potential_match_with_same_recordedattime(
-            avl_record,
             pm_index,
             group_stop_history,
             potential_matches_to_delete,
