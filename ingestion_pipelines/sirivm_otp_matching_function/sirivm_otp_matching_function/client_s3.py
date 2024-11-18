@@ -105,11 +105,11 @@ class TimetableS3Client:
             )
             raise
 
-    @timer(logger)
     def download_main_timetable(self) -> Timetable:
         """Download Main Timetable Data"""
         return self.download_timetable("timetable/timetable.json")
 
+    @timer(logger)
     def download_timetable(self, key: str) -> Timetable:
         """Download Timetable Data"""
         return self._get_from_s3(key)
