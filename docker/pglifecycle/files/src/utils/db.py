@@ -168,29 +168,245 @@ def create_user_sql(user):
     return sql, success_msg
 
 
-# def generate_connection_string(**kwargs) -> str:
-#     user_password = ""
-#     if kwargs.get("user"):
-#         user_password += kwargs.get("user")
-#         if kwargs.get("password"):
-#             user_password += ":" + kwargs.get("password")
-#         user_password += "@"
+def grant_privileges(con, role_name, database_name, role_kind, schemas, role_schemas):
+    if role_schemas is None:
+        role_schemas = []
 
-#     # Construct other parts
-#     other_parts = ""
-#     for key, value in kwargs.items():
-#         if key not in ["host", "port", "user", "password", "dbname"] and value:
-#             other_parts += f"{key}={value}&"
+    if role_kind == "ro":
+        log_and_execute(
+            con,
+            f"GRANT CONNECT ON DATABASE {database_name} TO {role_name}",
+            f"Granted CONNECT on {database_name} to {role_name}",
+        )
+        for schema in schemas + role_schemas:
+            log_and_execute(
+                con,
+                f"GRANT USAGE ON SCHEMA {schema} TO {role_name}",
+                f"Granted USAGE on schema {schema} to {role_name}",
+            )
+            log_and_execute(
+                con,
+                f"GRANT SELECT ON ALL TABLES IN SCHEMA {schema} TO {role_name}",
+                f"Granted SELECT on all tables in schema {schema} to {role_name}",
+            )
+            log_and_execute(
+                con,
+                f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT SELECT ON TABLES TO {role_name}",
+                f"Defaulted grant for SELECT on all tables in schema {schema} to {role_name}",
+            )
+            log_and_execute(
+                con,
+                f"GRANT SELECT ON ALL SEQUENCES IN SCHEMA {schema} TO {role_name}",
+                f"Granted SELECT on all sequences in schema {schema} to {role_name}",
+            )
+            log_and_execute(
+                con,
+                f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT SELECT ON SEQUENCES TO {role_name}",
+                f"Defaulted grant for SELECT on all sequences in schema {schema} to {role_name}",
+            )
+            log_and_execute(
+                con,
+                f"REVOKE CREATE ON SCHEMA {schema} FROM {role_name};",
+                f"Revoked CREATE on schema {schema} from {role_name}",
+            )
 
-#     # Construct the final connection string
-#     connection_string = f"postgresql://{user_password}{kwargs.get('host', '')}"
-#     if kwargs.get("port"):
-#         connection_string += f":{kwargs.get('port')}"
-#     connection_string += f"/{kwargs.get('dbname', '')}"
-#     if other_parts:
-#         connection_string += f"?{other_parts[:-1]}"
+    elif role_kind == "rw":
+        log_and_execute(
+            con,
+            f"GRANT ALL PRIVILEGES ON DATABASE {database_name} TO {role_name}",
+            f"Granted ALL privileges on {database_name} to {role_name}",
+        )
+        for schema in schemas + role_schemas:
+            log_and_execute(
+                con,
+                f"GRANT ALL ON SCHEMA {schema} TO {role_name}",
+                f"Granted ALL on schema {schema} to {role_name}",
+            )
+            log_and_execute(
+                con,
+                f"GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA {schema} TO {role_name}",
+                f"Granted ALL privileges on all tables in schema {schema} to {role_name}",
+            )
+            log_and_execute(
+                con,
+                f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT ALL ON TABLES TO {role_name}",
+                f"Defaulted grant for ALL on all tables in schema {schema} to {role_name}",
+            )
+            log_and_execute(
+                con,
+                f"GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA {schema} TO {role_name}",
+                f"Granted ALL privileges on all functions in schema {schema} to {role_name}",
+            )
+            log_and_execute(
+                con,
+                f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT ALL ON FUNCTIONS TO {role_name}",
+                f"Defaulted grant for ALL on all functions in schema {schema} to {role_name}",
+            )
+            log_and_execute(
+                con,
+                f"GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA {schema} TO {role_name}",
+                f"Granted ALL privileges on all sequences in schema {schema} to {role_name}",
+            )
+            log_and_execute(
+                con,
+                f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT ALL ON SEQUENCES TO {role_name}",
+                f"Defaulted grant for ALL on all sequences in schema {schema} to {role_name}",
+            )
 
-#     return connection_string
+    elif role_kind == "monitoring":
+        for schema in schemas + role_schemas:
+            log_and_execute(
+                con,
+                f"GRANT USAGE ON SCHEMA {schema} TO {role_name}",
+                f"Granted USAGE on schema {schema} to {role_name}",
+            )
+            if schema == "cron":
+                existing_tables = [
+                    row[0]
+                    for row in con.execute_sql(
+                        "SELECT table_name FROM information_schema.tables WHERE table_schema = 'cron';",
+                        2,
+                    )
+                ]
+                for table in existing_tables:
+                    log_and_execute(
+                        con,
+                        f"GRANT SELECT ON cron.{table} TO {role_name};",
+                        f"Granted SELECT on table {table} in schema cron to {role_name}",
+                    )
+                    log_and_execute(
+                        con,
+                        f"CREATE POLICY {role_name}_select_policy ON cron.{table} FOR SELECT USING (current_user = '{role_name}');",
+                        f"Created RLS policy for SELECT on table {table} in schema cron",
+                    )
+                    log_and_execute(
+                        con,
+                        f"ALTER TABLE cron.{table} ENABLE ROW LEVEL SECURITY;",
+                        f"Enabled RLS on table {table} in schema cron",
+                    )
+
+
+def remove_datadog_monitoring(con):
+    log.info("Removing DataDog monitoring setup...")
+
+    log_and_execute(
+        con,
+        "DROP EXTENSION IF EXISTS pg_stat_statements;",
+        "pg_stat_statements extension dropped successfully",
+        "Error dropping pg_stat_statements EXTENSION",
+    )
+    log_and_execute(
+        con,
+        "DROP SCHEMA IF EXISTS datadog CASCADE;",
+        "Successfully dropped datadog schema",
+        "Error dropping datadog schema",
+    )
+    log_and_execute(
+        con,
+        "REVOKE pg_monitor FROM datadog;",
+        "Successfully revoked ROLE pg_monitor from user datadog",
+        "Error revoking pg_monitor ROLE",
+    )
+    log_and_execute(
+        con,
+        "REVOKE USAGE ON SCHEMA public FROM datadog;",
+        "Successfully revoked USAGE on schema public from user datadog",
+        "Error revoking USAGE on schema public",
+    )
+    log_and_execute(
+        con,
+        "DROP ROLE IF EXISTS datadog;",
+        "Datadog USER dropped successfully",
+        "Error dropping datadog USER",
+    )
+
+
+def setup_datadog_monitoring(
+    con,
+    db,
+    existing_roles,
+    existing_schemas,
+    opts,
+    create_role,
+):
+    log.info(f"Enabling DataDog Monitoring for {db} database")
+
+    if create_role:
+        process_entities(
+            con,
+            [
+                dict(
+                    opts,
+                    **{"name": "datadog", "roleName": "pg_monitor"},
+                )
+            ],
+            create_user_sql,
+            "user",
+            existing_roles,
+        )
+
+    process_entities(con, ["datadog"], create_schema_sql, "schema")
+
+    enabled_schemas = ["datadog", "public"]
+    if "cron" in existing_schemas:
+        enabled_schemas.extend(["cron"])
+
+    grant_privileges(
+        con,
+        "datadog",
+        "postgres",
+        "monitoring",
+        enabled_schemas,
+        None,
+    )
+
+    process_entities(
+        con,
+        ["pg_stat_statements:public"],
+        create_extension_sql,
+        "extension",
+    )
+
+    process_entities(
+        con,
+        ["datadog"],
+        create_monitoring_function_sql,
+        "monitoring function",
+    )
+
+
+def log_and_execute(con, sql, success_msg, error_msg=None):
+    try:
+        con.execute_sql(sql)
+        log.info(success_msg)
+    except Exception as e:
+        log.error(error_msg if error_msg else str(e))
+
+
+def process_entities(
+    con, entities_to_create, create_sql_func, entity_type, existing_entities=None
+):
+    if existing_entities is None:
+        existing_entities = []
+
+    for entity in entities_to_create:
+        if all(isinstance(item, dict) for item in entities_to_create):
+            entity_name = entity["name"]
+        elif all(isinstance(item, str) for item in entities_to_create):
+            entity_name = entity
+        else:
+            raise TypeError("entities_to_create must be either a dict or a list")
+
+        if entity_name not in existing_entities:
+            create_sql, success_msg = create_sql_func(entity)
+            log_and_execute(
+                con,
+                create_sql,
+                success_msg,
+                f"Error creating {entity_type} {entity_name}",
+            )
+        else:
+            log.warning(f"{entity_type.capitalize()} {entity_name} already exists")
 
 
 class DatabaseUtils:
