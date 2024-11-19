@@ -229,10 +229,7 @@ def find_potential_matches(
             continue
 
         # final stop has already been matched, don't need to check for potentials
-        if (
-            i == final_stop_index
-            and str(final_stop_index) in group_stop_history["matched_stops"]
-        ):
+        if str(final_stop_index) in group_stop_history["matched_stops"]:
             continue
 
         next_stop_details = route_details[str(i)]
