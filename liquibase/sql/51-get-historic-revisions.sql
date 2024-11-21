@@ -49,3 +49,5 @@ CREATE OR REPLACE FUNCTION public.get_historic_revisions_v4(partition_date date)
         end; 
     $function$
 ;
+
+ALTER FUNCTION public.get_historic_revisions_v4 OWNER TO abods_rw;
