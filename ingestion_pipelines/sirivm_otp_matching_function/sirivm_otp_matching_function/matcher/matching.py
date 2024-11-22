@@ -408,7 +408,6 @@ def find_matches_in_potential_matches(
                 # avl is confirmed to be getting away from the stop with last distance > 70m
                 # 31-32. check if there is more than 1 match being created with the same recordedattime
                 selected_index = select_potential_match_with_same_recordedattime(
-                    avl,
                     pm_index,
                     group_stop_history,
                     potential_matches_to_delete,
@@ -430,7 +429,6 @@ def find_matches_in_potential_matches(
                 # 19. pm last distance < distance threshold / 20. the avl potential distance < last distance, Avl is moving backwards
                 # 34. update potential match with current avl index and distance between potential match stop and avl location
                 update_potential_match_without_recorded_at_time(
-                    avl,
                     pm_index,
                     pm_details,
                     current_avl_index,
@@ -460,7 +458,6 @@ def remove_matched_stops(
 
 
 def update_matched_stop(
-    avl: AVLRecord,
     pm_index: str,
     last_time_in_zone: datetime,
     group_stop_history: GroupStopHistory,
@@ -537,7 +534,6 @@ def map_matched_stop_to_db(
 
 
 def update_potential_match_without_recorded_at_time(
-    avl: AVLRecord,
     pm_index: str,
     pm_details: PotentialMatch,
     current_avl_index: int,
@@ -581,7 +577,6 @@ def update_potential_match_with_recorded_at_time(
     """
     pm_details["last_time_in_zone"] = str(avl_recorded_at_time_utc(avl))
     update_potential_match_without_recorded_at_time(
-        avl,
         pm_index,
         pm_details,
         current_avl_index,
@@ -590,7 +585,6 @@ def update_potential_match_with_recorded_at_time(
 
 
 def select_potential_match_with_same_recordedattime(
-    avl: AVLRecord,
     pm_index: str,
     group_stop_history: GroupStopHistory,
     potential_matches_to_delete: list[str],
@@ -745,7 +739,6 @@ def move_potential_match_to_match(
     if not delete_potential_match:
         # 24. move potential match to be a match
         update_matched_stop(
-            avl,
             pm_index,
             last_time_in_zone,
             group_stop_history,
