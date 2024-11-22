@@ -448,7 +448,7 @@ def remove_matched_stops(
     matches_to_delete: list,
 ) -> None:
     """
-    Remove matched stops from the potential match/matched stops list
+    Remove matched stops from the potential match list
 
     Args:
     ----
@@ -698,6 +698,13 @@ def move_potential_match_to_match(
             logger.debug(
                 f"{pm_index} higher than highest_matched_stop_index {highest_matched_stop_index}, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
             )
+            logger.info(
+                "Matched stop identified for removal",
+                stop_index=str(highest_matched_stop_index),
+                matched_stop=group_stop_history["matched_stops"][
+                    str(lowest_matched_stop_index)
+                ],
+            )
             # 23. Delete the lowest saved index from matched stops
             del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
         # 20. when the new match index is lower than the highest index saved
@@ -727,6 +734,13 @@ def move_potential_match_to_match(
             if stop_index_with_latest_match_timestamp == final_stop_index:
                 logger.debug(
                     f"last matched stop in new match sequence {stop_index_with_latest_match_timestamp} is final stop, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
+                )
+                logger.info(
+                    "Matched stop identified for removal",
+                    stop_index=str(highest_matched_stop_index),
+                    matched_stop=group_stop_history["matched_stops"][
+                        str(lowest_matched_stop_index)
+                    ],
                 )
                 del group_stop_history["matched_stops"][str(lowest_matched_stop_index)]
             else:
