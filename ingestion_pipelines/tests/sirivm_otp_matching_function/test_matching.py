@@ -1,6 +1,5 @@
 import os
 from datetime import UTC, datetime
-from unittest import mock
 
 import pytest
 
@@ -113,10 +112,6 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
     expected_stop_pos_distances_remove = []  # noqa: RUF012 - BODS-7131
     current_avl_index = 8
 
-    def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
-        return mock.patch.dict(os.environ, envvars)
-
-    @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
     @pytest.mark.parametrize(
         (
             "rec",
@@ -232,10 +227,6 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         },
     }
 
-    def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
-        return mock.patch.dict(os.environ, envvars)
-
-    @mockenv(OPERATOR_REF="FSRV", LINE_NAME="95")
     @pytest.mark.parametrize(
         (
             "avl",
@@ -463,10 +454,6 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         },
     }
 
-    def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
-        return mock.patch.dict(os.environ, envvars)
-
-    @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
     @pytest.mark.parametrize(
         (
             "avl",
@@ -964,10 +951,6 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
     }
     potential_matches_to_delete = []  # noqa: RUF012 - BODS-7131
 
-    def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
-        return mock.patch.dict(os.environ, envvars)
-
-    @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
     def test_update_matched_stop(self):  # noqa: D102 - BODS-7131
         update_matched_stop(
             self.pm_index,
@@ -1129,10 +1112,6 @@ class TestUpdatePotentialMatch:  # noqa: D101 - BODS-7131
         "last_time_in_zone": str(datetime(2024, 8, 20, 11, 25, 57, tzinfo=UTC)),
     }
 
-    def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
-        return mock.patch.dict(os.environ, envvars)
-
-    @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
     def test_update_potential_match_w_datetime(  # noqa: D102 - BODS-7131
         self,
     ):
@@ -1150,7 +1129,6 @@ class TestUpdatePotentialMatch:  # noqa: D101 - BODS-7131
         )
         assert pm_details == self.expected_pm_details_w_datetime
 
-    @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
     def test_update_potential_match_wo_datetime(  # noqa: D102 - BODS-7131
         self,
     ):
@@ -1290,10 +1268,6 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
         "matched_stops": {},
     }
 
-    def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
-        return mock.patch.dict(os.environ, envvars)
-
-    @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
     @pytest.mark.parametrize(
         (
             "pm_index",
@@ -1614,10 +1588,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         },
     }
 
-    def mockenv(**envvars):  # noqa: ANN003, D102 - BODS-7131
-        return mock.patch.dict(os.environ, envvars)
-
-    @mockenv(OPERATOR_REF="TLCT", LINE_NAME="378")
     @pytest.mark.parametrize(
         (
             "final_stop_index",
