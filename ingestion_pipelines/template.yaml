@@ -840,14 +840,6 @@ Resources:
                 aws:SourceArn: !Sub 'arn:aws:s3:::${ProjectName}-${Environment}-landing-bucket'
           - Effect: Allow
             Principal:
-              Service: s3.amazonaws.com
-            Action: sqs:SendMessage
-            Resource: !GetAtt SiriVmIngestionQueue.Arn
-            Condition:
-              ArnLike:
-                aws:SourceArn: !Sub 'arn:aws:s3:::{{resolve:ssm:/${ProjectName}/${Environment}/s3/sirivm}}'
-          - Effect: Allow
-            Principal:
               Service: sns.amazonaws.com
             Action: sqs:SendMessage
             Resource: !GetAtt SiriVmIngestionQueue.Arn
