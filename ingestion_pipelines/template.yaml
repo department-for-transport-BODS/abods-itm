@@ -60,8 +60,6 @@ Resources:
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/sirivm_access_policy/arn}}'
         - S3CrudPolicy:
-            BucketName: !Ref LandingBucket
-        - S3CrudPolicy:
             BucketName: !Ref ProcessBucket
         - SQSPollerPolicy:
             QueueName: !GetAtt SiriVmIngestionQueue.QueueName
@@ -796,18 +794,6 @@ Resources:
       SnsTopicArn: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/sns/avl-topic/arn}}'
       SqsQueueArn: !GetAtt SiriVmIngestionQueue.Arn
       SqsQueueUrl: !GetAtt SiriVmIngestionQueue.QueueUrl
-
-
-  LandingBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Condition: IsNotLocal
-    Properties:
-      BucketName: !Sub '${ProjectName}-${Environment}-landing-bucket'
-      # NotificationConfiguration:
-      #   QueueConfigurations:
-      #     - Event: s3:ObjectCreated:*
-      #       Queue: !GetAtt SiriVmIngestionQueue.Arn
 
   ProcessBucket:
     Type: AWS::S3::Bucket
