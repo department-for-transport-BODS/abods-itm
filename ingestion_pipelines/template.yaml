@@ -804,10 +804,10 @@ Resources:
     Condition: IsNotLocal
     Properties:
       BucketName: !Sub '${ProjectName}-${Environment}-landing-bucket'
-      NotificationConfiguration:
-        QueueConfigurations:
-          - Event: s3:ObjectCreated:*
-            Queue: !GetAtt SiriVmIngestionQueue.Arn
+      # NotificationConfiguration:
+      #   QueueConfigurations:
+      #     - Event: s3:ObjectCreated:*
+      #       Queue: !GetAtt SiriVmIngestionQueue.Arn
 
   ProcessBucket:
     Type: AWS::S3::Bucket
