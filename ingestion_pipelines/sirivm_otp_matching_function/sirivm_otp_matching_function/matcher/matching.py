@@ -797,8 +797,8 @@ def positions_timetable_lookup(
                 default_group_stop_history: GroupStopHistory = {
                     "last_avl_time": "",
                     "last_avl_index": 0,
-                    "last_avl_longitude": None,
-                    "last_avl_latitude": None,
+                    "last_avl_longitude": 0,
+                    "last_avl_latitude": 0,
                     "matched_stops": {},
                     "potential_matches": {},
                 }
