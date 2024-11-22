@@ -49,7 +49,11 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
         current_keys = set(logger.get_current_keys().keys())
         logger.remove_keys(current_keys - base_keys)
 
-        logger.append_keys(message_attributes=rec.message_attributes)
+        logger.append_keys(
+            message_attributes={
+                key: val.string_value for key, val in rec.message_attributes
+            },
+        )
 
         if "shards" not in _cache:
             logger.info("Getting shards data")
