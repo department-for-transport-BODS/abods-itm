@@ -232,8 +232,10 @@ def find_potential_matches(
                 avl_next_stop_distance,
                 current_avl_index,
             )
-            logger.debug(
-                f"13. potential match (stop{i}) created: {group_stop_history['potential_matches'][str(i)]}",
+            logger.info(
+                "13. potential match found",
+                stop_index=i,
+                potential_match=group_stop_history["potential_matches"][str(i)],
             )
         elif (
             i != final_stop_index
@@ -316,6 +318,11 @@ def check_update_first_stop(
                         "timetable_id": stop_timetable_id(matched_stop_details),
                         "group_id": avl_group_id(avl),
                     },
+                )
+                logger.info(
+                    "Removed matched first stop, and created new potential match",
+                    stop_index=ms_index,
+                    potential_match=group_stop_history["potential_matches"][ms_index],
                 )
 
 
@@ -553,7 +560,11 @@ def update_potential_match_without_recorded_at_time(
     """
     pm_details["last_avl_index"] = current_avl_index
     pm_details["last_distance"] = avl_pm_distance
-    logger.debug(f"18. updated potential match {pm_index}: {pm_details}")
+    logger.info(
+        "18. updated potential match",
+        stop_index=pm_index,
+        potential_match=pm_details,
+    )
 
 
 def update_potential_match_with_recorded_at_time(
@@ -723,6 +734,13 @@ def move_potential_match_to_match(
                 logger.debug(
                     f"{pm_index} lower than highest_matched_stop_index {highest_matched_stop_index}, remove matched stop index {highest_matched_stop_index} higher than {pm_index}",
                 )
+                logger.info(
+                    "Matched stop identified for removal",
+                    stop_index=str(highest_matched_stop_index),
+                    matched_stop=group_stop_history["matched_stops"][
+                        str(highest_matched_stop_index)
+                    ],
+                )
                 del group_stop_history["matched_stops"][str(highest_matched_stop_index)]
                 stop_details = route_details.get(str(highest_matched_stop_index))
                 if not stop_details:
@@ -738,12 +756,14 @@ def move_potential_match_to_match(
                     )
     if not delete_potential_match:
         # 24. move potential match to be a match
+
+        is_estimate = pm_details.get("is_estimate", False)
         update_matched_stop(
             pm_index,
             last_time_in_zone,
             group_stop_history,
             potential_matches_to_delete,
-            pm_details.get("is_estimate", False),
+            is_estimate,
         )
         map_matched_stop_to_db(
             is_final_stop,
@@ -752,7 +772,13 @@ def move_potential_match_to_match(
             avl,
             pm_index,
             last_time_in_zone,
-            pm_details.get("is_estimate", False),
+            is_estimate,
+        )
+        logger.info(
+            "Created matched stop from potential match",
+            stop_index=pm_index,
+            potential_match=pm_details,
+            matched_stop=group_stop_history["matched_stops"][pm_index],
         )
 
 
