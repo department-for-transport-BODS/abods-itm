@@ -819,7 +819,9 @@ Resources:
   SiriVmIngestionQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub '${ProjectName}-${Environment}-sirivm-ingestion-queue'
+      QueueName: !Sub '${ProjectName}-${Environment}-sirivm-ingestion-queue.fifo'
+      FifoQueue: true
+      ContentBasedDeduplication: true
       VisibilityTimeout: 430
 
   SiriVmIngestionQueuePolicy:
