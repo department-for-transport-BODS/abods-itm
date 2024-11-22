@@ -5,9 +5,7 @@ import logging
 import time
 import urllib.parse
 import uuid
-import zipfile
 from datetime import datetime, timedelta
-from io import BytesIO
 from os import environ
 
 import boto3
