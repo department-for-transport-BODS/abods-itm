@@ -275,12 +275,10 @@ def live_lambda_handler(event: SQSEvent) -> None:  # noqa: PLR0915 - BODS-7131
                 )
                 try:
                     obj = s3.get_object(Bucket=bucket, Key=key, VersionId=version_id)
-                    zip_file = zipfile.ZipFile(BytesIO(obj["Body"].read()))
-                    logging.info(f"Parsed Zip file Successfully {key}")
                     try:
                         logging.info("Parsing XML file")
                         avl_response = parse_xml(
-                            zip_file.read(zip_file.namelist()[0]),
+                            obj["Body"].read(),
                             batch_id,
                             source_type="string",
                         )
