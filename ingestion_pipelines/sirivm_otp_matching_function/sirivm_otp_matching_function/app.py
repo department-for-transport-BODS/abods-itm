@@ -105,7 +105,11 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
 
         # for recovery, only process avl file that is greater than last process avl file
         if int(avl_time) < int(control_info["last_avl"]):
-            logger.info("Record has already been processed, skipping")
+            logger.info(
+                "Record has already been processed, skipping",
+                avl_time=avl_time,
+                last_avl=control_info["last_avl"],
+            )
             return
 
         logger.info("Cleaning stop history")
