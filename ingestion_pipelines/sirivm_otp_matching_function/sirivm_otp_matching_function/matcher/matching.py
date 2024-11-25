@@ -823,6 +823,7 @@ def positions_timetable_lookup(
     for avl in avl_dict:
         # 1. check if group id exists in timetable
         if avl_group_id(avl) in timetable:
+            logger.append_keys(avl=avl)
             logger.debug(f"group_id {avl_group_id(avl)} in timetable")
 
             # 2. check if group id exists in stop_history, if not, create a blank group stop history
@@ -888,4 +889,5 @@ def positions_timetable_lookup(
                         potential_matches_to_remove,
                     )
 
+    logger.remove_keys("avl")
     return stop_pos_distances, stop_pos_distances_remove, stop_history
