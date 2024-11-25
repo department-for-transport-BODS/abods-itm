@@ -444,7 +444,7 @@ execute format (
 				case
 					when direction = ''outbound'' or direction = ''clockwise''
 					then group_id_tmp
-					else concat_ws(''|'', group_id_tmp, direction)
+					else concat_ws(''|'', group_id_tmp, ''inbound'')
 				end
 		end as group_id,
 		*
@@ -1361,7 +1361,7 @@ execute format (
 				case
 					when direction = ''outbound'' or direction = ''clockwise''
 					then group_id_tmp
-					else concat_ws(''|'', group_id_tmp, direction)
+					else concat_ws(''|'', group_id_tmp, ''inbound'')
 				end
 		end as group_id,
 		*
