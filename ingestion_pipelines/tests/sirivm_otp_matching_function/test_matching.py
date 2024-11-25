@@ -2201,6 +2201,23 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
             pytest.param(
                 {
                     "longitude": -1.648382,
+                    "latitude": 52.817693,
+                    "recorded_at_time": str(
+                        datetime(2024, 10, 10, 7, 50, 40, tzinfo=UTC),
+                    ),
+                },
+                {
+                    "last_avl_time": str(datetime(2024, 10, 10, 7, 50, 10, tzinfo=UTC)),
+                    "last_avl_longitude": -1.659246,
+                    "last_avl_latitude": 54.822937,
+                },
+                ((53.820328, -1.654394), 0),
+                None,
+                id="Longer than threshold distance between AVL stops does not give estimated match",
+            ),
+            pytest.param(
+                {
+                    "longitude": -1.648382,
                     "latitude": 53.817693,
                     "recorded_at_time": str(
                         datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
