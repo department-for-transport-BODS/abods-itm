@@ -421,7 +421,8 @@ execute format (
 			direction,
 			tvw.id as transmodel_vehiclejourney_id,
 			tvw.service_pattern_id as transmodel_servicepattern_id,
-			departure_day_shift
+			departure_day_shift,
+            concat_ws(''|'', operator_ref,line_name,journey_code,date_of_journey) as group_id_tmp
 		from public.%I  tvw
 		where trim(tvw.journey_code) <> ''''
 		window w as (partition by
@@ -438,12 +439,12 @@ execute format (
 	select
 		count(1) over w2 as journey_partition_size,
 		case when count(1) over w2 = 1
-			then concat_ws(''|'', operator_ref,line_name,journey_code,date_of_journey)
+			then group_id_tmp
 			else
 				case
 					when direction = ''outbound'' or direction = ''clockwise''
-					then concat_ws(''|'', operator_ref,line_name,journey_code,date_of_journey)
-					else concat(concat_ws(''|'', operator_ref,line_name,journey_code,date_of_journey),direction)
+					then group_id_tmp
+					else concat_ws(''|'', group_id_tmp, direction)
 				end
 		end as group_id,
 		*
@@ -765,7 +766,7 @@ execute format(
 		null as actual_departure_time,
 		tsr1.is_timing_point,
 		tsr1.group_id,
-		LOWER(previous_group_id) as previous_group_id,
+		LOWER(tsr1.previous_group_id) as previous_group_id,
 		tsr1.otp_state,
 		extract(epoch from tsr1.expected_departure_time::time - lag(tsr1.expected_departure_time::time) over(partition by tsr1.operator_noc, tsr1.line_name, tsr1.date_of_journey, tsr1.stop_id, tsr1.stop_index order by tsr1.stop_id, tsr1.stop_index, tsr1.expected_departure_time::time asc)) as expected_headway,
 		null as actual_headway,
