@@ -665,7 +665,7 @@ execute format(
 
 	from public.%I
 		window w AS (
-    	PARTITION BY operator_noc, line_name, date_of_journey, stop_id, extract(hour from expected_departure_time) 
+    	PARTITION BY operator_noc, line_name, date_of_journey, stop_id, stop_index, extract(hour from expected_departure_time) 
 		ORDER BY expected_departure_time, stop_index ASC
         RANGE BETWEEN unbounded preceding and unbounded following
             )',
@@ -1582,7 +1582,7 @@ execute format(
 
 	from public.%I
 		window w AS (
-    	PARTITION BY operator_noc, line_name, date_of_journey, stop_id, extract(hour from expected_departure_time) 
+    	PARTITION BY operator_noc, line_name, date_of_journey, stop_id, stop_index, extract(hour from expected_departure_time) 
 		ORDER BY expected_departure_time, stop_index ASC
         RANGE BETWEEN unbounded preceding and unbounded following
             )',
