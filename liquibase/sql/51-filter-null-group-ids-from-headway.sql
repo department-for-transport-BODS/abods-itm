@@ -14,7 +14,7 @@ execute format (
 EXECUTE format(
 'create table public.temp_timetable_headway
 as 
-select * from 
+select *, extract( epoch from x.actual_departure_time - x.previous_actual_departure_time ) as actual_headway from 
 ( select 
 
 timetable_id,
@@ -29,18 +29,11 @@ and actual_departure_time is not null
 		
 EXECUTE format(
 '
-with cte_headway as (
-  select timetable_id,
-  
-  extract( epoch from actual_departure_time - previous_actual_departure_time ) as actual_headway
-  from public.temp_timetable_headway
-)
 update public."Timetable" y
  
-set headway_time_difference = y.expected_headway - cte_headway.actual_headway ,
-actual_headway = cte_headway.actual_headway
+set headway_time_difference = y.expected_headway - x.actual_headway ,
+actual_headway = x.actual_headway
 from public.temp_timetable_headway x 
-join cte_headway on x.timetable_id = cte_headway.timetable_id
 where x.timetable_id  = y.timetable_id 
 and y.date_of_journey = %L
 ;', partition_date);
