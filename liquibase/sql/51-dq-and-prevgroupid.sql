@@ -422,7 +422,7 @@ execute format (
 			tvw.id as transmodel_vehiclejourney_id,
 			tvw.service_pattern_id as transmodel_servicepattern_id,
 			departure_day_shift,
-            concat_ws(''|'', operator_ref,line_name,journey_code,date_of_journey) as group_id_tmp
+            concat_ws(''|'', national_operator_code,exploded_line_name,journey_code,date_of_journey) as group_id_tmp
 		from public.%I  tvw
 		where trim(tvw.journey_code) <> ''''
 		window w as (partition by
@@ -1339,7 +1339,7 @@ execute format (
 			tvw.id as transmodel_vehiclejourney_id,
 			tvw.service_pattern_id as transmodel_servicepattern_id,
 			departure_day_shift,
-            concat_ws(''|'', operator_ref,line_name,journey_code,date_of_journey) as group_id_tmp
+            concat_ws(''|'', national_operator_code,exploded_line_name,journey_code,date_of_journey) as group_id_tmp
 		from public.%I  tvw
 		where trim(tvw.journey_code) <> ''''
 		window w as (partition by
