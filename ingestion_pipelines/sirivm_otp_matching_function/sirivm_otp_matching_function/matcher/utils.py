@@ -120,6 +120,7 @@ def transform_coordinates_and_calculate_intersections(
     circle_radius: float,
     line_point_1: tuple[float, float],
     line_point_2: tuple[float, float],
+    max_distance: float,
 ) -> list[float]:
     """
     Transform the geodetic coordinates onto flat plane and calculates the ratios of the distances from the start of a line segment to the points it intersects a circle to the total length of the line segment
@@ -129,6 +130,7 @@ def transform_coordinates_and_calculate_intersections(
         circle_radius (float): Radius of circle
         line_point_1 (tuple[float, float]): Co-ordinates of start of line segment
         line_point_2 (tuple[float, float]): Co-ordinates of end of line segment
+        max_distance (float): Max allowable distance between points to calculate ratios
     Returns:
         list[float]: Intersection distance ratios
 
@@ -147,6 +149,7 @@ def transform_coordinates_and_calculate_intersections(
         circle_radius,
         transformed_line_point_1,
         transformed_line_point_2,
+        max_distance,
     )
 
 
@@ -155,6 +158,7 @@ def calculate_line_circle_intersection_ratios(
     circle_radius: float,
     line_point_1: tuple[float, float],
     line_point_2: tuple[float, float],
+    max_distance: float,
 ) -> list[float]:
     """
     Calculate the ratios of the distances from the start of a line segment to the points it intersects a circle to the total length of the line segment
@@ -164,6 +168,7 @@ def calculate_line_circle_intersection_ratios(
         circle_radius (float): Radius of circle
         line_point_1 (tuple[float, float]): Co-ordinates of start of line segment
         line_point_2 (tuple[float, float]): Co-ordinates of end of line segment
+        max_distance (float): Max allowable distance between points to calculate ratios
     Returns:
         list[float]: Intersection distance ratios
 
@@ -184,6 +189,11 @@ def calculate_line_circle_intersection_ratios(
     a = dx**2 + dy**2
     b = 2 * (dx * (x1 - h) + dy * (y1 - k))
     c = (x1 - h) ** 2 + (y1 - k) ** 2 - r**2
+
+    line_length = math.sqrt(a)
+
+    if line_length > max_distance:
+        return []
 
     # Discriminant to check for intersections
     discriminant = b**2 - 4 * a * c
