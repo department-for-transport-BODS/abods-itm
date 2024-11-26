@@ -2,7 +2,6 @@ name: modify database
 run-name:
   modify database from ${{ github.ref_name }} @ ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
   github.ref_name == 'test' && 'test' ||
-  github.ref_name == 'cavl' && 'cavl' ||
   github.ref_name == 'uat' && 'uat' ||
   github.ref_name == 'dev' && 'dev' || 'sandbox' }}
 on:
@@ -22,7 +21,6 @@ concurrency:
   group:
     ${{ github.workflow }}-${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
     github.ref_name == 'test' && 'test' ||
-    github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   cancel-in-progress: false
@@ -33,7 +31,6 @@ env:
   DEPLOY_ENV:
     ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
     github.ref_name == 'test' && 'test' ||
-    github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   DEPLOY_SRC_PREFIX: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET_PREFIX }}
@@ -45,7 +42,6 @@ jobs:
     environment:
       ${{ (github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')) && 'prod' ||
       github.ref_name == 'test' && 'test' ||
-      github.ref_name == 'cavl' && 'cavl' ||
       github.ref_name == 'uat' && 'uat' ||
       github.ref_name == 'dev' && 'dev' || 'sandbox' }}
     outputs:
