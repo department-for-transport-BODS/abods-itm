@@ -3995,18 +3995,6 @@ expected_set_coac30 = [
     {
         "group_id": "coac|99|1710|2024-10-30",
         "stop_index": "37",
-        "time_difference": -51.0,
-        "last_time_in_zone_str": None,
-        "timetable_id": 1220966153,
-        "batch_id": 586166,
-        "last_time_in_zone": None,
-        "timestamp_after_estimate": datetime(2024, 10, 30, 18, 13, 57, tzinfo=UTC),
-        "otp_state": "OnTime",
-        "stop_type": "Non-final",
-    },
-    {
-        "group_id": "coac|99|1710|2024-10-30",
-        "stop_index": "37",
         "time_difference": 14.0,
         "last_time_in_zone_str": "18:15:02",
         "timetable_id": 1220966153,
