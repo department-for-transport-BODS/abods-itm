@@ -40,6 +40,9 @@ journey_stops_min_threshold = config.get("journey_stops_min_threshold")
 estimated_matching_time_upper_limit_in_seconds = config.get(
     "estimated_matching_time_upper_limit_in_seconds",
 )
+estimated_matching_distance_upper_limit_in_metres = config.get(
+    "estimated_matching_distance_upper_limit_in_metres",
+)
 
 
 def create_matched_stop(last_time_in_zone: datetime, is_estimate: bool) -> MatchedStop:  # noqa: FBT001
@@ -171,6 +174,7 @@ def check_estimated_match(
             group_stop_history["last_avl_latitude"],
         ),
         (avl["longitude"], avl["latitude"]),
+        estimated_matching_distance_upper_limit_in_metres,
     )
 
     # check if the line intersects the circle twice
@@ -229,7 +233,10 @@ def find_potential_matches(
             continue
 
         # final stop has already been matched, don't need to check for potentials
-        if str(final_stop_index) in group_stop_history["matched_stops"]:
+        if (
+            i == final_stop_index
+            and str(final_stop_index) in group_stop_history["matched_stops"]
+        ):
             continue
 
         next_stop_details = route_details[str(i)]

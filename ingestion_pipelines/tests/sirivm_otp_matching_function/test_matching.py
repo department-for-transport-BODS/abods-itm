@@ -247,6 +247,33 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         ),
         [
             pytest.param(
+                avl_record,
+                route_details,
+                group_stop_history,
+                1,
+                final_stop_index,
+                {},
+                id="Drivers changing journey code early, reaching stop 15, no potential matches should be created",
+            ),
+            pytest.param(
+                avl_record_2,
+                route_details,
+                group_stop_history_2,
+                62,
+                final_stop_index,
+                {
+                    "15": {
+                        "last_avl_index": 62,
+                        "last_distance": 13.738176401886017,
+                        "last_time_in_zone": str(
+                            datetime(2024, 10, 10, 8, 25, 56, tzinfo=UTC),
+                        ),
+                        "is_estimate": False,
+                    },
+                },
+                id="Bus reaching stop 15 and there's one actual match",
+            ),
+            pytest.param(
                 avl_record_scem,
                 route_details_scem,
                 group_stop_history_scem,
@@ -2197,6 +2224,23 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
                 ((53.820328, -1.654394), 0),
                 None,
                 id="Longer than threshold time between AVL stops does not give estimated match",
+            ),
+            pytest.param(
+                {
+                    "longitude": -1.648382,
+                    "latitude": 52.817693,
+                    "recorded_at_time": str(
+                        datetime(2024, 10, 10, 7, 50, 40, tzinfo=UTC),
+                    ),
+                },
+                {
+                    "last_avl_time": str(datetime(2024, 10, 10, 7, 50, 10, tzinfo=UTC)),
+                    "last_avl_longitude": -1.659246,
+                    "last_avl_latitude": 54.822937,
+                },
+                ((53.820328, -1.654394), 0),
+                None,
+                id="Longer than threshold distance between AVL stops does not give estimated match",
             ),
             pytest.param(
                 {

@@ -1,4 +1,3 @@
-import ast
 import csv
 import gzip
 import json
@@ -6,13 +5,13 @@ import logging
 import time
 import urllib.parse
 import uuid
-import zipfile
 from datetime import datetime, timedelta
-from io import BytesIO
 from os import environ
 
 import boto3
 import psycopg2
+from aws_lambda_powertools.utilities.data_classes import SQSEvent
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.exceptions import ClientError
 from dateutil.parser import parse
 
@@ -113,14 +112,15 @@ def read_historic_matching_records(run_date):  # noqa: ANN001, ANN201 - BODS-713
     return progress
 
 
-def lambda_handler(event, context):  # noqa: ANN001, ANN201 - BODS-7131
+def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:
     logging.info(
         f"Starting s3 ingestion - Time to Run [{round(context.get_remaining_time_in_millis() / 1000)}] seconds / Memory [{context.memory_limit_in_mb}] Mb",
     )
+
     if event.get("backfill_start_date") and event.get("backfill_end_date"):
         backfill_lambda_handler(event, context)
     else:
-        live_lambda_handler(event, context)
+        live_lambda_handler(SQSEvent(event))
 
 
 def backfill_lambda_handler(event, context):  # noqa: ANN001, ANN201, PLR0915 - BODS-7131
@@ -229,7 +229,7 @@ def backfill_lambda_handler(event, context):  # noqa: ANN001, ANN201, PLR0915 - 
         )
 
 
-def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001, PLR0915 - BODS-7131
+def live_lambda_handler(event: SQSEvent) -> None:  # noqa: PLR0915 - BODS-7131
     try:
         now = datetime.now()
         year = datetime.strftime(now, "%Y")
@@ -258,32 +258,25 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001, PLR091
         )
         batch_id = cur.fetchone()[0]
         try:
-            event_subset = event["Records"][0]["body"]
-            event_subset = ast.literal_eval(event_subset)
-            if "Records" in event_subset:
-                logging.info("Got SQS Records")
-                sirivm_event = event_subset["Records"]
-            elif "Message" in event_subset:
-                logging.info("Got SNS Message")
-                message_subset = ast.literal_eval(event_subset["Message"])
-                sirivm_event = message_subset["Records"]
-            else:
-                raise ValueError("No Events or Message")  # noqa: TRY301 - BODS-7131
-            for rec in sirivm_event:
-                bucket = rec["s3"]["bucket"]["name"]
+            for rec in event.records:
+                sns_event = rec.decoded_nested_sns_event
+                message = json.loads(sns_event.message)
+
+                bucket = message["bucket"]
                 key = urllib.parse.unquote_plus(
-                    rec["s3"]["object"]["key"],
+                    message["key"],
                     encoding="utf-8",
                 )
-                logging.info(f"Processing AVL bucket {bucket} and file {key}")
+                version_id = message["versionId"]
+                logging.info(
+                    f"Processing AVL bucket {bucket}, file {key}, versionId {version_id}",
+                )
                 try:
-                    obj = s3.get_object(Bucket=bucket, Key=key)
-                    zip_file = zipfile.ZipFile(BytesIO(obj["Body"].read()))
-                    logging.info(f"Parsed Zip file Successfully {key}")
+                    obj = s3.get_object(Bucket=bucket, Key=key, VersionId=version_id)
                     try:
                         logging.info("Parsing XML file")
                         avl_response = parse_xml(
-                            zip_file.read(zip_file.namelist()[0]),
+                            obj["Body"].read(),
                             batch_id,
                             source_type="string",
                         )
@@ -297,7 +290,7 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001, PLR091
                             f"Writing gzip file to S3 bucket {sirivm_process_bucket}",
                         )
                         queue = getQueue(process_queue)
-                        resp = queue.send_message(
+                        queue.send_message(
                             MessageBody="Put gzip file to S3",
                             MessageAttributes={
                                 "bucket": {
@@ -324,7 +317,7 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001, PLR091
                         for shard_no in range(no_of_shards):
                             queue_name = f"{otp_queue}{shard_no+1}.fifo"
                             queue = getQueue(queue_name)
-                            resp = queue.send_message(  # noqa: F841 - BODS-7131
+                            queue.send_message(  # noqa: F841 - BODS-7131
                                 MessageBody="Put gzip file to S3",
                                 MessageDeduplicationId=str(uuid.uuid4()),
                                 MessageGroupId=f"{queue_name.split('.')[0]}-group",
