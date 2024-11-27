@@ -168,4 +168,7 @@
     <changeSet id="52" author="abodsuser">
         <sqlFile path="sql/52-filter-null-group-ids-from-headway.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="53" author="abodsuser">
+        <sqlFile path="sql/53-fix-otcservice-call.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
