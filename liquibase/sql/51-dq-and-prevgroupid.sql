@@ -1711,63 +1711,63 @@ concat('timetable_stop_prev_group_id', timetable_suffix)
 -- Clean Up --
 --------------
 
---RAISE NOTICE 'Cleaning Up';
+RAISE NOTICE 'Cleaning Up';
 
 
---execute format(
---'drop table if exists public.%I',
---concat('organisation_timetable', timetable_suffix)
---);
---
---execute format(
---'drop table if exists public.%I',
---concat('filtered_registered_organisation_timetable', timetable_suffix)
---);
---
---execute format(
---'drop table if exists public.%I',
---concat('timetable_vehiclejourney', timetable_suffix)
---);
---
---execute format (
---'drop table if exists public.%I',
---concat('timetable_vehiclejourney_workingdays', timetable_suffix)
---);
---
---execute format (
---'drop table if exists public.%I',
---concat('timetable_vehiclejourney_exclusions', timetable_suffix)
---);
---
---execute format (
---'drop table if exists public.%I',
---concat('timetable_journey', timetable_suffix)
---);
---
---execute format (
---'drop table if exists public.%I',
---concat('timetable_stop', timetable_suffix)
---);
---
---execute format (
---'drop table if exists public.%I',
---concat('timetable_vj_per_groupid', timetable_suffix)
---);
---
---execute format (
---'drop table if exists public.%I',
---concat('timetable_stop_rank_1', timetable_suffix)
---);
---
---execute format (
---'drop table if exists public.%I',
---concat('timetable_stop_no_last_stops', timetable_suffix)
---);
---
---execute format (
---'drop table if exists public.%I',
---concat('timetable_stop_prev_group_id', timetable_suffix)
---);
+execute format(
+'drop table if exists public.%I',
+concat('organisation_timetable', timetable_suffix)
+);
+
+execute format(
+'drop table if exists public.%I',
+concat('filtered_registered_organisation_timetable', timetable_suffix)
+);
+
+execute format(
+'drop table if exists public.%I',
+concat('timetable_vehiclejourney', timetable_suffix)
+);
+
+execute format (
+'drop table if exists public.%I',
+concat('timetable_vehiclejourney_workingdays', timetable_suffix)
+);
+
+execute format (
+'drop table if exists public.%I',
+concat('timetable_vehiclejourney_exclusions', timetable_suffix)
+);
+
+execute format (
+'drop table if exists public.%I',
+concat('timetable_journey', timetable_suffix)
+);
+
+execute format (
+'drop table if exists public.%I',
+concat('timetable_stop', timetable_suffix)
+);
+
+execute format (
+'drop table if exists public.%I',
+concat('timetable_vj_per_groupid', timetable_suffix)
+);
+
+execute format (
+'drop table if exists public.%I',
+concat('timetable_stop_rank_1', timetable_suffix)
+);
+
+execute format (
+'drop table if exists public.%I',
+concat('timetable_stop_no_last_stops', timetable_suffix)
+);
+
+execute format (
+'drop table if exists public.%I',
+concat('timetable_stop_prev_group_id', timetable_suffix)
+);
 
 
 
