@@ -156,8 +156,8 @@ execute format(
 		from public.%I ot
 		join (
 	            select os.registration_number, registration_code, concat_ws('':'', substring(os.registration_number, 1, 9), substring(os.registration_number, 11, 12)) as otc_service_code, os.registration_status, os.effective_date
-	            from public.%I os
-	            left join public.%I ois
+	            from bods.%I os
+	            left join bods.%I ois
 	            on os.registration_number = ois.registration_number
 	            and ois.registration_status = ''Registered''
 	            and ois.effective_date = current_date + 1
@@ -172,8 +172,8 @@ execute format(
 concat('filtered_registered_organisation_timetable', timetable_suffix),
 concat('organisation_timetable', timetable_suffix),
 concat('organisation_timetable', timetable_suffix),
-'bods_otcservice',
-'bods_otcinactiveservice'
+'otc_service',
+'otc_inactiveservice'
 );
 
 RAISE NOTICE '(Re)Creating timetable_vehiclejourney temp table';
