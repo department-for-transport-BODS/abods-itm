@@ -1,0 +1,1 @@
+ALTER TABLE public."Timetable" ADD COLUMN IF NOT EXISTS timestamp_after_estimate timestamptz;

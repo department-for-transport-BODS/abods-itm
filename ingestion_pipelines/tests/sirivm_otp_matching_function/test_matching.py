@@ -9,6 +9,7 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     check_update_first_stop,
     find_matches_in_potential_matches,
     find_potential_matches,
+    map_matched_stop_to_db,
     move_potential_match_to_match,
     positions_timetable_lookup,
     remove_matched_stops,
@@ -16,11 +17,9 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     update_matched_stop,
     update_potential_match_with_recorded_at_time,
     update_potential_match_without_recorded_at_time,
-    write_matched_stop_to_db,
 )
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
     AVLRecord,
-    EstimatedMatch,
     GroupStopHistory,
     PotentialMatch,
     RouteDetails,
@@ -45,6 +44,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
         "matched_stops": {
             "1": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 23, 48, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "potential_matches": {
@@ -52,6 +52,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
                 "last_avl_index": 6,
                 "last_distance": 58.596598093401845,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 24, 58, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -61,11 +62,13 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
             "last_avl_index": 8,
             "last_distance": 37.35876375439114,
             "last_time_in_zone": str(avl_recorded_at_time_utc(avl_record_5_mins)),
+            "is_estimate": False,
         },
         "2": {
             "last_avl_index": 6,
             "last_distance": 58.596598093401845,
             "last_time_in_zone": str(datetime(2024, 8, 20, 11, 24, 58, tzinfo=UTC)),
+            "is_estimate": False,
         },
     }
     expected_stop_pos_distances_remove_5_mins = [  # noqa: RUF012 - BODS-7131
@@ -80,6 +83,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
         "matched_stops": {
             "1": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 32, 5, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "potential_matches": {
@@ -87,6 +91,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
                 "last_avl_index": 6,
                 "last_distance": 58.596598093401845,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 34, 37, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -94,6 +99,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
     expected_matched_stops = {  # noqa: RUF012 - BODS-7131
         "1": {
             "last_match_time": str(datetime(2024, 8, 20, 11, 32, 5, tzinfo=UTC)),
+            "is_estimate": False,
         },
     }
     expected_potential_matches = {  # noqa: RUF012 - BODS-7131
@@ -101,6 +107,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
             "last_avl_index": 6,
             "last_distance": 58.596598093401845,
             "last_time_in_zone": str(datetime(2024, 8, 20, 11, 34, 37, tzinfo=UTC)),
+            "is_estimate": False,
         },
     }
     expected_stop_pos_distances_remove = []  # noqa: RUF012 - BODS-7131
@@ -195,9 +202,11 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         "matched_stops": {
             "13": {
                 "last_match_time": str(datetime(2024, 10, 10, 8, 24, 26, tzinfo=UTC)),
+                "is_estimate": False,
             },
             "14": {
                 "last_match_time": str(datetime(2024, 10, 10, 8, 25, 6, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "potential_matches": {},
@@ -208,13 +217,17 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         "last_avl_latitude": 51.565052,
         "last_avl_longitude": -1.784906,
         "matched_stops": {
-            "3": {"last_match_time": datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC)},
+            "3": {
+                "last_match_time": datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC),
+                "is_estimate": False,
+            },
         },
         "potential_matches": {  # noqa: RUF012 - BODS-7131
             "2": {
                 "last_avl_index": 5,
                 "last_distance": 61.599382260785646,
                 "last_time_in_zone": str(datetime(2024, 10, 31, 8, 7, 56, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -234,6 +247,33 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         ),
         [
             pytest.param(
+                avl_record,
+                route_details,
+                group_stop_history,
+                1,
+                final_stop_index,
+                {},
+                id="Drivers changing journey code early, reaching stop 15, no potential matches should be created",
+            ),
+            pytest.param(
+                avl_record_2,
+                route_details,
+                group_stop_history_2,
+                62,
+                final_stop_index,
+                {
+                    "15": {
+                        "last_avl_index": 62,
+                        "last_distance": 13.738176401886017,
+                        "last_time_in_zone": str(
+                            datetime(2024, 10, 10, 8, 25, 56, tzinfo=UTC),
+                        ),
+                        "is_estimate": False,
+                    },
+                },
+                id="Bus reaching stop 15 and there's one actual match",
+            ),
+            pytest.param(
                 avl_record_scem,
                 route_details_scem,
                 group_stop_history_scem,
@@ -246,6 +286,7 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
                         "last_time_in_zone": str(
                             datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC),
                         ),
+                        "is_estimate": False,
                     },
                     "1": {
                         "last_avl_index": 6,
@@ -253,6 +294,7 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
                         "last_time_in_zone": str(
                             datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC),
                         ),
+                        "is_estimate": False,
                     },
                 },
                 id="Bus started early, matched with stop 3 and go back to the starting/end stop, final stop should not become a potential match",
@@ -295,9 +337,11 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         "matched_stops": {
             "4": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 32, 20, tzinfo=UTC)),
+                "is_estimate": False,
             },
             "5": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 32, 50, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "potential_matches": {
@@ -305,6 +349,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 "last_avl_index": 29,
                 "last_distance": 142,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 34, 42, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -314,9 +359,11 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         "matched_stops": {
             "42": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 58, 43, tzinfo=UTC)),
+                "is_estimate": False,
             },
             "43": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 59, 5, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "potential_matches": {
@@ -324,11 +371,13 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 "last_avl_index": 89,
                 "last_distance": 11,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC)),
+                "is_estimate": False,
             },
             "44": {
                 "last_avl_index": 89,
                 "last_distance": 13,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 59, 27, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -338,9 +387,11 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         "matched_stops": {
             "43": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 59, 5, tzinfo=UTC)),
+                "is_estimate": False,
             },
             "45": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "potential_matches": {
@@ -348,6 +399,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 "last_avl_index": 90,
                 "last_distance": 332,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 59, 27, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -357,9 +409,11 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         "matched_stops": {
             "34": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 51, 35, tzinfo=UTC)),
+                "is_estimate": False,
             },
             "35": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 53, 8, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "potential_matches": {
@@ -367,6 +421,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 "last_avl_index": 76,
                 "last_distance": 8,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 53, 43, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -379,11 +434,13 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 "last_avl_index": 2,
                 "last_distance": 11.812096582392824,
                 "last_time_in_zone": str(datetime(2024, 8, 21, 7, 1, 3, tzinfo=UTC)),
+                "is_estimate": False,
             },
             "41": {
                 "last_avl_index": 2,
                 "last_distance": 10.812096582392824,
                 "last_time_in_zone": str(datetime(2024, 8, 21, 7, 1, 34, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -393,6 +450,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         "matched_stops": {
             "40": {
                 "last_match_time": str(datetime(2024, 8, 20, 7, 42, 26, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "potential_matches": {
@@ -400,6 +458,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 "last_avl_index": 101,
                 "last_distance": 10.812096582392824,
                 "last_time_in_zone": str(datetime(2024, 8, 21, 7, 43, 25, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -447,6 +506,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                         "6": {
                             "last_match_time": str(
@@ -460,6 +520,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                     },
                     "potential_matches": {
@@ -477,6 +538,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                     },
                 },
@@ -508,6 +570,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                         "45": {
                             "last_match_time": str(
@@ -521,6 +584,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                     },
                     "potential_matches": {
@@ -538,6 +602,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                         "44": {
                             "last_avl_index": 90,
@@ -553,6 +618,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                     },
                 },
@@ -584,6 +650,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                         "45": {
                             "last_match_time": str(
@@ -597,6 +664,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                     },
                     "potential_matches": {
@@ -614,6 +682,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                     },
                 },
@@ -645,6 +714,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                         "35": {
                             "last_match_time": str(
@@ -658,6 +728,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                     },
                     "potential_matches": {
@@ -675,6 +746,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                     },
                 },
@@ -709,6 +781,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                         "41": {
                             "last_avl_index": 2,
@@ -724,6 +797,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                     },
                 },
@@ -755,6 +829,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                         "41": {
                             "last_match_time": str(
@@ -768,6 +843,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                     },
                     "potential_matches": {
@@ -785,6 +861,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                                     tzinfo=UTC,
                                 ),
                             ),
+                            "is_estimate": False,
                         },
                     },
                 },
@@ -881,6 +958,7 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
                 "last_time_in_zone": str(
                     datetime(2024, 9, 1, 11, 30, 57),
                 ),
+                "is_estimate": False,
             },
         },
     }
@@ -897,6 +975,7 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
             self.last_time_in_zone,
             self.group_stop_history,
             self.potential_matches_to_delete,
+            False,  # noqa: FBT003
         )
         expected_group_stop_history = {
             "last_avl_time": str(
@@ -906,6 +985,7 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
             "matched_stops": {
                 "1": {
                     "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5)),
+                    "is_estimate": False,
                 },
             },
             "potential_matches": {
@@ -915,6 +995,7 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
                     "last_time_in_zone": str(
                         datetime(2024, 9, 1, 11, 30, 57),
                     ),
+                    "is_estimate": False,
                 },
             },
         }
@@ -961,6 +1042,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                         "timetable_id": 893823336,
                         "batch_id": batch_id,
                         "last_time_in_zone": last_time_in_zone_non_final,
+                        "timestamp_after_estimate": None,
                         "otp_state": "Early",
                         "stop_type": "Non-final",
                     },
@@ -982,6 +1064,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                         "timetable_id": 893822665,
                         "batch_id": batch_id,
                         "last_time_in_zone": last_time_in_zone_final,
+                        "timestamp_after_estimate": None,
                         "otp_state": "OnTime",
                         "stop_type": "final",
                     },
@@ -999,7 +1082,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
         last_time_in_zone: datetime,
         expected_stop_pos_distances: list,  # noqa: ANN401 - BODS-7131
     ):
-        write_matched_stop_to_db(
+        map_matched_stop_to_db(
             is_final_stop,
             timetable_dict[self.group_id],
             stop_pos_distances,
@@ -1012,6 +1095,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
             },
             pm_index,
             last_time_in_zone,
+            None,
         )
         assert stop_pos_distances == expected_stop_pos_distances
 
@@ -1306,6 +1390,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_avl_index": 3,
         "last_distance": 75.1243252308765,
         "last_time_in_zone": str(datetime(2024, 8, 20, 11, 15, 48, tzinfo=UTC)),
+        "is_estimate": False,
     }
     group_stop_history_1 = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 3,
@@ -1315,6 +1400,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_avl_index": 3,
                 "last_distance": 75.1243252308765,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 15, 48, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "matched_stops": {},
@@ -1323,6 +1409,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_avl_index": 30,
         "last_distance": 80.65435437,
         "last_time_in_zone": str(datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC)),
+        "is_estimate": False,
     }
     group_stop_history_2 = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 30,
@@ -1332,14 +1419,17 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_avl_index": 30,
                 "last_distance": 80.65435437,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "matched_stops": {
             "1": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 15, 48, tzinfo=UTC)),
+                "is_estimate": False,
             },
             "2": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 17, 6, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -1347,6 +1437,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_avl_index": 59,
         "last_distance": 72.1232432,
         "last_time_in_zone": str(datetime(2024, 8, 20, 11, 39, 54, tzinfo=UTC)),
+        "is_estimate": False,
     }
     group_stop_history_3 = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 59,
@@ -1356,19 +1447,23 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_avl_index": 59,
                 "last_distance": 72.1232432,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 37, 54, tzinfo=UTC)),
+                "is_estimate": False,
             },
             "23": {
                 "last_avl_index": 59,
                 "last_distance": 15.12312678,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 39, 54, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "matched_stops": {
             "21": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 34, 23, tzinfo=UTC)),
+                "is_estimate": False,
             },
             "22": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 35, 6, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -1377,6 +1472,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_avl_index": 59,
         "last_distance": 81.123124167,
         "last_time_in_zone": str(datetime(2024, 8, 20, 11, 36, 54, tzinfo=UTC)),
+        "is_estimate": False,
     }
     group_stop_history_4 = {  # noqa: RUF012 - BODS-7131
         "last_avl_index": 62,
@@ -1386,14 +1482,17 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_avl_index": 59,
                 "last_distance": 81.123124167,
                 "last_time_in_zone": str(datetime(2024, 8, 20, 11, 36, 54, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "matched_stops": {
             "21": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 34, 23, tzinfo=UTC)),
+                "is_estimate": False,
             },
             "24": {
                 "last_match_time": str(datetime(2024, 8, 20, 11, 35, 6, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -1404,6 +1503,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_time_in_zone": str(
             datetime(2024, 10, 17, 16, 12, 18, tzinfo=UTC),
         ),
+        "is_estimate": False,
     }
     group_stop_history_5 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": datetime(2024, 10, 17, 16, 15, 41, tzinfo=UTC),
@@ -1413,6 +1513,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_match_time": str(
                     datetime(2024, 10, 17, 16, 10, 6, tzinfo=UTC),
                 ),
+                "is_estimate": False,
             },
         },
         "potential_matches": {
@@ -1422,6 +1523,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_time_in_zone": str(
                     datetime(2024, 10, 17, 16, 12, 18, tzinfo=UTC),
                 ),
+                "is_estimate": False,
             },
             "2": {
                 "last_avl_index": 6,
@@ -1429,6 +1531,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_time_in_zone": str(
                     datetime(2024, 10, 17, 16, 14, 58, tzinfo=UTC),
                 ),
+                "is_estimate": False,
             },
         },
     }
@@ -1439,6 +1542,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_time_in_zone": str(
             datetime(2024, 10, 23, 15, 39, 4, tzinfo=UTC),
         ),
+        "is_estimate": False,
     }
     group_stop_history_6 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": datetime(2024, 10, 23, 15, 39, 33, tzinfo=UTC),
@@ -1448,11 +1552,13 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_match_time": str(
                     datetime(2024, 10, 23, 15, 37, 43, tzinfo=UTC),
                 ),
+                "is_estimate": False,
             },
             "13": {
                 "last_match_time": str(
                     datetime(2024, 10, 23, 15, 38, 44, tzinfo=UTC),
                 ),
+                "is_estimate": False,
             },
         },
         "potential_matches": {
@@ -1462,6 +1568,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_time_in_zone": str(
                     datetime(2024, 10, 23, 15, 39, 4, tzinfo=UTC),
                 ),
+                "is_estimate": False,
             },
             "12": {
                 "last_avl_index": 90,
@@ -1469,6 +1576,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_time_in_zone": str(
                     datetime(2024, 10, 23, 15, 39, 4, tzinfo=UTC),
                 ),
+                "is_estimate": False,
             },
             "14": {
                 "last_avl_index": 90,
@@ -1476,6 +1584,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_time_in_zone": str(
                     datetime(2024, 10, 23, 15, 39, 27, tzinfo=UTC),
                 ),
+                "is_estimate": False,
             },
             "15": {
                 "last_avl_index": 91,
@@ -1483,6 +1592,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_time_in_zone": str(
                     datetime(2024, 10, 23, 15, 39, 33, tzinfo=UTC),
                 ),
+                "is_estimate": False,
             },
         },
     }
@@ -1490,14 +1600,19 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_avl_index": 97,
         "last_distance": 37.80104206056258,
         "last_time_in_zone": str(datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC)),
+        "is_estimate": False,
     }
     group_stop_history_7 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 10, 31, 8, 39, 43, tzinfo=UTC)),
         "last_avl_index": 99,
         "matched_stops": {
-            "3": {"last_match_time": str(datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC))},
+            "3": {
+                "last_match_time": str(datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC)),
+                "is_estimate": False,
+            },
             "71": {
                 "last_match_time": str(datetime(2024, 10, 31, 8, 36, 21, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
         "potential_matches": {
@@ -1505,6 +1620,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 "last_avl_index": 98,
                 "last_distance": 73.61235793637137,
                 "last_time_in_zone": str(datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC)),
+                "is_estimate": False,
             },
         },
     }
@@ -1555,6 +1671,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                                 tzinfo=UTC,
                             ),
                         ),
+                        "is_estimate": False,
                     },
                 },
                 [
@@ -1576,6 +1693,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         ),
                         "otp_state": "OnTime",
                         "stop_type": "Non-final",
+                        "timestamp_after_estimate": None,
                     },
                 ],
                 id="first match",
@@ -1597,11 +1715,13 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "last_match_time": str(
                             datetime(2024, 8, 20, 11, 17, 6, tzinfo=UTC),
                         ),
+                        "is_estimate": False,
                     },
                     "3": {
                         "last_match_time": str(
                             datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC),
                         ),
+                        "is_estimate": False,
                     },
                 },
                 [
@@ -1623,6 +1743,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         ),
                         "otp_state": "OnTime",
                         "stop_type": "Non-final",
+                        "timestamp_after_estimate": None,
                     },
                 ],
                 id="not first match, the pm index higher than the highest match index saved and it will be the third actual match, move the potential match to be a match and remove the lowest match index from matched stops",
@@ -1652,11 +1773,13 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                                 tzinfo=UTC,
                             ),
                         ),
+                        "is_estimate": False,
                     },
                     "22": {
                         "last_match_time": str(
                             datetime(2024, 8, 20, 11, 35, 6, tzinfo=UTC),
                         ),
+                        "is_estimate": False,
                     },
                 },
                 [],
@@ -1689,6 +1812,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                                 tzinfo=UTC,
                             ),
                         ),
+                        "is_estimate": False,
                     },
                     "23": {
                         "last_match_time": str(
@@ -1702,6 +1826,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                                 tzinfo=UTC,
                             ),
                         ),
+                        "is_estimate": False,
                     },
                 },
                 [
@@ -1723,6 +1848,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         ),
                         "otp_state": "Late",
                         "stop_type": "Non-final",
+                        "timestamp_after_estimate": None,
                     },
                 ],
                 id="not first match, the pm index lower than the highest match index saved and it will be the third actual match, move the potential match to be a match and delete the indices that are higher than the current potential match index in the matched stops",
@@ -1746,6 +1872,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "last_match_time": str(
                             datetime(2024, 10, 17, 16, 12, 18, tzinfo=UTC),
                         ),
+                        "is_estimate": False,
                     },
                 },
                 [
@@ -1767,6 +1894,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         ),
                         "otp_state": "Early",
                         "stop_type": "Non-final",
+                        "timestamp_after_estimate": None,
                     },
                 ],
                 id="bus going to the starting point to start the journey and matching backwards, when matching the second bus stop and there's only one actual match, delete the first matched stop",
@@ -1788,11 +1916,13 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "last_match_time": str(
                             datetime(2024, 10, 23, 15, 37, 43, tzinfo=UTC),
                         ),
+                        "is_estimate": False,
                     },
                     "13": {
                         "last_match_time": str(
                             datetime(2024, 10, 23, 15, 38, 44, tzinfo=UTC),
                         ),
+                        "is_estimate": False,
                     },
                 },
                 [],
@@ -1817,11 +1947,13 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "last_match_time": str(
                             datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC),
                         ),
+                        "is_estimate": False,
                     },
                     "70": {
                         "last_match_time": str(
                             datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC),
                         ),
+                        "is_estimate": False,
                     },
                 },
                 [
@@ -1843,6 +1975,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "stop_type": "Non-final",
                         "time_difference": -4377.0,
                         "timetable_id": 1231325656,
+                        "timestamp_after_estimate": None,
                     },
                 ],
                 id="bus matched final stops, then non-final stop, the final stop match should be removed",
@@ -2008,6 +2141,7 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
             to_set_total = [*to_set_total, *to_set]
 
         assert to_set_total == expected_to_set
+        print(to_remove_total)
         assert to_remove_total == expected_to_remove
         assert stop_history == expected_stop_history
 
@@ -2037,7 +2171,7 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
                     "last_avl_latitude": 53.822937,
                 },
                 ((53.820328, -1.654394), 0),
-                {"last_time_in_zone": "2024-10-10T07:49:26.156720+00:00"},
+                "2024-10-10T07:49:26.156720+00:00",
                 id="Line between 2 AVL points on straight road and within time threshold gives an estimated match",
             ),
             pytest.param(
@@ -2090,6 +2224,23 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
                 ((53.820328, -1.654394), 0),
                 None,
                 id="Longer than threshold time between AVL stops does not give estimated match",
+            ),
+            pytest.param(
+                {
+                    "longitude": -1.648382,
+                    "latitude": 52.817693,
+                    "recorded_at_time": str(
+                        datetime(2024, 10, 10, 7, 50, 40, tzinfo=UTC),
+                    ),
+                },
+                {
+                    "last_avl_time": str(datetime(2024, 10, 10, 7, 50, 10, tzinfo=UTC)),
+                    "last_avl_longitude": -1.659246,
+                    "last_avl_latitude": 54.822937,
+                },
+                ((53.820328, -1.654394), 0),
+                None,
+                id="Longer than threshold distance between AVL stops does not give estimated match",
             ),
             pytest.param(
                 {
@@ -2147,7 +2298,7 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
         avl: AVLRecord,
         group_stop_history: GroupStopHistory,
         stop: StopDetails,
-        expected_estimated_match: EstimatedMatch,
+        expected_estimated_match: str,
     ):
         estimated_match = check_estimated_match(avl, group_stop_history, stop)
         assert estimated_match == expected_estimated_match

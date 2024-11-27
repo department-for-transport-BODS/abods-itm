@@ -156,7 +156,16 @@
     <changeSet id="48" author="abodsuser">
         <sqlFile path="sql/48-journey-to-service-mapping.sql" splitStatements="false" />
     </changeSet>
-        <changeSet id="49" author="abodsuser">
+    <changeSet id="49" author="abodsuser">
         <sqlFile path="sql/49-add-ep-servicecodes.sql" splitStatements="false" />
+    </changeSet>
+    <changeSet id="50" author="abodsuser">
+        <sqlFile path="sql/50-timestamp-after-estimate.sql" splitStatements="false" />
+    </changeSet>
+    <changeSet id="51" author="abodsuser">
+        <sqlFile path="sql/51-dq-and-prevgroupid.sql" splitStatements="false" />
+    </changeSet>
+    <changeSet id="52" author="abodsuser">
+        <sqlFile path="sql/52-filter-null-group-ids-from-headway.sql" splitStatements="false" />
     </changeSet>
 </databaseChangeLog>
