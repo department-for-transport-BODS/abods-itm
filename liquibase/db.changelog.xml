@@ -162,11 +162,10 @@
     <changeSet id="50" author="abodsuser">
         <sqlFile path="sql/50-timestamp-after-estimate.sql" splitStatements="false" />
     </changeSet>
-        <changeSet id="51" author="abodsuser">
+    <changeSet id="51" author="abodsuser">
         <sqlFile path="sql/51-dq-and-prevgroupid.sql" splitStatements="false" />
     </changeSet>
-    </changeSet>
-        <changeSet id="52" author="abodsuser">
+    <changeSet id="52" author="abodsuser">
         <sqlFile path="sql/52-filter-null-group-ids-from-headway.sql" splitStatements="false" />
     </changeSet>
 </databaseChangeLog>
