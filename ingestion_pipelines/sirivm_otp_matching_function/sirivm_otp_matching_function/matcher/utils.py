@@ -32,9 +32,12 @@ def timer(passed_logger: Logger) -> Callable[Param, Return]:
             try:
                 return f(*args, **kwargs)
             finally:
-                end_time = time.perf_counter()
+                end_time = time.perf_counter_ns()
                 run_time = end_time - start_time
-                passed_logger.info(f"Finished {f.__name__}() in {run_time:.4f} secs")
+                passed_logger.info(
+                    f"Finished {f.__name__}()",
+                    time_in_ms=run_time / 1000,
+                )
 
         return applicator
 

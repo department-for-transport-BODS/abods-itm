@@ -49,10 +49,13 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
         current_keys = set(logger.get_current_keys().keys())
         logger.remove_keys(current_keys - base_keys)
 
-        logger.append_keys(message_attributes=rec.message_attributes)
+        logger.append_keys(
+            message_attributes={
+                key: val.string_value for key, val in rec.message_attributes
+            },
+        )
 
         if "shards" not in _cache:
-            logger.info("Getting shards data")
             _cache["shards"] = s3_client.get_shards()
 
         if "Historic" in rec.message_attributes:
@@ -92,7 +95,6 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
         avl_datetime = parse(avl_time)
         logger.append_keys(avl_time=avl_time, avl_datetime=avl_datetime)
 
-        logger.info("Fetching stop history")
         shard_stop_history, control_info = s3_client.get_stop_history(
             avl_datetime,
             shard_identifier,
@@ -101,10 +103,13 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
 
         # for recovery, only process avl file that is greater than last process avl file
         if int(avl_time) < int(control_info["last_avl"]):
-            logger.info("Record has already been processed, skipping")
+            logger.info(
+                "Record has already been processed, skipping",
+                avl_time=avl_time,
+                last_avl=control_info["last_avl"],
+            )
             return
 
-        logger.info("Cleaning stop history")
         clean_shard_stop_history = clean_stop_history(shard_stop_history, avl_datetime)
 
         avl_year = avl_datetime.year
@@ -115,10 +120,8 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
         avl_minute = "00" if avl_datetime.minute < half_hour else "30"
         timetable_key = f"timetable_shreds/YYYY={avl_year}/MM={avl_month}/DD={avl_day}/timetable_{avl_year}{avl_month}{avl_day}_{avl_hour}_{avl_minute}.json"
         logger.append_keys(timetable_key=timetable_key)
-        logger.info("Fetching historic timetable")
         timetable = read_timetable(timetable_key)
 
-        logger.info("Fetching AVL data")
         avl_list = s3_client.get_avl_data(fname)
         avl_list = filter_avl_list(shard_identifier, shards, avl_list)
         batch_id = avl_list[0]["batch_id"]  # assuming we have at least one AVL
@@ -128,14 +131,12 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
     try:
         validate_avl_list(avl_list, batch_id)
 
-        logger.info("Got data, calculating matches")
         to_set, to_remove, stop_history = positions_timetable_lookup(
             timetable,
             avl_list,
             clean_shard_stop_history,
         )
 
-        logger.info("Updating database with successful results")
         db_client.historic_update_success(
             batch_id,
             to_set,
@@ -143,7 +144,6 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
             f"{avl_year}-{avl_month}-{avl_day}",
         )
 
-        logger.info("Saving stop history")
         s3_client.export_stop_history(
             stop_history,
             control_info,
@@ -182,7 +182,6 @@ def live_record_handler(
         avl_datetime = parse(str(avl_time_val))
         logger.append_keys(avl_time=avl_time_val, avl_datetime=avl_datetime)
 
-        logger.info("Fetching stop history")
         current_date = datetime.today()  # noqa: DTZ002 - Stop using today() later
         shard_stop_history, control_info = s3_client.get_stop_history(
             current_date,
@@ -190,25 +189,20 @@ def live_record_handler(
             avl_time_val,
         )
 
-        logger.info("Cleaning stop history")
         clean_shard_stop_history = clean_stop_history(shard_stop_history, avl_datetime)
 
-        logger.info("Fetching AVL data")
         avl_list = s3_client.get_avl_data(fname)
         avl_list = filter_avl_list(shard_identifier, shards, avl_list)
         validate_avl_list(avl_list, batch_id)
 
-        logger.info("Got data, calculating matches")
         to_set, to_remove, stop_history = positions_timetable_lookup(
             timetable,
             avl_list,
             clean_shard_stop_history,
         )
 
-        logger.info("Updating database")
         db_client.live_update_success(batch_id, to_set, to_remove)
 
-        logger.info("Updating S3")
         s3_client.export_stop_history(
             stop_history,
             control_info,
