@@ -51,7 +51,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
 
         logger.append_keys(
             message_attributes={
-                key: val.string_value for key, val in rec.message_attributes
+                key: val.string_value for key, val in rec.message_attributes.items()
             },
         )
 
