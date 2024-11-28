@@ -134,8 +134,8 @@ def check_estimated_match(
         return None
 
     if (
-        not bool(group_stop_history.get("last_avl_longitude"))
-        or not bool(group_stop_history.get("last_avl_latitude"))
+        (group_stop_history.get("last_avl_longitude") is None)
+        or (group_stop_history.get("last_avl_latitude") is None)
         or not bool(group_stop_history.get("last_avl_time"))
     ):
         return None
