@@ -4,7 +4,7 @@ from typing import Literal, NotRequired, TypedDict
 
 from .utils import validate_date
 
-StopDetails = tuple[tuple[float, float], str, int, str]
+StopDetails = tuple[tuple[float, float], str, int, str, str]
 RouteDetails = Mapping[str, StopDetails]
 Timetable = Mapping[str, RouteDetails]
 OperatorShards = Mapping[str, Sequence[str]]
@@ -28,6 +28,10 @@ def stop_timetable_id(stop: StopDetails) -> int:
 
 def stop_date(stop: StopDetails) -> str:
     return stop[3]
+
+
+def stop_direction(stop: StopDetails) -> str:
+    return stop[4]
 
 
 def stop_departure_time(stop: StopDetails) -> datetime:

@@ -260,7 +260,7 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
         current_timestamp(0) +  interval '120' minute
     )
     select t.group_id,row_number() over( partition by t.group_id order by t.group_id,t.expected_departure_time asc,t.stop_index  asc  ) as stop_index , 
-    t.stop_latitude,t.stop_longitude,t.expected_departure_time::time as expected_departure_time,t.timetable_id, t.date_of_journey
+    t.stop_latitude,t.stop_longitude,t.expected_departure_time::time as expected_departure_time,t.timetable_id, t.date_of_journey, t.direction
     from public."Timetable" t
     where t.date_of_journey  = now()::date
     and t.vehiclejourney_id in (select vehiclejourney_id from my_groups)
@@ -289,7 +289,7 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
         timetable_dict = defaultdict(dict)
         res = cur.fetchall()
         for i in res:
-            timetable_dict[i[0]][i[1]] = [(float(i[2]), float(i[3])), i[4], i[5], i[6]]
+            timetable_dict[i[0]][i[1]] = [(float(i[2]), float(i[3])), i[4], i[5], i[6], i[7]]
         cur.close()
         write_to_s3(timetable_dict, "timetable/timetable.json")
         write_to_s3(timetable_dict, fname)
