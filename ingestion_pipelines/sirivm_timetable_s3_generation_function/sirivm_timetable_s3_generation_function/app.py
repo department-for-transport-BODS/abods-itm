@@ -291,7 +291,7 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
         directions = {i[7] for i in res}
         for i in res:
             group_id = i[0]
-            if directions.size > 1:
+            if len(directions) > 1:
                 direction = i[7]
                 group_id = group_id + "_" + direction
             timetable_dict[group_id][i[1]] = [
