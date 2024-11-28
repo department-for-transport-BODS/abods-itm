@@ -88,7 +88,7 @@ jobs:
               echo "VERSION=${DEPLOY_VER//\//-}" >> "$GITHUB_OUTPUT"
             else
               echo [INFO] Deploying from main branch. Using latest tagged version
-              latest_version=$(get_latest_version $DEPLOY_SRC 'releases/itm')
+              latest_version=$(get_latest_version $DEPLOY_SRC 'abods-itm/releases')
               echo """ \
                 Modifying backend database using parameters:
                   (Database Action)        - $DEPLOY_ACT
