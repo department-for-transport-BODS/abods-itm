@@ -37,7 +37,7 @@ env:
     github.ref_name == 'uat' && 'uat' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
   DEPLOY_SRC_PREFIX: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET_PREFIX }}
-  DEPLOY_VER: ${{ github.ref_name != 'main' && github.ref_name || 'null' }}
+  DEPLOY_VER: ${{ github.ref_name != 'main' && github.ref_name || 'prod' }}
 
 jobs:
   validation:
