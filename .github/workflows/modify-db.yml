@@ -84,7 +84,7 @@ jobs:
               echo "VERSION=${DEPLOY_VER//\//-}" >> "$GITHUB_OUTPUT"
             else
               echo [INFO] Deploying from main branch. Using latest tagged version
-              latest_version=$(get_latest_version $DEPLOY_SRC 'abods-itm/releases')
+              latest_version=$(get_latest_version $DEPLOY_SRC 'releases/itm')
               echo """ \
                 Modifying backend database using parameters:
                   (Database Action)        - $DEPLOY_ACT
@@ -259,7 +259,7 @@ jobs:
           DEPLOY_SRC: ${{ env.DEPLOY_SRC_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods-itm/releases" || rc_path="abods-itm/releases"
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="releases/itm" || rc_path="releases-dev/itm"
           lambda_function_name="${{ vars.PROJECT_NAME }}-${DEPLOY_ENV}-pglifecycle-function"
           cat <<EOF > $GITHUB_WORKSPACE/payload.json
           {
