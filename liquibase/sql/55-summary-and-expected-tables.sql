@@ -264,10 +264,7 @@ BEGIN
 					ttb.day_of_week,
 					ttb.common_name,
 					ttb.expected_departure_time,
-					CASE
-						WHEN ttb.actual_departure_time is not null THEN ttb.actual_departure_time
-						ELSE ttb.timestamp_after_estimate
-					END as actual_departure_time,
+					COALESCE(ttb.actual_departure_time, ttb.timestamp_after_estimate) as actual_departure_time,
 					ttb.is_timing_point,
 					ttb.otp_state,
 					ttb.time_difference,
@@ -452,10 +449,7 @@ BEGIN
 						ttb.date_of_journey,
 						ttb.day_of_week,
 						ttb.expected_departure_time,
-						CASE
-							WHEN ttb.actual_departure_time is not null THEN ttb.actual_departure_time
-							ELSE ttb.timestamp_after_estimate
-						END as actual_departure_time,
+						COALESCE(ttb.actual_departure_time, ttb.timestamp_after_estimate) as actual_departure_time,
 						ttb.is_timing_point,
 						ttb.otp_state,
 						ttb.time_difference,
@@ -658,7 +652,7 @@ BEGIN
 										es.noc_and_line_and_servicecode,
 										''-''
 										, -1)
-			WHERE  ttb.date_of_journey = %L and (ttb.time_difference is not null or ttb.
+			WHERE  ttb.date_of_journey = %L
 			group by 
 			ttb.operator_noc ,
 			ttb.line_name ,
