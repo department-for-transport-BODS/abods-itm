@@ -76,6 +76,7 @@ def read_historic_timetable(timetable_date):  # noqa: ANN001, ANN201 - BODS-7131
         "expected_departure_time",
         "timetable_id",
         "date_of_journey",
+        "direction",
     ]
     try:
         df = wr.s3.read_csv(  # noqa: PD901 - BODS-7131
@@ -103,14 +104,22 @@ def recreate_timetable(timetable):  # noqa: ANN001, ANN201 - BODS-7131
 
     """
     recreated_timetable = {}
+    logger.info("counting directions for group id")
+
+    directions_by_group_id = {}
+    for row in timetable:
+        directions_by_group_id.setdefault(row["group_id"], set()).add(row["direction"])
+
     logger.info("Recreating timetable")
     count = 0
     for row in timetable:
         count += 1  # noqa: SIM113 - BODS-7131
         group_id = row["group_id"]
-        if group_id not in recreated_timetable:
-            recreated_timetable[group_id] = {}
-        recreated_timetable[group_id][str(row["stop_index"])] = [
+        directions = directions_by_group_id[group_id]
+        if len(directions) > 1:
+            direction = row["direction"]
+            group_id = group_id + "|" + direction
+        recreated_timetable.setdefault(group_id, {})[str(row["stop_index"])] = [
             [row["stop_latitude"], row["stop_longitude"]],
             row["expected_departure_time"],
             row["timetable_id"],
