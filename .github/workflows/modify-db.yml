@@ -54,6 +54,10 @@ jobs:
       REMOTE_DB_HOSTNAME: ${{ steps.set-vars.outputs.REMOTE_DB_HOSTNAME }}
       VERSION: ${{ steps.verify.outputs.VERSION }}
 
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
