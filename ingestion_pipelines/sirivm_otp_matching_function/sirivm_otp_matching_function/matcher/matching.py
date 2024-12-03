@@ -824,6 +824,7 @@ def positions_timetable_lookup(
         # 1. check if group id exists in timetable
         logger.append_keys(avl=avl)
         stop_history_index, route_details = get_route_details(avl, timetable)
+        logger.append_keys(stop_history_index=stop_history_index)
         if not route_details:
             logger.info("Could not find group id for avl in timetable extract")
             continue
@@ -898,6 +899,7 @@ def positions_timetable_lookup(
 
 def get_route_details(avl: AVLRecord, timetable: Timetable) -> tuple[str, RouteDetails]:
     group_id = avl_group_id(avl)
+    logger.append_keys(avl_group_id=avl_group_id)
     route_details = timetable.get(group_id)
     if route_details:
         return group_id, route_details
