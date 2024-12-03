@@ -174,4 +174,7 @@
     <changeSet id="54" author="abodsuser">
         <sqlFile path="sql/54-direction-and-departure-day-shift.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="55" author="abodsuser">
+        <sqlFile path="sql/55-summary-and-expected-tables.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
