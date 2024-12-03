@@ -252,19 +252,30 @@ def backfill_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001, PL
 
 
 def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
-    query = """  with my_groups as (
-        select distinct vehiclejourney_id
-        from public."Timetable" where date_of_journey  = (now() at time zone 'Europe/London')::date
-        and expected_departure_time between
-        current_timestamp(0) - interval '120' minute and
-        current_timestamp(0) +  interval '120' minute
-    )
-    select t.group_id,row_number() over( partition by t.group_id order by t.group_id,t.expected_departure_time asc,t.stop_index  asc  ) as stop_index , 
-    t.stop_latitude,t.stop_longitude,t.expected_departure_time::time as expected_departure_time,t.timetable_id, t.date_of_journey, t.direction
-    from public."Timetable" t
-    where t.date_of_journey  = now()::date
-    and t.vehiclejourney_id in (select vehiclejourney_id from my_groups)
-    order by t.group_id,t.expected_departure_time asc,t.stop_index  asc; """  # noqa: W291 - BODS-7131
+    query = """
+        WITH my_groups AS
+          (SELECT DISTINCT vehiclejourney_id
+           FROM public."Timetable"
+           WHERE date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
+             AND expected_departure_time BETWEEN current_timestamp(0) - interval '120' MINUTE AND current_timestamp(0) + interval '120' MINUTE)
+        SELECT t.group_id,
+               row_number() OVER (PARTITION BY t.group_id
+                                  ORDER BY t.group_id, t.expected_departure_time ASC, t.stop_index ASC) AS stop_index,
+               t.stop_latitude,
+               t.stop_longitude,
+               t.expected_departure_time::TIME AS expected_departure_time,
+               t.timetable_id,
+               t.date_of_journey,
+               t.direction
+        FROM public."Timetable" t
+        WHERE t.date_of_journey = now()::date
+          AND t.vehiclejourney_id IN
+            (SELECT vehiclejourney_id
+             FROM my_groups)
+        ORDER BY t.group_id,
+                 t.expected_departure_time ASC,
+                 t.stop_index ASC;
+    """  # noqa: W291 - BODS-7131
     now = datetime.now()
     year = datetime.strftime(now, "%Y")
     mon = datetime.strftime(now, "%m")
