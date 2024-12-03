@@ -822,11 +822,20 @@ def positions_timetable_lookup(
     stop_pos_distances_remove: list[RecordToRemove] = []
     for avl in avl_dict:
         # 1. check if group id exists in timetable
-        logger.append_keys(avl=avl)
-        stop_history_index, route_details = get_route_details(avl, timetable)
-        logger.append_keys(stop_history_index=stop_history_index)
+        group_id = avl_group_id(avl)
+        avl_direction = avl.get("direction_ref", "")
+        stop_history_index, route_details = get_route_details(
+            group_id,
+            avl_direction,
+            timetable,
+        )
+        logger.append_keys(
+            avl=avl,
+            group_id=group_id,
+            stop_history_index=stop_history_index,
+        )
         if not route_details:
-            logger.info("Could not find group id for avl in timetable extract")
+            logger.info("Could not find timetable for avl in timetable extract")
             continue
 
         logger.debug(f"stop_history_index {stop_history_index} in timetable")
@@ -893,13 +902,15 @@ def positions_timetable_lookup(
                     potential_matches_to_remove,
                 )
 
-    logger.remove_keys("avl")
+    logger.remove_keys(["avl", "group_id", "stop_history_index"])
     return stop_pos_distances, stop_pos_distances_remove, stop_history
 
 
-def get_route_details(avl: AVLRecord, timetable: Timetable) -> tuple[str, RouteDetails]:
-    group_id = avl_group_id(avl)
-    logger.append_keys(avl_group_id=avl_group_id)
+def get_route_details(
+    group_id: str,
+    direction_ref: str,
+    timetable: Timetable,
+) -> tuple[str, RouteDetails]:
     route_details = timetable.get(group_id)
     if route_details:
         return group_id, route_details
@@ -908,6 +919,5 @@ def get_route_details(avl: AVLRecord, timetable: Timetable) -> tuple[str, RouteD
     # When that happens, sirivm_timetable_s3_generation_function will add the direction ref to the group id.
     # We will also need to use this to keep track of the matching for both journeys separately,
     # but the database updates need to be with the original group id
-    direction = avl.get("direction_ref", "").lower()
-    group_id = group_id + "|" + direction
-    return group_id, timetable.get(group_id)
+    index = group_id + "|" + direction_ref.lower()
+    return index, timetable.get(index)
