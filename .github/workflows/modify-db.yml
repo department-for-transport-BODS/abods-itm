@@ -36,7 +36,7 @@ env:
     github.ref_name == 'cavl' && 'cavl' ||
     github.ref_name == 'uat' && 'uat' ||
     github.ref_name == 'dev' && 'dev' || 'sandbox' }}
-  DEPLOY_SRC_PREFIX: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET_PREFIX }}
+  DEPLOY_SRC: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET }}
   DEPLOY_VER: ${{ github.ref_name != 'main' && github.ref_name || 'null' }}
 
 jobs:
@@ -57,8 +57,6 @@ jobs:
     steps:
       - name: validate job parameters
         id: verify
-        env:
-          DEPLOY_SRC: ${{ env.DEPLOY_SRC_PREFIX }}-${{ vars.AWS_ACCOUNT_ID }}
         run: |
           get_latest_version() {
             local bucket_name=$1
@@ -260,7 +258,6 @@ jobs:
       - name: run database migrations against ${{ env.DEPLOY_ENV }}
         if: ${{ env.DEPLOY_ACT == 'run-migrations' || env.DEPLOY_ACT == 'refresh' }}
         env:
-          DEPLOY_SRC: ${{ env.DEPLOY_SRC_PREFIX }}-${{ needs.validation.outputs.AWS_ACCOUNT_ID }}
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
           [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods-itm/releases" || rc_path="abods-itm/releases"
