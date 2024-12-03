@@ -259,7 +259,7 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
            WHERE date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
              AND expected_departure_time BETWEEN current_timestamp(0) - interval '120' MINUTE AND current_timestamp(0) + interval '120' MINUTE)
         SELECT t.group_id,
-               row_number() OVER (PARTITION BY t.group_id, t.direction_ref
+               row_number() OVER (PARTITION BY t.vehiclejourney_id
                                   ORDER BY t.group_id, t.expected_departure_time ASC, t.stop_index ASC) AS stop_index,
                t.stop_latitude,
                t.stop_longitude,
@@ -268,7 +268,7 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
                t.date_of_journey,
                t.direction
         FROM public."Timetable" t
-        WHERE t.date_of_journey = now()::date
+        WHERE t.date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
           AND t.vehiclejourney_id IN
             (SELECT vehiclejourney_id
              FROM my_groups)
