@@ -534,6 +534,7 @@ $procedure$
 
 
 
+
 CREATE OR REPLACE PROCEDURE public.create_timetable_threshold_summary(IN pt_date date)
  LANGUAGE plpgsql
 AS $procedure$
@@ -690,16 +691,17 @@ $procedure$
 
 
 
+
 CREATE OR REPLACE PROCEDURE public.generate_expected_tables(IN partition_date date)
- LANGUAGE plpgsql
+LANGUAGE plpgsql
 AS $procedure$
 begin
 RAISE NOTICE 'Deleting expected journeys for %', partition_date::text ;
-
+ 
 delete from expected_journeys where date_of_journey = partition_date;
-
+ 
 RAISE NOTICE 'Inserting expected journeys for for %', partition_date::text ;
-
+ 
 insert into expected_journeys (
 	date_of_journey,
 	operator_noc,
@@ -737,7 +739,7 @@ with journeys as (
 	on t.servicepattern_id = ts.id
 	where t.date_of_journey = partition_date
 	window w as (
-		partition by t.group_id
+		partition by t.group_id, t.vehiclejourney_id
 		order by t.stop_index asc
 		range between unbounded preceding and unbounded following
 	)
@@ -773,17 +775,17 @@ group by
 	end_time,
 	direction
 ;
-
+ 
 RAISE NOTICE 'Analysing expected journeys for for %', partition_date::text ;
-
+ 
 analyse expected_journeys;
-
+ 
 RAISE NOTICE 'Deleting expected_services_by_date for for %', partition_date::text ;
-
+ 
 delete from expected_services_by_date where date_of_journey = partition_date;
-
+ 
 RAISE NOTICE 'Inserting expected_services_by_date for for %', partition_date::text ;
-
+ 
 insert into expected_services_by_date (
 	date_of_journey,
 	noc_and_line_and_servicecode,
@@ -803,13 +805,13 @@ where date_of_journey = partition_date)
 group by
 date_of_journey,
 noc_and_line_and_servicecode;
-
+ 
 RAISE NOTICE 'Analysing expected_services_by_date  for %', partition_date::text ;
-
+ 
 analyse expected_services_by_date;
-
+ 
 RAISE NOTICE 'Upserting service_details for %', partition_date::text ;
-
+ 
 insert into service_details (
 noc_and_line_and_servicecode,
 operator_noc,
@@ -833,21 +835,21 @@ EXCLUDED.operator_noc,
 EXCLUDED.line_name,
 EXCLUDED.service_name
 );
-
+ 
 RAISE NOTICE 'Analysing service_details for for %', partition_date::text ;
-
+ 
 analyse service_details;
-
+ 
 RAISE NOTICE 'Refreshing expected_services for for %', partition_date::text ;
-
+ 
 refresh materialized view expected_services;
-
+ 
 RAISE NOTICE 'Deleting expected operators for for %', partition_date::text ;
-
+ 
 delete from expected_operators where date_of_journey = partition_date;
-
+ 
 RAISE NOTICE 'Inserting expected operators for for %', partition_date::text ;
-
+ 
 insert into expected_operators (
 	date_of_journey,
 	operator_noc,
@@ -858,13 +860,13 @@ from expected_services es
 left join traveline_operators o on
 o.noc_code = es.operator_noc
 where es.date_of_journey = partition_date;
-
+ 
 RAISE NOTICE 'Analysing expected operators for for %', partition_date::text ;
  
 analyse expected_operators;
-
+ 
 RAISE NOTICE 'Done';
-
+ 
 end; $procedure$
 ;
-;
+ 
