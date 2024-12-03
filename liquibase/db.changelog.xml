@@ -177,4 +177,7 @@
     <changeSet id="55" author="abodsuser">
         <sqlFile path="sql/55-servicepatternstop-to-int8.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="56" author="abodsuser">
+        <sqlFile path="sql/56-summary-and-expected-tables.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
