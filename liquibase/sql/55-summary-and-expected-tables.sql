@@ -639,10 +639,7 @@ BEGIN
                      day_of_week ,
                      admin_area_id,
                      stop_index,
-					CASE 
-						WHEN timestamp_after_estimate is not null THEN TRUE
-						ELSE FALSE
-					END AS estimated
+			(timestamp_after_estimate is not null) AS estimated
               from public."Timetable" where date_of_journey = %L ) ttb
 			INNER JOIN public.expected_services es 
 				ON ttb.date_of_journey = es.date_of_journey 
