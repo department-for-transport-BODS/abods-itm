@@ -63,8 +63,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-          role-session-name: ${{ env.DEPLOY_ENV }}-database-modification-validation
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-database-modification-validation
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
@@ -152,7 +152,7 @@ jobs:
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ needs.validation.outputs.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-          role-session-name: ${{ env.DEPLOY_ENV }}-database-modification
+          role-session-name: ${{ vars.PROJECT_NAME }}-itm-${{ env.RC_ENV }}-database-modification
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
