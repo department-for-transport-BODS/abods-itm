@@ -425,10 +425,7 @@ BEGIN
 						time_difference AS avg_time_difference,
 						es.admin_area_id,
 						ttb.actual_headway,
-						CASE
-							WHEN ttb.timestamp_after_estimate is not null THEN TRUE
-							ELSE FALSE
-						END AS estimated,
+						(ttb.timestamp_after_estimate is not null) AS estimated,
 						ttb.timestamp_after_estimate
 					FROM
 						public."Timetable" ttb
@@ -618,10 +615,7 @@ BEGIN
 					ttb.expected_headway,
 					ttb.actual_headway,
 					ttb.headway_time_difference,
-					CASE 
-						WHEN ttb.timestamp_after_estimate is not null THEN TRUE
-						ELSE FALSE
-					END AS estimated				
+					(ttb.timestamp_after_estimate is not null) AS estimated
 				FROM 
 					public."Timetable" ttb
 					INNER JOIN public.expected_services es 
