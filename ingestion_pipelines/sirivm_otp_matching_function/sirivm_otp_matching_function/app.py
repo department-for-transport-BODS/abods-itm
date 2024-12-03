@@ -62,17 +62,10 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             historic_record_handler(rec, _cache["shards"])
             continue
 
+        # sirivm_timetable_s3_generation_function sends this message when done refreshing the extract
         if rec.message_attributes["key"].string_value == "timetable":
-            if "main_timetable" not in _cache:
-                logger.info(
-                    "Request to refresh timetable received, but not yet in cache",
-                )
-                continue
-
-            # Invalidate timetable cache, it will be when next needed
-            # We probably want to switch to a time based TTL on the cache
-            logger.info("Clearing main timetable")
-            del _cache["main_timetable"]
+            logger.info("Updating main timetable")
+            _cache["main_timetable"] = s3_client.download_main_timetable()
             continue
 
         if "main_timetable" not in _cache:

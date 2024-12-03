@@ -822,72 +822,102 @@ def positions_timetable_lookup(
     stop_pos_distances_remove: list[RecordToRemove] = []
     for avl in avl_dict:
         # 1. check if group id exists in timetable
-        if avl_group_id(avl) in timetable:
-            logger.append_keys(avl=avl)
-            logger.debug(f"group_id {avl_group_id(avl)} in timetable")
+        group_id = avl_group_id(avl)
+        avl_direction = avl.get("direction_ref", "")
+        stop_history_index, route_details = get_route_details(
+            group_id,
+            avl_direction,
+            timetable,
+        )
+        logger.append_keys(
+            avl=avl,
+            group_id=group_id,
+            stop_history_index=stop_history_index,
+        )
+        if not route_details:
+            logger.info("Could not find timetable for avl in timetable extract")
+            continue
 
-            # 2. check if group id exists in stop_history, if not, create a blank group stop history
-            if avl_group_id(avl) not in stop_history:
-                default_group_stop_history: GroupStopHistory = {
-                    "last_avl_time": "",
-                    "last_avl_index": 0,
-                    "last_avl_longitude": None,
-                    "last_avl_latitude": None,
-                    "matched_stops": {},
-                    "potential_matches": {},
-                }
-                stop_history[avl_group_id(avl)] = default_group_stop_history
-            group_stop_history = stop_history[avl_group_id(avl)]
-            current_avl_index = group_stop_history.get("last_avl_index")
-            route_details = timetable[avl_group_id(avl)]
-            final_stop_index = len(route_details)
-            current_avl_time = str(avl_recorded_at_time_utc(avl))
-            # 3. check if current recorded_at_time is the same as the last avl time in group_stop_history
-            if group_stop_history.get("last_avl_time") != current_avl_time:
-                # 4. increment last avl index by 1 and update the time
-                current_avl_index += 1
-                group_stop_history["last_avl_index"] = current_avl_index
-                logger.debug(f"avl index {current_avl_index}")
-                if len(group_stop_history["matched_stops"]) > 0:
-                    # 6-10. Check if the bus is revisiting stop 1
-                    check_update_first_stop(
-                        avl,
-                        route_details,
-                        group_stop_history,
-                        stop_pos_distances_remove,
-                        current_avl_index,
-                    )
+        logger.debug(f"stop_history_index {stop_history_index} in timetable")
 
-                # 11-14. Find potential matches
-                logger.debug("11. find potential matches")
+        # 2. check if group id exists in stop_history, if not, create a blank group stop history
+        if stop_history_index not in stop_history:
+            default_group_stop_history: GroupStopHistory = {
+                "last_avl_time": "",
+                "last_avl_index": 0,
+                "last_avl_longitude": None,
+                "last_avl_latitude": None,
+                "matched_stops": {},
+                "potential_matches": {},
+            }
+            stop_history[stop_history_index] = default_group_stop_history
+        group_stop_history = stop_history[stop_history_index]
+        current_avl_index = group_stop_history.get("last_avl_index")
+        final_stop_index = len(route_details)
+        current_avl_time = str(avl_recorded_at_time_utc(avl))
+        # 3. check if current recorded_at_time is the same as the last avl time in group_stop_history
+        if group_stop_history.get("last_avl_time") != current_avl_time:
+            # 4. increment last avl index by 1 and update the time
+            current_avl_index += 1
+            group_stop_history["last_avl_index"] = current_avl_index
+            logger.debug(f"avl index {current_avl_index}")
+            if len(group_stop_history["matched_stops"]) > 0:
+                # 6-10. Check if the bus is revisiting stop 1
+                check_update_first_stop(
+                    avl,
+                    route_details,
+                    group_stop_history,
+                    stop_pos_distances_remove,
+                    current_avl_index,
+                )
 
-                find_potential_matches(
+            # 11-14. Find potential matches
+            logger.debug("11. find potential matches")
+
+            find_potential_matches(
+                avl,
+                route_details,
+                group_stop_history,
+                current_avl_index,
+                final_stop_index,
+            )
+
+            # Check if avl is anywhere within the zone of a potential match
+            # 14-34. Find matches
+            if len(group_stop_history.get("potential_matches")) > 0:
+                potential_matches_to_remove = []
+                find_matches_in_potential_matches(
                     avl,
                     route_details,
                     group_stop_history,
                     current_avl_index,
+                    stop_pos_distances,
+                    potential_matches_to_remove,
                     final_stop_index,
+                    stop_pos_distances_remove,
+                )
+                # 22.1 remove matched stops from potential matches
+                remove_matched_stops(
+                    group_stop_history,
+                    potential_matches_to_remove,
                 )
 
-                # Check if avl is anywhere within the zone of a potential match
-                # 14-34. Find matches
-                if len(group_stop_history.get("potential_matches")) > 0:
-                    potential_matches_to_remove = []
-                    find_matches_in_potential_matches(
-                        avl,
-                        route_details,
-                        group_stop_history,
-                        current_avl_index,
-                        stop_pos_distances,
-                        potential_matches_to_remove,
-                        final_stop_index,
-                        stop_pos_distances_remove,
-                    )
-                    # 22.1 remove matched stops from potential matches
-                    remove_matched_stops(
-                        group_stop_history,
-                        potential_matches_to_remove,
-                    )
-
-    logger.remove_keys("avl")
+    logger.remove_keys(["avl", "group_id", "stop_history_index"])
     return stop_pos_distances, stop_pos_distances_remove, stop_history
+
+
+def get_route_details(
+    group_id: str,
+    direction_ref: str,
+    timetable: Timetable,
+) -> tuple[str, RouteDetails]:
+    route_details = timetable.get(group_id)
+    if route_details:
+        return group_id, route_details
+
+    # In some cases, there can be multiple journeys with different directions using the same group id.
+    # When that happens, sirivm_timetable_s3_generation_function will add the direction ref to the group id.
+    # We will also need to use this to keep track of the matching for both journeys separately,
+    # but the database updates need to be with the original group id
+    index = group_id + "|" + direction_ref.lower()
+    return index, timetable.get(index)
