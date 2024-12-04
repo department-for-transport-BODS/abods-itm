@@ -183,6 +183,9 @@
     <changeSet id="57" author="abodsuser">
         <sqlFile path="sql/57-update_timetable_threshold_summary.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="58" author="abodsuser">
+        <sqlFile path="sql/58-update-timetable-inbound-outbound-fix.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
 
 
