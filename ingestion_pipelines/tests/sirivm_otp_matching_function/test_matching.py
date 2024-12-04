@@ -2011,8 +2011,8 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     timetable_scem2 = read_timetable("scem9272024-11-06.json")
     avl_list_coac30 = read_avl("coac9917102024-10-30.csv")
     timetable_coac30 = read_timetable("coac9917102024-10-30.json")
-    avl_list_fbri_m4_0740_2024_11_28 = read_avl("fbri|m4|0740|2024-11-28.csv")
-    timetable_fbri_m4_0740_2024_11_28 = read_timetable("fbri|m4|0740|2024-11-28.json")
+    avl_list_fbri_m4_0740_2024_11_28 = read_avl("fbri_m4_0740_2024-11-28.csv")
+    timetable_fbri_m4_0740_2024_11_28 = read_timetable("fbri_m4_0740_2024-11-28.json")
 
     @pytest.mark.parametrize(
         (
