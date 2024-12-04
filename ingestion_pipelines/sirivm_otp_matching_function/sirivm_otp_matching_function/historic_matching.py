@@ -1,0 +1,190 @@
+import json
+import sys
+from datetime import datetime
+from pathlib import Path
+
+import polars as pl
+from aws_lambda_powertools import Logger
+from client_db import TimetableDBClient
+from client_s3 import TimetableS3Client
+from dateutil.parser import parse
+from matcher.handle_stop_history import clean_stop_history
+from matcher.matching import positions_timetable_lookup
+from matcher.models import (
+    ControlInfo,
+    StopHistory,
+)
+from matcher.utils import timer
+
+logger = Logger()
+s3_client = TimetableS3Client()
+db_client = TimetableDBClient()
+
+two_hours_secs = -7200
+
+
+@timer(logger)
+def write_to_json(data: dict, output_path: Path) -> None:
+    """
+    Write data to json
+
+    Args:
+    ----
+        data (dict): data in dict type
+        output_path (str): The destination path
+
+    """
+    output_path.parent.mkdir(exist_ok=True, parents=True)
+    with open(output_path, "w+") as f:
+        f.write(json.dumps(data))
+
+
+def convert_timetable_to_dict(timetable: pl.LazyFrame) -> dict:
+    grouped_timetable = timetable.group_by("group_id", maintain_order=True).all()
+    group_id_count = grouped_timetable.select(pl.len()).collect().item()
+    grouped_dict = {}
+    for i in range(group_id_count):
+        row = (
+            grouped_timetable.filter(pl.int_range(pl.len()).is_in([i]))
+            .collect()
+            .row(0, named=True)
+        )
+        grouped_dict.update({row["group_id"]: {}})
+        for stop in row["stop_index"]:
+            grouped_dict[row["group_id"]].update(
+                {
+                    stop: (
+                        (
+                            float(row["stop_latitude"][int(stop) - 1]),
+                            float(row["stop_longitude"][int(stop) - 1]),
+                        ),
+                        row["expected_departure_time"][int(stop) - 1],
+                        row["timetable_id"][int(stop) - 1],
+                        row["date_of_journey"][int(stop) - 1],
+                    ),
+                },
+            )
+    return grouped_dict
+
+
+@timer(logger)
+def get_stop_history(
+    query_date: str,
+) -> StopHistory:
+    """Get Stop History"""
+    path = (
+        Path(__file__).parent.parent
+        / "historic_data"
+        / "timetable_avl"
+        / query_date
+        / "timetable_avl_stop_history.json"
+    )
+
+    if not path.is_file():
+        logger.info("Stop history file does not exist")
+        return {}
+
+    with open(path) as f:
+        stop_history = json.load(f)
+    del stop_history["control_info"]
+
+    return stop_history
+
+
+@timer(logger)
+def validate_avl_list(
+    avl_list: pl.LazyFrame,
+    expected_batch_id: int,
+) -> None:
+    if (
+        avl_list.filter(pl.col("batch_id") != expected_batch_id)
+        .select(pl.len())
+        .collect()
+        .item()
+        > 0
+    ):
+        raise Exception("AVLs with multiple match ids retrieved")  # noqa: TRY002 - Not worth making an exception type
+
+
+def new_control_info(avl_time: int) -> ControlInfo:
+    return {
+        "last_avl": avl_time,
+        "last_avl_processed_time": str(datetime.now()),
+    }
+
+
+@timer(logger)
+def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> None:
+    """
+    Run historic matching
+
+    Args:
+    ----
+        avl_path (str): Path to avl parquet
+        timetable (pl.LazyFrame): Path to timetable parquet
+        date_str (str): The date for historic matching
+
+    """
+    date_datetime = parse(date_str)
+    stop_history = get_stop_history(date_str)
+
+    avl_data = s3_client.read_parquet_s3(avl_path)
+    logger.info(f"Loaded avl data for {date_str}")
+
+    avl_group_count = (
+        avl_data.group_by("response_time_stamp", maintain_order=True).len().collect()
+    )
+    avl_response_time_list = avl_group_count.get_column("response_time_stamp")
+    cleaned_stop_history = stop_history
+
+    for rt in avl_response_time_list:
+        logger.info(f"Run historic matching for batch at {rt}")
+        if len(stop_history) > 1:
+            cleaned_stop_history = clean_stop_history(stop_history, parse(rt))
+        avl_rt = avl_data.filter(pl.col("response_time_stamp") == rt)
+        avl_row_count = (
+            avl_data.filter(pl.col("response_time_stamp") == rt)
+            .select(pl.len())
+            .collect()
+            .item()
+        )
+        avl_list = [
+            avl_rt.filter(pl.int_range(pl.len()).is_in([i]))
+            .collect()
+            .row(0, named=True)
+            for i in range(avl_row_count)
+        ]
+        batch_id = avl_list[0]["batch_id"]
+        control_info = new_control_info(rt)
+        to_set, to_remove, stop_history = positions_timetable_lookup(
+            timetable,
+            avl_list,
+            cleaned_stop_history,
+        )
+        write_to_json(
+            {**stop_history, "control_info": control_info},
+            Path(__file__).parent.parent
+            / "historic_data"
+            / "timetable_avl"
+            / date_str
+            / "timetable_avl_stop_history.json",
+        )
+        db_client.historic_update_success(
+            batch_id,
+            to_set,
+            to_remove,
+            f"{date_datetime.year}-{date_datetime.month}-{date_datetime.day}",
+        )
+
+
+if __name__ == "__main__":
+    process_date = sys.argv[1]
+    process_date_parts = process_date.split("-")
+    s3_bucket = "abods-sandbox-exporter-bucket"
+    s3_client.bucket = s3_bucket
+    avl_path = f"historic/parquet/YYYY={process_date_parts[0]}/MM={process_date_parts[1]}/DD={process_date_parts[2]}/siri_vm.parquet"
+    timetable_path = f"historic/parquet/YYYY={process_date_parts[0]}/MM={process_date_parts[1]}/DD={process_date_parts[2]}/timetable.parquet"
+    timetable_lf = s3_client.read_parquet_s3(timetable_path)
+    logger.info(f"Loaded timetable for {process_date}")
+    timetable = convert_timetable_to_dict(timetable_lf)
+    historic_matching(avl_path, timetable, process_date)

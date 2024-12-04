@@ -103,7 +103,7 @@ def haversine(avl: AVLRecord, stop: StopDetails) -> float:
 
     """
     # convert decimal degrees to radians
-    lat1, lon1 = avl["latitude"], avl["longitude"]
+    lat1, lon1 = float(avl["latitude"]), float(avl["longitude"])
     lat2, lon2 = stop_latitude(stop), stop_longitude(stop)
 
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
