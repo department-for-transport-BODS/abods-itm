@@ -34,6 +34,11 @@ def mock_setup_db():
         yield mock_conn
 
 
+@pytest.fixture(autouse=True)
+def mock_env_vars(monkeypatch):
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-2")
+
+
 @patch("petl.fromcsv")
 @patch("psycopg2.extras.execute_values")
 def test_lambda_handler(mock_execute_values, mock_fromcsv):

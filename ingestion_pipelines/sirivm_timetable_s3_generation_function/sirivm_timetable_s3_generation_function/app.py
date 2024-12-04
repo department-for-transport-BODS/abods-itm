@@ -76,6 +76,7 @@ def read_historic_timetable(timetable_date):  # noqa: ANN001, ANN201 - BODS-7131
         "expected_departure_time",
         "timetable_id",
         "date_of_journey",
+        "direction",
     ]
     try:
         df = wr.s3.read_csv(  # noqa: PD901 - BODS-7131
@@ -103,14 +104,22 @@ def recreate_timetable(timetable):  # noqa: ANN001, ANN201 - BODS-7131
 
     """
     recreated_timetable = {}
+    logger.info("counting directions for group id")
+
+    directions_by_group_id = {}
+    for row in timetable:
+        directions_by_group_id.setdefault(row["group_id"], set()).add(row["direction"])
+
     logger.info("Recreating timetable")
     count = 0
     for row in timetable:
         count += 1  # noqa: SIM113 - BODS-7131
         group_id = row["group_id"]
-        if group_id not in recreated_timetable:
-            recreated_timetable[group_id] = {}
-        recreated_timetable[group_id][str(row["stop_index"])] = [
+        directions = directions_by_group_id[group_id]
+        if len(directions) > 1:
+            direction = row["direction"]
+            group_id = group_id + "|" + direction
+        recreated_timetable.setdefault(group_id, {})[str(row["stop_index"])] = [
             [row["stop_latitude"], row["stop_longitude"]],
             row["expected_departure_time"],
             row["timetable_id"],
@@ -252,19 +261,30 @@ def backfill_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001, PL
 
 
 def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
-    query = """  with my_groups as (
-        select distinct vehiclejourney_id
-        from public."Timetable" where date_of_journey  = (now() at time zone 'Europe/London')::date
-        and expected_departure_time between
-        current_timestamp(0) - interval '120' minute and
-        current_timestamp(0) +  interval '120' minute
-    )
-    select t.group_id,row_number() over( partition by t.group_id order by t.group_id,t.expected_departure_time asc,t.stop_index  asc  ) as stop_index , 
-    t.stop_latitude,t.stop_longitude,t.expected_departure_time::time as expected_departure_time,t.timetable_id, t.date_of_journey
-    from public."Timetable" t
-    where t.date_of_journey  = now()::date
-    and t.vehiclejourney_id in (select vehiclejourney_id from my_groups)
-    order by t.group_id,t.expected_departure_time asc,t.stop_index  asc; """  # noqa: W291 - BODS-7131
+    query = """
+        WITH my_groups AS
+          (SELECT DISTINCT vehiclejourney_id
+           FROM public."Timetable"
+           WHERE date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
+             AND expected_departure_time BETWEEN current_timestamp(0) - interval '120' MINUTE AND current_timestamp(0) + interval '120' MINUTE)
+        SELECT t.group_id,
+               row_number() OVER (PARTITION BY t.vehiclejourney_id
+                                  ORDER BY t.group_id, t.expected_departure_time ASC, t.stop_index ASC) AS stop_index,
+               t.stop_latitude,
+               t.stop_longitude,
+               t.expected_departure_time::TIME AS expected_departure_time,
+               t.timetable_id,
+               t.date_of_journey,
+               t.direction
+        FROM public."Timetable" t
+        WHERE t.date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
+          AND t.vehiclejourney_id IN
+            (SELECT vehiclejourney_id
+             FROM my_groups)
+        ORDER BY t.group_id,
+                 t.expected_departure_time ASC,
+                 t.stop_index ASC;
+    """  # noqa: W291 - BODS-7131
     now = datetime.now()
     year = datetime.strftime(now, "%Y")
     mon = datetime.strftime(now, "%m")
@@ -288,8 +308,22 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
         cur.execute(query)
         timetable_dict = defaultdict(dict)
         res = cur.fetchall()
+        directions_by_group_id = {}
         for i in res:
-            timetable_dict[i[0]][i[1]] = [(float(i[2]), float(i[3])), i[4], i[5], i[6]]
+            directions_by_group_id.setdefault(i[0], set()).add(i[7])
+
+        for i in res:
+            group_id = i[0]
+            directions = directions_by_group_id[group_id]
+            if len(directions) > 1:
+                direction = i[7]
+                group_id = group_id + "|" + direction
+            timetable_dict[group_id][i[1]] = [
+                (float(i[2]), float(i[3])),
+                i[4],
+                i[5],
+                i[6],
+            ]
         cur.close()
         write_to_s3(timetable_dict, "timetable/timetable.json")
         write_to_s3(timetable_dict, fname)
