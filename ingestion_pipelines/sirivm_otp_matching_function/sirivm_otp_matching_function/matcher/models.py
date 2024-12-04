@@ -105,8 +105,8 @@ class GroupStopHistory(TypedDict):
 
     last_avl_index: int
     last_avl_time: str
-    last_avl_longitude: float
-    last_avl_latitude: float
+    last_avl_longitude: float | None
+    last_avl_latitude: float | None
     matched_stops: dict[str, MatchedStop]
     potential_matches: dict[str, PotentialMatch]
 
