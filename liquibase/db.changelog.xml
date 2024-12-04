@@ -180,4 +180,9 @@
     <changeSet id="56" author="abodsuser">
         <sqlFile path="sql/56-summary-and-expected-tables.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="57" author="abodsuser">
+        <sqlFile path="sql/57-update_timetable_threshold_summary.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
+
+
