@@ -199,9 +199,12 @@ if __name__ == "__main__":
         sys.exit(1)
     process_date = os.environ["PROCESS_DATE"]
     process_date_parts = process_date.split("-")
+    year = process_date_parts[0]
+    month = process_date_parts[1]
+    day = process_date_parts[2]
     s3_bucket = os.getenv("SIRIVM_BUCKET", "abods-sandbox-exporter-bucket")
-    avl_path = f"s3://{s3_bucket}/historic/parquet/YYYY={process_date_parts[0]}/MM={process_date_parts[1]}/DD={process_date_parts[2]}/siri_vm.parquet"
-    timetable_path = f"s3://{s3_bucket}/historic/parquet/YYYY={process_date_parts[0]}/MM={process_date_parts[1]}/DD={process_date_parts[2]}/timetable.parquet"
+    avl_path = f"s3://{s3_bucket}/historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet"
+    timetable_path = f"s3://{s3_bucket}/historic/parquet/YYYY={year}/MM={month}/DD={day}/timetable_{year}{month}{day}.parquet"
     timetable_lf = read_parquet_s3(timetable_path)
     logger.info(f"Loaded timetable for {process_date}")
     timetable = convert_timetable_to_dict(timetable_lf)

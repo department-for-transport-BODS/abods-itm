@@ -14,6 +14,7 @@ ENV POSTGRES_USER="abods_proxy_rw"
 ENV POWERTOOLS_SERVICE_NAME="sirivm_otp_matching_function"
 ENV PROJECT_ENV="sandbox"
 ENV PROJECT_NAME="abods"
+ENV AWS_DEFAULT_REGION="eu-west-2"
 
 # Install pip requirements
 COPY requirements.txt .
