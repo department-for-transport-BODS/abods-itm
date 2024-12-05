@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -8,7 +9,6 @@ from aws_lambda_powertools import Logger
 from dateutil.parser import parse
 
 from .client_db import TimetableDBClient
-from .client_s3 import TimetableS3Client
 from .matcher.handle_stop_history import clean_stop_history
 from .matcher.matching import positions_timetable_lookup
 from .matcher.models import (
@@ -18,10 +18,25 @@ from .matcher.models import (
 from .matcher.utils import timer
 
 logger = Logger()
-s3_client = TimetableS3Client()
 db_client = TimetableDBClient()
 
 two_hours_secs = -7200
+
+
+def read_parquet_s3(source: str) -> pl.LazyFrame:
+    """
+    Read parquet file from s3
+
+    Args:
+    ----
+        source (str): The source path of the parquet file
+
+    Returns:
+    -------
+        pl.LazyFrame
+
+    """
+    return pl.scan_parquet(source)
 
 
 @timer(logger)
@@ -129,7 +144,7 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
     date_datetime = parse(date_str)
     stop_history = get_stop_history(date_str)
 
-    avl_data = s3_client.read_parquet_s3(avl_path)
+    avl_data = read_parquet_s3(avl_path)
     logger.info(f"Loaded avl data for {date_str}")
 
     avl_group_count = (
@@ -179,13 +194,15 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
 
 
 if __name__ == "__main__":
-    process_date = sys.argv[1]
+    if "PROCESS_DATE" not in os.environ:
+        logger.error("Environment variable PROCESS_DATE is missing.")
+        sys.exit(1)
+    process_date = os.environ["PROCESS_DATE"]
     process_date_parts = process_date.split("-")
-    s3_bucket = "abods-sandbox-exporter-bucket"
-    s3_client.bucket = s3_bucket
-    avl_path = f"historic/parquet/YYYY={process_date_parts[0]}/MM={process_date_parts[1]}/DD={process_date_parts[2]}/siri_vm.parquet"
-    timetable_path = f"historic/parquet/YYYY={process_date_parts[0]}/MM={process_date_parts[1]}/DD={process_date_parts[2]}/timetable.parquet"
-    timetable_lf = s3_client.read_parquet_s3(timetable_path)
+    s3_bucket = os.getenv("SIRIVM_BUCKET", "abods-sandbox-exporter-bucket")
+    avl_path = f"s3://{s3_bucket}/historic/parquet/YYYY={process_date_parts[0]}/MM={process_date_parts[1]}/DD={process_date_parts[2]}/siri_vm.parquet"
+    timetable_path = f"s3://{s3_bucket}/historic/parquet/YYYY={process_date_parts[0]}/MM={process_date_parts[1]}/DD={process_date_parts[2]}/timetable.parquet"
+    timetable_lf = read_parquet_s3(timetable_path)
     logger.info(f"Loaded timetable for {process_date}")
     timetable = convert_timetable_to_dict(timetable_lf)
     historic_matching(avl_path, timetable, process_date)

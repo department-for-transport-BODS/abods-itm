@@ -9,7 +9,6 @@ from typing import Any
 
 import awswrangler as wr
 import boto3
-import polars as pl
 from aws_lambda_powertools import Logger
 from botocore.exceptions import ClientError
 from pandas import DataFrame
@@ -65,21 +64,6 @@ class TimetableS3Client:
         self.client = boto3.client("s3")
         self.bucket = os.environ["SIRIVM_BUCKET"]
         logger.append_keys(s3_bucket=self.bucket)
-
-    def read_parquet_s3(self, source: str) -> pl.LazyFrame:
-        """
-        Read parquet file from s3
-
-        Args:
-        ----
-            source (str): The source path of the parquet file
-
-        Returns:
-        -------
-            pl.LazyFrame
-
-        """
-        return pl.scan_parquet(source)
 
     def _get_from_s3(self, key: str) -> Any:  # noqa: ANN401 - Any is correct here, callers should determine actual type
         """Get data from S3"""
