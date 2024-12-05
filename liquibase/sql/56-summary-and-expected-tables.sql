@@ -4,17 +4,9 @@ alter table timetable_summary_stops_tz add column IF NOT EXISTS estimated bool d
 
 ALTER TABLE timetable_summary_stops_tz DROP CONSTRAINT IF EXISTS timetable_summary_stops_tz_pkey;
 
-ALTER TABLE timetable_summary_stops_tz
-add primary key (operator_noc, service_code, noc_and_line_and_servicecode,stop_id,locality_id,line_name,stop_latitude,stop_longitude,date_of_journey, departure_hour,departure_hour_only,day_of_week, common_name, is_timing_point, max_early, max_late, estimated);
-
-
 alter table timetable_summary_service_tz add column IF NOT EXISTS estimated bool default false;
 
 ALTER TABLE timetable_summary_service_tz DROP CONSTRAINT IF EXISTS timetable_summary_sevice_tz_pkey;
-
-ALTER TABLE timetable_summary_service_tz
-add primary key (operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late, line_name, noc_and_line_and_servicecode, estimated);
-
 
 alter table timetable_threshold_summary add column IF NOT EXISTS estimated bool default false;
 

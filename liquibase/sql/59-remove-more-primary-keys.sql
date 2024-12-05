@@ -1,0 +1,3 @@
+ALTER TABLE timetable_summary_stops_tz DROP CONSTRAINT IF EXISTS timetable_summary_stops_tz_pkey;
+
+ALTER TABLE timetable_summary_service_tz DROP CONSTRAINT IF EXISTS timetable_summary_service_tz_pkey;
