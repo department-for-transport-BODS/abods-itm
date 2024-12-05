@@ -5,16 +5,16 @@ from pathlib import Path
 
 import polars as pl
 from aws_lambda_powertools import Logger
-from client_db import TimetableDBClient
-from client_s3 import TimetableS3Client
+from .client_db import TimetableDBClient
+from .client_s3 import TimetableS3Client
 from dateutil.parser import parse
-from matcher.handle_stop_history import clean_stop_history
-from matcher.matching import positions_timetable_lookup
-from matcher.models import (
+from .matcher.handle_stop_history import clean_stop_history
+from .matcher.matching import positions_timetable_lookup
+from .matcher.models import (
     ControlInfo,
     StopHistory,
 )
-from matcher.utils import timer
+from .matcher.utils import timer
 
 logger = Logger()
 s3_client = TimetableS3Client()
