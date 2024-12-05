@@ -10,6 +10,7 @@ on:
         options:
           - "pglifecycle"
           - "datadog-agent"
+          - "historic-matching"
       imageTag:
         description: Custom tag to apply to images. If 'blank', use git commit sha
         type: string
