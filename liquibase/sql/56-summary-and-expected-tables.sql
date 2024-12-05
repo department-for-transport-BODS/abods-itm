@@ -1,9 +1,5 @@
 alter table timetable_summary_operator_t add column IF NOT EXISTS estimated bool default false;
 
-ALTER TABLE timetable_summary_operator_t
-add primary key (operator_noc, date_of_journey, day_of_week, departure_hour, departure_hour_only, is_timing_point, max_early, max_late,avg_time_difference,admin_areas, estimated);
-
-
 alter table timetable_summary_stops_tz add column IF NOT EXISTS estimated bool default false;
 
 ALTER TABLE timetable_summary_stops_tz DROP CONSTRAINT IF EXISTS timetable_summary_stops_tz_pkey;
