@@ -40,10 +40,13 @@ class HistoricTimetableStore:
             "direction",
             maintain_order=True,
         ).all()
+        directions = group_timetable_with_direction.collect().get_column("direction").to_list()
+        if direction_ref not in directions:
+            return None
         direction_count = (
             group_timetable_with_direction.select(pl.len()).collect().item()
         )
-        if direction_count > 1 and direction_ref != "":
+        if direction_count > 1:
             group_id = group_id + "|" + direction_ref
             group_timetable = group_timetable_with_direction.filter(
                 pl.col("direction") == direction_ref,
