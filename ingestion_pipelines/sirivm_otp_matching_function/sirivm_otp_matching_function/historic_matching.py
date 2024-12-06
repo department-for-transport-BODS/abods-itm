@@ -39,7 +39,9 @@ def read_parquet_s3(source: str) -> pl.LazyFrame:
         pl.LazyFrame
 
     """
-    return pl.scan_parquet(source)
+    return pl.scan_parquet(
+        source, storage_options={"aws_region": os.environ["AWS_REGION"]}
+    )
 
 
 @timer(logger)
