@@ -21,7 +21,7 @@ class HistoricTimetableStore:
         self,
         group_id: str,
         direction_ref: str,
-    ) -> tuple[str, RouteDetails]:
+    ) -> tuple[str, RouteDetails | None]:
         """
         Get route details
 
@@ -35,6 +35,7 @@ class HistoricTimetableStore:
             tuple[str, RouteDetails]: group_id and route details
 
         """
+        journey_index = group_id + "|" + direction_ref
         group_timetable = self._timetable.filter(pl.col("group_id") == group_id)
         group_timetable_with_direction = group_timetable.group_by(
             "direction",
@@ -42,16 +43,16 @@ class HistoricTimetableStore:
         ).all()
         directions = group_timetable_with_direction.collect().get_column("direction").to_list()
         if direction_ref not in directions:
-            return None
+            return journey_index, None
         direction_count = (
             group_timetable_with_direction.select(pl.len()).collect().item()
         )
         if direction_count > 1:
-            group_id = group_id + "|" + direction_ref
             group_timetable = group_timetable_with_direction.filter(
                 pl.col("direction") == direction_ref,
             )
         else:
+            journey_index = group_id
             group_timetable = group_timetable.group_by(
                 "group_id",
                 maintain_order=True,
@@ -65,7 +66,7 @@ class HistoricTimetableStore:
                 .row(0, named=True)
             )
             for stop in range(1, len(row["stop_index"]) + 1):
-                grouped_dict.setdefault(group_id, {})[str(stop)] = (
+                grouped_dict.setdefault(journey_index, {})[str(stop)] = (
                     (
                         float(row["stop_latitude"][stop - 1]),
                         float(row["stop_longitude"][stop - 1]),
@@ -74,4 +75,4 @@ class HistoricTimetableStore:
                     row["timetable_id"][stop - 1],
                     row["date_of_journey"][stop - 1],
                 )
-        return group_id, grouped_dict[group_id]
+        return journey_index, grouped_dict[journey_index]
