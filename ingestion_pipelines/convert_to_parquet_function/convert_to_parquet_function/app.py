@@ -28,7 +28,7 @@ avl_csv_schema = pa.schema(
         ("origin_ref", pa.string()),
         ("destination_ref", pa.string()),
         ("departure_time", pa.string()),
-    ]
+    ],
 )
 
 timetable_csv_schema = pa.schema(
@@ -41,7 +41,7 @@ timetable_csv_schema = pa.schema(
         ("timetable_id", pa.string()),
         ("date_of_journey", pa.string()),
         ("direction", pa.string()),
-    ]
+    ],
 )
 
 timetable_cols = [
@@ -89,7 +89,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
     is_timetable = event.get("is_timetable")
     local_parquet = f"historic/parquet/YYYY={pd_year}/MM={pd_month}/DD={pd_day}/siri_vm_{pd_year}{pd_month}{pd_day}.parquet"
     csv_files = [
-        f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv"
+        f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv",
     ]
     if part_2:
         csv_files = [
@@ -102,7 +102,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
         schema = timetable_csv_schema
         column_names = timetable_cols
         csv_files = [
-            f"historic/csv/timetable/YYYY={pd_year}/MM={pd_month}/{pd_year}-{pd_month}-{pd_day}.csv"
+            f"historic/csv/timetable/YYYY={pd_year}/MM={pd_month}/{pd_year}-{pd_month}-{pd_day}.csv",
         ]
         local_parquet = f"historic/parquet/YYYY={pd_year}/MM={pd_month}/DD={pd_day}/timetable_{pd_year}{pd_month}{pd_day}.parquet"
     batch_id = 0
@@ -121,7 +121,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
                 csv_stream = pv.open_csv(
                     input_stream,
                     read_options=pv.ReadOptions(
-                        block_size=150 * 1000000, column_names=column_names
+                        block_size=150 * 1000000, column_names=column_names,
                     ),
                     parse_options=pv.ParseOptions(delimiter=",", quote_char='"'),
                     convert_options=pv.ConvertOptions(column_types=schema),

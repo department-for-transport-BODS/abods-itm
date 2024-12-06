@@ -1,5 +1,7 @@
 import polars as pl
 
+from .models import RouteDetails
+
 
 class HistoricTimetableStore:
     """Timetable store for historic matching"""
@@ -19,7 +21,7 @@ class HistoricTimetableStore:
         self,
         group_id: str,
         direction_ref: str,
-    ) -> tuple[str, dict]:
+    ) -> tuple[str, RouteDetails]:
         """
         Get route details
 
@@ -41,7 +43,7 @@ class HistoricTimetableStore:
         direction_count = (
             group_timetable_with_direction.select(pl.len()).collect().item()
         )
-        if direction_count > 1:
+        if direction_count > 1 and direction_ref != "":
             group_id = group_id + "|" + direction_ref
             group_timetable = group_timetable_with_direction.filter(
                 pl.col("direction") == direction_ref,
