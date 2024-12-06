@@ -18,8 +18,8 @@ select *, extract( epoch from x.actual_departure_time - x.previous_actual_depart
 ( select 
 
 timetable_id,
-actual_departure_time,
-lag(actual_departure_time) over(partition by operator_noc,line_name,date_of_journey,stop_id,stop_index  
+COALESCE(actual_departure_time, timestamp_after_estimate) as actual_departure_time,
+lag(COALESCE(actual_departure_time, timestamp_after_estimate)) over(partition by operator_noc,line_name,date_of_journey,stop_id,stop_index  
 order by stop_id,stop_index asc , expected_departure_time  asc) as previous_actual_departure_time
 from public."Timetable" t 
 where date_of_journey = %L and previous_group_id is not null
