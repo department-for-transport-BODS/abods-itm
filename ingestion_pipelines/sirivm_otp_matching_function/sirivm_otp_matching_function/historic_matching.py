@@ -7,6 +7,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+import boto3
 import polars as pl
 from aws_lambda_powertools import Logger
 from dateutil.parser import parse
@@ -25,6 +26,9 @@ db_client = TimetableDBClient()
 
 two_hours_secs = -7200
 
+session = boto3.session.Session()
+credentials = session.get_credentials()
+
 
 def read_parquet_s3(source: str) -> pl.LazyFrame:
     """
@@ -40,7 +44,13 @@ def read_parquet_s3(source: str) -> pl.LazyFrame:
 
     """
     return pl.scan_parquet(
-        source, storage_options={"aws_region": os.environ["AWS_REGION"]}
+        source,
+        storage_options={
+            "aws_access_key_id": credentials.access_key,
+            "aws_secret_access_key": credentials.secret_key,
+            "aws_session_token": credentials.token,
+            "aws_region": os.environ["AWS_REGION"],
+        },
     )
 
 
