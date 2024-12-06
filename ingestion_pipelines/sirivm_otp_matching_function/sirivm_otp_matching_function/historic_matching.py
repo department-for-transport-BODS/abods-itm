@@ -14,6 +14,7 @@ from dateutil.parser import parse
 
 from .client_db import TimetableDBClient
 from .matcher.handle_stop_history import clean_stop_history
+from .matcher.historic_timetable_store import HistoricTimetableStore
 from .matcher.matching import positions_timetable_lookup
 from .matcher.models import (
     ControlInfo,
@@ -188,7 +189,7 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
         batch_id = avl_list[0]["batch_id"]
         control_info = new_control_info(rt)
         to_set, to_remove, stop_history = positions_timetable_lookup(
-            timetable,
+            HistoricTimetableStore(timetable),
             avl_list,
             cleaned_stop_history,
         )
@@ -224,5 +225,4 @@ if __name__ == "__main__":
     timetable_path = f"s3://{s3_bucket}/historic/parquet/YYYY={year}/MM={month}/DD={day}/timetable_{year}{month}{day}.parquet"
     timetable_lf = read_parquet_s3(timetable_path)
     logger.info(f"Loaded timetable for {process_date}")
-    timetable = convert_timetable_to_dict(timetable_lf)
-    historic_matching(avl_path, timetable, process_date)
+    historic_matching(avl_path, timetable_lf, process_date)
