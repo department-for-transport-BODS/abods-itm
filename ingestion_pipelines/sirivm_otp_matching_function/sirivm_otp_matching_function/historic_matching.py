@@ -200,11 +200,9 @@ if __name__ == "__main__":
     if "PROCESS_DATE" not in os.environ:
         logger.error("Environment variable PROCESS_DATE is missing.")
         sys.exit(1)
-    #temp
-    logger.info("startup successful")
-    sys.exit(0)
 
     process_date = os.environ["PROCESS_DATE"]
+    logger.append_keys(PROCESS_DATE=process_date)
     process_date_parts = process_date.split("-")
     year = process_date_parts[0]
     month = process_date_parts[1]
