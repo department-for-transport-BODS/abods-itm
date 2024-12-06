@@ -186,6 +186,7 @@
     <changeSet id="58" author="abodsuser">
         <sqlFile path="sql/58-remove_unneeded_primary_key.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="60" author="abodsuser">
+        <sqlFile path="sql/60-populate-headway-with-estimate.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
-
-
