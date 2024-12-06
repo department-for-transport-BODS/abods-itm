@@ -2,6 +2,7 @@ import os
 from collections.abc import Sequence
 from datetime import datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
+from typing import Protocol
 
 from aws_lambda_powertools import Logger
 
@@ -16,7 +17,6 @@ from .models import (
     RouteDetails,
     StopDetails,
     StopHistory,
-    Timetable,
     avl_group_id,
     avl_recorded_at_time_utc,
     stop_departure_time,
@@ -31,15 +31,32 @@ from .utils import (
     transform_coordinates_and_calculate_intersections,
     validate_date,
 )
-from typing import Protocol
+
 
 class TimetableStore(Protocol):
+    """Interface for a timetable store"""
+
     def get_route_details(
-            self,
-            group_id: str,
-            direction_ref: str,
-    ) -> tuple[str, RouteDetails]:
-        pass
+        self,
+        group_id: str,
+        direction_ref: str,
+    ) -> tuple[str, RouteDetails | None]:
+        """
+        Interface for getting the route data for a given group id and direction
+
+        Args:
+        ----
+            group_id (str): A string representing operator_ref|line_name|journey_ref|date_of_journey in lower case
+            direction_ref (str): Direction ref (e.g. inbound, outbound)
+
+        Returns:
+        -------
+            str: The last index used to find the route in the timetable
+            RouteDetails | None: The matched route data if any
+
+        """
+        ...
+
 
 logger = Logger()
 
@@ -912,4 +929,3 @@ def positions_timetable_lookup(
 
     logger.remove_keys(["avl", "group_id", "stop_history_index"])
     return stop_pos_distances, stop_pos_distances_remove, stop_history
-

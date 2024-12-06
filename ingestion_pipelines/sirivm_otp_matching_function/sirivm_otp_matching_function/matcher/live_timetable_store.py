@@ -1,14 +1,32 @@
-from .models import Timetable, RouteDetails
+from .models import RouteDetails, Timetable
 
 
 class LiveTimetableStore:
-    def __init__(self, timetable: Timetable):
+    """Timetable store used for live matching"""
+
+    def __init__(self, timetable: Timetable) -> None:
+        """Construct a live timetable store"""
         self._timetable = timetable
+
     def get_route_details(
-            self,
-            group_id: str,
-            direction_ref: str,
-    ) -> tuple[str, RouteDetails]:
+        self,
+        group_id: str,
+        direction_ref: str,
+    ) -> tuple[str, RouteDetails | None]:
+        """
+        Get the route data for a given group id and direction
+
+        Args:
+        ----
+            group_id (str): A string representing operator_ref|line_name|journey_ref|date_of_journey in lower case
+            direction_ref (str): Direction ref (e.g. inbound, outbound)
+
+        Returns:
+        -------
+            str: The last index used to find the route in the timetable
+            RouteDetails | None: The matched route data if any
+
+        """
         route_details = self._timetable.get(group_id)
         if route_details:
             return group_id, route_details
