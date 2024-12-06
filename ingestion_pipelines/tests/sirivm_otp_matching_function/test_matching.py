@@ -17,6 +17,7 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     update_potential_match_with_recorded_at_time,
     update_potential_match_without_recorded_at_time,
 )
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.live_timetable_store import LiveTimetableStore
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
     AVLRecord,
     GroupStopHistory,
@@ -2106,7 +2107,7 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
             # Simulate invoking the lambda once per AVL for the group id
             # In practice there is only one AVL for a given group id in each batch
             to_set, to_remove, stop_history = positions_timetable_lookup(
-                timetable,
+                LiveTimetableStore(timetable),
                 [avl],
                 stop_history,
             )

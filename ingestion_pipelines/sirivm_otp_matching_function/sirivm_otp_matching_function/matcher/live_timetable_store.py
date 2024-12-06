@@ -1,0 +1,21 @@
+from .models import Timetable, RouteDetails
+
+
+class LiveTimetableStore:
+    def __init__(self, timetable: Timetable):
+        self._timetable = timetable
+    def get_route_details(
+            self,
+            group_id: str,
+            direction_ref: str,
+    ) -> tuple[str, RouteDetails]:
+        route_details = self._timetable.get(group_id)
+        if route_details:
+            return group_id, route_details
+
+        # In some cases, there can be multiple journeys with different directions using the same group id.
+        # When that happens, sirivm_timetable_s3_generation_function will add the direction ref to the group id.
+        # We will also need to use this to keep track of the matching for both journeys separately,
+        # but the database updates need to be with the original group id
+        index = group_id + "|" + direction_ref.lower()
+        return index, self._timetable.get(index)
