@@ -27,7 +27,7 @@ db_client = TimetableDBClient()
 two_hours_secs = -7200
 
 session = boto3.session.Session()
-credentials = session.get_credentials()
+credentials = session.get_credentials().get_frozen_credentials()
 
 
 def read_parquet_s3(source: str) -> pl.LazyFrame:
@@ -49,7 +49,7 @@ def read_parquet_s3(source: str) -> pl.LazyFrame:
             "aws_access_key_id": credentials.access_key,
             "aws_secret_access_key": credentials.secret_key,
             "aws_session_token": credentials.token,
-            "aws_region": os.environ["AWS_REGION"],
+            "aws_region": session.region_name,
         },
     )
 
