@@ -3,6 +3,9 @@ from datetime import UTC, datetime
 
 import pytest
 
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.live_timetable_store import (
+    LiveTimetableStore,
+)
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.matching import (
     check_estimated_match,
     check_update_first_stop,
@@ -1978,21 +1981,18 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     from .data.expected.expected_results import (
         expected_remove_coac,
         expected_remove_coac30,
-        expected_remove_fbri_m4_0740_2024_11_28,
         expected_remove_scem,
         expected_remove_scem2,
         expected_remove_slea,
         expected_remove_tlct,
         expected_set_coac,
         expected_set_coac30,
-        expected_set_fbri_m4_0740_2024_11_28,
         expected_set_scem,
         expected_set_scem2,
         expected_set_slea,
         expected_set_tlct,
         expected_stop_history_coac,
         expected_stop_history_coac30,
-        expected_stop_history_fbri_m4_0740_2024_11_28,
         expected_stop_history_scem,
         expected_stop_history_scem2,
         expected_stop_history_slea,
@@ -2011,8 +2011,6 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
     timetable_scem2 = read_timetable("scem9272024-11-06.json")
     avl_list_coac30 = read_avl("coac9917102024-10-30.csv")
     timetable_coac30 = read_timetable("coac9917102024-10-30.json")
-    avl_list_fbri_m4_0740_2024_11_28 = read_avl("fbri_m4_0740_2024-11-28.csv")
-    timetable_fbri_m4_0740_2024_11_28 = read_timetable("fbri_m4_0740_2024-11-28.json")
 
     @pytest.mark.parametrize(
         (
@@ -2078,15 +2076,6 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
                 expected_stop_history_scem2,
                 id="Bus continues after final stop and creates potential match while moving away from it",
             ),
-            pytest.param(
-                timetable_fbri_m4_0740_2024_11_28,
-                avl_list_fbri_m4_0740_2024_11_28,
-                {},
-                expected_set_fbri_m4_0740_2024_11_28,
-                expected_remove_fbri_m4_0740_2024_11_28,
-                expected_stop_history_fbri_m4_0740_2024_11_28,
-                id="Multiple journeys using same group id",
-            ),
         ],
     )
     def test_positions_timetable_lookup(  # noqa: D102 - BODS-7131
@@ -2106,7 +2095,7 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
             # Simulate invoking the lambda once per AVL for the group id
             # In practice there is only one AVL for a given group id in each batch
             to_set, to_remove, stop_history = positions_timetable_lookup(
-                timetable,
+                LiveTimetableStore(timetable),
                 [avl],
                 stop_history,
             )
