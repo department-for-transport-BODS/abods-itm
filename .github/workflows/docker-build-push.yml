@@ -91,6 +91,7 @@ jobs:
           ECR_REPOSITORY: ${{ env.SVC_NAME }}
           IMAGE_TAG: ${{ needs.validation.outputs.tag }}
         run: |
+          type ./pre-build.sh && ./pre-build.sh
           docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           echo "[INFO] Image $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
