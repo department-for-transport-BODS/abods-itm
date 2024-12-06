@@ -186,6 +186,9 @@
     <changeSet id="58" author="abodsuser">
         <sqlFile path="sql/58-remove_unneeded_primary_key.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="59" author="abodsuser">
+        <sqlFile path="sql/59-remove-more-primary-keys.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
 
 
