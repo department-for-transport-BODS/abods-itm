@@ -35,7 +35,6 @@ class HistoricTimetableStore:
             tuple[str, RouteDetails]: group_id and route details
 
         """
-        journey_index = group_id + "|" + direction_ref
         group_timetable = self._timetable.filter(pl.col("group_id") == group_id)
         timetable = (
             group_timetable.with_columns(
@@ -48,27 +47,32 @@ class HistoricTimetableStore:
                 "date_of_journey",
             )
             .collect()
-            .to_dict("records")
+            .to_dicts()
         )
+        journey_index = group_id + "|" + direction_ref
+
         if not timetable:
             return journey_index, None
+
         directions = {rec["direction"] for rec in timetable}
-        if len(directions) > 1:
-            timetable = [rec for rec in timetable if rec["direction"] == direction_ref]
-        else:
+        if len(directions) <= 1:
             journey_index = group_id
+        else:
+            timetable = [rec for rec in timetable if rec["direction"] == direction_ref]
+
+        if not timetable:
+            return journey_index, None
+
         timetable.sort(key=lambda rec: rec["stop_index"])
         converted_timetable: dict[str, StopDetails] = {}
-        stop_index = 1
-        for row in timetable.values():
-            converted_timetable[stop_index] = (
+        for index, row in enumerate(timetable):
+            converted_timetable[str(index + 1)] = (
                 (
-                    float(row["stop_latitude"]),
-                    float(row["stop_longitude"]),
+                    row["stop_latitude"],
+                    (row["stop_longitude"]),
                 ),
-                str(row["expected_departure_time"]),
+                (row["expected_departure_time"]),
                 int(row["timetable_id"]),
-                str(row["date_of_journey"]),
+                (row["date_of_journey"]),
             )
-            stop_index += 1
         return journey_index, converted_timetable
