@@ -121,7 +121,8 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
                 csv_stream = pv.open_csv(
                     input_stream,
                     read_options=pv.ReadOptions(
-                        block_size=150 * 1000000, column_names=column_names,
+                        block_size=150 * 1000000,
+                        column_names=column_names,
                     ),
                     parse_options=pv.ParseOptions(delimiter=",", quote_char='"'),
                     convert_options=pv.ConvertOptions(column_types=schema),
