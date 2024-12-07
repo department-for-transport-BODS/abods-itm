@@ -1,6 +1,6 @@
 import polars as pl
 
-from .models import RouteDetails
+from .models import RouteDetails, StopDetails
 
 
 class HistoricTimetableStore:
@@ -37,42 +37,38 @@ class HistoricTimetableStore:
         """
         journey_index = group_id + "|" + direction_ref
         group_timetable = self._timetable.filter(pl.col("group_id") == group_id)
-        group_timetable_with_direction = group_timetable.group_by(
-            "direction",
-            maintain_order=True,
-        ).all()
-        directions = group_timetable_with_direction.collect().get_column("direction").to_list()
-        if direction_ref not in directions:
-            return journey_index, None
-        direction_count = (
-            group_timetable_with_direction.select(pl.len()).collect().item()
-        )
-        if direction_count > 1:
-            group_timetable = group_timetable_with_direction.filter(
-                pl.col("direction") == direction_ref,
+        timetable = (
+            group_timetable.with_columns(
+                "direction",
+                "stop_index",
+                "stop_latitude",
+                "stop_longitude",
+                "expected_departure_time",
+                "timetable_id",
+                "date_of_journey",
             )
+            .collect()
+            .to_dict("records")
+        )
+        if not timetable:
+            return journey_index, None
+        directions = {rec["direction"] for rec in timetable}
+        if len(directions) > 1:
+            timetable = [rec for rec in timetable if rec["direction"] == direction_ref]
         else:
             journey_index = group_id
-            group_timetable = group_timetable.group_by(
-                "group_id",
-                maintain_order=True,
-            ).all()
-        row_count = group_timetable.select(pl.len()).collect().item()
-        grouped_dict = {}
-        for i in range(row_count):
-            row = (
-                group_timetable.filter(pl.int_range(pl.len()).is_in([i]))
-                .collect()
-                .row(0, named=True)
+        timetable.sort(key=lambda rec: rec["stop_index"])
+        converted_timetable: dict[str, StopDetails] = {}
+        stop_index = 1
+        for row in timetable.values():
+            converted_timetable[stop_index] = (
+                (
+                    float(row["stop_latitude"]),
+                    float(row["stop_longitude"]),
+                ),
+                str(row["expected_departure_time"]),
+                int(row["timetable_id"]),
+                str(row["date_of_journey"]),
             )
-            for stop in range(1, len(row["stop_index"]) + 1):
-                grouped_dict.setdefault(journey_index, {})[str(stop)] = (
-                    (
-                        float(row["stop_latitude"][stop - 1]),
-                        float(row["stop_longitude"][stop - 1]),
-                    ),
-                    row["expected_departure_time"][stop - 1],
-                    row["timetable_id"][stop - 1],
-                    row["date_of_journey"][stop - 1],
-                )
-        return journey_index, grouped_dict[journey_index]
+            stop_index += 1
+        return journey_index, converted_timetable
