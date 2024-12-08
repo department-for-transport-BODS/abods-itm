@@ -63,7 +63,7 @@ class HistoricTimetableStore:
         if not timetable:
             return journey_index, None
 
-        timetable.sort(key=lambda rec: rec["stop_index"])
+        timetable.sort(key=lambda rec: int(rec["stop_index"]))
         converted_timetable: dict[str, StopDetails] = {}
         for index, row in enumerate(timetable):
             converted_timetable[str(index + 1)] = (
