@@ -17,6 +17,7 @@ from .matcher.handle_stop_history import clean_stop_history
 from .matcher.historic_timetable_store import HistoricTimetableStore
 from .matcher.matching import positions_timetable_lookup
 from .matcher.models import (
+    AVLRecord,
     ControlInfo,
     StopHistory,
 )
@@ -151,21 +152,20 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
             .row(0, named=True)
         )
         for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
-            avl_list.append(
-                {
-                    "recorded_at_time": avl_batch["recorded_at_time"][index],
-                    "response_timestamp": avl_batch["response_time_stamp"],
-                    "latitude": avl_batch["latitude"][index],
-                    "longitude": avl_batch["longitude"][index],
-                    "line_name": avl_batch["line_name"][index],
-                    "operator_ref": avl_batch["operator_ref"][index],
-                    "vehicle_ref": avl_batch["vehicle_ref"][index],
-                    "journey_ref": avl_batch["journey_ref"][index],
-                    "direction_ref": avl_batch["direction_ref"][index],
-                    "date_of_journey": avl_batch["date_of_journey"][index],
-                    "batch_id": avl_batch["batch_id"][index],
-                },
-            )
+            avl: AVLRecord = {
+                "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
+                "response_timestamp": str(avl_batch["response_time_stamp"]),
+                "latitude": float(avl_batch["latitude"][index]),
+                "longitude": float(avl_batch["longitude"][index]),
+                "line_name": str(avl_batch["line_name"][index]),
+                "operator_ref": str(avl_batch["operator_ref"][index]),
+                "vehicle_ref": str(avl_batch["vehicle_ref"][index]),
+                "journey_ref": str(avl_batch["journey_ref"][index]),
+                "direction_ref": str(avl_batch["direction_ref"][index]),
+                "date_of_journey": str(avl_batch["date_of_journey"][index]),
+                "batch_id": int(avl_batch["batch_id"][index]),
+            }
+            avl_list.append(avl)
         batch_id = avl_batch["batch_id"][0]
         try:
             control_info = new_control_info(rt)
