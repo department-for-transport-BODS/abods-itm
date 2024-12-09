@@ -1,11 +1,9 @@
 # This file is the entry point of an ECS task that performs a long-lived matching process.
 # It lives alongside the lambda code for ease of development
 
-import json
 import os
 import sys
-from datetime import datetime
-from pathlib import Path
+from collections.abc import Sequence
 
 import boto3
 import polars as pl
@@ -16,11 +14,7 @@ from .client_db import TimetableDBClient
 from .matcher.handle_stop_history import clean_stop_history
 from .matcher.historic_timetable_store import HistoricTimetableStore
 from .matcher.matching import positions_timetable_lookup
-from .matcher.models import (
-    AVLRecord,
-    ControlInfo,
-    StopHistory,
-)
+from .matcher.models import AVLRecord
 from .matcher.utils import timer
 
 logger = Logger()
@@ -57,65 +51,13 @@ def read_parquet_s3(source: str) -> pl.LazyFrame:
 
 
 @timer(logger)
-def write_to_json(data: dict, output_path: Path) -> None:
-    """
-    Write data to json
-
-    Args:
-    ----
-        data (dict): data in dict type
-        output_path (str): The destination path
-
-    """
-    output_path.parent.mkdir(exist_ok=True, parents=True)
-    with open(output_path, "w+") as f:
-        f.write(json.dumps(data))
-
-
-@timer(logger)
-def get_stop_history(
-    query_date: str,
-) -> StopHistory:
-    """Get Stop History"""
-    path = (
-        Path(__file__).parent.parent
-        / "historic_data"
-        / "timetable_avl"
-        / query_date
-        / "timetable_avl_stop_history.json"
-    )
-
-    if not path.is_file():
-        logger.info("Stop history file does not exist")
-        return {}
-
-    with open(path) as f:
-        stop_history = json.load(f)
-    del stop_history["control_info"]
-
-    return stop_history
-
-
-@timer(logger)
 def validate_avl_list(
-    avl_list: pl.LazyFrame,
+    avl_list: Sequence[AVLRecord],
     expected_batch_id: int,
 ) -> None:
-    if (
-        avl_list.filter(pl.col("batch_id") != expected_batch_id)
-        .select(pl.len())
-        .collect()
-        .item()
-        > 0
-    ):
-        raise Exception("AVLs with multiple match ids retrieved")  # noqa: TRY002 - Not worth making an exception type
-
-
-def new_control_info(avl_time: int) -> ControlInfo:
-    return {
-        "last_avl": avl_time,
-        "last_avl_processed_time": str(datetime.now()),
-    }
+    for avl in avl_list:
+        if avl["batch_id"] != expected_batch_id:
+            raise Exception("AVLs with multiple match ids retrieved")  # noqa: TRY002 - Not worth making an exception type
 
 
 @timer(logger)
@@ -130,27 +72,24 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
         date_str (str): The date for historic matching
 
     """
-    stop_history = get_stop_history(date_str)
-
     avl_data = read_parquet_s3(avl_path)
     logger.info(f"Loaded avl data for {date_str}")
     avl_group = avl_data.group_by("response_time_stamp", maintain_order=True)
     avl_group_count = avl_group.len().collect()
     avl_response_time_list = avl_group_count.get_column("response_time_stamp")
 
-    cleaned_stop_history = stop_history
-
+    stop_history = {}
     for rt in avl_response_time_list:
-        avl_list = []
         logger.info(f"Run historic matching for batch at {rt}")
         if len(stop_history) > 1:
-            cleaned_stop_history = clean_stop_history(stop_history, parse(rt))
+            stop_history = clean_stop_history(stop_history, parse(rt))
         avl_batch = (
             avl_group.all()
             .filter(pl.col("response_time_stamp") == rt)
             .collect()
             .row(0, named=True)
         )
+        avl_list = []
         for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
             avl: AVLRecord = {
                 "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
@@ -167,20 +106,12 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
             }
             avl_list.append(avl)
         batch_id = avl_batch["batch_id"][0]
+        validate_avl_list(avl_list, batch_id)
         try:
-            control_info = new_control_info(rt)
             to_set, to_remove, stop_history = positions_timetable_lookup(
                 HistoricTimetableStore(timetable),
                 avl_list,
-                cleaned_stop_history,
-            )
-            write_to_json(
-                {**stop_history, "control_info": control_info},
-                Path(__file__).parent.parent
-                / "historic_data"
-                / "timetable_avl"
-                / date_str
-                / "timetable_avl_stop_history.json",
+                stop_history,
             )
             db_client.historic_update_success(
                 batch_id,
