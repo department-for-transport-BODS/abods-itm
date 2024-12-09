@@ -178,7 +178,7 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
                 batch_id,
                 to_set,
                 to_remove,
-                f"{date_datetime.year}-{date_datetime.month}-{date_datetime.day}",
+                date_str,
             )
         except Exception:
             logger.exception("An error occurred when processing historic record")
@@ -194,8 +194,8 @@ if __name__ == "__main__":
     logger.append_keys(PROCESS_DATE=process_date)
     process_date_parts = process_date.split("-")
     year = process_date_parts[0]
-    month = process_date_parts[1]
-    day = process_date_parts[2]
+    month = process_date_parts[1].zfill(2)
+    day = process_date_parts[2].zfill(2)
     s3_bucket = os.getenv("SIRIVM_BUCKET", "abods-sandbox-exporter-bucket")
     timetable_path = f"s3://{s3_bucket}/historic/parquet/YYYY={year}/MM={month}/DD={day}/timetable_{year}{month}{day}.parquet"
     timetable_lf = read_parquet_s3(timetable_path)
