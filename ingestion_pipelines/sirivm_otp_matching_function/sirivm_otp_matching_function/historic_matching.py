@@ -221,8 +221,11 @@ if __name__ == "__main__":
     month = process_date_parts[1]
     day = process_date_parts[2]
     s3_bucket = os.getenv("SIRIVM_BUCKET", "abods-sandbox-exporter-bucket")
-    avl_path = f"s3://{s3_bucket}/historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet"
     timetable_path = f"s3://{s3_bucket}/historic/parquet/YYYY={year}/MM={month}/DD={day}/timetable_{year}{month}{day}.parquet"
     timetable_lf = read_parquet_s3(timetable_path)
     logger.info(f"Loaded timetable for {process_date}")
-    historic_matching(avl_path, timetable_lf, process_date)
+    historic_matching(
+        avl_path=f"s3://{s3_bucket}/historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet",
+        timetable=timetable_lf,
+        date_str=process_date,
+    )
