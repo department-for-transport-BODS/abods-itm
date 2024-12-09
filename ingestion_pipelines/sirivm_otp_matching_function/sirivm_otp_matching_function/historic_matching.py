@@ -120,7 +120,7 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
             avl_list.append(avl)
 
         if len(avl_list) < 1:
-            logger.debug("No AVLs in the list")
+            logger.info("No AVLs in the list")
             continue
 
         batch_id = avl_batch["batch_id"][0]
