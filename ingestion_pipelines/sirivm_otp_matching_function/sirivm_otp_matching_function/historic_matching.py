@@ -104,7 +104,17 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
                 "date_of_journey": str(avl_batch["date_of_journey"][index]),
                 "batch_id": int(avl_batch["batch_id"][index]),
             }
+
+            if avl["operator_ref"] == "TFLO":
+                logger.debug("Skipping TFLO")
+                continue
+
             avl_list.append(avl)
+
+        if len(avl_list) < 1:
+            logger.debug("No AVLs in the list")
+            continue
+
         batch_id = avl_batch["batch_id"][0]
         validate_avl_list(avl_list, batch_id)
         try:
