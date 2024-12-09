@@ -8,8 +8,6 @@ dateutils==0.6.12
 idna==3.7
 polars==1.16.0
 psycopg2-binary==2.9.9
-pydantic==2.10.3
-pydantic_core==2.27.1
 pyproj==3.7.0
 python-dateutil==2.9.0.post0
 pytz==2024.1
