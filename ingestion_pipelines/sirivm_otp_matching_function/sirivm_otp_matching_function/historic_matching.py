@@ -99,8 +99,6 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
         )
         avl_list = []
         for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
-            recorded_at_time = parse(str(avl_batch["recorded_at_time"][index]))
-            stop_history = clean_stop_history(stop_history, recorded_at_time)
             avl: AVLRecord = {
                 "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
                 "response_timestamp": str(avl_batch["response_time_stamp"][index]),
