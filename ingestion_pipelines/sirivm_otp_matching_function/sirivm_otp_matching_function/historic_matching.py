@@ -79,8 +79,16 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
     avl_response_time_list = avl_group_count.get_column("response_time_stamp")
 
     stop_history = {}
+    number_of_batches = len(avl_response_time_list)
+    logger.info("Starting to process AVL data", number_of_batches=number_of_batches)
+    batch_number = 0
     for rt in avl_response_time_list:
-        logger.info(f"Run historic matching for batch at {rt}")
+        batch_number += 1
+        logger.info(
+            f"Run historic matching for batch at {rt}",
+            batch_number=batch_number,
+            number_of_batches=number_of_batches,
+        )
         if len(stop_history) > 1:
             stop_history = clean_stop_history(stop_history, parse(rt))
         avl_batch = (
