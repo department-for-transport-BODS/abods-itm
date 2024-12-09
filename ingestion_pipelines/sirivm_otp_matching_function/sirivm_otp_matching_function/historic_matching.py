@@ -89,8 +89,9 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
             batch_number=batch_number,
             number_of_batches=number_of_batches,
         )
-        if len(stop_history) > 1:
-            stop_history = clean_stop_history(stop_history, parse(rt))
+
+        stop_history = clean_stop_history(stop_history, parse(rt))
+
         avl_batch = (
             avl_group.all()
             .filter(pl.col("response_time_stamp") == rt)
