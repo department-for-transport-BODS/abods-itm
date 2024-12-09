@@ -121,6 +121,7 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
             logger.info("No AVLs in the list")
             continue
 
+        logger.info("Produced avl list", size=len(avl_list))
         batch_id = avl_list[0]["batch_id"]
         validate_avl_list(avl_list, batch_id)
         try:
