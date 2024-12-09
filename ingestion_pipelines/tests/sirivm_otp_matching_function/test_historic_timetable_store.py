@@ -58,7 +58,7 @@ split_timetable = [
     {
         **common_keys,
         "direction": "inbound",
-        "stop_index": "4",
+        "stop_index": "11",
         "stop_latitude": "53.226276",
         "stop_longitude": "-0.5363951",
         "expected_departure_time": "12:26:00",
