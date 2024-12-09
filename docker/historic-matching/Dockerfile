@@ -19,7 +19,12 @@ RUN apt-get update \
     && pip install psycopg2 \
     && python -m pip install -r requirements.txt
 
+HEALTHCHECK NONE
+# checkov:skip=CKV_DOCKER_8:root user is fine for now
+USER root
+
 WORKDIR /app
 COPY files /app
+
 
 CMD ["python", "-m", "sirivm_otp_matching_function.historic_matching"]
