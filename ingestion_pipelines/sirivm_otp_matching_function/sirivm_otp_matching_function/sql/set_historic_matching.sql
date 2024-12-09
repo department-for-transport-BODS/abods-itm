@@ -2,7 +2,7 @@
 UPDATE public."Timetable" u
 SET time_difference = CASE
                           WHEN t.time_difference::int < 0 THEN
-                              EXTRACT(epoch FROM (COALESCE(t.last_time_in_zone_utc, t.timestamp_after_estimate)::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time::timestamp))::int
+                              EXTRACT(epoch FROM (COALESCE(t.last_time_in_zone_utc, t.timestamp_after_estimate::timestamp)::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time::timestamp))::int
                           ELSE t.time_difference::int
                       END,
     actual_departure_time = t.last_time_in_zone_utc::timestamp AT TIME ZONE 'UTC',
