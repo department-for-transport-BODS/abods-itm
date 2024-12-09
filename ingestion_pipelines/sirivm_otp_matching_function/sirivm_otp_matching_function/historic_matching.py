@@ -129,7 +129,6 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
         date_str (str): The date for historic matching
 
     """
-    date_datetime = parse(date_str)
     stop_history = get_stop_history(date_str)
 
     avl_data = read_parquet_s3(avl_path)
