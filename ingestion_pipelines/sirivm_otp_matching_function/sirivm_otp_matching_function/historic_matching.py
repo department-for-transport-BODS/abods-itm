@@ -71,34 +71,6 @@ def write_to_json(data: dict, output_path: Path) -> None:
         f.write(json.dumps(data))
 
 
-def convert_timetable_to_dict(timetable: pl.LazyFrame) -> dict:
-    grouped_timetable = timetable.group_by("group_id", maintain_order=True).all()
-    group_id_count = grouped_timetable.select(pl.len()).collect().item()
-    grouped_dict = {}
-    for i in range(group_id_count):
-        row = (
-            grouped_timetable.filter(pl.int_range(pl.len()).is_in([i]))
-            .collect()
-            .row(0, named=True)
-        )
-        grouped_dict.update({row["group_id"]: {}})
-        for stop in row["stop_index"]:
-            grouped_dict[row["group_id"]].update(
-                {
-                    stop: (
-                        (
-                            float(row["stop_latitude"][int(stop) - 1]),
-                            float(row["stop_longitude"][int(stop) - 1]),
-                        ),
-                        row["expected_departure_time"][int(stop) - 1],
-                        row["timetable_id"][int(stop) - 1],
-                        row["date_of_journey"][int(stop) - 1],
-                    ),
-                },
-            )
-    return grouped_dict
-
-
 @timer(logger)
 def get_stop_history(
     query_date: str,
@@ -187,26 +159,30 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
             for i in range(avl_row_count)
         ]
         batch_id = avl_list[0]["batch_id"]
-        control_info = new_control_info(rt)
-        to_set, to_remove, stop_history = positions_timetable_lookup(
-            HistoricTimetableStore(timetable),
-            avl_list,
-            cleaned_stop_history,
-        )
-        write_to_json(
-            {**stop_history, "control_info": control_info},
-            Path(__file__).parent.parent
-            / "historic_data"
-            / "timetable_avl"
-            / date_str
-            / "timetable_avl_stop_history.json",
-        )
-        db_client.historic_update_success(
-            batch_id,
-            to_set,
-            to_remove,
-            f"{date_datetime.year}-{date_datetime.month}-{date_datetime.day}",
-        )
+        try:
+            control_info = new_control_info(rt)
+            to_set, to_remove, stop_history = positions_timetable_lookup(
+                HistoricTimetableStore(timetable),
+                avl_list,
+                cleaned_stop_history,
+            )
+            write_to_json(
+                {**stop_history, "control_info": control_info},
+                Path(__file__).parent.parent
+                / "historic_data"
+                / "timetable_avl"
+                / date_str
+                / "timetable_avl_stop_history.json",
+            )
+            db_client.historic_update_success(
+                batch_id,
+                to_set,
+                to_remove,
+                f"{date_datetime.year}-{date_datetime.month}-{date_datetime.day}",
+            )
+        except Exception:
+            logger.exception("An error occurred when processing historic record")
+            db_client.batch_failed(batch_id)
 
 
 if __name__ == "__main__":
