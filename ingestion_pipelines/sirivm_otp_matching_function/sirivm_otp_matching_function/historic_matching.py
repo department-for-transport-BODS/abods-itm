@@ -74,35 +74,36 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
     """
     avl_data = read_parquet_s3(avl_path)
     logger.info(f"Loaded avl data for {date_str}")
-    avl_group = avl_data.group_by("response_time_stamp", maintain_order=True)
+    avl_group = avl_data.group_by("batch_id", maintain_order=True)
     avl_group_count = avl_group.len().collect()
-    avl_response_time_list = avl_group_count.get_column("response_time_stamp")
+    avl_batch_id_list = avl_group_count.get_column("batch_id")
 
     stop_history = {}
-    number_of_batches = len(avl_response_time_list)
+    number_of_batches = len(avl_batch_id_list)
     logger.info("Starting to process AVL data", number_of_batches=number_of_batches)
     batch_number = 0
-    for rt in avl_response_time_list:
+    for batch in avl_batch_id_list:
         batch_number += 1
         logger.info(
-            f"Run historic matching for batch at {rt}",
+            "Run historic matching for batch",
+            batch_id=batch,
             batch_number=batch_number,
             number_of_batches=number_of_batches,
         )
 
-        stop_history = clean_stop_history(stop_history, parse(rt))
-
         avl_batch = (
             avl_group.all()
-            .filter(pl.col("response_time_stamp") == rt)
+            .filter(pl.col("batch_id") == batch)
             .collect()
             .row(0, named=True)
         )
         avl_list = []
         for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
+            recorded_at_time = parse(str(avl_batch["recorded_at_time"][index]))
+            stop_history = clean_stop_history(stop_history, recorded_at_time)
             avl: AVLRecord = {
                 "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
-                "response_timestamp": str(avl_batch["response_time_stamp"]),
+                "response_timestamp": str(avl_batch["response_time_stamp"][index]),
                 "latitude": float(avl_batch["latitude"][index]),
                 "longitude": float(avl_batch["longitude"][index]),
                 "line_name": str(avl_batch["line_name"][index]),
@@ -111,7 +112,7 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
                 "journey_ref": str(avl_batch["journey_ref"][index]),
                 "direction_ref": str(avl_batch["direction_ref"][index]),
                 "date_of_journey": str(avl_batch["date_of_journey"][index]),
-                "batch_id": int(avl_batch["batch_id"][index]),
+                "batch_id": int(avl_batch["batch_id"]),
             }
 
             if avl["operator_ref"] == "TFLO":
@@ -124,7 +125,7 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
             logger.info("No AVLs in the list")
             continue
 
-        batch_id = avl_batch["batch_id"][0]
+        batch_id = avl_list[0]["batch_id"]
         validate_avl_list(avl_list, batch_id)
         try:
             to_set, to_remove, stop_history = positions_timetable_lookup(
