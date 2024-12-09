@@ -68,8 +68,8 @@ class HistoricTimetableStore:
         for index, row in enumerate(timetable):
             converted_timetable[str(index + 1)] = (
                 (
-                    row["stop_latitude"],
-                    (row["stop_longitude"]),
+                    float(row["stop_latitude"]),
+                    float(row["stop_longitude"]),
                 ),
                 (row["expected_departure_time"]),
                 int(row["timetable_id"]),
