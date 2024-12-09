@@ -133,31 +133,40 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
 
     avl_data = read_parquet_s3(avl_path)
     logger.info(f"Loaded avl data for {date_str}")
-
-    avl_group_count = (
-        avl_data.group_by("response_time_stamp", maintain_order=True).len().collect()
-    )
+    avl_group = avl_data.group_by("response_time_stamp", maintain_order=True)
+    avl_group_count = avl_group.len().collect()
     avl_response_time_list = avl_group_count.get_column("response_time_stamp")
+
     cleaned_stop_history = stop_history
 
     for rt in avl_response_time_list:
+        avl_list = []
         logger.info(f"Run historic matching for batch at {rt}")
         if len(stop_history) > 1:
             cleaned_stop_history = clean_stop_history(stop_history, parse(rt))
-        avl_rt = avl_data.filter(pl.col("response_time_stamp") == rt)
-        avl_row_count = (
-            avl_data.filter(pl.col("response_time_stamp") == rt)
-            .select(pl.len())
-            .collect()
-            .item()
-        )
-        avl_list = [
-            avl_rt.filter(pl.int_range(pl.len()).is_in([i]))
+        avl_batch = (
+            avl_group.all()
+            .filter(pl.col("response_time_stamp") == rt)
             .collect()
             .row(0, named=True)
-            for i in range(avl_row_count)
-        ]
-        batch_id = avl_list[0]["batch_id"]
+        )
+        for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
+            avl_list.append(
+                {
+                    "recorded_at_time": avl_batch["recorded_at_time"][index],
+                    "response_timestamp": avl_batch["response_time_stamp"],
+                    "latitude": avl_batch["latitude"][index],
+                    "longitude": avl_batch["longitude"][index],
+                    "line_name": avl_batch["line_name"][index],
+                    "operator_ref": avl_batch["operator_ref"][index],
+                    "vehicle_ref": avl_batch["vehicle_ref"][index],
+                    "journey_ref": avl_batch["journey_ref"][index],
+                    "direction_ref": avl_batch["direction_ref"][index],
+                    "date_of_journey": avl_batch["date_of_journey"][index],
+                    "batch_id": avl_batch["batch_id"][index],
+                },
+            )
+        batch_id = avl_batch["batch_id"][0]
         try:
             control_info = new_control_info(rt)
             to_set, to_remove, stop_history = positions_timetable_lookup(
