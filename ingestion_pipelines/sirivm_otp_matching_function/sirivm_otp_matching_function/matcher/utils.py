@@ -28,7 +28,7 @@ def timer(passed_logger: Logger) -> Callable[Param, Return]:
     def decorate(f: Callable[Param, Return]) -> Callable[Param, Return]:
         def applicator(*args: Param, **kwargs: Param) -> Return:
             passed_logger.info(f"Starting {f.__name__}()")
-            start_time = time.perf_counter()
+            start_time = time.perf_counter_ns()
             try:
                 return f(*args, **kwargs)
             finally:
@@ -36,7 +36,7 @@ def timer(passed_logger: Logger) -> Callable[Param, Return]:
                 run_time = end_time - start_time
                 passed_logger.info(
                     f"Finished {f.__name__}()",
-                    time_in_ms=run_time / 1000,
+                    time_in_ms=run_time / 1000000,
                 )
 
         return applicator
