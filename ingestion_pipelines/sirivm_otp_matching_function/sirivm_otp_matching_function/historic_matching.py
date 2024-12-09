@@ -8,10 +8,8 @@ from collections.abc import Sequence
 import boto3
 import polars as pl
 from aws_lambda_powertools import Logger
-from dateutil.parser import parse
 
 from .client_db import TimetableDBClient
-from .matcher.handle_stop_history import clean_stop_history
 from .matcher.historic_timetable_store import HistoricTimetableStore
 from .matcher.matching import positions_timetable_lookup
 from .matcher.models import AVLRecord
