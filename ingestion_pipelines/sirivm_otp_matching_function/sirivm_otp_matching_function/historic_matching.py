@@ -2,7 +2,6 @@
 # It lives alongside the lambda code for ease of development
 
 import os
-import subprocess
 import sys
 from collections.abc import Sequence
 
@@ -25,22 +24,13 @@ s3 = boto3.client("s3")
 
 
 @timer(logger)
-def validate_avl_list(
-    avl_list: Sequence[AVLRecord],
-    expected_batch_id: int,
-) -> None:
-    for avl in avl_list:
-        if avl["batch_id"] != expected_batch_id:
-            raise Exception("AVLs with multiple match ids retrieved")  # noqa: TRY002 - Not worth making an exception type
-
-@timer(logger)
-def get_avls_for_group_id(group_id: str, avl_group: pl.LazyFrame) -> Sequence[AVLRecord]:
+def get_avls_for_group_id(
+    group_id: str,
+    avl_group: pl.LazyFrame,
+) -> Sequence[AVLRecord]:
     avl_batch = (
-            avl_group
-            .filter(pl.col("group_id") == group_id)
-            .collect()
-            .row(0, named=True)
-        )
+        avl_group.filter(pl.col("group_id") == group_id).collect().row(0, named=True)
+    )
     avl_list = []
     for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
         avl: AVLRecord = {
@@ -79,7 +69,19 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
     """
     avl_data = pl.scan_parquet(avl_path)
     logger.info(f"Loaded avl data for {date_str}")
-    avl_group = avl_data.with_columns(pl.concat_str(pl.col("operator_ref"), pl.col("line_name"), pl.col("journey_ref"), pl.col("date_of_journey"), separator="|").alias("group_id")).group_by("group_id", maintain_order=True).all()
+    avl_group = (
+        avl_data.with_columns(
+            pl.concat_str(
+                pl.col("operator_ref"),
+                pl.col("line_name"),
+                pl.col("journey_ref"),
+                pl.col("date_of_journey"),
+                separator="|",
+            ).alias("group_id"),
+        )
+        .group_by("group_id", maintain_order=True)
+        .all()
+    )
     avl_group_count = avl_group.len().collect()
     avl_group_list = avl_group_count.get_column("group_id")
     timetable_store = HistoricTimetableStore(pl.scan_parquet(timetable_path))
@@ -97,29 +99,27 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
             number_of_group_ids=number_of_groups,
         )
         group_avls = get_avls_for_group_id(group_id, avl_group)
-        
+
         if len(group_avls) < 1:
             logger.info("No AVLs in the list")
             continue
 
         logger.info("Produced avl list", size=len(group_avls))
         try:
-            for ind, avl in enumerate(group_avls):
-                batch_id = group_avls[ind]["batch_id"]
+            for avl in group_avls:
                 to_set, to_remove, stop_history = positions_timetable_lookup(
                     timetable_store,
                     [avl],
                     stop_history,
                 )
                 db_client.historic_update_success(
-                    batch_id,
+                    None,
                     to_set,
                     to_remove,
                     date_str,
                 )
         except Exception:
             logger.exception("An error occurred when processing historic record")
-            db_client.batch_failed(batch_id)
 
 
 if __name__ == "__main__":
@@ -135,8 +135,9 @@ if __name__ == "__main__":
         month = process_date_parts[1].zfill(2)
         day = process_date_parts[2].zfill(2)
         s3_bucket = os.getenv("SIRIVM_BUCKET", "abods-sandbox-exporter-bucket")
-        local_timetable_path = "/tmp/timetable.parquet"
-        local_avl_path = "/tmp/avl.parquet"
+
+        local_timetable_path = "/tmp/timetable.parquet"  # noqa: S108 intentional use of /tmp
+        local_avl_path = "/tmp/avl.parquet"  # noqa: S108 intentional use of /tmp
         s3.download_file(
             Bucket=s3_bucket,
             Key=f"historic/parquet/YYYY={year}/MM={month}/DD={day}/timetable_{year}{month}{day}.parquet",
