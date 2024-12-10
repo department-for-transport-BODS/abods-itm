@@ -2,6 +2,7 @@
 # It lives alongside the lambda code for ease of development
 
 import os
+import subprocess
 import sys
 from collections.abc import Sequence
 
@@ -142,6 +143,7 @@ if __name__ == "__main__":
             Key=f"historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet",
             Filename=local_timetable_path,
         )
+        subprocess.run(["ls", "-la", "/tmp"])
         logger.info(f"Loaded timetable for {process_date}")
         historic_matching(
             avl_path=local_avl_path,
