@@ -1,6 +1,10 @@
 import polars as pl
+from aws_lambda_powertools import Logger
 
 from .models import RouteDetails, StopDetails
+from .utils import timer
+
+logger = Logger()
 
 
 class HistoricTimetableStore:
@@ -17,6 +21,7 @@ class HistoricTimetableStore:
         """
         self._timetable = timetable
 
+    @timer(logger)
     def get_route_details(
         self,
         group_id: str,
