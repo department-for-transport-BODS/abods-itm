@@ -141,7 +141,7 @@ class TimetableDBClient:
     @timer(logger)
     def historic_update_success(
         self,
-        batch_id: int| None,
+        batch_id: int | None,
         entries_to_update: Sequence[RecordToAdd],
         entries_to_remove: Sequence[RecordToRemove],
         avl_date_str: str,

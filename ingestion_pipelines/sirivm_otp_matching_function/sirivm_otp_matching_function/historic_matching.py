@@ -10,7 +10,7 @@ import polars as pl
 from aws_lambda_powertools import Logger
 
 from .client_db import TimetableDBClient
-from .live_timetable_store import LiveTimetableStore
+from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import positions_timetable_lookup
 from .matcher.models import AVLRecord, StopDetails, Timetable
 from .matcher.utils import timer
@@ -58,25 +58,39 @@ def get_avls_for_group_id(
 def get_timetable_data_for_group_id(
     group_id: str,
     timetable: pl.LazyFrame,
-) -> Timetable:
+) -> Timetable | None:
     group_timetable = timetable.group_by(pl.col("group_id"))
     filtered_timetable_df = group_timetable.all().filter(
         pl.col("group_id").str.to_lowercase() == group_id,
     )
-    route_details: dict[str, StopDetails] = {}
-    if filtered_timetable_df.select(pl.len()).collect().item() > 0:
-        journey_timetable = filtered_timetable_df.collect().row(0, named=True)
-        for stop in range(len(journey_timetable["stop_index"])):
-            route_details[str(stop + 1)] = (
-                (
-                    float(journey_timetable["stop_latitude"][stop]),
-                    float(journey_timetable["stop_longitude"][stop]),
-                ),
-                journey_timetable["expected_departure_time"][stop],
-                int(journey_timetable["timetable_id"][stop]),
-                (journey_timetable["date_of_journey"][stop]),
-            )
-    timetable: Timetable = {group_id: route_details}
+
+    stop_data = filtered_timetable_df.collect().row(0, named=True)
+
+    if len(stop_data) <= 0:
+        return None
+
+    directions = set(stop_data["direction"])
+    row_count = len(stop_data["stop_index"])
+
+    timetable: dict[str, dict[str, StopDetails]] = {}
+    for stop in range(row_count):
+        index = group_id
+
+        if len(directions) > 1:
+            stop_direction = str(stop_data["direction"][stop])
+            index += f"|{stop_direction}"
+
+        route_details = timetable.setdefault(index, {})
+        normalised_stop_index = str(len(route_details) + 1)
+        route_details[normalised_stop_index] = (
+            (
+                float(stop_data["stop_latitude"][stop]),
+                float(stop_data["stop_longitude"][stop]),
+            ),
+            str(stop_data["expected_departure_time"][stop]),
+            int(stop_data["timetable_id"][stop]),
+            str(stop_data["date_of_journey"][stop]),
+        )
     return timetable
 
 
@@ -112,10 +126,15 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
             number_of_group_ids=number_of_groups,
         )
         group_avls = get_avls_for_group_id(group_id, avl_group)
-        filtered_timetable = get_timetable_data_for_group_id(group_id, timetable)
 
         if len(group_avls) < 1:
             logger.info("No AVLs in the list")
+            continue
+
+        filtered_timetable = get_timetable_data_for_group_id(group_id, timetable)
+
+        if filtered_timetable is None:
+            logger.info("Could not find timetable for group_id", group_id=group_id)
             continue
 
         logger.info("Produced avl list", size=len(group_avls))
