@@ -61,6 +61,9 @@ def get_timetable_data_for_group_id(
         pl.col("group_id").str.to_lowercase() == group_id,
     )
 
+    if filtered_timetable_df.select(pl.len()).collect().item() == 0:
+        return None
+
     stop_data = filtered_timetable_df.collect().row(0, named=True)
 
     directions = set(stop_data["direction"])
