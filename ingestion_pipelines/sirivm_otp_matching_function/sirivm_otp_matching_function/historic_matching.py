@@ -10,9 +10,9 @@ import polars as pl
 from aws_lambda_powertools import Logger
 
 from .client_db import TimetableDBClient
-from .matcher.historic_timetable_store import HistoricTimetableStore
+from .live_timetable_store import LiveTimetableStore
 from .matcher.matching import positions_timetable_lookup
-from .matcher.models import AVLRecord
+from .matcher.models import AVLRecord, StopDetails, Timetable
 from .matcher.utils import timer
 
 logger = Logger()
@@ -55,6 +55,31 @@ def get_avls_for_group_id(
     return avl_list
 
 
+def get_timetable_data_for_group_id(
+    group_id: str,
+    timetable: pl.LazyFrame,
+) -> Timetable:
+    group_timetable = timetable.group_by(pl.col("group_id"))
+    filtered_timetable_df = group_timetable.all().filter(
+        pl.col("group_id").str.to_lowercase() == group_id,
+    )
+    route_details: dict[str, StopDetails] = {}
+    if filtered_timetable_df.select(pl.len()).collect().item() > 0:
+        journey_timetable = filtered_timetable_df.collect().row(0, named=True)
+        for stop in range(len(journey_timetable["stop_index"])):
+            route_details[str(stop + 1)] = (
+                (
+                    float(journey_timetable["stop_latitude"][stop]),
+                    float(journey_timetable["stop_longitude"][stop]),
+                ),
+                journey_timetable["expected_departure_time"][stop],
+                int(journey_timetable["timetable_id"][stop]),
+                (journey_timetable["date_of_journey"][stop]),
+            )
+    timetable: Timetable = {group_id: route_details}
+    return timetable
+
+
 @timer(logger)
 def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None:
     """
@@ -69,22 +94,10 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
     """
     avl_data = pl.scan_parquet(avl_path)
     logger.info(f"Loaded avl data for {date_str}")
-    avl_group = (
-        avl_data.with_columns(
-            pl.concat_str(
-                pl.col("operator_ref"),
-                pl.col("line_name"),
-                pl.col("journey_ref"),
-                pl.col("date_of_journey"),
-                separator="|",
-            ).alias("group_id"),
-        )
-        .group_by("group_id", maintain_order=True)
-        .all()
-    )
+    avl_group = avl_data.group_by("group_id", maintain_order=True).all()
     avl_group_count = avl_group.len().collect()
     avl_group_list = avl_group_count.get_column("group_id")
-    timetable_store = HistoricTimetableStore(pl.scan_parquet(timetable_path))
+    timetable = pl.scan_parquet(timetable_path)
 
     stop_history = {}
     number_of_groups = len(avl_group_list)
@@ -99,6 +112,7 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
             number_of_group_ids=number_of_groups,
         )
         group_avls = get_avls_for_group_id(group_id, avl_group)
+        filtered_timetable = get_timetable_data_for_group_id(group_id, timetable)
 
         if len(group_avls) < 1:
             logger.info("No AVLs in the list")
@@ -108,7 +122,7 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
         try:
             for avl in group_avls:
                 to_set, to_remove, stop_history = positions_timetable_lookup(
-                    timetable_store,
+                    LiveTimetableStore(filtered_timetable),
                     [avl],
                     stop_history,
                 )
