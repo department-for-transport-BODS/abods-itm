@@ -33,6 +33,37 @@ def validate_avl_list(
         if avl["batch_id"] != expected_batch_id:
             raise Exception("AVLs with multiple match ids retrieved")  # noqa: TRY002 - Not worth making an exception type
 
+@timer(logger)
+def get_avls_for_group_id(group_id: str, avl_group: pl.LazyFrame) -> Sequence[AVLRecord]:
+    avl_batch = (
+            avl_group
+            .filter(pl.col("group_id") == group_id)
+            .collect()
+            .row(0, named=True)
+        )
+    avl_list = []
+    for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
+        avl: AVLRecord = {
+            "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
+            "response_timestamp": str(avl_batch["response_time_stamp"][index]),
+            "latitude": float(avl_batch["latitude"][index]),
+            "longitude": float(avl_batch["longitude"][index]),
+            "line_name": str(avl_batch["line_name"][index]),
+            "operator_ref": str(avl_batch["operator_ref"][index]),
+            "vehicle_ref": str(avl_batch["vehicle_ref"][index]),
+            "journey_ref": str(avl_batch["journey_ref"][index]),
+            "direction_ref": str(avl_batch["direction_ref"][index]),
+            "date_of_journey": str(avl_batch["date_of_journey"][index]),
+            "batch_id": int(avl_batch["batch_id"]),
+        }
+
+        if avl["operator_ref"] == "TFLO":
+            logger.debug("Skipping TFLO")
+            continue
+
+        avl_list.append(avl)
+    return avl_list
+
 
 @timer(logger)
 def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None:
@@ -48,75 +79,44 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
     """
     avl_data = pl.scan_parquet(avl_path)
     logger.info(f"Loaded avl data for {date_str}")
-    avl_group = avl_data.group_by("batch_id", maintain_order=True)
+    avl_group = avl_data.with_columns(pl.concat_str(pl.col("operator_ref"), pl.col("line_name"), pl.col("journey_ref"), pl.col("date_of_journey"), separator="|").alias("group_id")).group_by("group_id", maintain_order=True).all()
     avl_group_count = avl_group.len().collect()
-    avl_batch_id_list = avl_group_count.get_column("batch_id")
+    avl_group_list = avl_group_count.get_column("group_id")
     timetable_store = HistoricTimetableStore(pl.scan_parquet(timetable_path))
 
     stop_history = {}
-    number_of_batches = len(avl_batch_id_list)
-    logger.info("Starting to process AVL data", number_of_batches=number_of_batches)
+    number_of_groups = len(avl_group_list)
+    logger.info("Starting to process AVL data", number_of_groups=number_of_groups)
     batch_number = 0
-    for batch in avl_batch_id_list:
+    for group_id in avl_group_list:
         batch_number += 1
         logger.info(
             "Run historic matching for batch",
-            batch_id=batch,
-            batch_number=batch_number,
-            number_of_batches=number_of_batches,
+            group_id=group_id,
+            group_number=batch_number,
+            number_of_group_ids=number_of_groups,
         )
-
-        @timer(logger)
-        def get_avls():
-            avl_batch = (
-                avl_group.all()
-                .filter(pl.col("batch_id") == batch)
-                .collect()
-                .row(0, named=True)
-            )
-            avls = []
-            for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
-                avl: AVLRecord = {
-                    "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
-                    "response_timestamp": str(avl_batch["response_time_stamp"][index]),
-                    "latitude": float(avl_batch["latitude"][index]),
-                    "longitude": float(avl_batch["longitude"][index]),
-                    "line_name": str(avl_batch["line_name"][index]),
-                    "operator_ref": str(avl_batch["operator_ref"][index]),
-                    "vehicle_ref": str(avl_batch["vehicle_ref"][index]),
-                    "journey_ref": str(avl_batch["journey_ref"][index]),
-                    "direction_ref": str(avl_batch["direction_ref"][index]),
-                    "date_of_journey": str(avl_batch["date_of_journey"][index]),
-                    "batch_id": int(avl_batch["batch_id"]),
-                }
-
-                if avl["operator_ref"] == "TFLO":
-                    logger.debug("Skipping TFLO")
-                    continue
-
-                avls.append(avl)
-            return avls
-
-        avl_list = get_avls()
-        if len(avl_list) < 1:
+        group_avls = get_avls_for_group_id(group_id, avl_group)
+        
+        if len(group_avls) < 1:
             logger.info("No AVLs in the list")
             continue
 
-        logger.info("Produced avl list", size=len(avl_list))
-        batch_id = avl_list[0]["batch_id"]
-        validate_avl_list(avl_list, batch_id)
+        logger.info("Produced avl list", size=len(group_avls))
         try:
-            to_set, to_remove, stop_history = positions_timetable_lookup(
-                timetable_store,
-                avl_list,
-                stop_history,
-            )
-            db_client.historic_update_success(
-                batch_id,
-                to_set,
-                to_remove,
-                date_str,
-            )
+            for ind, avl in enumerate(group_avls):
+                batch_id = group_avls[ind]["batch_id"]
+                to_set, to_remove, stop_history = positions_timetable_lookup(
+                    timetable_store,
+                    [avl],
+                    stop_history,
+                )
+                db_client.historic_update_success(
+                    batch_id,
+                    to_set,
+                    to_remove,
+                    date_str,
+                )
         except Exception:
             logger.exception("An error occurred when processing historic record")
             db_client.batch_failed(batch_id)
