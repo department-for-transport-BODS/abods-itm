@@ -33,19 +33,21 @@ def get_avls_for_group_id(
     )
     avl_list = []
     for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
-        avl_list.append({
-            "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
-            "response_timestamp": str(avl_batch["response_time_stamp"][index]),
-            "latitude": float(avl_batch["latitude"][index]),
-            "longitude": float(avl_batch["longitude"][index]),
-            "line_name": str(avl_batch["line_name"][index]),
-            "operator_ref": str(avl_batch["operator_ref"][index]),
-            "vehicle_ref": str(avl_batch["vehicle_ref"][index]),
-            "journey_ref": str(avl_batch["journey_ref"][index]),
-            "direction_ref": str(avl_batch["direction_ref"][index]),
-            "date_of_journey": str(avl_batch["date_of_journey"][index]),
-            "batch_id": int(avl_batch["batch_id"]),
-        })
+        avl_list.append(
+            {
+                "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
+                "response_timestamp": str(avl_batch["response_time_stamp"][index]),
+                "latitude": float(avl_batch["latitude"][index]),
+                "longitude": float(avl_batch["longitude"][index]),
+                "line_name": str(avl_batch["line_name"][index]),
+                "operator_ref": str(avl_batch["operator_ref"][index]),
+                "vehicle_ref": str(avl_batch["vehicle_ref"][index]),
+                "journey_ref": str(avl_batch["journey_ref"][index]),
+                "direction_ref": str(avl_batch["direction_ref"][index]),
+                "date_of_journey": str(avl_batch["date_of_journey"][index]),
+                "batch_id": int(avl_batch["batch_id"]),
+            },
+        )
     return avl_list
 
 
@@ -104,8 +106,7 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
     avl_data = pl.scan_parquet(avl_path)
     logger.info(f"Loaded avl data for {date_str}")
     avl_group = avl_data.group_by("group_id", maintain_order=True).all()
-    avl_group_count = avl_group.len().collect()
-    avl_group_list = avl_group_count.get_column("group_id")
+    avl_group_list = avl_group.collect().get_column("group_id")
     timetable = pl.scan_parquet(timetable_path)
 
     number_of_groups = len(avl_group_list)
@@ -132,7 +133,11 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
 
 
 @timer(logger)
-def process_group_data(date_str: str, group_avls:Sequence[AVLRecord], routes_for_group_id: Timetable) -> None:
+def process_group_data(
+    date_str: str,
+    group_avls: Sequence[AVLRecord],
+    routes_for_group_id: Timetable,
+) -> None:
     timetable_store = LiveTimetableStore(routes_for_group_id)
     total_to_set = []
     stop_history = {}
