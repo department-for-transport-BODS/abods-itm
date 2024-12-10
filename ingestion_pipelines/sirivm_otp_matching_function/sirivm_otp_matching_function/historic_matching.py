@@ -130,8 +130,8 @@ if __name__ == "__main__":
         month = process_date_parts[1].zfill(2)
         day = process_date_parts[2].zfill(2)
         s3_bucket = os.getenv("SIRIVM_BUCKET", "abods-sandbox-exporter-bucket")
-        local_timetable_path = "./timetable.parquet"
-        local_avl_path = "./avl.parquet"
+        local_timetable_path = "/tmp/timetable.parquet"
+        local_avl_path = "/tmp/avl.parquet"
         s3.download_file(
             Bucket=s3_bucket,
             Key=f"historic/parquet/YYYY={year}/MM={month}/DD={day}/timetable_{year}{month}{day}.parquet",
