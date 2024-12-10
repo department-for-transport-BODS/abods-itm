@@ -45,7 +45,7 @@ def get_avls_for_group_id(
                 "journey_ref": str(avl_batch["journey_ref"][index]),
                 "direction_ref": str(avl_batch["direction_ref"][index]),
                 "date_of_journey": str(avl_batch["date_of_journey"][index]),
-                "batch_id": int(avl_batch["batch_id"]),
+                "batch_id": int(avl_batch["batch_id"][index]),
             },
         )
     return avl_list
