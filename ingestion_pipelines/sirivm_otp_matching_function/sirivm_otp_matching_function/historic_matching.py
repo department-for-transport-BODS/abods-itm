@@ -113,7 +113,6 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
     avl_group_list = avl_group_count.get_column("group_id")
     timetable = pl.scan_parquet(timetable_path)
 
-    stop_history = {}
     number_of_groups = len(avl_group_list)
     logger.info("Starting to process AVL data", number_of_groups=number_of_groups)
     batch_number = 0
@@ -125,32 +124,45 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
             group_number=batch_number,
             number_of_group_ids=number_of_groups,
         )
-        group_avls = get_avls_for_group_id(group_id, avl_group)
-
-        if len(group_avls) < 1:
-            logger.info("No AVLs in the list")
-            continue
-
-        filtered_timetable = get_timetable_data_for_group_id(group_id, timetable)
-
-        if filtered_timetable is None:
-            logger.info("Could not find timetable for group_id", group_id=group_id)
-            continue
-
-        logger.info("Produced avl list", size=len(group_avls))
         try:
+            group_avls = get_avls_for_group_id(group_id, avl_group)
+
+            if len(group_avls) < 1:
+                logger.info("No AVLs in the list")
+                continue
+
+            logger.info("Produced avl list", size=len(group_avls))
+
+            routes_for_group_id = get_timetable_data_for_group_id(group_id, timetable)
+
+            if routes_for_group_id is None:
+                logger.info("Could not find timetable for group_id", group_id=group_id)
+                continue
+
+            timetable_store = LiveTimetableStore(routes_for_group_id)
+
+            total_to_set = []
+            stop_history = {}
             for avl in group_avls:
                 to_set, to_remove, stop_history = positions_timetable_lookup(
-                    LiveTimetableStore(filtered_timetable),
+                    timetable_store,
                     [avl],
                     stop_history,
                 )
-                db_client.historic_update_success(
-                    None,
-                    to_set,
-                    to_remove,
-                    date_str,
-                )
+                remove_timetable_ids = [rec["timetable_id"] for rec in to_remove]
+                total_to_set = [
+                    rec
+                    for rec in total_to_set
+                    if rec["timetable_id"] not in remove_timetable_ids
+                ]
+                total_to_set.extend(to_set)
+
+            db_client.historic_update_success(
+                None,
+                total_to_set,
+                [],
+                date_str,
+            )
         except Exception:
             logger.exception("An error occurred when processing historic record")
 
