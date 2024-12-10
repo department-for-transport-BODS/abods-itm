@@ -66,34 +66,38 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
             number_of_batches=number_of_batches,
         )
 
-        avl_batch = (
-            avl_group.all()
-            .filter(pl.col("batch_id") == batch)
-            .collect()
-            .row(0, named=True)
-        )
-        avl_list = []
-        for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
-            avl: AVLRecord = {
-                "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
-                "response_timestamp": str(avl_batch["response_time_stamp"][index]),
-                "latitude": float(avl_batch["latitude"][index]),
-                "longitude": float(avl_batch["longitude"][index]),
-                "line_name": str(avl_batch["line_name"][index]),
-                "operator_ref": str(avl_batch["operator_ref"][index]),
-                "vehicle_ref": str(avl_batch["vehicle_ref"][index]),
-                "journey_ref": str(avl_batch["journey_ref"][index]),
-                "direction_ref": str(avl_batch["direction_ref"][index]),
-                "date_of_journey": str(avl_batch["date_of_journey"][index]),
-                "batch_id": int(avl_batch["batch_id"]),
-            }
+        @timer(logger)
+        def get_avls():
+            avl_batch = (
+                avl_group.all()
+                .filter(pl.col("batch_id") == batch)
+                .collect()
+                .row(0, named=True)
+            )
+            avls = []
+            for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
+                avl: AVLRecord = {
+                    "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
+                    "response_timestamp": str(avl_batch["response_time_stamp"][index]),
+                    "latitude": float(avl_batch["latitude"][index]),
+                    "longitude": float(avl_batch["longitude"][index]),
+                    "line_name": str(avl_batch["line_name"][index]),
+                    "operator_ref": str(avl_batch["operator_ref"][index]),
+                    "vehicle_ref": str(avl_batch["vehicle_ref"][index]),
+                    "journey_ref": str(avl_batch["journey_ref"][index]),
+                    "direction_ref": str(avl_batch["direction_ref"][index]),
+                    "date_of_journey": str(avl_batch["date_of_journey"][index]),
+                    "batch_id": int(avl_batch["batch_id"]),
+                }
 
-            if avl["operator_ref"] == "TFLO":
-                logger.debug("Skipping TFLO")
-                continue
+                if avl["operator_ref"] == "TFLO":
+                    logger.debug("Skipping TFLO")
+                    continue
 
-            avl_list.append(avl)
+                avls.append(avl)
+            return avls
 
+        avl_list = get_avls()
         if len(avl_list) < 1:
             logger.info("No AVLs in the list")
             continue
