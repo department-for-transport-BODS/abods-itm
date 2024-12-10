@@ -6,7 +6,7 @@ on:
         type: choice
         description: name of service to build
         required: true
-        default: "pglifecycle"
+        default: "historic-matching"
         options:
           - "pglifecycle"
           - "datadog-agent"
@@ -14,7 +14,7 @@ on:
       imageTag:
         description: Custom tag to apply to images. If 'blank', use git commit sha
         type: string
-        default: ""
+        default: "latest"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.inputs.service }}
