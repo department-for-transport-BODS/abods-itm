@@ -145,7 +145,7 @@ if __name__ == "__main__":
         logger.info(f"Loaded timetable for {process_date}")
         historic_matching(
             avl_path=local_avl_path,
-            timetable=local_timetable_path,
+            timetable_path=local_timetable_path,
             date_str=process_date,
         )
     except Exception:
