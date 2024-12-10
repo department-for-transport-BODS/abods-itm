@@ -141,9 +141,8 @@ if __name__ == "__main__":
         s3.download_file(
             Bucket=s3_bucket,
             Key=f"historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet",
-            Filename=local_timetable_path,
+            Filename=local_avl_path,
         )
-        subprocess.run(["ls", "-la", "/tmp"])
         logger.info(f"Loaded timetable for {process_date}")
         historic_matching(
             avl_path=local_avl_path,
