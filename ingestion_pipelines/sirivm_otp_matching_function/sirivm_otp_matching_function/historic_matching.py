@@ -61,11 +61,11 @@ def get_timetable_data_for_group_id(
 
     stop_data = filtered_timetable_df.collect().row(0, named=True)
 
-    if len(stop_data) <= 0:
-        return None
-
     directions = set(stop_data["direction"])
     row_count = len(stop_data["stop_index"])
+
+    if row_count <= 0:
+        return None
 
     timetable: dict[str, dict[str, StopDetails]] = {}
     for stop in range(row_count):
