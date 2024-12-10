@@ -33,7 +33,7 @@ def get_avls_for_group_id(
     )
     avl_list = []
     for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
-        avl: AVLRecord = {
+        avl_list.append({
             "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
             "response_timestamp": str(avl_batch["response_time_stamp"][index]),
             "latitude": float(avl_batch["latitude"][index]),
@@ -45,13 +45,7 @@ def get_avls_for_group_id(
             "direction_ref": str(avl_batch["direction_ref"][index]),
             "date_of_journey": str(avl_batch["date_of_journey"][index]),
             "batch_id": int(avl_batch["batch_id"]),
-        }
-
-        if avl["operator_ref"] == "TFLO":
-            logger.debug("Skipping TFLO")
-            continue
-
-        avl_list.append(avl)
+        })
     return avl_list
 
 
@@ -116,15 +110,7 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
 
     number_of_groups = len(avl_group_list)
     logger.info("Starting to process AVL data", number_of_groups=number_of_groups)
-    batch_number = 0
     for group_id in avl_group_list:
-        batch_number += 1
-        logger.info(
-            "Run historic matching for batch",
-            group_id=group_id,
-            group_number=batch_number,
-            number_of_group_ids=number_of_groups,
-        )
         try:
             group_avls = get_avls_for_group_id(group_id, avl_group)
 
@@ -140,32 +126,35 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
                 logger.info("Could not find timetable for group_id", group_id=group_id)
                 continue
 
-            timetable_store = LiveTimetableStore(routes_for_group_id)
-
-            total_to_set = []
-            stop_history = {}
-            for avl in group_avls:
-                to_set, to_remove, stop_history = positions_timetable_lookup(
-                    timetable_store,
-                    [avl],
-                    stop_history,
-                )
-                remove_timetable_ids = [rec["timetable_id"] for rec in to_remove]
-                total_to_set = [
-                    rec
-                    for rec in total_to_set
-                    if rec["timetable_id"] not in remove_timetable_ids
-                ]
-                total_to_set.extend(to_set)
-
-            db_client.historic_update_success(
-                None,
-                total_to_set,
-                [],
-                date_str,
-            )
+            process_group_data(date_str, group_avls, routes_for_group_id)
         except Exception:
             logger.exception("An error occurred when processing historic record")
+
+
+@timer(logger)
+def process_group_data(date_str: str, group_avls:Sequence[AVLRecord], routes_for_group_id: Timetable) -> None:
+    timetable_store = LiveTimetableStore(routes_for_group_id)
+    total_to_set = []
+    stop_history = {}
+    for avl in group_avls:
+        to_set, to_remove, stop_history = positions_timetable_lookup(
+            timetable_store,
+            [avl],
+            stop_history,
+        )
+        remove_timetable_ids = [rec["timetable_id"] for rec in to_remove]
+        total_to_set = [
+            rec
+            for rec in total_to_set
+            if rec["timetable_id"] not in remove_timetable_ids
+        ]
+        total_to_set.extend(to_set)
+    db_client.historic_update_success(
+        None,
+        total_to_set,
+        [],
+        date_str,
+    )
 
 
 if __name__ == "__main__":
