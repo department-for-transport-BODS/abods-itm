@@ -40,44 +40,41 @@ class HistoricTimetableStore:
             tuple[str, RouteDetails]: group_id and route details
 
         """
-        group_timetable = self._timetable.filter(pl.col("group_id") == group_id)
-        timetable = (
-            group_timetable.with_columns(
-                "direction",
-                "stop_index",
-                "stop_latitude",
-                "stop_longitude",
-                "expected_departure_time",
-                "timetable_id",
-                "date_of_journey",
-            )
-            .collect()
-            .to_dicts()
+        group_timetable = self._timetable.group_by(pl.col("group_id"))
+        filtered_timetable_df = group_timetable.all().filter(
+            pl.col("group_id") == group_id,
         )
+        route_details: dict[str, StopDetails] = {}
+        if filtered_timetable_df.select(pl.len()).collect().item() > 0:
+            journey_timetable = filtered_timetable_df.collect().row(0, named=True)
+            for stop in range(len(journey_timetable["stop_index"])):
+                route_details[str(stop + 1)] = (
+                    (
+                        float(journey_timetable["stop_latitude"][stop]),
+                        float(journey_timetable["stop_longitude"][stop]),
+                    ),
+                    journey_timetable["expected_departure_time"][stop],
+                    int(journey_timetable["timetable_id"][stop]),
+                    (journey_timetable["date_of_journey"][stop]),
+                )
         journey_index = group_id + "|" + direction_ref
-
-        if not timetable:
+        if not route_details:
             return journey_index, None
 
-        directions = {rec["direction"] for rec in timetable}
+        directions = set(journey_timetable["direction"])
+        timetable: dict[str, StopDetails] = {}
         if len(directions) <= 1:
             journey_index = group_id
+            timetable = route_details
         else:
-            timetable = [rec for rec in timetable if rec["direction"] == direction_ref]
+            index = 0
+            for ind, direction in enumerate(journey_timetable["direction"]):
+                if direction == direction_ref:
+                    index += 1
+                    timetable[str(index)] = route_details[str(ind + 1)]
 
         if not timetable:
             return journey_index, None
 
-        timetable.sort(key=lambda rec: int(rec["stop_index"]))
-        converted_timetable: dict[str, StopDetails] = {}
-        for index, row in enumerate(timetable):
-            converted_timetable[str(index + 1)] = (
-                (
-                    float(row["stop_latitude"]),
-                    float(row["stop_longitude"]),
-                ),
-                (row["expected_departure_time"]),
-                int(row["timetable_id"]),
-                (row["date_of_journey"]),
-            )
-        return journey_index, converted_timetable
+        timetable = dict(sorted(timetable.items(), key=lambda x: x[0]))
+        return journey_index, timetable
