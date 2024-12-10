@@ -55,6 +55,7 @@ def get_avls_for_group_id(
     return avl_list
 
 
+@timer(logger)
 def get_timetable_data_for_group_id(
     group_id: str,
     timetable: pl.LazyFrame,
