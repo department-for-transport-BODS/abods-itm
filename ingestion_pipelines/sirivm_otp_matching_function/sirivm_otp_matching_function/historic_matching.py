@@ -109,12 +109,17 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
     avl_data = pl.scan_parquet(avl_path)
     logger.info(f"Loaded avl data for {date_str}")
     avl_group = avl_data.group_by("group_id", maintain_order=True).all()
-    avl_group_list = avl_group.select("group_id").collect().get_column("group_id")
     timetable = pl.scan_parquet(timetable_path)
+    common_group_ids_list = set(
+        timetable.select("group_id")
+        .join(avl_group.select("group_id"), on="group_id", how="semi")
+        .collect()
+        .get_column("group_id")
+    )
 
-    number_of_groups = len(avl_group_list)
+    number_of_groups = len(common_group_ids_list)
     logger.info("Starting to process AVL data", number_of_groups=number_of_groups)
-    for group_id in avl_group_list:
+    for group_id in common_group_ids_list:
         try:
             group_avls = get_avls_for_group_id(group_id, avl_group)
 
