@@ -20,32 +20,7 @@ db_client = TimetableDBClient()
 
 two_hours_secs = -7200
 
-session = boto3.session.Session()
-credentials = session.get_credentials().get_frozen_credentials()
-
-
-def read_parquet_s3(source: str) -> pl.LazyFrame:
-    """
-    Read parquet file from s3
-
-    Args:
-    ----
-        source (str): The source path of the parquet file
-
-    Returns:
-    -------
-        pl.LazyFrame
-
-    """
-    return pl.scan_parquet(
-        source,
-        storage_options={
-            "aws_access_key_id": credentials.access_key,
-            "aws_secret_access_key": credentials.secret_key,
-            "aws_session_token": credentials.token,
-            "aws_region": session.region_name,
-        },
-    )
+s3 = boto3.client("s3")
 
 
 @timer(logger)
@@ -59,22 +34,23 @@ def validate_avl_list(
 
 
 @timer(logger)
-def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> None:
+def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None:
     """
     Run historic matching
 
     Args:
     ----
         avl_path (str): Path to avl parquet
-        timetable (pl.LazyFrame): Path to timetable parquet
+        timetable_path (str): Path to timetable parquet
         date_str (str): The date for historic matching
 
     """
-    avl_data = read_parquet_s3(avl_path)
+    avl_data = pl.scan_parquet(avl_path)
     logger.info(f"Loaded avl data for {date_str}")
     avl_group = avl_data.group_by("batch_id", maintain_order=True)
     avl_group_count = avl_group.len().collect()
     avl_batch_id_list = avl_group_count.get_column("batch_id")
+    timetable_store = HistoricTimetableStore(pl.scan_parquet(timetable_path))
 
     stop_history = {}
     number_of_batches = len(avl_batch_id_list)
@@ -126,7 +102,7 @@ def historic_matching(avl_path: str, timetable: pl.LazyFrame, date_str: str) -> 
         validate_avl_list(avl_list, batch_id)
         try:
             to_set, to_remove, stop_history = positions_timetable_lookup(
-                HistoricTimetableStore(timetable),
+                timetable_store,
                 avl_list,
                 stop_history,
             )
@@ -154,12 +130,22 @@ if __name__ == "__main__":
         month = process_date_parts[1].zfill(2)
         day = process_date_parts[2].zfill(2)
         s3_bucket = os.getenv("SIRIVM_BUCKET", "abods-sandbox-exporter-bucket")
-        timetable_path = f"s3://{s3_bucket}/historic/parquet/YYYY={year}/MM={month}/DD={day}/timetable_{year}{month}{day}.parquet"
-        timetable_lf = read_parquet_s3(timetable_path)
+        local_timetable_path = "./timetable.parquet"
+        local_avl_path = "./avl.parquet"
+        s3.download_file(
+            Bucket=s3_bucket,
+            Key=f"historic/parquet/YYYY={year}/MM={month}/DD={day}/timetable_{year}{month}{day}.parquet",
+            Filename=local_timetable_path,
+        )
+        s3.download_file(
+            Bucket=s3_bucket,
+            Key=f"historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet",
+            Filename=local_timetable_path,
+        )
         logger.info(f"Loaded timetable for {process_date}")
         historic_matching(
-            avl_path=f"s3://{s3_bucket}/historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet",
-            timetable=timetable_lf,
+            avl_path=local_avl_path,
+            timetable=local_timetable_path,
             date_str=process_date,
         )
     except Exception:
