@@ -192,7 +192,7 @@
     <changeSet id="60" author="abodsuser">
         <sqlFile path="sql/60-populate-headway-with-estimate.sql" splitStatements="false" />
     </changeSet>
-    <changeSet id="61" author="abodsuser">
-        <sqlFile path="sql/61-full-refresh-dataset.sql" splitStatements="false" />
+    <changeSet id="62" author="abodsuser">
+        <sqlFile path="sql/62-full-refresh-dataset.sql" splitStatements="false" />
     </changeSet>
 </databaseChangeLog>
