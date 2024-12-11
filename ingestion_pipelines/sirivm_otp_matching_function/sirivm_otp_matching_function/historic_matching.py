@@ -6,7 +6,7 @@ import sys
 from collections.abc import Sequence
 
 import boto3
-import polars as pl
+import duckdb
 from aws_lambda_powertools import Logger
 
 from .client_db import TimetableDBClient
@@ -26,70 +26,97 @@ s3 = boto3.client("s3")
 @timer(logger)
 def get_avls_for_group_id(
     group_id: str,
-    avl_group: pl.LazyFrame,
 ) -> Sequence[AVLRecord]:
-    avl_batch = (
-        avl_group.filter(pl.col("group_id") == group_id)
-        .collect()
-        .row(by_predicate=(pl.col("group_id") == group_id))
-    )
-    avl_list = []
-    for index, _avl_id in enumerate(avl_batch[1]):
-        avl_list.append(
-            {
-                "recorded_at_time": str(avl_batch[11][index]),
-                "response_timestamp": str(avl_batch[12][index]),
-                "latitude": float(avl_batch[7][index]),
-                "longitude": float(avl_batch[8][index]),
-                "line_name": str(avl_batch[3][index]),
-                "operator_ref": str(avl_batch[2][index]),
-                "vehicle_ref": str(avl_batch[9][index]),
-                "journey_ref": str(avl_batch[4][index]),
-                "direction_ref": str(avl_batch[5][index]),
-                "date_of_journey": str(avl_batch[6][index]),
-                "batch_id": int(avl_batch[10][index]),
-            },
-        )
-    return avl_list
+    return [
+        {
+            "recorded_at_time": str(recorded_at_time),
+            "response_timestamp": str(response_time_stamp),
+            "latitude": float(latitude),
+            "longitude": float(longitude),
+            "line_name": str(line_name),
+            "operator_ref": str(operator_ref),
+            "vehicle_ref": str(vehicle_ref),
+            "journey_ref": str(journey_ref),
+            "direction_ref": str(direction_ref),
+            "date_of_journey": str(date_of_journey),
+            "batch_id": int(batch_id),
+        }
+        for (
+            recorded_at_time,
+            response_time_stamp,
+            latitude,
+            longitude,
+            line_name,
+            operator_ref,
+            vehicle_ref,
+            journey_ref,
+            direction_ref,
+            date_of_journey,
+            batch_id,
+        ) in duckdb.sql(
+            f"""
+            SELECT
+                recorded_at_time,
+                response_time_stamp,
+                latitude,
+                longitude,
+                line_name,
+                operator_ref,
+                vehicle_ref,
+                journey_ref,
+                direction_ref,
+                date_of_journey,
+                batch_id
+            FROM avl
+            WHERE group_id = '{group_id}'
+            """,
+        ).fetchall()
+    ]
 
 
 @timer(logger)
 def get_timetable_data_for_group_id(
     group_id: str,
-    timetable_group: pl.LazyFrame,
-) -> Timetable | None:
-    filtered_timetable_df = timetable_group.filter(
-        pl.col("group_id").str.to_lowercase() == group_id,
-    )
-
-    stop_data = filtered_timetable_df.collect().row(
-        by_predicate=(pl.col("group_id").str.to_lowercase() == group_id),
-    )
-
-    directions = set(stop_data[7])
-    row_count = len(stop_data[1])
-
-    if row_count <= 0:
-        return None
-
+) -> Timetable:
+    stop_data = duckdb.sql(
+        f"""
+        SELECT
+            direction,
+            stop_latitude,
+            stop_longitude,
+            expected_departure_time,
+            timetable_id,
+            date_of_journey
+        FROM timetable
+        WHERE group_id = '{group_id}'
+        """,
+    ).fetchall()
+    directions = {rec[0] for rec in stop_data}
     timetable: dict[str, dict[str, StopDetails]] = {}
-    for stop in range(row_count):
+    for (
+        direction,
+        stop_latitude,
+        stop_longitude,
+        expected_departure_time,
+        timetable_id,
+        date_of_journey,
+    ) in stop_data:
         index = group_id
 
         if len(directions) > 1:
-            stop_direction = str(stop_data[7][stop])
+            stop_direction = str(direction)
             index += f"|{stop_direction}"
 
         route_details = timetable.setdefault(index, {})
         normalised_stop_index = str(len(route_details) + 1)
         route_details[normalised_stop_index] = (
             (
-                float(stop_data[2][stop]),
-                float(stop_data[3][stop]),
+                float(stop_latitude),
+                float(stop_longitude),
             ),
-            str(stop_data[4][stop]),
-            int(stop_data[5][stop]),
-            str(stop_data[6][stop]),
+            str(expected_departure_time),
+            int(timetable_id),
+            str(date_of_journey),
         )
     return timetable
 
@@ -106,23 +133,30 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
         date_str (str): The date for historic matching
 
     """
-    avl_data = pl.scan_parquet(avl_path)
-    logger.info(f"Loaded avl data for {date_str}")
-    avl_group = avl_data.group_by("group_id", maintain_order=True).all()
-    timetable = pl.scan_parquet(timetable_path)
-    timetable_group = timetable.group_by("group_id", maintain_order=True).all()
-    common_group_ids_list = set(
-        timetable_group.select("group_id")
-        .join(avl_group.select("group_id"), on="group_id", how="semi")
-        .collect()
-        .get_column("group_id"),
-    )
-
-    number_of_groups = len(common_group_ids_list)
+    duckdb.sql(f"""
+        CREATE TABLE avl AS
+        SELECT *
+        FROM '{avl_path}'
+    """)  # noqa: S608 Not really sql injection
+    duckdb.sql(f"""
+        CREATE TABLE timetable AS
+        SELECT *
+        FROM '{timetable_path}'
+    """)  # noqa: S608 Not really sql injection
+    group_ids: list[str] = [
+        row[0]
+        for row in duckdb.sql(
+            """
+            SELECT DISTINCT a.group_id
+            FROM timetable t
+            INNER JOIN avl a ON a.group_id = t.group_id
+            """,
+        ).fetchall()
+    ]
+    number_of_groups = len(group_ids)
     logger.info("Starting to process AVL data", number_of_groups=number_of_groups)
-    group_number = 0
-    for group_id in common_group_ids_list:
-        group_number += 1
+    for idx, group_id in enumerate(group_ids):
+        group_number = idx + 1
         logger.info(
             "Processing group_id",
             group_id=group_id,
@@ -130,22 +164,13 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
             number_of_groups=number_of_groups,
         )
         try:
-            group_avls = get_avls_for_group_id(group_id, avl_group)
-
-            if len(group_avls) < 1:
-                logger.info("No AVLs in the list")
-                continue
+            group_avls = get_avls_for_group_id(group_id)
 
             logger.info("Produced avl list", size=len(group_avls))
 
             routes_for_group_id = get_timetable_data_for_group_id(
                 group_id,
-                timetable_group,
             )
-
-            if routes_for_group_id is None:
-                logger.info("Could not find timetable for group_id", group_id=group_id)
-                continue
 
             process_group_data(date_str, group_avls, routes_for_group_id)
         except Exception:
