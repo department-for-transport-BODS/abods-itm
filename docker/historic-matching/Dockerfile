@@ -12,6 +12,7 @@ ENV POWERTOOLS_SERVICE_NAME="sirivm_otp_matching_function"
 ENV PROJECT_ENV="sandbox"
 ENV PROJECT_NAME="abods"
 ENV AWS_DEFAULT_REGION="eu-west-2"
+ENV ENABLE_ESTIMATED_MATCHING="true"
 
 COPY requirements.txt .
 RUN apt-get update \
