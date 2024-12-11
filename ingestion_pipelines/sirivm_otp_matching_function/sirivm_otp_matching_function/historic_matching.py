@@ -177,7 +177,6 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
         worker.join()
 
 
-@timer(logger)
 def process_group_data(
     date_str: str,
     group_ids: list,
@@ -195,10 +194,11 @@ def process_group_data(
             logger.debug(
                 f"Worker id {worker_id}: getting sirivm timetable_query from {group_id}",
             )
-            group_avls = get_avls_for_group_id(group_id)
+            group_avls = get_avls_for_group_id(group_id, worker_id)
             logger.info("Produced avl list", size=len(group_avls))
             routes_for_group_id = get_timetable_data_for_group_id(
                 group_id,
+                worker_id,
             )
             logger.info(
                 "Processing group_id",
