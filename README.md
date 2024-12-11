@@ -79,3 +79,32 @@ OTP Matching's lambda handler function
 - connects to the database
 - updates the timetable with the bus punctuality
 - writes AVL last positions data to s3 bucket
+
+#### Historic matching
+
+If a change is made to the matching process, and past journeys must be reprocessed, the following manual process can be used to re-process those journeys.
+
+1. Timetable shredding
+
+   The code in `injestion_pipelines/sirivm_timetable_s3_generation_function` is used to produce S3 extracts of the data in the `Timetable` table of the PostgreSQL database. 
+   We can produce a full day's extracts by sending a test event to the deployed lambda function `abods-$ENVIRONMENT-sirivm-timetable-s3-generation-function`.
+   We should not need to repeat shredding unless the format of the extract changes, or the source timetable data is updated.  
+   For example, to trigger shredding for the 15th October 2024:
+   ```json
+   {
+     "backfill_start_date": "2024-10-15",
+     "backfill_end_date": "2024-10-15"
+   }
+   ```
+2. Historic matching
+   After the shredding process is complete we can start historic matching.
+   The code in `injestion_pipelines/sirivm_timetable_s3_generation_functionsirivm_s3_ingestion_function` co-ordinates the matching process for a full day's data, and adds events to a queue that is read by one of ten historic matching lambdas. 
+   To trigger the process, send a test event to the deployed lambda at `abods-$ENVIRONMENT-sirivm-backfill-ingestion-function`.
+   For example, to trigger matching for the 15th October 2024:
+   ```json
+   {
+     "backfill_start_date": "2024-10-15",
+     "backfill_end_date": "2024-10-15",
+     "concurrency": "1"
+   }
+   ```

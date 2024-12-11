@@ -33,7 +33,16 @@ run = [
 [tasks.checks]
 depends = ["checkov", "test", "fmt:check", "lint:check"]
 
-[tasks.db_connect]
-run = "./scripts/db_connect.sh"
+[tasks.db]
+run = "assume --exec -- ./scripts/db_connect.sh sandbox"
+
+[tasks."db:dev"]
+run = "assume --exec -- ./scripts/db_connect.sh dev"
+
+[tasks."db:test"]
+run = "assume --exec -- ./scripts/db_connect.sh test"
+
+[tasks."db:uat"]
+run = "assume --exec -- ./scripts/db_connect.sh uat"
 
 

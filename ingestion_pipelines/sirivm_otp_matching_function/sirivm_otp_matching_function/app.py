@@ -12,6 +12,7 @@ from dateutil.parser import parse
 from .client_db import TimetableDBClient
 from .client_s3 import TimetableS3Client, filter_avl_list
 from .matcher.handle_stop_history import clean_stop_history
+from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import positions_timetable_lookup
 from .matcher.models import AVLRecord, OperatorShards, Timetable
 from .matcher.utils import timer
@@ -125,7 +126,7 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
         validate_avl_list(avl_list, batch_id)
 
         to_set, to_remove, stop_history = positions_timetable_lookup(
-            timetable,
+            LiveTimetableStore(timetable),
             avl_list,
             clean_shard_stop_history,
         )
@@ -189,7 +190,7 @@ def live_record_handler(
         validate_avl_list(avl_list, batch_id)
 
         to_set, to_remove, stop_history = positions_timetable_lookup(
-            timetable,
+            LiveTimetableStore(timetable),
             avl_list,
             clean_shard_stop_history,
         )

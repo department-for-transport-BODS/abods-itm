@@ -1,0 +1,1 @@
+ALTER TABLE timetable_summary_operator_t DROP CONSTRAINT IF EXISTS timetable_summary_operator_t_pkey;
