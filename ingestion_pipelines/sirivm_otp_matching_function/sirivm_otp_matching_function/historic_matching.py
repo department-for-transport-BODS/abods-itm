@@ -29,23 +29,25 @@ def get_avls_for_group_id(
     avl_group: pl.LazyFrame,
 ) -> Sequence[AVLRecord]:
     avl_batch = (
-        avl_group.filter(pl.col("group_id") == group_id).collect().row(0, named=True)
+        avl_group.filter(pl.col("group_id") == group_id)
+        .collect()
+        .row(by_predicate=(pl.col("group_id") == group_id))
     )
     avl_list = []
-    for index, _avl_id in enumerate(avl_batch["siri_vm_positions_id"]):
+    for index, _avl_id in enumerate(avl_batch[1]):
         avl_list.append(
             {
-                "recorded_at_time": str(avl_batch["recorded_at_time"][index]),
-                "response_timestamp": str(avl_batch["response_time_stamp"][index]),
-                "latitude": float(avl_batch["latitude"][index]),
-                "longitude": float(avl_batch["longitude"][index]),
-                "line_name": str(avl_batch["line_name"][index]),
-                "operator_ref": str(avl_batch["operator_ref"][index]),
-                "vehicle_ref": str(avl_batch["vehicle_ref"][index]),
-                "journey_ref": str(avl_batch["journey_ref"][index]),
-                "direction_ref": str(avl_batch["direction_ref"][index]),
-                "date_of_journey": str(avl_batch["date_of_journey"][index]),
-                "batch_id": int(avl_batch["batch_id"][index]),
+                "recorded_at_time": str(avl_batch[11][index]),
+                "response_timestamp": str(avl_batch[12][index]),
+                "latitude": float(avl_batch[7][index]),
+                "longitude": float(avl_batch[8][index]),
+                "line_name": str(avl_batch[3][index]),
+                "operator_ref": str(avl_batch[2][index]),
+                "vehicle_ref": str(avl_batch[9][index]),
+                "journey_ref": str(avl_batch[4][index]),
+                "direction_ref": str(avl_batch[5][index]),
+                "date_of_journey": str(avl_batch[6][index]),
+                "batch_id": int(avl_batch[10][index]),
             },
         )
     return avl_list
@@ -60,13 +62,12 @@ def get_timetable_data_for_group_id(
         pl.col("group_id").str.to_lowercase() == group_id,
     )
 
-    if filtered_timetable_df.select(pl.len()).collect().item() == 0:
-        return None
+    stop_data = filtered_timetable_df.collect().row(
+        by_predicate=(pl.col("group_id").str.to_lowercase() == group_id),
+    )
 
-    stop_data = filtered_timetable_df.collect().row(0, named=True)
-
-    directions = set(stop_data["direction"])
-    row_count = len(stop_data["stop_index"])
+    directions = set(stop_data[7])
+    row_count = len(stop_data[1])
 
     if row_count <= 0:
         return None
@@ -76,19 +77,19 @@ def get_timetable_data_for_group_id(
         index = group_id
 
         if len(directions) > 1:
-            stop_direction = str(stop_data["direction"][stop])
+            stop_direction = str(stop_data[7][stop])
             index += f"|{stop_direction}"
 
         route_details = timetable.setdefault(index, {})
         normalised_stop_index = str(len(route_details) + 1)
         route_details[normalised_stop_index] = (
             (
-                float(stop_data["stop_latitude"][stop]),
-                float(stop_data["stop_longitude"][stop]),
+                float(stop_data[2][stop]),
+                float(stop_data[3][stop]),
             ),
-            str(stop_data["expected_departure_time"][stop]),
-            int(stop_data["timetable_id"][stop]),
-            str(stop_data["date_of_journey"][stop]),
+            str(stop_data[4][stop]),
+            int(stop_data[5][stop]),
+            str(stop_data[6][stop]),
         )
     return timetable
 
