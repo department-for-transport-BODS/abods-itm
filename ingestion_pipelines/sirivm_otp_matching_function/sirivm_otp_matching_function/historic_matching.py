@@ -54,10 +54,9 @@ def get_avls_for_group_id(
 @timer(logger)
 def get_timetable_data_for_group_id(
     group_id: str,
-    timetable: pl.LazyFrame,
+    timetable_group: pl.LazyFrame,
 ) -> Timetable | None:
-    group_timetable = timetable.group_by(pl.col("group_id"))
-    filtered_timetable_df = group_timetable.all().filter(
+    filtered_timetable_df = timetable_group.filter(
         pl.col("group_id").str.to_lowercase() == group_id,
     )
 
@@ -110,8 +109,9 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
     logger.info(f"Loaded avl data for {date_str}")
     avl_group = avl_data.group_by("group_id", maintain_order=True).all()
     timetable = pl.scan_parquet(timetable_path)
+    timetable_group = timetable.group_by("group_id", maintain_order=True).all()
     common_group_ids_list = set(
-        timetable.select("group_id")
+        timetable_group.select("group_id")
         .join(avl_group.select("group_id"), on="group_id", how="semi")
         .collect()
         .get_column("group_id"),
@@ -137,7 +137,10 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
 
             logger.info("Produced avl list", size=len(group_avls))
 
-            routes_for_group_id = get_timetable_data_for_group_id(group_id, timetable)
+            routes_for_group_id = get_timetable_data_for_group_id(
+                group_id,
+                timetable_group,
+            )
 
             if routes_for_group_id is None:
                 logger.info("Could not find timetable for group_id", group_id=group_id)
