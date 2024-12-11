@@ -193,6 +193,6 @@
         <sqlFile path="sql/60-populate-headway-with-estimate.sql" splitStatements="false" />
     </changeSet>
     <changeSet id="61" author="abodsuser">
-        <sqlFile path="sql/61-populate-headway-with-estimate.sql" splitStatements="false" />
+        <sqlFile path="sql/61-update-timetable-inbound-outbound-fix.sql" splitStatements="false" />
     </changeSet>
 </databaseChangeLog>
