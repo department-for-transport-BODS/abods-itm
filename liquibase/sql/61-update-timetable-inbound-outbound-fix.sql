@@ -401,15 +401,6 @@ execute format (
 	)
 	select
 		count(1) over w2 as journey_partition_size,
---		case when count(1) over w2 = 1
---			then group_id_tmp
---			else
---				case
---					when direction = ''outbound'' or direction = ''clockwise''
---					then group_id_tmp
---					else concat_ws(''|'', group_id_tmp, ''inbound'')
---				end
---		end as group_id,
 		*
 	from ranked_directional_journeys where rank=1
 	window w2 as (partition by
