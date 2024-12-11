@@ -9,7 +9,6 @@ from multiprocessing import Process, Queue
 import boto3
 import duckdb
 from aws_lambda_powertools import Logger
-from duckdb.duckdb import DuckDBPyConnection
 
 from .client_db import TimetableDBClient
 from .matcher.live_timetable_store import LiveTimetableStore
@@ -22,106 +21,6 @@ logger = Logger()
 two_hours_secs = -7200
 
 s3 = boto3.client("s3")
-
-
-@timer(logger)
-def get_avls_for_group_id(
-    group_id: str,
-    process_conn: DuckDBPyConnection,
-) -> Sequence[AVLRecord]:
-    return [
-        {
-            "recorded_at_time": str(recorded_at_time),
-            "response_timestamp": str(response_time_stamp),
-            "latitude": float(latitude),
-            "longitude": float(longitude),
-            "line_name": str(line_name),
-            "operator_ref": str(operator_ref),
-            "vehicle_ref": str(vehicle_ref),
-            "journey_ref": str(journey_ref),
-            "direction_ref": str(direction_ref),
-            "date_of_journey": str(date_of_journey),
-            "batch_id": int(batch_id),
-        }
-        for (
-            recorded_at_time,
-            response_time_stamp,
-            latitude,
-            longitude,
-            line_name,
-            operator_ref,
-            vehicle_ref,
-            journey_ref,
-            direction_ref,
-            date_of_journey,
-            batch_id,
-        ) in process_conn.execute(
-            f"""
-            SELECT
-                recorded_at_time,
-                response_time_stamp,
-                latitude,
-                longitude,
-                line_name,
-                operator_ref,
-                vehicle_ref,
-                journey_ref,
-                direction_ref,
-                date_of_journey,
-                batch_id
-            FROM avl
-            WHERE group_id = '{group_id}'
-            """,
-        ).fetchall()
-    ]
-
-
-@timer(logger)
-def get_timetable_data_for_group_id(
-    group_id: str,
-    process_conn: DuckDBPyConnection,
-) -> Timetable:
-    stop_data = process_conn.execute(
-        f"""
-        SELECT
-            direction,
-            stop_latitude,
-            stop_longitude,
-            expected_departure_time,
-            timetable_id,
-            date_of_journey
-        FROM timetable
-        WHERE group_id = '{group_id}'
-        """,
-    ).fetchall()
-    directions = {rec[0] for rec in stop_data}
-    timetable: dict[str, dict[str, StopDetails]] = {}
-    for (
-        direction,
-        stop_latitude,
-        stop_longitude,
-        expected_departure_time,
-        timetable_id,
-        date_of_journey,
-    ) in stop_data:
-        index = group_id
-
-        if len(directions) > 1:
-            stop_direction = str(direction)
-            index += f"|{stop_direction}"
-
-        route_details = timetable.setdefault(index, {})
-        normalised_stop_index = str(len(route_details) + 1)
-        route_details[normalised_stop_index] = (
-            (
-                float(stop_latitude),
-                float(stop_longitude),
-            ),
-            str(expected_departure_time),
-            int(timetable_id),
-            str(date_of_journey),
-        )
-    return timetable
 
 
 @timer(logger)
@@ -182,24 +81,115 @@ def worker_task(
         "avl_timetable.db",
         config={"access_mode": "READ_ONLY"},
     ) as process_conn:
+
+        @timer(logger)
+        def get_avls_for_group_id(group_id: str) -> Sequence[AVLRecord]:
+            return [
+                {
+                    "recorded_at_time": str(recorded_at_time),
+                    "response_timestamp": str(response_time_stamp),
+                    "latitude": float(latitude),
+                    "longitude": float(longitude),
+                    "line_name": str(line_name),
+                    "operator_ref": str(operator_ref),
+                    "vehicle_ref": str(vehicle_ref),
+                    "journey_ref": str(journey_ref),
+                    "direction_ref": str(direction_ref),
+                    "date_of_journey": str(date_of_journey),
+                    "batch_id": int(batch_id),
+                }
+                for (
+                    recorded_at_time,
+                    response_time_stamp,
+                    latitude,
+                    longitude,
+                    line_name,
+                    operator_ref,
+                    vehicle_ref,
+                    journey_ref,
+                    direction_ref,
+                    date_of_journey,
+                    batch_id,
+                ) in process_conn.execute(
+                    f"""
+                    SELECT
+                        recorded_at_time,
+                        response_time_stamp,
+                        latitude,
+                        longitude,
+                        line_name,
+                        operator_ref,
+                        vehicle_ref,
+                        journey_ref,
+                        direction_ref,
+                        date_of_journey,
+                        batch_id
+                    FROM avl
+                    WHERE group_id = '{group_id}'
+                    """,
+                ).fetchall()
+            ]
+
+        @timer(logger)
+        def get_timetable_data_for_group_id(group_id: str) -> Timetable:
+            stop_data = process_conn.execute(
+                f"""
+                SELECT
+                    direction,
+                    stop_latitude,
+                    stop_longitude,
+                    expected_departure_time,
+                    timetable_id,
+                    date_of_journey
+                FROM timetable
+                WHERE group_id = '{group_id}'
+                """,
+            ).fetchall()
+            directions = {rec[0] for rec in stop_data}
+            timetable: dict[str, dict[str, StopDetails]] = {}
+            for (
+                direction,
+                stop_latitude,
+                stop_longitude,
+                expected_departure_time,
+                timetable_id,
+                date_of_journey,
+            ) in stop_data:
+                index = group_id
+
+                if len(directions) > 1:
+                    stop_direction = str(direction)
+                    index += f"|{stop_direction}"
+
+                route_details = timetable.setdefault(index, {})
+                normalised_stop_index = str(len(route_details) + 1)
+                route_details[normalised_stop_index] = (
+                    (
+                        float(stop_latitude),
+                        float(stop_longitude),
+                    ),
+                    str(expected_departure_time),
+                    int(timetable_id),
+                    str(date_of_journey),
+                )
+            return timetable
+
         while True:
             try:
-                group_id = group_queue.get(timeout=10)
-                if group_id is None:
+                latest_group_id = group_queue.get(timeout=10)
+                if latest_group_id is None:
                     return
+
                 logger.info(
                     "Processing group_id",
-                    group_id=group_id,
+                    group_id=latest_group_id,
                     group_number=worker_count,
                     initial_group_count=number_of_groups,
                     estimated_remaining_groups=group_queue.qsize(),
                 )
-                group_avls = get_avls_for_group_id(group_id, process_conn)
+                group_avls = get_avls_for_group_id(latest_group_id)
                 timetable_store = LiveTimetableStore(
-                    get_timetable_data_for_group_id(
-                        group_id,
-                        process_conn,
-                    )
+                    get_timetable_data_for_group_id(latest_group_id),
                 )
                 total_to_set = []
                 stop_history = {}
