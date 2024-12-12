@@ -1,8 +1,9 @@
 import math
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Generator
+from contextlib import contextmanager
 from datetime import UTC, datetime
-from typing import Literal, ParamSpec, TypeVar
+from typing import Any, Literal, ParamSpec, TypeVar
 
 import boto3
 import pyproj
@@ -27,8 +28,7 @@ crs_transformer = pyproj.Transformer.from_crs(source_crs, target_crs, always_xy=
 def timer(passed_logger: Logger) -> Callable[Param, Return]:
     def decorate(f: Callable[Param, Return]) -> Callable[Param, Return]:
         def applicator(*args: Param, **kwargs: Param) -> Return:
-            passed_logger.info(f"Starting {f.__name__}()")
-            start_time = time.perf_counter()
+            start_time = time.perf_counter_ns()
             try:
                 return f(*args, **kwargs)
             finally:
@@ -36,12 +36,32 @@ def timer(passed_logger: Logger) -> Callable[Param, Return]:
                 run_time = end_time - start_time
                 passed_logger.info(
                     f"Finished {f.__name__}()",
-                    time_in_ms=run_time / 1000,
+                    time_in_ms=run_time / 1000000,
                 )
 
         return applicator
 
     return decorate
+
+
+@contextmanager
+def log_execution_time(
+    passed_logger: Logger,
+    tag: str,
+    **log_context: dict[str, Any],
+) -> Generator[None, None, None]:
+    start_time = time.perf_counter_ns()
+    try:
+        yield
+    finally:
+        end_time = time.perf_counter_ns()
+        run_time = end_time - start_time
+        passed_logger.info(
+            f"Finished {tag}",
+            tag=tag,
+            time_in_ms=run_time / 1000000,
+            **log_context,
+        )
 
 
 def validate_date(date_input: datetime | str) -> datetime:
