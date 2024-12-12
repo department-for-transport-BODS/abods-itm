@@ -140,7 +140,7 @@ class TimetableDBClient:
     @timer(logger)
     def historic_update_success(
         self,
-        batch_id: int,
+        batch_id: int | None,
         entries_to_update: Sequence[RecordToAdd],
         entries_to_remove: Sequence[RecordToRemove],
         avl_date_str: str,
@@ -185,8 +185,8 @@ class TimetableDBClient:
                     sql=self.sql_queries.update_otp_state,
                     values=values,
                 )
-
-            _update_batch_status(cursor, batch_id, "Success")
+            if batch_id:
+                _update_batch_status(cursor, batch_id, "Success")
 
 
 def _prepare_new_entries(
