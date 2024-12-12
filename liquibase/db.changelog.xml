@@ -189,6 +189,10 @@
     <changeSet id="59" author="abodsuser">
         <sqlFile path="sql/59-remove-more-primary-keys.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="60" author="abodsuser">
+        <sqlFile path="sql/60-populate-headway-with-estimate.sql" splitStatements="false" />
+    </changeSet>
+    <changeSet id="61" author="abodsuser">
+        <sqlFile path="sql/61-update-timetable-inbound-outbound-fix.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
-
-

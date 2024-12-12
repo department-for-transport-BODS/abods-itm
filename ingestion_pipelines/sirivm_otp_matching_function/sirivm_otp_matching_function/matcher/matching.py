@@ -2,6 +2,7 @@ import os
 from collections.abc import Sequence
 from datetime import datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
+from typing import Protocol
 
 from aws_lambda_powertools import Logger
 
@@ -16,7 +17,6 @@ from .models import (
     RouteDetails,
     StopDetails,
     StopHistory,
-    Timetable,
     avl_group_id,
     avl_recorded_at_time_utc,
     stop_departure_time,
@@ -31,6 +31,32 @@ from .utils import (
     transform_coordinates_and_calculate_intersections,
     validate_date,
 )
+
+
+class TimetableStore(Protocol):
+    """Interface for a timetable store"""
+
+    def get_route_details(
+        self,
+        group_id: str,
+        direction_ref: str,
+    ) -> tuple[str, RouteDetails | None]:
+        """
+        Interface for getting the route data for a given group id and direction
+
+        Args:
+        ----
+            group_id (str): A string representing operator_ref|line_name|journey_ref|date_of_journey in lower case
+            direction_ref (str): Direction ref (e.g. inbound, outbound)
+
+        Returns:
+        -------
+            str: The last index used to find the route in the timetable
+            RouteDetails | None: The matched route data if any
+
+        """
+        ...
+
 
 logger = Logger()
 
@@ -798,7 +824,7 @@ def move_potential_match_to_match(
 
 @timer(logger)
 def positions_timetable_lookup(
-    timetable: Timetable,
+    timetable: TimetableStore,
     avl_dict: Sequence[AVLRecord],
     stop_history: StopHistory,
 ) -> tuple[Sequence[RecordToAdd], Sequence[RecordToRemove], dict]:
@@ -824,10 +850,9 @@ def positions_timetable_lookup(
         # 1. check if group id exists in timetable
         group_id = avl_group_id(avl)
         avl_direction = avl.get("direction_ref", "")
-        stop_history_index, route_details = get_route_details(
+        stop_history_index, route_details = timetable.get_route_details(
             group_id,
             avl_direction,
-            timetable,
         )
         logger.append_keys(
             avl=avl,
@@ -904,20 +929,3 @@ def positions_timetable_lookup(
 
     logger.remove_keys(["avl", "group_id", "stop_history_index"])
     return stop_pos_distances, stop_pos_distances_remove, stop_history
-
-
-def get_route_details(
-    group_id: str,
-    direction_ref: str,
-    timetable: Timetable,
-) -> tuple[str, RouteDetails]:
-    route_details = timetable.get(group_id)
-    if route_details:
-        return group_id, route_details
-
-    # In some cases, there can be multiple journeys with different directions using the same group id.
-    # When that happens, sirivm_timetable_s3_generation_function will add the direction ref to the group id.
-    # We will also need to use this to keep track of the matching for both journeys separately,
-    # but the database updates need to be with the original group id
-    index = group_id + "|" + direction_ref.lower()
-    return index, timetable.get(index)
