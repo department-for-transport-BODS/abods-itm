@@ -1664,7 +1664,7 @@ concat('timetable_stop_prev_group_id', timetable_suffix)
 -- Clean Up --
 --------------
 
---RAISE NOTICE 'Cleaning Up';
+RAISE NOTICE 'Cleaning Up';
 
 
 execute format(
