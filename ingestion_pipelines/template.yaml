@@ -759,7 +759,6 @@ Resources:
       Layers: !If
         - IsNotLocal
         - - !Ref IngestionFunctionLayer
-          - "arn:aws:lambda:eu-west-2:654654341097:layer:pyarrow:1"
         - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
