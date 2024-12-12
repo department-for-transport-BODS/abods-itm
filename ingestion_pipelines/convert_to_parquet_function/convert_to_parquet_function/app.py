@@ -9,41 +9,6 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from dateutil.parser import parse
 from pyarrow import fs
 
-avl_csv_schema = pa.schema(
-    [
-        ("siri_vm_positions_id", pa.string()),
-        ("operator_ref", pa.string()),
-        ("line_name", pa.string()),
-        ("journey_ref", pa.string()),
-        ("direction_ref", pa.string()),
-        ("date_of_journey", pa.string()),
-        ("latitude", pa.string()),
-        ("longitude", pa.string()),
-        ("vehicle_ref", pa.string()),
-        ("batch_id", pa.string()),
-        ("recorded_at_time", pa.string()),
-        ("response_time_stamp", pa.string()),
-        ("load_time_stamp", pa.string()),
-        ("group_id", pa.string()),
-        ("origin_ref", pa.string()),
-        ("destination_ref", pa.string()),
-        ("departure_time", pa.string()),
-    ]
-)
-
-timetable_csv_schema = pa.schema(
-    [
-        ("group_id", pa.string()),
-        ("stop_index", pa.string()),
-        ("stop_latitude", pa.string()),
-        ("stop_longitude", pa.string()),
-        ("expected_departure_time", pa.string()),
-        ("timetable_id", pa.string()),
-        ("date_of_journey", pa.string()),
-        ("direction", pa.string()),
-    ]
-)
-
 timetable_cols = [
     "group_id",
     "stop_index",
@@ -75,6 +40,15 @@ avl_cols = [
     "departure_time",
 ]
 
+
+def get_pa_schema(cols: list) -> pa.schema:
+    col_list_wtypes = []
+
+    col_list_wtypes = [(col, pa.string()) for col in cols]
+
+    return pa.schema(col_list_wtypes)
+
+
 logger = Logger()
 
 
@@ -96,10 +70,10 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv",
             f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv_part2",
         ]
-    schema = avl_csv_schema
+    schema = get_pa_schema(avl_cols)
     column_names = avl_cols
     if is_timetable:
-        schema = timetable_csv_schema
+        schema = get_pa_schema(timetable_cols)
         column_names = timetable_cols
         csv_files = [
             f"historic/csv/timetable/YYYY={pd_year}/MM={pd_month}/{pd_year}-{pd_month}-{pd_day}.csv"
