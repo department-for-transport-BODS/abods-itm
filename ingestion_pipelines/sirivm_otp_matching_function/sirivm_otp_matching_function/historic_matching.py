@@ -13,7 +13,9 @@ from aws_lambda_powertools import Logger
 from .client_db import TimetableDBClient
 from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import positions_timetable_lookup
-from .matcher.models import StopDetails
+from .matcher.models import (
+    StopDetails,  # noqa: TCH001 I don't mind importing types at runtime
+)
 from .matcher.utils import log_execution_time
 
 logger = Logger()
@@ -21,7 +23,7 @@ logger = Logger()
 two_hours_secs = -7200
 
 
-def operator_worker_task(  # noqa:C901 PLR0915 Don't care
+def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
     date_str: str,
     task_count: int,
     task_queue: Queue[str | None],
@@ -173,7 +175,7 @@ def operator_worker_task(  # noqa:C901 PLR0915 Don't care
                         journey_matches = []
                         stop_history = {}
                         for avl in avls:
-                            # TODO: The matching code should have an entry point for a single avl
+                            # noqa: TD003 TODO(gps035): The matching code should have an entry point for a single avl
                             to_set, to_remove, stop_history = (
                                 positions_timetable_lookup(
                                     timetable_store,
@@ -271,7 +273,7 @@ if __name__ == "__main__":
             number_of_groups=operator_count,
         )
         workers = []
-        num_workers = 8  # TODO: Should align to number of cores available
+        num_workers = 8  # noqa: TD003 TODO(gps035): Should align to number of cores available
         logger.info("Launching workers", num_workers=num_workers)
         for i in range(num_workers):
             worker = Process(
@@ -282,7 +284,8 @@ if __name__ == "__main__":
             workers.append(worker)
 
         logger.info(
-            "Spawned workers, waiting for each to exit", num_workers=num_workers
+            "Spawned workers, waiting for each to exit",
+            num_workers=num_workers,
         )
         for worker in workers:
             worker.join()
