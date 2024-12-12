@@ -26,7 +26,7 @@ two_hours_secs = -7200
 def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
     date_str: str,
     task_count: int,
-    task_queue: Queue[str | None],
+    task_queue: Queue,
     worker_id: int,
 ) -> None:
     logger.append_keys(worker_id=worker_id)
@@ -237,7 +237,7 @@ if __name__ == "__main__":
                 Filename=local_avl_path,
             )
 
-        operator_queue: Queue[str | None] = Queue()
+        operator_queue = Queue()
         with duckdb.connect("avl_timetable.db") as conn:
             with log_execution_time(logger, "build_db"):
                 conn.execute(f"""
