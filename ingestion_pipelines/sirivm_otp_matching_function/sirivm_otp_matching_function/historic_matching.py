@@ -14,7 +14,7 @@ from .client_db import TimetableDBClient
 from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import positions_timetable_lookup
 from .matcher.models import (
-    StopDetails,  # noqa: TCH001, TC001 I don't mind importing types at runtime
+    StopDetails,  # noqa: TC001 I don't mind importing types at runtime
 )
 from .matcher.utils import log_execution_time
 
