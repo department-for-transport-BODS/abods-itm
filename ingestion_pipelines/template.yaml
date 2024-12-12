@@ -745,6 +745,82 @@ Resources:
       KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
       RetentionInDays: 30
 
+  ##########################################################
+  #### CONVERT TO PARQUET FUNCTION (& ASSC. RESOURCES) ####
+  ##########################################################
+  Convert2parquet:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-${Environment}-convert2parquet'
+      CodeUri: ./convert_to_parquet_function
+      Handler: convert_to_parquet_function.app.lambda_handler
+      Timeout: 60
+      MemorySize: 5000
+      Layers: !If
+        - IsNotLocal
+        - - !Ref IngestionFunctionLayer
+          - "arn:aws:lambda:eu-west-2:654654341097:layer:pyarrow:1"
+        - []
+      Policies:
+        - 'AWSLambdaVPCAccessExecutionRole'
+        - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
+        - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/sirivm_access_policy/arn}}'
+        - S3CrudPolicy:
+            BucketName: !Ref ExporterBucket
+        - Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: !GetAtt Convert2parquetFunctionLogGroup.Arn
+      VpcConfig:
+        SubnetIds: !Ref VpcSubnets
+        SecurityGroupIds:
+          - !GetAtt Convert2parquetFunctionSecurityGroup.GroupId
+          - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: convert2parquet
+          POWERTOOLS_LOG_LEVEL: INFO
+          PROJECT_ENV: !Ref Environment
+          PROJECT_NAME: !Ref ProjectName
+          POSTGRES_HOST: !If
+            - IsNotLocal
+            - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rdsproxy/endpoint}}'
+            - !Ref RdsDbHostAddr
+          POSTGRES_PORT: !Ref RdsDbPort
+          POSTGRES_DB: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
+          POSTGRES_USER: !Sub '${ProjectName}_proxy_rw'
+          SIRIVM_BUCKET: !If
+            - IsNotLocal
+            - !Ref ExporterBucket
+            - !Ref AWS::NoValue
+      LoggingConfig:
+        LogGroup: !Ref Convert2parquetFunctionLogGroup
+
+  Convert2parquetFunctionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub 'Security group for ${ProjectName}-${Environment}-convert2parquet'
+      GroupName: !Sub '${ProjectName}-${Environment}-convert2parquet'
+      SecurityGroupEgress: 
+        - IpProtocol: '-1'
+          CidrIp: '0.0.0.0/0'
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-convert2parquet'
+
+  Convert2parquetFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Condition: IsNotLocal
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ProjectName}-${Environment}-convert2parquet'
+      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
+      RetentionInDays: 30
+
   #########################################
   #### GENERAL CONFIGURATION RESOURCES ####
   #########################################
@@ -801,6 +877,13 @@ Resources:
     Condition: IsNotLocal
     Properties:
       BucketName: !Sub '${ProjectName}-${Environment}-process-bucket'
+
+  ExporterBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Condition: IsNotLocal
+    Properties:
+      BucketName: !Sub '${ProjectName}-${Environment}-exporter-bucket'
 
   SiriVmIngestionQueue:
     Type: AWS::SQS::Queue
