@@ -27,7 +27,6 @@ from .models import (
 from .utils import (
     get_otp_state,
     get_time_difference,
-    timer,
     transform_coordinates_and_calculate_intersections,
     validate_date,
 )

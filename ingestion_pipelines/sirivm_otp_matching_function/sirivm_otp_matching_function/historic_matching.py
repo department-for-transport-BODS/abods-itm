@@ -6,6 +6,7 @@ import sys
 import time
 from collections.abc import Mapping
 from multiprocessing import Process, Queue
+from queue import Empty
 
 import boto3
 import duckdb
@@ -59,6 +60,7 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
     number_of_operators = (
         operator_queue.qsize()
     )  # Should be fine since nothing is reading yet
+    operator_queue.close()
     logger.info("Starting to process AVL data", number_of_groups=number_of_operators)
     workers = []
     num_workers = 8
@@ -72,9 +74,10 @@ def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None
         workers.append(worker)
     for worker in workers:
         worker.join()
+    logger.info("Finished processing AVL data")
 
 
-def worker_task(  # noqa:C901 Don't care
+def worker_task(  # noqa:C901 PLR0915 Don't care
     date_str: str,
     number_of_operators: int,
     operator_queue: Queue,
@@ -196,9 +199,14 @@ def worker_task(  # noqa:C901 Don't care
         while True:
             try:
                 latest_operator_ref = operator_queue.get(timeout=10)
-                if latest_operator_ref is None:
-                    return
+            except Empty:
+                logger.info("No operators available, worker exiting")
+                return
+            except Exception:
+                logger.exception("An unexpected exception occurred")
+                continue
 
+            try:
                 logger.info(
                     "Processing operator",
                     operator_ref=latest_operator_ref,
