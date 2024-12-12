@@ -266,7 +266,6 @@ if __name__ == "__main__":
         )  # Should be fine since nothing is reading yet
 
         operator_queue.put(None)  # Sentinel value to indicate no more work
-        operator_queue.close()
 
         logger.info(
             "Starting to process AVL data",
