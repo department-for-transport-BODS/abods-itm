@@ -24,7 +24,6 @@ two_hours_secs = -7200
 s3 = boto3.client("s3")
 
 
-@timer(logger)
 def historic_matching(avl_path: str, timetable_path: str, date_str: str) -> None:
     """
     Run historic matching
@@ -279,7 +278,7 @@ if __name__ == "__main__":
             Key=f"historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet",
             Filename=local_avl_path,
         )
-        logger.info(f"Loaded timetable for {process_date}")
+        logger.info("Downloaded parquet files")
         historic_matching(
             avl_path=local_avl_path,
             timetable_path=local_timetable_path,
