@@ -18,6 +18,7 @@ timetable_cols = [
     "timetable_id",
     "date_of_journey",
     "direction",
+    "operator_noc",
 ]
 
 avl_cols = [

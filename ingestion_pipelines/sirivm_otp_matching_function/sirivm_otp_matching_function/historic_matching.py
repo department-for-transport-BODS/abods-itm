@@ -14,7 +14,7 @@ from .client_db import TimetableDBClient
 from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import positions_timetable_lookup
 from .matcher.models import (
-    StopDetails,  # noqa: TC001 I don't mind importing types at runtime
+    StopDetails,  # noqa: TCH001, TC001 I don't mind importing types at runtime
 )
 from .matcher.utils import log_execution_time
 
@@ -111,6 +111,7 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                         f"""
                             SELECT
                                 group_id,
+                                operator_noc,
                                 direction,
                                 stop_latitude,
                                 stop_longitude,
@@ -119,7 +120,7 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                                 date_of_journey,
                                 stop_index
                             FROM timetable
-                            WHERE split_part(group_id, '|', 1) = LOWER('{operator_ref}')
+                            WHERE operator_noc = '{operator_ref}'
                         """,
                     ).fetchall()
                     # Initially bucket by group_id, since we need to do something different if there are multiple directions within each
@@ -134,6 +135,7 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                         directions = {rec[0] for rec in stops}
                         for (
                             _,
+                            _operator_noc,
                             direction,
                             stop_latitude,
                             stop_longitude,
