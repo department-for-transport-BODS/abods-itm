@@ -746,12 +746,13 @@ Resources:
       RetentionInDays: 30
 
   ##########################################################
-  #### CONVERT TO PARQUET FUNCTION (& ASSC. RESOURCES) ####
+  #### CONVERT TO PARQUET FUNCTION (& ASSC. RESOURCES) #####
   ##########################################################
-  Convert2parquet:
+  ConvertToParquetFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub '${ProjectName}-${Environment}-convert2parquet'
+      # checkov:skip=CKV_AWS_117:No need to run in a vpc, only accesses AWS API
+      FunctionName: !Sub '${ProjectName}-${Environment}-convert-to-parquet-function'
       CodeUri: ./convert_to_parquet_function
       Handler: convert_to_parquet_function.app.lambda_handler
       Timeout: 60
@@ -761,9 +762,8 @@ Resources:
         - - !Ref IngestionFunctionLayer
         - []
       Policies:
-        - 'AWSLambdaVPCAccessExecutionRole'
-        - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
-        - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/sirivm_access_policy/arn}}'
+        - KMSDecryptPolicy:
+            KeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/s3/arn}}'
         - S3CrudPolicy:
             BucketName: !Ref ExporterBucket
         - Version: '2012-10-17'
@@ -773,50 +773,25 @@ Resources:
               - logs:CreateLogGroup
               - logs:CreateLogStream
               - logs:PutLogEvents
-            Resource: !GetAtt Convert2parquetFunctionLogGroup.Arn
-      VpcConfig:
-        SubnetIds: !Ref VpcSubnets
-        SecurityGroupIds:
-          - !GetAtt Convert2parquetFunctionSecurityGroup.GroupId
-          - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
+            Resource: !GetAtt ConvertToParquetFunctionLogGroup.Arn
       Environment:
         Variables:
-          POWERTOOLS_SERVICE_NAME: convert2parquet
+          POWERTOOLS_SERVICE_NAME: convert_to_parquet_function
           POWERTOOLS_LOG_LEVEL: INFO
           PROJECT_ENV: !Ref Environment
           PROJECT_NAME: !Ref ProjectName
-          POSTGRES_HOST: !If
-            - IsNotLocal
-            - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rdsproxy/endpoint}}'
-            - !Ref RdsDbHostAddr
-          POSTGRES_PORT: !Ref RdsDbPort
-          POSTGRES_DB: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
-          POSTGRES_USER: !Sub '${ProjectName}_proxy_rw'
-          SIRIVM_BUCKET: !If
+          EXPORTER_BUCKET: !If
             - IsNotLocal
             - !Ref ExporterBucket
             - !Ref AWS::NoValue
       LoggingConfig:
-        LogGroup: !Ref Convert2parquetFunctionLogGroup
+        LogGroup: !Ref ConvertToParquetFunctionLogGroup
 
-  Convert2parquetFunctionSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Sub 'Security group for ${ProjectName}-${Environment}-convert2parquet'
-      GroupName: !Sub '${ProjectName}-${Environment}-convert2parquet'
-      SecurityGroupEgress: 
-        - IpProtocol: '-1'
-          CidrIp: '0.0.0.0/0'
-      VpcId: !Ref VpcId
-      Tags:
-        - Key: Name
-          Value: !Sub '${ProjectName}-${Environment}-convert2parquet'
-
-  Convert2parquetFunctionLogGroup:
+  ConvertToParquetFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Condition: IsNotLocal
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${ProjectName}-${Environment}-convert2parquet'
+      LogGroupName: !Sub '/aws/lambda/${ProjectName}-${Environment}-convert-to-parquet-function'
       KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
       RetentionInDays: 30
 
