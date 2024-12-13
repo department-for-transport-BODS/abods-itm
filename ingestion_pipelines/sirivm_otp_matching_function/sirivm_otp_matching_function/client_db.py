@@ -70,7 +70,6 @@ def execute_values_amended(
         argslist=values,
         fetch=True,
     )
-    logger.info("Query succeeded, checking updated row counts")
     expected = len(values)
     actual = len(result)
     if expected == actual:
@@ -150,19 +149,21 @@ class TimetableDBClient:
         grouped = _prepare_new_entries(entries_to_update)
         with self.connection.cursor() as cursor:
             if len(entries_to_remove) > 0:
-                remove_values = [
-                    (entry["timetable_id"], entry["group_id"], avl_date_str)
-                    for entry in entries_to_remove
-                ]
-                logger.info("Running remove query", value_count=len(remove_values))
                 execute_values_amended(
                     cur=cursor,
                     sql=self.sql_queries.remove_historic_matching,
-                    values=remove_values,
+                    values=[
+                        (
+                            entry["timetable_id"],
+                            entry["group_id"],
+                            avl_date_str,
+                        )
+                        for entry in entries_to_remove
+                    ],
                 )
 
             for records in grouped.values():
-                set_values = [
+                values = [
                     (
                         record["timetable_id"],
                         record["time_difference"],
@@ -173,18 +174,16 @@ class TimetableDBClient:
                     )
                     for record in records
                 ]
-                logger.info("Running set query", value_count=len(set_values))
                 execute_values_amended(
                     cur=cursor,
                     sql=self.sql_queries.set_historic_matching,
-                    values=set_values,
+                    values=values,
                 )
-                logger.info("Running otp state query", value_count=len(set_values))
                 # Update otp state again as the otp calculation is not taking the updated time difference value
                 execute_values_amended(
                     cur=cursor,
                     sql=self.sql_queries.update_otp_state,
-                    values=set_values,
+                    values=values,
                 )
             if batch_id:
                 _update_batch_status(cursor, batch_id, "Success")
