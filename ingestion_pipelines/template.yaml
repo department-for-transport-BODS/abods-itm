@@ -751,6 +751,7 @@ Resources:
   ConvertToParquetFunction:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_117:No need to run in a vpc, only accesses AWS API
       FunctionName: !Sub '${ProjectName}-${Environment}-convert-to-parquet-function'
       CodeUri: ./convert_to_parquet_function
       Handler: convert_to_parquet_function.app.lambda_handler
