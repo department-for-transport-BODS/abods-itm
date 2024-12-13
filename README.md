@@ -98,7 +98,7 @@ If a change is made to the matching process, and past journeys must be reprocess
    ```
 2. Historic matching
    After the shredding process is complete we can start historic matching.
-   The code in `injestion_pipelines/sirivm_timetable_s3_generation_functionsirivm_s3_ingestion_function` co-ordinates the matching process for a full day's data, and adds events to a queue that is read by one of ten historic matching lambdas. 
+   The code in `injestion_pipelines/sirivm_s3_ingestion_function` co-ordinates the matching process for a full day's data, and adds events to a queue that is read by one of ten historic matching lambdas. 
    To trigger the process, send a test event to the deployed lambda at `abods-$ENVIRONMENT-sirivm-backfill-ingestion-function`.
    For example, to trigger matching for the 15th October 2024:
    ```json
