@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 
 from aws_lambda_powertools import Logger
 
+from ..shared.config import TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES
 from .models import StopHistory
 from .utils import timer
 
@@ -33,10 +34,10 @@ def clean_stop_history(
             "%Y-%m-%d %H:%M:%S",
         ).replace(tzinfo=UTC)
         difference_in_seconds = (avl_utc - last_avl_utc).total_seconds()
-        difference_in_hours = difference_in_seconds / 60 / 60
-        if difference_in_hours > 1:
+        difference_in_minutes = difference_in_seconds / 60
+        if difference_in_minutes > TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES:
             logger.info(
-                f"Removing {group_id} with avl time {avl_utc} and last avl time {last_avl_utc}, time diff = {difference_in_hours}",
+                f"Removing {group_id} with avl time {avl_utc} and last avl time {last_avl_utc}, time diff = {difference_in_minutes}",
             )
             continue
 
