@@ -2,9 +2,9 @@ from datetime import UTC, datetime
 
 from aws_lambda_powertools import Logger
 
+from ..shared.config import TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES
 from .models import StopHistory
 from .utils import timer
-from ..shared.config import TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES
 
 logger = Logger()
 
