@@ -307,7 +307,8 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
         )
         conn.autocommit = True
         cur = conn.cursor()
-        cur.execute(query, [TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES])
+        interval_time = TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES
+        cur.execute(query, [interval_time, interval_time])
         timetable_dict = defaultdict(dict)
         res = cur.fetchall()
         directions_by_group_id = {}
