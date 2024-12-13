@@ -9,6 +9,7 @@ import awswrangler as wr
 import boto3
 import psycopg2
 from dateutil.parser import parse
+from .shared.config import TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES
 
 session = boto3.Session()
 db_host = environ.get("POSTGRES_HOST")
@@ -261,12 +262,12 @@ def backfill_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001, PL
 
 
 def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
-    query = """
+    query = f"""
         WITH my_groups AS
           (SELECT DISTINCT vehiclejourney_id
            FROM public."Timetable"
            WHERE date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
-             AND expected_departure_time BETWEEN current_timestamp(0) - interval '120' MINUTE AND current_timestamp(0) + interval '120' MINUTE)
+             AND expected_departure_time BETWEEN current_timestamp(0) - interval '{TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES}' MINUTE AND current_timestamp(0) + interval '{TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES}' MINUTE)
         SELECT t.group_id,
                row_number() OVER (PARTITION BY t.vehiclejourney_id
                                   ORDER BY t.group_id, t.expected_departure_time ASC, t.stop_index ASC) AS stop_index,
