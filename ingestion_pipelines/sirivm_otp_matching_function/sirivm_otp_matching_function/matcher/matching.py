@@ -858,7 +858,7 @@ def positions_timetable_lookup(
             stop_history_index=stop_history_index,
         )
         if not route_details:
-            logger.info("Could not find timetable for avl in timetable extract")
+            logger.debug("Could not find timetable for avl in timetable extract")
             continue
 
         logger.debug(f"stop_history_index {stop_history_index} in timetable")
