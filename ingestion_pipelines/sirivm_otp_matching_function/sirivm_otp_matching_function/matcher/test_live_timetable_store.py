@@ -1,12 +1,7 @@
 import pytest
 
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.live_timetable_store import (
-    LiveTimetableStore,
-)
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
-    RouteDetails,
-    Timetable,
-)
+from .live_timetable_store import LiveTimetableStore
+from .models import RouteDetails, Timetable
 
 group_id = "test|10|20|2024-12-25"
 

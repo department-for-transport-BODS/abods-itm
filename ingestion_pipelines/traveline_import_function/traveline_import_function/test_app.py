@@ -28,7 +28,7 @@ MOCK_NOC_CSV_DATA = [
 @pytest.fixture(autouse=True)
 def mock_setup_db() -> Generator[MagicMock]:
     with patch(
-        "ingestion_pipelines.traveline_import_function.traveline_import_function.shared.db.setup_db",
+        f"{__package__}.shared.db.setup_db",
     ) as mock_setup_db:
         mock_conn = MagicMock()
         mock_setup_db.return_value = mock_conn
@@ -46,9 +46,7 @@ def test_lambda_handler(
     mock_execute_values: MagicMock,
     mock_fromcsv: MagicMock,
 ) -> None:
-    from ingestion_pipelines.traveline_import_function.traveline_import_function.app import (
-        lambda_handler,
-    )
+    from .app import lambda_handler
 
     mock_fromcsv.return_value.distinct.return_value.dicts.return_value = (
         MOCK_NOC_CSV_DATA

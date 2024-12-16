@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.matching import (
+from .matching import (
     check_estimated_match,
     check_update_first_stop,
     find_matches_in_potential_matches,
@@ -16,7 +16,7 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     update_potential_match_with_recorded_at_time,
     update_potential_match_without_recorded_at_time,
 )
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
+from .models import (
     AVLRecord,
     GroupStopHistory,
     PotentialMatch,
@@ -26,7 +26,6 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     avl_recorded_at_time_utc,
     stop_departure_time,
 )
-
 from .test_data.get_test_data import read_avl, read_timetable
 
 
