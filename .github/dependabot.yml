@@ -5,7 +5,7 @@
 
 version: 2
 updates:
-  - package-ecosystem: "terraform"
-    directory: "."
+  - package-ecosystem: "pip"
+    directory: "./ingestion_pipelines"
     schedule:
       interval: "weekly"
