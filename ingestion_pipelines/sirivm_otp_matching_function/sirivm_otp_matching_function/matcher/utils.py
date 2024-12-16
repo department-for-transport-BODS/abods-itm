@@ -105,7 +105,10 @@ def get_time_difference(
     time_difference = (last_time_in_zone - timetable_departure_time).total_seconds()
     if time_difference < -(hour * 2) or time_difference > hour:
         logger.warning(
-            f"time difference: {time_difference}, last_time_in_zone: {last_time_in_zone}, timetable_departure_time {validate_date(timetable_departure_time)}",
+            "time difference is outside expected range",
+            time_difference=time_difference,
+            last_time_in_zone=last_time_in_zone,
+            timetable_departure_time=validate_date(timetable_departure_time),
         )
     return time_difference
 
