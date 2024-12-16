@@ -37,7 +37,11 @@ def clean_stop_history(
         difference_in_minutes = difference_in_seconds / 60
         if difference_in_minutes > TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES:
             logger.info(
-                f"Removing {group_id} with avl time {avl_utc} and last avl time {last_avl_utc}, time diff = {difference_in_minutes}",
+                "Evicting group_id from stop_history",
+                group_id=group_id,
+                avl_utc=avl_utc,
+                last_avl_utc=last_avl_utc,
+                difference_in_minutes=difference_in_minutes,
             )
             continue
 
