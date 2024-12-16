@@ -4,7 +4,7 @@ import json
 from collections.abc import Sequence
 from pathlib import Path
 
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
+from ..models import (
     AVLRecord,
     Timetable,
     parse_live_avl_data,

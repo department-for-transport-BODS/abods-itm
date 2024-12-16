@@ -1,6 +1,4 @@
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.client_s3 import (
-    filter_avl_list,
-)
+from .client_s3 import filter_avl_list
 
 shard_1_operator_id = "TFLO"
 shard_2_operator_id = "NATX"
