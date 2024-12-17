@@ -14,7 +14,7 @@ on:
       imageTag:
         description: Custom tag to apply to images. If 'blank', use git commit sha
         type: string
-        default: "latest"
+        default: ""
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.inputs.service }}
