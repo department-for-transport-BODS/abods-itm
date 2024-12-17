@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-if [ $# -le 2 ]
+if [ $# -lt 2 ]
   then
     echo "Usage: $0 <process_date YYYY-MM-DD> <environment sandbox|dev|test|uat|prod>"
     exit
