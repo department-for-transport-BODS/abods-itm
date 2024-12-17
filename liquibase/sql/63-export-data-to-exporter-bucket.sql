@@ -1,7 +1,3 @@
-CREATE OR REPLACE FUNCTION public.environment_name() RETURNS TEXT
-RETURN SPLIT_PART(aurora_db_instance_identifier(), '-', 2);
-
-
 CREATE OR REPLACE PROCEDURE public.historic_timetable_export(IN partition_date DATE)
     LANGUAGE PLPGSQL AS
 $procedure$
@@ -28,7 +24,7 @@ BEGIN
                              expected_departure_time ASC,
                              stop_index ASC', datestring),
             aws_commons.create_s3_uri(
-                    concat('abods-', public.environment_name(), '-exporter-bucket'),
+                    concat('abods-', SPLIT_PART(aurora_db_instance_identifier(), '-', 2), '-exporter-bucket'),
                     concat(
                             'historic/csv/timetable/YYYY=',
                             DATE_PART('year', partition_date),
@@ -62,7 +58,7 @@ BEGIN
                     FROM public."SiriVMPositions"
                     WHERE date_of_journey = ''%s''::DATE', datestring),
             aws_commons.create_s3_uri(
-                    concat('abods-', public.environment_name(), '-exporter-bucket'),
+                    concat('abods-', SPLIT_PART(aurora_db_instance_identifier(), '-', 2), '-exporter-bucket'),
                     concat(
                             'historic/csv/siri/YYYY=',
                             DATE_PART('year', partition_date),
