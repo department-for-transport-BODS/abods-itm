@@ -195,4 +195,7 @@
     <changeSet id="61" author="abodsuser">
         <sqlFile path="sql/61-update-timetable-inbound-outbound-fix.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="62" author="abodsuser">
+        <sqlFile path="sql/62-index-latlong-in-summary-and-fix-int8-sync.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
