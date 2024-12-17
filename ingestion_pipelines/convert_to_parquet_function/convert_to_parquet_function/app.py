@@ -40,73 +40,102 @@ avl_cols = [
     "departure_time",
 ]
 
-
-def get_pa_schema(cols: list) -> pa.schema:
-    col_list_wtypes = []
-
-    col_list_wtypes = [(col, pa.string()) for col in cols]
-
-    return pa.schema(col_list_wtypes)
-
-
 logger = Logger()
 
+s3_fs = fs.S3FileSystem(region=os.environ.get("AWS_REGION", "eu-west-2"))
+s3_bucket = os.environ.get("EXPORTER_BUCKET")
 
-def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
-    s3_bucket = os.environ.get("EXPORTER_BUCKET")
-    s3_fs = fs.S3FileSystem(region=os.environ.get("AWS_REGION", "eu-west-1"))
+
+def get_s3_path(path: str) -> str:
+    return f"{s3_bucket}/{path}"
+
+
+def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
     process_date = parse(event.get("process_date"))
     pd_year = process_date.year
     pd_month = str(process_date.month).zfill(2)
     pd_day = str(process_date.day).zfill(2)
-    part_2 = event.get("part_2")
-    is_timetable = event.get("is_timetable")
-    local_parquet = f"historic/parquet/YYYY={pd_year}/MM={pd_month}/DD={pd_day}/siri_vm_{pd_year}{pd_month}{pd_day}.parquet"
-    csv_files = [
-        f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv",
-    ]
-    if part_2:
-        csv_files = [
-            f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv",
-            f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv_part2",
-        ]
-    schema = get_pa_schema(avl_cols)
-    column_names = avl_cols
-    if is_timetable:
-        schema = get_pa_schema(timetable_cols)
-        column_names = timetable_cols
-        csv_files = [
-            f"historic/csv/timetable/YYYY={pd_year}/MM={pd_month}/{pd_year}-{pd_month}-{pd_day}.csv",
-        ]
-        local_parquet = f"historic/parquet/YYYY={pd_year}/MM={pd_month}/DD={pd_day}/timetable_{pd_year}{pd_month}{pd_day}.parquet"
-    batch_id = 0
-    output_path = f"{s3_bucket}/{local_parquet}"
-    logger.info(f"Converting {csv_files} --> [{output_path}]")
 
-    # Read the CSV file from S3
+    output = {"statusCode": 200, "timetable": {"processed": False}, "avl": {"processed": False}}
+
+    if not event.get("skip_timetable") == "true":
+        base_input_path = get_s3_path(
+            f"historic/csv/timetable/YYYY={pd_year}/MM={pd_month}/{pd_year}-{pd_month}-{pd_day}.csv")
+        if not s3_fs.get_file_info(base_input_path).is_file:
+            output["timetable"]["input_missing"] = True
+        else:
+            output_path = get_s3_path(
+                f"historic/parquet/YYYY={pd_year}/MM={pd_month}/DD={pd_day}/timetable_{pd_year}{pd_month}{pd_day}.parquet")
+            if event.get("overwrite_existing_output") != "true" and s3_fs.get_file_info(output_path).is_file:
+                output["timetable"]["output_exists"] = True
+            else:
+                stream_and_convert(
+                    input_path=base_input_path,
+                    output_path=output_path,
+                    column_names=timetable_cols,
+                )
+                output["timetable"]["processed"] = True
+
+    if not event.get("skip_avl"):
+        base_input_path = get_s3_path(
+            f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv")
+        if not s3_fs.get_file_info(base_input_path).is_file:
+            output["avl"]["input_missing"] = True
+        else:
+            output_path = get_s3_path(
+                f"historic/parquet/YYYY={pd_year}/MM={pd_month}/DD={pd_day}/siri_vm_{pd_year}{pd_month}{pd_day}.parquet")
+            if event.get("overwrite_existing_output") != "true" and s3_fs.get_file_info(output_path).is_file:
+                output["avl"]["output_exists"] = True
+            else:
+                stream_and_convert(
+                    input_path=base_input_path,
+                    output_path=output_path,
+                    column_names=avl_cols,
+                )
+                output["avl"]["processed"] = True
+
+    return output
+
+
+def stream_and_convert(input_path: str, output_path: str, column_names: list[str]) -> None:
+    paths = [input_path]
+    part = 2
+    while True:
+        extra_data_path = input_path + "_part" + str(part)
+        if not s3_fs.get_file_info(extra_data_path).is_file:
+            logger.info(f"Did not find {extra_data_path}")
+            break
+        if part == 10:
+            raise Exception(
+                "There are more parts to the data than the script has been written to handle",
+            )
+        logger.info(f"Found {extra_data_path}")
+        paths.append(extra_data_path)
+        part = part + 1
+
+    logger.info(f"Converting {input_path} --> [{output_path}]")
+    schema = pa.schema([(col, pa.string()) for col in column_names])
+    batch_id = 0
+
     with (
         s3_fs.open_output_stream(output_path) as output_stream,
         pq.ParquetWriter(output_stream, schema) as writer,
     ):
-        for csv_file in csv_files:
-            input_path = f"{s3_bucket}/{csv_file}"
-            with s3_fs.open_input_stream(input_path) as input_stream:
-                logger.info(f"Processing {input_path}")
-                csv_stream = pv.open_csv(
+        for file_path in paths:
+            logger.info(f"Processing {file_path}")
+            with (
+                s3_fs.open_input_stream(file_path) as input_stream,
+                pv.open_csv(
                     input_stream,
                     read_options=pv.ReadOptions(
-                        block_size=150 * 1000000,
+                        block_size=150 * 1_000_000,
                         column_names=column_names,
                     ),
                     parse_options=pv.ParseOptions(delimiter=",", quote_char='"'),
                     convert_options=pv.ConvertOptions(column_types=schema),
-                )
-                for batch in csv_stream:
+                ) as reader,
+            ):
+                for batch in reader:
                     batch_id += 1
                     logger.info(f"Writing batch {batch_id}")
                     writer.write_batch(batch)
-                csv_stream = None
-
-    return {
-        "statusCode": 200,
-    }
