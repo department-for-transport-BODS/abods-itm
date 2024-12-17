@@ -75,3 +75,16 @@ BEGIN
     RAISE NOTICE 'Exported sirivmpositions for date %', partition_date::TEXT;
 END;
 $procedure$;
+
+CREATE OR REPLACE PROCEDURE public.historic_matching_summary_generation(IN partition_date DATE)
+    LANGUAGE PLPGSQL AS
+$procedure$
+BEGIN
+    CALL public.generate_expected_tables(partition_date);
+    CALL public.create_timetable_threshold_summary(partition_date);
+    CALL public.populate_headway(partition_date);
+    CALL public.summary_by_stops(partition_date);
+    CALL public.summary_by_services(partition_date);
+    CALL public.summary_by_operators(partition_date);
+END;
+$procedure$;
