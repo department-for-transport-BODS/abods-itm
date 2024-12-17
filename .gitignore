@@ -30,3 +30,5 @@ coverage.xml
 
 # dotenv / environment variables file
 .env
+
+docker/historic-matching/files/
