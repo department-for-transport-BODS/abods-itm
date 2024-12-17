@@ -32,7 +32,7 @@ begin
                     expected_departure_time asc,
                     stop_index  asc
                 '',
-                aws_commons.create_s3_uri(''abods-{SPLIT_PART(aurora_db_instance_identifier(), ''-'', 2)}-exporter-bucket'', ''historic/csv/timetable/YYYY=%s/MM=%s/%s.csv'',  ''eu-west-2''),
+                aws_commons.create_s3_uri(''abods-'' + SPLIT_PART(aurora_db_instance_identifier(), ''-'', 2) + ''-exporter-bucket'', ''historic/csv/timetable/YYYY=%s/MM=%s/%s.csv'',  ''eu-west-2''),
                 options :=''format csv''
             )',
             datestring,
@@ -61,7 +61,7 @@ begin
     execute format(
             'SELECT * from aws_s3.query_export_to_s3(
             ''select * from public."SiriVMPositions" where date_of_journey  = ''''%s''''::date'',
-            aws_commons.create_s3_uri(''abods-{SPLIT_PART(aurora_db_instance_identifier(), ''-'', 2)}-exporter-bucket'', ''historic/csv/siri/YYYY=%s/MM=%s/siri_vm_%s.csv'',  ''eu-west-2''),
+            aws_commons.create_s3_uri(''abods-'' + SPLIT_PART(aurora_db_instance_identifier(), ''-'', 2) + ''-exporter-bucket'', ''historic/csv/siri/YYYY=%s/MM=%s/siri_vm_%s.csv'',  ''eu-west-2''),
         options :=''format csv''
         )',
             datestring,
