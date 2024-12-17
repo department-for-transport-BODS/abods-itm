@@ -5,6 +5,7 @@ import os
 import sys
 from multiprocessing import Process, Queue
 from queue import Empty
+from typing import TYPE_CHECKING
 
 import boto3
 import duckdb
@@ -13,10 +14,12 @@ from aws_lambda_powertools import Logger
 from .client_db import TimetableDBClient
 from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import match_group_id_avls
-from .matcher.models import (
-    StopDetails,  # noqa: TC001 I don't mind importing types at runtime
-)
 from .matcher.utils import log_execution_time
+
+if TYPE_CHECKING:
+    from .matcher.models import (
+        StopDetails,
+    )
 
 logger = Logger()
 
