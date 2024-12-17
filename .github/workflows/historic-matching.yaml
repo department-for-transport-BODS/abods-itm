@@ -1,0 +1,102 @@
+name: historic matching
+run-name: 
+  run historic matching against ${{ startsWith(github.ref, 'refs/tags/v') && 'prod' ||
+  github.ref_name == 'main' && 'uat' ||
+  github.ref_name == 'test' && 'test' ||
+  github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      process_date:
+        type: string
+        description: target date for historic matching
+        required: true
+
+concurrency:
+  group:
+    ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/v') && 'prod' ||
+    github.ref_name == 'main' && 'uat' ||
+    github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ENVIRONMENT: ${{ startsWith(github.ref, 'refs/tags/v') && 'prod' ||
+    github.ref_name == 'main' && 'uat' ||
+    github.ref_name == 'test' && 'test' ||
+    github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+  PROCESS_DATE: ${{ github.event.inputs.process_date }}
+  PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    environment: ${{ startsWith(github.ref, 'refs/tags/v') && 'prod' ||
+      github.ref_name == 'main' && 'uat' ||
+      github.ref_name == 'test' && 'test' ||
+      github.ref_name == 'dev' && 'dev' || 'sandbox' }}
+    outputs:
+      AWS_ACCOUNT_ID: ${{ steps.set-vars.outputs.AWS_ACCOUNT_ID }}
+
+    steps:
+      - name: validate job parameters
+        run: |
+          if [[ ! -z ${PROCESS_DATE} ]]; then
+            echo """ \
+              Executing deploy job using parameters:
+                (Historic Matching Date) - $PROCESS_DATE
+                (Target Environment)     - $ENVIRONMENT
+            """
+          else
+            echo "[ERROR] A date for processing historic matching must be provided. Exiting"
+          fi
+
+      - name: set environment specific vars
+        id: set-vars
+        run: |
+          echo "AWS_ACCOUNT_ID=${{ vars.AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
+
+  matching:
+    runs-on: ubuntu-latest
+    needs: validation
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-session-name: ${{ vars.PROJECT_NAME }}-itm-${{ env.ENVIRONMENT }}-historic-matching
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
+      - name: start historic matching task
+        run: |
+          PRIVATE_SUBNET_IDS=$(aws ssm get-parameter \
+            --name "/$PROJECT_NAME/$ENVIRONMENT/vpc/subnets/private" \
+            --output text \
+            --query Parameter.Value)
+          VPC_SG_IDS=$(aws ssm get-parameter \
+            --name "/$PROJECT_NAME/$ENVIRONMENT/ec2/securitygroup/historic-matching/id" \
+            --output text \
+            --query Parameter.Value)
+
+          TASK_ID=$(aws ecs run-task \
+            --cluster "$PROJECT_NAME-$ENVIRONMENT" \
+            --task-definition "$PROJECT_NAME-$ENVIRONMENT-historic-matching" \
+            --overrides "{ \"containerOverrides\": [ { \"name\": \"matcher\", \"environment\": [ { \"name\": \"PROCESS_DATE\", \"value\": \"$PROCESS_DATE\" } ] } ] }" \
+            --count 1 --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$VPC_SG_IDS]}" | \
+            jq -r '.tasks.[0].taskArn' | cut -d "/" -f 3)
+
+          ecs_logs_link="https://$AWS_REGION.console.aws.amazon.com/ecs/v2/clusters/$PROJECT_NAME-$ENVIRONMENT/tasks/$TASK_ID/logs?region=$AWS_REGION"
+
+          echo "You can read the logs at $ecs_logs_link"
