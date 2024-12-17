@@ -12,8 +12,8 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     find_matches_in_potential_matches,
     find_potential_matches,
     map_matched_stop_to_db,
+    match_avl_batch,
     move_potential_match_to_match,
-    positions_timetable_lookup,
     remove_matched_stops,
     select_potential_match_with_same_recordedattime,
     update_matched_stop,
@@ -2071,7 +2071,7 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
             ),
         ],
     )
-    def test_positions_timetable_lookup(  # noqa: D102 - BODS-7131
+    def test_match_avl_batch(  # noqa: D102 - BODS-7131
         self,
         timetable,
         avl_list,
@@ -2087,7 +2087,7 @@ class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
         for avl in avl_list:
             # Simulate invoking the lambda once per AVL for the group id
             # In practice there is only one AVL for a given group id in each batch
-            to_set, to_remove, stop_history = positions_timetable_lookup(
+            to_set, to_remove, stop_history = match_avl_batch(
                 LiveTimetableStore(timetable),
                 [avl],
                 stop_history,
