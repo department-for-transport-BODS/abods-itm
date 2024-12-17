@@ -53,7 +53,7 @@ logger = Logger()
 
 
 def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
-    s3_bucket = "abods-sandbox-exporter-bucket"
+    s3_bucket = os.environ.get("EXPORTER_BUCKET")
     s3_fs = fs.S3FileSystem(region=os.environ.get("AWS_REGION", "eu-west-1"))
     process_date = parse(event.get("process_date"))
     pd_year = process_date.year

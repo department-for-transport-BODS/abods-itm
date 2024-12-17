@@ -268,7 +268,7 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
           (SELECT DISTINCT vehiclejourney_id
            FROM public."Timetable"
            WHERE date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
-             AND expected_departure_time BETWEEN current_timestamp(0) - interval %s MINUTE AND current_timestamp(0) + interval %s MINUTE)
+             AND expected_departure_time BETWEEN current_timestamp(0) - interval '%s' MINUTE AND current_timestamp(0) + interval '%s' MINUTE)
         SELECT t.group_id,
                row_number() OVER (PARTITION BY t.vehiclejourney_id
                                   ORDER BY t.group_id, t.expected_departure_time ASC, t.stop_index ASC) AS stop_index,

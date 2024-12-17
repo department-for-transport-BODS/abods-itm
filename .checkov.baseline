@@ -119,12 +119,6 @@
             "file": "/ingestion_pipelines/template.yaml",
             "findings": [
                 {
-                    "resource": "AWS::EC2::SecurityGroup.Convert2parquetFunctionSecurityGroup",
-                    "check_ids": [
-                        "CKV_AWS_23"
-                    ]
-                },
-                {
                     "resource": "AWS::EC2::SecurityGroup.SiriVmDbIngestionFunctionSecurityGroup",
                     "check_ids": [
                         "CKV_AWS_23"
@@ -657,7 +651,7 @@
                     ]
                 },
                 {
-                    "resource": "AWS::Serverless::Function.Convert2parquet",
+                    "resource": "AWS::Serverless::Function.ConvertToParquetFunction",
                     "check_ids": [
                         "CKV_AWS_115",
                         "CKV_AWS_116",
