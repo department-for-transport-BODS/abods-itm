@@ -2,18 +2,18 @@
 
 set -euo pipefail
 
-if [ $# -eq 0 ]
+if [ $# -le 2 ]
   then
-    echo "Usage: $0 <process_date YYYY-MM-DD>"
+    echo "Usage: $0 <process_date YYYY-MM-DD> <environment sandbox|dev|test|uat|prod>"
     exit
 fi
 
-PROCESS_DATE=$1
+PROCESS_DATE="$1"
+ENVIRONMENT="$2"
 PROJECT_NAME="abods"
-ENVIRONMENT="sandbox"
 
-PRIVATE_SUBNET_IDS=$(aws ssm get-parameter --name /abods/$ENVIRONMENT/vpc/subnets/private --output text --query Parameter.Value)
-VPC_SG_IDS=$(aws ssm get-parameter --name /abods/$ENVIRONMENT/ec2/securitygroup/rdsproxy-access/id --output text --query Parameter.Value)
+PRIVATE_SUBNET_IDS=$(aws ssm get-parameter --name "/abods/$ENVIRONMENT/vpc/subnets/private" --output text --query Parameter.Value)
+VPC_SG_IDS=$(aws ssm get-parameter --name "/abods/$ENVIRONMENT/ec2/securitygroup/rdsproxy-access/id" --output text --query Parameter.Value)
 
 TASK_ID=$(aws ecs run-task --cluster "$PROJECT_NAME-$ENVIRONMENT" --task-definition "$PROJECT_NAME-$ENVIRONMENT-historic-matching" --overrides "{ \"containerOverrides\": [ { \"name\": \"matcher\", \"environment\": [ { \"name\": \"PROCESS_DATE\", \"value\": \"$PROCESS_DATE\" } ] } ] }" --count 1 --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$VPC_SG_IDS]}" | jq -r '.tasks.[0].taskArn' | cut -d "/" -f 3)
 
