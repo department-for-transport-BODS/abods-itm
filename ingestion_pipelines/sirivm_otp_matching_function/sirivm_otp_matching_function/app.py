@@ -151,7 +151,10 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
         db_client.batch_failed(batch_id)
 
 
-def validate_avl_list(avl_list: Sequence[LiveAVLRecord], expected_batch_id: int) -> None:
+def validate_avl_list(
+    avl_list: Sequence[LiveAVLRecord],
+    expected_batch_id: int,
+) -> None:
     for avl in avl_list:
         if avl["batch_id"] != expected_batch_id:
             raise Exception("AVLs with multiple match ids retrieved")  # noqa: TRY002 - Not worth making an exception type

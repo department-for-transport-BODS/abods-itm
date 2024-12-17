@@ -14,8 +14,8 @@ from botocore.exceptions import ClientError
 from pandas import DataFrame
 
 from .matcher.models import (
-    LiveAVLRecord,
     ControlInfo,
+    LiveAVLRecord,
     OperatorShards,
     StopHistory,
     Timetable,
