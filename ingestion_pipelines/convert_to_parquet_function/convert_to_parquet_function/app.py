@@ -56,17 +56,26 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
     pd_month = str(process_date.month).zfill(2)
     pd_day = str(process_date.day).zfill(2)
 
-    output = {"statusCode": 200, "timetable": {"processed": False}, "avl": {"processed": False}}
+    output = {
+        "statusCode": 200,
+        "timetable": {"processed": False},
+        "avl": {"processed": False},
+    }
 
-    if not event.get("skip_timetable") == "true":
+    if event.get("skip_timetable") != "true":
         base_input_path = get_s3_path(
-            f"historic/csv/timetable/YYYY={pd_year}/MM={pd_month}/{pd_year}-{pd_month}-{pd_day}.csv")
+            f"historic/csv/timetable/YYYY={pd_year}/MM={pd_month}/{pd_year}-{pd_month}-{pd_day}.csv",
+        )
         if not s3_fs.get_file_info(base_input_path).is_file:
             output["timetable"]["input_missing"] = True
         else:
             output_path = get_s3_path(
-                f"historic/parquet/YYYY={pd_year}/MM={pd_month}/DD={pd_day}/timetable_{pd_year}{pd_month}{pd_day}.parquet")
-            if event.get("overwrite_existing_output") != "true" and s3_fs.get_file_info(output_path).is_file:
+                f"historic/parquet/YYYY={pd_year}/MM={pd_month}/DD={pd_day}/timetable_{pd_year}{pd_month}{pd_day}.parquet",
+            )
+            if (
+                event.get("overwrite_existing_output") != "true"
+                and s3_fs.get_file_info(output_path).is_file
+            ):
                 output["timetable"]["output_exists"] = True
             else:
                 stream_and_convert(
@@ -76,15 +85,20 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
                 )
                 output["timetable"]["processed"] = True
 
-    if not event.get("skip_avl"):
+    if event.get("skip_avl") != "true":
         base_input_path = get_s3_path(
-            f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv")
+            f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv",
+        )
         if not s3_fs.get_file_info(base_input_path).is_file:
             output["avl"]["input_missing"] = True
         else:
             output_path = get_s3_path(
-                f"historic/parquet/YYYY={pd_year}/MM={pd_month}/DD={pd_day}/siri_vm_{pd_year}{pd_month}{pd_day}.parquet")
-            if event.get("overwrite_existing_output") != "true" and s3_fs.get_file_info(output_path).is_file:
+                f"historic/parquet/YYYY={pd_year}/MM={pd_month}/DD={pd_day}/siri_vm_{pd_year}{pd_month}{pd_day}.parquet",
+            )
+            if (
+                event.get("overwrite_existing_output") != "true"
+                and s3_fs.get_file_info(output_path).is_file
+            ):
                 output["avl"]["output_exists"] = True
             else:
                 stream_and_convert(
@@ -97,7 +111,11 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
     return output
 
 
-def stream_and_convert(input_path: str, output_path: str, column_names: list[str]) -> None:
+def stream_and_convert(
+    input_path: str,
+    output_path: str,
+    column_names: list[str],
+) -> None:
     paths = [input_path]
     part = 2
     while True:
@@ -105,8 +123,8 @@ def stream_and_convert(input_path: str, output_path: str, column_names: list[str
         if not s3_fs.get_file_info(extra_data_path).is_file:
             logger.info(f"Did not find {extra_data_path}")
             break
-        if part == 10:
-            raise Exception(
+        if part == 10:  # noqa: PLR2004 not really a magic value, just not sure what happens when we reach 2 chars
+            raise Exception(  # noqa: TRY002 Not interested for now
                 "There are more parts to the data than the script has been written to handle",
             )
         logger.info(f"Found {extra_data_path}")
