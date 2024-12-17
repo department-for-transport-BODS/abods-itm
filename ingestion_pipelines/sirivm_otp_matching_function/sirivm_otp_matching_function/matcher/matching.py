@@ -826,7 +826,7 @@ def match_avl_batch(
     timetable: TimetableStore,
     avls: Sequence[AVLRecord],
     stop_history: StopHistory,
-) -> tuple[Sequence[RecordToAdd], Sequence[RecordToRemove], dict]:
+) -> tuple[Sequence[RecordToAdd], Sequence[RecordToRemove], StopHistory]:
     """
     Perform matching on a time sliced batch of AVL records.
 
@@ -899,7 +899,7 @@ def match_avl(
     timetable: TimetableStore,
     avl: AVLRecord,
     stop_history: StopHistory,
-) -> tuple[Sequence[RecordToAdd], Sequence[RecordToRemove], dict]:
+) -> tuple[Sequence[RecordToAdd], Sequence[RecordToRemove], StopHistory]:
     """
     Given an AVL, compare to known stops in timetable, and return updated stop history, database updates to perform
 
