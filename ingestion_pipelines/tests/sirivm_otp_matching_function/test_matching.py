@@ -1025,7 +1025,6 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                         "time_difference": -355.0,
                         "last_time_in_zone_str": "11:09:05",
                         "timetable_id": 893823336,
-                        "batch_id": batch_id,
                         "last_time_in_zone": last_time_in_zone_non_final,
                         "timestamp_after_estimate": None,
                         "otp_state": "Early",
@@ -1047,7 +1046,6 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                         "time_difference": -420.0,
                         "last_time_in_zone_str": "11:35:00",
                         "timetable_id": 893822665,
-                        "batch_id": batch_id,
                         "last_time_in_zone": last_time_in_zone_final,
                         "timestamp_after_estimate": None,
                         "otp_state": "OnTime",
@@ -1643,7 +1641,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "time_difference": 48.0,
                         "last_time_in_zone_str": "11:15:48",
                         "timetable_id": 893823336,
-                        "batch_id": avl_record["batch_id"],
                         "last_time_in_zone": datetime(
                             2024,
                             8,
@@ -1693,7 +1690,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "time_difference": 184.0,
                         "last_time_in_zone_str": "11:20:04",
                         "timetable_id": 893823358,
-                        "batch_id": avl_record["batch_id"],
                         "last_time_in_zone": datetime(
                             2024,
                             8,
@@ -1798,7 +1794,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "time_difference": 534.0,
                         "last_time_in_zone_str": "11:36:54",
                         "timetable_id": 893823138,
-                        "batch_id": avl_record["batch_id"],
                         "last_time_in_zone": datetime(
                             2024,
                             8,
@@ -1844,7 +1839,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                         "time_difference": -1375.0,
                         "last_time_in_zone_str": "16:12:18",
                         "timetable_id": 1091293263,
-                        "batch_id": avl_record_2["batch_id"],
                         "last_time_in_zone": datetime(
                             2024,
                             10,
@@ -1920,7 +1914,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 },
                 [
                     {
-                        "batch_id": 591355,
                         "group_id": "scem|9|13|2024-10-31",
                         "last_time_in_zone": datetime(
                             2024,

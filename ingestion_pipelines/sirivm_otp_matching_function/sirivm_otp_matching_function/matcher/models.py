@@ -39,15 +39,20 @@ class AVLRecord(TypedDict):
     """AVL record"""
 
     recorded_at_time: str
-    response_timestamp: str
     latitude: float
     longitude: float
     line_name: str
     operator_ref: str
-    vehicle_ref: str
     journey_ref: str
     direction_ref: str
     date_of_journey: str
+
+    # Available, but not used
+    # response_timestamp: str
+    # vehicle_ref: str
+
+class LiveAVLRecord(AVLRecord):
+    # Does not exist in historical data from ITO, so should not be used in new historic matching
     batch_id: int
 
 
@@ -77,7 +82,7 @@ class RecordToAdd(TypedDict):
     time_difference: float
     last_time_in_zone_str: str | None
     timetable_id: int
-    batch_id: int
+    # batch_id: int
     last_time_in_zone: datetime | None
     timestamp_after_estimate: datetime | None
     otp_state: Literal["Early", "OnTime", "Late"]

@@ -556,7 +556,6 @@ def map_matched_stop_to_db(
             if not is_estimate
             else None,
             "timetable_id": stop_timetable_id(route_details[pm_index]),
-            "batch_id": avl["batch_id"],
             "last_time_in_zone": last_time_in_zone if not is_estimate else None,
             "timestamp_after_estimate": last_time_in_zone if is_estimate else None,
             "otp_state": get_otp_state(is_final_stop, time_difference),

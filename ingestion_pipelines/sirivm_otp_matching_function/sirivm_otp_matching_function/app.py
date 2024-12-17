@@ -14,7 +14,7 @@ from .client_s3 import TimetableS3Client, filter_avl_list
 from .matcher.handle_stop_history import clean_stop_history
 from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import positions_timetable_lookup
-from .matcher.models import AVLRecord, OperatorShards, Timetable
+from .matcher.models import LiveAVLRecord, OperatorShards, Timetable
 from .matcher.utils import timer
 
 logger = Logger()
@@ -151,7 +151,7 @@ def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
         db_client.batch_failed(batch_id)
 
 
-def validate_avl_list(avl_list: Sequence[AVLRecord], expected_batch_id: int) -> None:
+def validate_avl_list(avl_list: Sequence[LiveAVLRecord], expected_batch_id: int) -> None:
     for avl in avl_list:
         if avl["batch_id"] != expected_batch_id:
             raise Exception("AVLs with multiple match ids retrieved")  # noqa: TRY002 - Not worth making an exception type
