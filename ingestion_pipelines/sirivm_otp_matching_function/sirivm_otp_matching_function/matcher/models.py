@@ -98,7 +98,6 @@ class MatchedStop(TypedDict):
 class PotentialMatch(TypedDict):
     """Details of a stop that could be a match upon processing a later AVL point"""
 
-    last_avl_index: int
     last_distance: float
     last_time_in_zone: str
     is_estimate: NotRequired[bool]
@@ -107,7 +106,6 @@ class PotentialMatch(TypedDict):
 class GroupStopHistory(TypedDict):
     """Stored stop details for current journey matching"""
 
-    last_avl_index: int
     last_avl_time: str
     last_avl_longitude: float | None
     last_avl_latitude: float | None
