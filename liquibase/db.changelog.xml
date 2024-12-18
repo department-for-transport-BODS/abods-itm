@@ -198,4 +198,7 @@
     <changeSet id="62" author="abodsuser">
         <sqlFile path="sql/62-index-latlong-in-summary-and-fix-int8-sync.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="63" author="abodsuser">
+        <sqlFile path="sql/63-export-data-to-exporter-bucket.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
