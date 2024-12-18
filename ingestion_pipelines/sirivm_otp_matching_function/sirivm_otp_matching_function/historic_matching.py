@@ -12,7 +12,7 @@ from aws_lambda_powertools import Logger
 
 from .client_db import TimetableDBClient
 from .matcher.live_timetable_store import LiveTimetableStore
-from .matcher.matching import positions_timetable_lookup
+from .matcher.matching import match_group_id_avls
 from .matcher.models import (
     StopDetails,  # noqa: TC001 I don't mind importing types at runtime
 )
@@ -174,29 +174,7 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                         # sort just in case duckdb returns in the wrong order
                         avls.sort(key=lambda x: x["recorded_at_time"])
 
-                        journey_matches = []
-                        stop_history = {}
-                        for avl in avls:
-                            # noqa: TD003 TODO(gps035): The matching code should have an entry point for a single avl
-                            to_set, to_remove, stop_history = (
-                                positions_timetable_lookup(
-                                    timetable_store,
-                                    [avl],
-                                    stop_history,
-                                )
-                            )
-                            # The live matching code can result in a db update that it later changes its mind about
-                            # If that happens here, we can just remove any prior matches with the same timetable id,
-                            # before we update the db
-                            remove_timetable_ids = [
-                                rec["timetable_id"] for rec in to_remove
-                            ]
-                            journey_matches = [
-                                rec
-                                for rec in journey_matches
-                                if rec["timetable_id"] not in remove_timetable_ids
-                            ]
-                            journey_matches.extend(to_set)
+                        journey_matches = match_group_id_avls(timetable_store, avls)
 
                         db_client.historic_update_success(
                             None,  # We aren't using avl batches, so we need to skip the batch table update
