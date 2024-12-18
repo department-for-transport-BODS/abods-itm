@@ -506,7 +506,6 @@ expected_remove_tlct = [
 expected_stop_history_tlct = {
     "tlct|378|1215|2024-08-20": {
         "last_avl_time": str(datetime(2024, 8, 20, 12, 0, 5, tzinfo=UTC)),
-        "last_avl_index": 91,
         "last_avl_latitude": 53.660963,
         "last_avl_longitude": -1.857058,
         "matched_stops": {
@@ -853,7 +852,6 @@ expected_remove_coac = [
 expected_stop_history_coac = {
     "coac|41|1630|2024-10-17": {
         "last_avl_time": str(datetime(2024, 10, 17, 17, 7, 59, tzinfo=UTC)),
-        "last_avl_index": 110,
         "last_avl_latitude": 51.539658,
         "last_avl_longitude": -2.410061,
         "matched_stops": {
@@ -1300,7 +1298,6 @@ expected_remove_slea = [
 expected_stop_history_slea = {
     "slea|it1|1030|2024-10-23": {
         "last_avl_time": str(datetime(2024, 10, 23, 10, 57, 13, tzinfo=UTC)),
-        "last_avl_index": 124,
         "last_avl_latitude": 52.996857,
         "last_avl_longitude": -0.40885,
         "matched_stops": {
@@ -1315,7 +1312,6 @@ expected_stop_history_slea = {
         },
         "potential_matches": {
             "33": {
-                "last_avl_index": 124,
                 "last_distance": 79.17722004963838,
                 "last_time_in_zone": str(datetime(2024, 10, 23, 10, 57, 1, tzinfo=UTC)),
                 "is_estimate": False,
@@ -2401,7 +2397,6 @@ expected_remove_scem = [
 ]
 expected_stop_history_scem = {
     "scem|9|11|2024-10-31": {
-        "last_avl_index": 384,
         "last_avl_time": str(datetime(2024, 10, 31, 9, 49, 26, tzinfo=UTC)),
         "last_avl_latitude": 53.226475,
         "last_avl_longitude": -0.53755,
@@ -3295,7 +3290,6 @@ expected_remove_scem2 = [
 ]
 expected_stop_history_scem2 = {
     "scem|9|27|2024-11-06": {
-        "last_avl_index": 371,
         "last_avl_time": "2024-11-06 14:16:06+00:00",
         "last_avl_latitude": 53.20123,
         "last_avl_longitude": -0.587637,
@@ -4051,7 +4045,6 @@ expected_remove_coac30 = [
 
 expected_stop_history_coac30 = {
     "coac|99|1710|2024-10-30": {
-        "last_avl_index": 398,
         "last_avl_time": str(datetime(2024, 10, 30, 18, 58, 34, tzinfo=UTC)),
         "last_avl_latitude": 51.565052,
         "last_avl_longitude": -1.784906,
@@ -4067,7 +4060,6 @@ expected_stop_history_coac30 = {
         },
         "potential_matches": {
             "75": {
-                "last_avl_index": 398,
                 "last_distance": 19.030482529160707,
                 "last_time_in_zone": str(
                     datetime(2024, 10, 30, 18, 58, 34, tzinfo=UTC),
@@ -4080,7 +4072,6 @@ expected_stop_history_coac30 = {
 
 expected_stop_history_fbri_m4_0740_2024_11_28 = {
     "fbri|m4|0740|2024-11-28|inbound": {
-        "last_avl_index": 171,
         "last_avl_latitude": 51.45371,
         "last_avl_longitude": -2.597056,
         "last_avl_time": "2024-11-28 08:44:35+00:00",
@@ -4097,7 +4088,6 @@ expected_stop_history_fbri_m4_0740_2024_11_28 = {
         "potential_matches": {},
     },
     "fbri|m4|0740|2024-11-28|outbound": {
-        "last_avl_index": 126,
         "last_avl_latitude": 51.526817,
         "last_avl_longitude": -2.596336,
         "last_avl_time": "2024-11-28 08:28:06+00:00",

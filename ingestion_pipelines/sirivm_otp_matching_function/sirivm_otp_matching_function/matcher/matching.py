@@ -78,10 +78,8 @@ def create_matched_stop(last_time_in_zone: datetime, is_estimate: bool) -> Match
 def create_potential_match(
     avl: AVLRecord,
     distance: float,
-    avl_index: int,
 ) -> PotentialMatch:
     return {
-        "last_avl_index": avl_index,
         "last_distance": distance,
         "last_time_in_zone": str(avl_recorded_at_time_utc(avl)),
         "is_estimate": False,
@@ -203,7 +201,6 @@ def find_potential_matches(
     avl: AVLRecord,
     route_details: RouteDetails,
     group_stop_history: GroupStopHistory,
-    current_avl_index: int,
     final_stop_index: int,
 ) -> None:
     """
@@ -214,7 +211,6 @@ def find_potential_matches(
         avl (AVLRecord): Avl record
         route_details (RouteDetails): Route stop info
         group_stop_history (GroupStopHistory): Stop history of the current group id
-        current_avl_index (int): Current avl index
         final_stop_index (int): The stop index of the final stop
 
     """
@@ -256,7 +252,6 @@ def find_potential_matches(
             group_stop_history["potential_matches"][str(i)] = create_potential_match(
                 avl,
                 avl_next_stop_distance,
-                current_avl_index,
             )
             logger.debug(
                 "13. potential match found",
@@ -276,7 +271,6 @@ def find_potential_matches(
 
             if timestamp_after_estimate:
                 group_stop_history["potential_matches"][str(i)] = {
-                    "last_avl_index": current_avl_index,
                     "last_distance": avl_next_stop_distance,
                     "last_time_in_zone": timestamp_after_estimate,
                     "is_estimate": True,
@@ -293,7 +287,6 @@ def check_update_first_stop(
     route_details: RouteDetails,
     group_stop_history: GroupStopHistory,
     stop_pos_distances_remove: list[RecordToRemove],
-    current_avl_index: int,
 ) -> None:
     """
     Check if the bus is going in and out from the first stop zone within 5 mins and update the record if it does
@@ -304,7 +297,6 @@ def check_update_first_stop(
         route_details (RouteDetails): Route stop info
         group_stop_history (GroupStopHistory): Stop history of the current group id
         stop_pos_distances_remove (list): The list of stops that needs to have matched records removed from database
-        current_avl_index (int): Current avl index
 
     """
     logger.debug("check and update first stop")
@@ -333,7 +325,7 @@ def check_update_first_stop(
                 del group_stop_history["matched_stops"][ms_index]
                 # 9.2 set this match as a potential match
                 group_stop_history["potential_matches"][ms_index] = (
-                    create_potential_match(avl, avl_ms_distance, current_avl_index)
+                    create_potential_match(avl, avl_ms_distance)
                 )
                 logger.debug(
                     f"updated stop 1 potential match: {group_stop_history['potential_matches'][ms_index]}",
@@ -356,7 +348,6 @@ def find_matches_in_potential_matches(
     avl: AVLRecord,
     route_details: RouteDetails,
     group_stop_history: GroupStopHistory,
-    current_avl_index: int,
     stop_pos_distances: list[RecordToAdd],
     potential_matches_to_delete: list[str],
     final_stop_index: int,
@@ -370,7 +361,6 @@ def find_matches_in_potential_matches(
         avl (AVLRecord): Avl record
         route_details (RouteDetails): Route stop info
         group_stop_history (GroupStopHistory): Stop history of the current group id
-        current_avl_index (int): Current avl index
         stop_pos_distances (list): The matched records that is going to be written into the database
         potential_matches_to_delete (list): The list of matched stops to be removed from the potential match list
         final_stop_index (int): The stop index of the final stop
@@ -419,12 +409,11 @@ def find_matches_in_potential_matches(
                         stop_pos_distances_remove,
                     )
             else:
-                # 17.Update potential match with last_avl_index of current_index and last_distance of as last distance from stop and last_time_in_zone of AVL time
+                # 17.Update potential match with last_distance of as last distance from stop and last_time_in_zone of AVL time
                 update_potential_match_with_recorded_at_time(
                     avl,
                     pm_index,
                     pm_details,
-                    current_avl_index,
                     avl_pm_distance,
                 )
         else:
@@ -464,7 +453,6 @@ def find_matches_in_potential_matches(
                 update_potential_match_without_recorded_at_time(
                     pm_index,
                     pm_details,
-                    current_avl_index,
                     avl_pm_distance,
                 )
 
@@ -568,7 +556,6 @@ def map_matched_stop_to_db(
 def update_potential_match_without_recorded_at_time(
     pm_index: str,
     pm_details: PotentialMatch,
-    current_avl_index: int,
     avl_pm_distance: float,
 ) -> None:
     """
@@ -579,11 +566,9 @@ def update_potential_match_without_recorded_at_time(
         avl (AVLRecord): Avl record
         pm_index (str): Potential match stop that needs to be updated
         pm_details (PotentialMatch): Potential match information stored in stop history
-        current_avl_index (int): Current avl index
         avl_pm_distance (float): The distance between the avl record and the stop
 
     """
-    pm_details["last_avl_index"] = current_avl_index
     pm_details["last_distance"] = avl_pm_distance
     logger.debug(
         "18. updated potential match",
@@ -596,7 +581,6 @@ def update_potential_match_with_recorded_at_time(
     avl: AVLRecord,
     pm_index: str,
     pm_details: PotentialMatch,
-    current_avl_index: int,
     avl_pm_distance: float,
 ) -> None:
     """
@@ -607,7 +591,6 @@ def update_potential_match_with_recorded_at_time(
         avl (AVLRecord): Avl record
         pm_index (str): Potential match stop that needs to be updated
         pm_details (PotentialMatch): Potential match information stored in stop history
-        current_avl_index (int): Current avl index
         avl_pm_distance (float): The distance between the avl record and the stop
 
     """
@@ -615,7 +598,6 @@ def update_potential_match_with_recorded_at_time(
     update_potential_match_without_recorded_at_time(
         pm_index,
         pm_details,
-        current_avl_index,
         avl_pm_distance,
     )
 
@@ -940,7 +922,6 @@ def match_avl(
     if stop_history_index not in stop_history:
         default_group_stop_history: GroupStopHistory = {
             "last_avl_time": "",
-            "last_avl_index": 0,
             "last_avl_longitude": None,
             "last_avl_latitude": None,
             "matched_stops": {},
@@ -948,15 +929,11 @@ def match_avl(
         }
         stop_history[stop_history_index] = default_group_stop_history
     group_stop_history = stop_history[stop_history_index]
-    current_avl_index = group_stop_history.get("last_avl_index")
     final_stop_index = len(route_details)
     current_avl_time = str(avl_recorded_at_time_utc(avl))
     # 3. check if current recorded_at_time is the same as the last avl time in group_stop_history
     if group_stop_history.get("last_avl_time") != current_avl_time:
-        # 4. increment last avl index by 1 and update the time
-        current_avl_index += 1
-        group_stop_history["last_avl_index"] = current_avl_index
-        logger.debug(f"avl index {current_avl_index}")
+        # 4. update the time
         if len(group_stop_history["matched_stops"]) > 0:
             # 6-10. Check if the bus is revisiting stop 1
             check_update_first_stop(
@@ -964,7 +941,6 @@ def match_avl(
                 route_details,
                 group_stop_history,
                 stop_pos_distances_remove,
-                current_avl_index,
             )
 
         # 11-14. Find potential matches
@@ -974,7 +950,6 @@ def match_avl(
             avl,
             route_details,
             group_stop_history,
-            current_avl_index,
             final_stop_index,
         )
 
@@ -986,7 +961,6 @@ def match_avl(
                 avl,
                 route_details,
                 group_stop_history,
-                current_avl_index,
                 stop_pos_distances,
                 potential_matches_to_remove,
                 final_stop_index,
