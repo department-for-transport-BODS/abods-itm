@@ -14,8 +14,8 @@ from botocore.exceptions import ClientError
 from pandas import DataFrame
 
 from .matcher.models import (
-    AVLRecord,
     ControlInfo,
+    LiveAVLRecord,
     OperatorShards,
     StopHistory,
     Timetable,
@@ -30,8 +30,8 @@ client = boto3.client("s3")
 def filter_avl_list(
     shard_identifier: str,
     sharded_operators: OperatorShards,
-    avl_list: Sequence[AVLRecord],
-) -> Sequence[AVLRecord]:
+    avl_list: Sequence[LiveAVLRecord],
+) -> Sequence[LiveAVLRecord]:
     """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
     if shard_identifier == "0":
         # Allow all operators that aren't in a shard
@@ -197,7 +197,7 @@ class TimetableS3Client:
         return data
 
     @timer(logger)
-    def get_avl_data(self, filename: str | list[str]) -> Sequence[AVLRecord]:
+    def get_avl_data(self, filename: str | list[str]) -> Sequence[LiveAVLRecord]:
         """Get AVL Data from S3 and return a list of AVLData models"""
         data = self.get_avl_data_df(filename)
         return data.to_dict("records")

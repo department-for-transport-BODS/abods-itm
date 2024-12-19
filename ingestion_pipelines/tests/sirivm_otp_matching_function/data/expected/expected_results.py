@@ -2,7 +2,6 @@ from datetime import UTC, datetime  # noqa: N999 - BODS-7131
 
 expected_set_tlct = [
     {
-        "batch_id": 812384,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 28, 22, tzinfo=UTC),
         "last_time_in_zone_str": "11:28:22",
@@ -14,7 +13,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812398,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 30, 50, tzinfo=UTC),
         "last_time_in_zone_str": "11:30:50",
@@ -26,7 +24,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812404,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 31, 53, tzinfo=UTC),
         "last_time_in_zone_str": "11:31:53",
@@ -38,7 +35,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812406,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 32, 20, tzinfo=UTC),
         "last_time_in_zone_str": "11:32:20",
@@ -50,7 +46,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812408,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 32, 50, tzinfo=UTC),
         "last_time_in_zone_str": "11:32:50",
@@ -62,7 +57,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812420,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 34, 42, tzinfo=UTC),
         "last_time_in_zone_str": "11:34:42",
@@ -74,7 +68,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812423,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC),
         "last_time_in_zone_str": "11:35:25",
@@ -86,7 +79,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812423,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC),
         "last_time_in_zone_str": "11:35:25",
@@ -98,7 +90,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812428,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 36, 14, tzinfo=UTC),
         "last_time_in_zone_str": "11:36:14",
@@ -110,7 +101,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812431,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 36, 47, tzinfo=UTC),
         "last_time_in_zone_str": "11:36:47",
@@ -122,7 +112,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812436,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 36, 55, tzinfo=UTC),
         "last_time_in_zone_str": "11:36:55",
@@ -134,7 +123,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812436,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -146,7 +134,6 @@ expected_set_tlct = [
         "timetable_id": 893823270,
     },
     {
-        "batch_id": 812439,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 37, 37, tzinfo=UTC),
         "last_time_in_zone_str": "11:37:37",
@@ -158,7 +145,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812439,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 37, 37, tzinfo=UTC),
         "last_time_in_zone_str": "11:37:37",
@@ -170,7 +156,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812445,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 38, 47, tzinfo=UTC),
         "last_time_in_zone_str": "11:38:47",
@@ -182,7 +167,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812448,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 39, 20, tzinfo=UTC),
         "last_time_in_zone_str": "11:39:20",
@@ -194,7 +178,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812451,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -206,7 +189,6 @@ expected_set_tlct = [
         "timetable_id": 893823050,
     },
     {
-        "batch_id": 812455,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -218,7 +200,6 @@ expected_set_tlct = [
         "timetable_id": 893823204,
     },
     {
-        "batch_id": 812458,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 40, 46, tzinfo=UTC),
         "last_time_in_zone_str": "11:40:46",
@@ -230,7 +211,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812470,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 41, 52, tzinfo=UTC),
         "last_time_in_zone_str": "11:41:52",
@@ -242,7 +222,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812472,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 43, 8, tzinfo=UTC),
         "last_time_in_zone_str": "11:43:08",
@@ -254,7 +233,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812472,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 43, 8, tzinfo=UTC),
         "last_time_in_zone_str": "11:43:08",
@@ -266,7 +244,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812472,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -278,7 +255,6 @@ expected_set_tlct = [
         "timetable_id": 893823138,
     },
     {
-        "batch_id": 812473,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 43, 44, tzinfo=UTC),
         "last_time_in_zone_str": "11:43:44",
@@ -290,7 +266,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812479,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 44, 34, tzinfo=UTC),
         "last_time_in_zone_str": "11:44:34",
@@ -302,7 +277,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812487,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 46, 22, tzinfo=UTC),
         "last_time_in_zone_str": "11:46:22",
@@ -314,7 +288,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812491,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 46, 45, tzinfo=UTC),
         "last_time_in_zone_str": "11:46:45",
@@ -326,7 +299,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812495,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 46, 58, tzinfo=UTC),
         "last_time_in_zone_str": "11:46:58",
@@ -338,7 +310,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812496,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 47, 30, tzinfo=UTC),
         "last_time_in_zone_str": "11:47:30",
@@ -350,7 +321,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812498,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 48, 19, tzinfo=UTC),
         "last_time_in_zone_str": "11:48:19",
@@ -362,7 +332,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812502,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 48, 30, tzinfo=UTC),
         "last_time_in_zone_str": "11:48:30",
@@ -374,7 +343,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812509,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -386,7 +354,6 @@ expected_set_tlct = [
         "timetable_id": 893822401,
     },
     {
-        "batch_id": 812514,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 50, 28, tzinfo=UTC),
         "last_time_in_zone_str": "11:50:28",
@@ -398,7 +365,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812520,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 51, 35, tzinfo=UTC),
         "last_time_in_zone_str": "11:51:35",
@@ -410,7 +376,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812531,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 53, 8, tzinfo=UTC),
         "last_time_in_zone_str": "11:53:08",
@@ -422,7 +387,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812535,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 54, 9, tzinfo=UTC),
         "last_time_in_zone_str": "11:54:09",
@@ -434,7 +398,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812538,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 54, 29, tzinfo=UTC),
         "last_time_in_zone_str": "11:54:29",
@@ -446,7 +409,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812542,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -458,7 +420,6 @@ expected_set_tlct = [
         "timetable_id": 893822786,
     },
     {
-        "batch_id": 812549,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 55, 53, tzinfo=UTC),
         "last_time_in_zone_str": "11:55:53",
@@ -470,7 +431,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812555,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 57, 23, tzinfo=UTC),
         "last_time_in_zone_str": "11:57:23",
@@ -482,7 +442,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812561,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 58, 3, tzinfo=UTC),
         "last_time_in_zone_str": "11:58:03",
@@ -494,7 +453,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812563,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 58, 43, tzinfo=UTC),
         "last_time_in_zone_str": "11:58:43",
@@ -506,7 +464,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812566,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 59, 5, tzinfo=UTC),
         "last_time_in_zone_str": "11:59:05",
@@ -518,7 +475,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812566,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC),
         "last_time_in_zone_str": "11:59:57",
@@ -530,7 +486,6 @@ expected_set_tlct = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 812568,
         "group_id": "tlct|378|1215|2024-08-20",
         "last_time_in_zone": datetime(2024, 8, 20, 11, 59, 27, tzinfo=UTC),
         "last_time_in_zone_str": "11:59:27",
@@ -551,7 +506,6 @@ expected_remove_tlct = [
 expected_stop_history_tlct = {
     "tlct|378|1215|2024-08-20": {
         "last_avl_time": str(datetime(2024, 8, 20, 12, 0, 5, tzinfo=UTC)),
-        "last_avl_index": 91,
         "last_avl_latitude": 53.660963,
         "last_avl_longitude": -1.857058,
         "matched_stops": {
@@ -570,7 +524,6 @@ expected_stop_history_tlct = {
 
 expected_set_coac = [
     {
-        "batch_id": 474986,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -582,7 +535,6 @@ expected_set_coac = [
         "timestamp_after_estimate": datetime(2024, 10, 17, 16, 10, 25, tzinfo=UTC),
     },
     {
-        "batch_id": 474990,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -594,7 +546,6 @@ expected_set_coac = [
         "timetable_id": 1091293276,
     },
     {
-        "batch_id": 474992,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 16, 12, 18, tzinfo=UTC),
         "last_time_in_zone_str": "16:12:18",
@@ -606,7 +557,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 474994,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 16, 14, 58, tzinfo=UTC),
         "last_time_in_zone_str": "16:14:58",
@@ -618,7 +568,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475106,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 16, 30, 47, tzinfo=UTC),
         "last_time_in_zone_str": "16:30:47",
@@ -630,7 +579,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475130,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 16, 33, 37, tzinfo=UTC),
         "last_time_in_zone_str": "16:33:37",
@@ -642,7 +590,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475139,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 16, 35, 22, tzinfo=UTC),
         "last_time_in_zone_str": "16:35:22",
@@ -654,7 +601,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475139,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -666,7 +612,6 @@ expected_set_coac = [
         "timetable_id": 1091293302,
     },
     {
-        "batch_id": 475144,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 16, 35, 57, tzinfo=UTC),
         "last_time_in_zone_str": "16:35:57",
@@ -678,7 +623,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475148,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -690,7 +634,6 @@ expected_set_coac = [
         "timetable_id": 1091293331,
     },
     {
-        "batch_id": 475153,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 16, 37, 23, tzinfo=UTC),
         "last_time_in_zone_str": "16:37:23",
@@ -702,7 +645,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475153,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -714,7 +656,6 @@ expected_set_coac = [
         "timetable_id": 1091293276,
     },
     {
-        "batch_id": 475159,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -726,7 +667,6 @@ expected_set_coac = [
         "timetable_id": 1091293465,
     },
     {
-        "batch_id": 475178,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -738,7 +678,6 @@ expected_set_coac = [
         "timetable_id": 1091293452,
     },
     {
-        "batch_id": 475190,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -750,7 +689,6 @@ expected_set_coac = [
         "timetable_id": 1091293432,
     },
     {
-        "batch_id": 475196,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -762,7 +700,6 @@ expected_set_coac = [
         "timetable_id": 1091293419,
     },
     {
-        "batch_id": 475199,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -774,7 +711,6 @@ expected_set_coac = [
         "timetable_id": 1091293413,
     },
     {
-        "batch_id": 475202,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -786,7 +722,6 @@ expected_set_coac = [
         "timetable_id": 1091293400,
     },
     {
-        "batch_id": 475203,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -798,7 +733,6 @@ expected_set_coac = [
         "timetable_id": 1091293387,
     },
     {
-        "batch_id": 475213,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -810,7 +744,6 @@ expected_set_coac = [
         "timetable_id": 1091293367,
     },
     {
-        "batch_id": 475226,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 16, 48, 43, tzinfo=UTC),
         "last_time_in_zone_str": "16:48:43",
@@ -822,7 +755,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475231,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 16, 49, 43, tzinfo=UTC),
         "last_time_in_zone_str": "16:49:43",
@@ -834,7 +766,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475286,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 16, 59, 1, tzinfo=UTC),
         "last_time_in_zone_str": "16:59:01",
@@ -846,7 +777,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475297,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 17, 0, 39, tzinfo=UTC),
         "last_time_in_zone_str": "17:00:39",
@@ -858,7 +788,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475309,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 17, 2, 22, tzinfo=UTC),
         "last_time_in_zone_str": "17:02:22",
@@ -870,7 +799,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475309,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -882,7 +810,6 @@ expected_set_coac = [
         "timetable_id": 1091293143,
     },
     {
-        "batch_id": 475312,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -894,7 +821,6 @@ expected_set_coac = [
         "timetable_id": 1091293135,
     },
     {
-        "batch_id": 475318,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 17, 4, 6, tzinfo=UTC),
         "last_time_in_zone_str": "17:04:06",
@@ -906,7 +832,6 @@ expected_set_coac = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 475332,
         "group_id": "coac|41|1630|2024-10-17",
         "last_time_in_zone": datetime(2024, 10, 17, 17, 7, 21, tzinfo=UTC),
         "last_time_in_zone_str": "17:07:21",
@@ -927,7 +852,6 @@ expected_remove_coac = [
 expected_stop_history_coac = {
     "coac|41|1630|2024-10-17": {
         "last_avl_time": str(datetime(2024, 10, 17, 17, 7, 59, tzinfo=UTC)),
-        "last_avl_index": 110,
         "last_avl_latitude": 51.539658,
         "last_avl_longitude": -2.410061,
         "matched_stops": {
@@ -946,7 +870,6 @@ expected_stop_history_coac = {
 
 expected_set_slea = [
     {
-        "batch_id": 1357962,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 29, 5, tzinfo=UTC),
         "last_time_in_zone_str": "10:29:05",
@@ -958,7 +881,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1357966,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 29, 44, tzinfo=UTC),
         "last_time_in_zone_str": "10:29:44",
@@ -970,7 +892,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1357968,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 30, 5, tzinfo=UTC),
         "last_time_in_zone_str": "10:30:05",
@@ -982,7 +903,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1357976,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 31, 47, tzinfo=UTC),
         "last_time_in_zone_str": "10:31:47",
@@ -994,7 +914,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1357979,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 32, 1, tzinfo=UTC),
         "last_time_in_zone_str": "10:32:01",
@@ -1006,7 +925,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1357981,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 32, 37, tzinfo=UTC),
         "last_time_in_zone_str": "10:32:37",
@@ -1018,7 +936,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1357984,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 32, 57, tzinfo=UTC),
         "last_time_in_zone_str": "10:32:57",
@@ -1030,7 +947,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1357986,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 33, 25, tzinfo=UTC),
         "last_time_in_zone_str": "10:33:25",
@@ -1042,7 +958,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1357991,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 33, 57, tzinfo=UTC),
         "last_time_in_zone_str": "10:33:57",
@@ -1054,7 +969,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1357996,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 34, 53, tzinfo=UTC),
         "last_time_in_zone_str": "10:34:53",
@@ -1066,7 +980,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1357999,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 35, 26, tzinfo=UTC),
         "last_time_in_zone_str": "10:35:26",
@@ -1078,7 +991,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358013,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 37, 57, tzinfo=UTC),
         "last_time_in_zone_str": "10:37:57",
@@ -1090,7 +1002,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358015,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 38, 4, tzinfo=UTC),
         "last_time_in_zone_str": "10:38:04",
@@ -1102,7 +1013,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358021,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 39, 7, tzinfo=UTC),
         "last_time_in_zone_str": "10:39:07",
@@ -1114,7 +1024,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358027,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 40, 7, tzinfo=UTC),
         "last_time_in_zone_str": "10:40:07",
@@ -1126,7 +1035,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358030,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 40, 35, tzinfo=UTC),
         "last_time_in_zone_str": "10:40:35",
@@ -1138,7 +1046,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358034,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 41, 17, tzinfo=UTC),
         "last_time_in_zone_str": "10:41:17",
@@ -1150,7 +1057,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358039,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 42, 7, tzinfo=UTC),
         "last_time_in_zone_str": "10:42:07",
@@ -1162,7 +1068,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358041,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 42, 15, tzinfo=UTC),
         "last_time_in_zone_str": "10:42:15",
@@ -1174,7 +1079,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358045,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 42, 59, tzinfo=UTC),
         "last_time_in_zone_str": "10:42:59",
@@ -1186,7 +1090,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358055,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 44, 55, tzinfo=UTC),
         "last_time_in_zone_str": "10:44:55",
@@ -1198,7 +1101,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358060,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 45, 27, tzinfo=UTC),
         "last_time_in_zone_str": "10:45:27",
@@ -1210,7 +1112,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358068,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 46, 43, tzinfo=UTC),
         "last_time_in_zone_str": "10:46:43",
@@ -1222,7 +1123,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358075,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 48, 3, tzinfo=UTC),
         "last_time_in_zone_str": "10:48:03",
@@ -1234,7 +1134,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358082,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 49, 15, tzinfo=UTC),
         "last_time_in_zone_str": "10:49:15",
@@ -1246,7 +1145,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358087,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 50, 5, tzinfo=UTC),
         "last_time_in_zone_str": "10:50:05",
@@ -1258,7 +1156,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358090,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 50, 37, tzinfo=UTC),
         "last_time_in_zone_str": "10:50:37",
@@ -1270,7 +1167,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358094,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 51, 17, tzinfo=UTC),
         "last_time_in_zone_str": "10:51:17",
@@ -1282,7 +1178,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358097,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 51, 37, tzinfo=UTC),
         "last_time_in_zone_str": "10:51:37",
@@ -1294,7 +1189,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358102,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 52, 39, tzinfo=UTC),
         "last_time_in_zone_str": "10:52:39",
@@ -1306,7 +1200,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358108,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 53, 13, tzinfo=UTC),
         "last_time_in_zone_str": "10:53:13",
@@ -1318,7 +1211,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358112,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 54, 19, tzinfo=UTC),
         "last_time_in_zone_str": "10:54:19",
@@ -1330,7 +1222,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358119,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 55, 27, tzinfo=UTC),
         "last_time_in_zone_str": "10:55:27",
@@ -1342,7 +1233,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358123,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 56, 5, tzinfo=UTC),
         "last_time_in_zone_str": "10:56:05",
@@ -1354,7 +1244,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358124,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 56, 17, tzinfo=UTC),
         "last_time_in_zone_str": "10:56:17",
@@ -1366,7 +1255,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358125,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 57, 1, tzinfo=UTC),
         "last_time_in_zone_str": "10:57:01",
@@ -1378,7 +1266,6 @@ expected_set_slea = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 1358127,
         "group_id": "slea|it1|1030|2024-10-23",
         "last_time_in_zone": datetime(2024, 10, 23, 10, 56, 49, tzinfo=UTC),
         "last_time_in_zone_str": "10:56:49",
@@ -1411,7 +1298,6 @@ expected_remove_slea = [
 expected_stop_history_slea = {
     "slea|it1|1030|2024-10-23": {
         "last_avl_time": str(datetime(2024, 10, 23, 10, 57, 13, tzinfo=UTC)),
-        "last_avl_index": 124,
         "last_avl_latitude": 52.996857,
         "last_avl_longitude": -0.40885,
         "matched_stops": {
@@ -1426,7 +1312,6 @@ expected_stop_history_slea = {
         },
         "potential_matches": {
             "33": {
-                "last_avl_index": 124,
                 "last_distance": 79.17722004963838,
                 "last_time_in_zone": str(datetime(2024, 10, 23, 10, 57, 1, tzinfo=UTC)),
                 "is_estimate": False,
@@ -1437,7 +1322,6 @@ expected_stop_history_slea = {
 
 expected_set_scem = [
     {
-        "batch_id": 590996,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 7, 39, 11, tzinfo=UTC),
         "last_time_in_zone_str": "07:39:11",
@@ -1449,7 +1333,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591152,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 5, 12, tzinfo=UTC),
         "last_time_in_zone_str": "08:05:12",
@@ -1461,7 +1344,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591162,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 6, 33, tzinfo=UTC),
         "last_time_in_zone_str": "08:06:33",
@@ -1473,7 +1355,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591166,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 7, 34, tzinfo=UTC),
         "last_time_in_zone_str": "08:07:34",
@@ -1485,7 +1366,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591182,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 10, 16, tzinfo=UTC),
         "last_time_in_zone_str": "08:10:16",
@@ -1497,7 +1377,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591186,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -1509,7 +1388,6 @@ expected_set_scem = [
         "timetable_id": 1231327392,
     },
     {
-        "batch_id": 591190,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 11, 37, tzinfo=UTC),
         "last_time_in_zone_str": "08:11:37",
@@ -1521,7 +1399,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591195,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 12, 18, tzinfo=UTC),
         "last_time_in_zone_str": "08:12:18",
@@ -1533,7 +1410,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591200,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 13, 18, tzinfo=UTC),
         "last_time_in_zone_str": "08:13:18",
@@ -1545,7 +1421,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591211,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 14, 59, tzinfo=UTC),
         "last_time_in_zone_str": "08:14:59",
@@ -1557,7 +1432,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591215,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 15, 40, tzinfo=UTC),
         "last_time_in_zone_str": "08:15:40",
@@ -1569,7 +1443,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591233,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 18, 42, tzinfo=UTC),
         "last_time_in_zone_str": "08:18:42",
@@ -1581,7 +1454,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591235,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 19, 3, tzinfo=UTC),
         "last_time_in_zone_str": "08:19:03",
@@ -1593,7 +1465,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591239,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 19, 43, tzinfo=UTC),
         "last_time_in_zone_str": "08:19:43",
@@ -1605,7 +1476,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591241,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 20, 3, tzinfo=UTC),
         "last_time_in_zone_str": "08:20:03",
@@ -1617,7 +1487,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591243,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -1629,7 +1498,6 @@ expected_set_scem = [
         "timetable_id": 1231326425,
     },
     {
-        "batch_id": 591245,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 20, 44, tzinfo=UTC),
         "last_time_in_zone_str": "08:20:44",
@@ -1641,7 +1509,6 @@ expected_set_scem = [
         "timetable_id": 1231326393,
     },
     {
-        "batch_id": 591249,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 21, 24, tzinfo=UTC),
         "last_time_in_zone_str": "08:21:24",
@@ -1653,7 +1520,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591251,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 21, 44, tzinfo=UTC),
         "last_time_in_zone_str": "08:21:44",
@@ -1665,7 +1531,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591255,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 22, 25, tzinfo=UTC),
         "last_time_in_zone_str": "08:22:25",
@@ -1677,7 +1542,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591259,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 23, 5, tzinfo=UTC),
         "last_time_in_zone_str": "08:23:05",
@@ -1689,7 +1553,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591265,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 24, 6, tzinfo=UTC),
         "last_time_in_zone_str": "08:24:06",
@@ -1701,7 +1564,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591269,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 24, 47, tzinfo=UTC),
         "last_time_in_zone_str": "08:24:47",
@@ -1713,7 +1575,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591273,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 25, 27, tzinfo=UTC),
         "last_time_in_zone_str": "08:25:27",
@@ -1725,7 +1586,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591275,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -1737,7 +1597,6 @@ expected_set_scem = [
         "timestamp_after_estimate": datetime(2024, 10, 31, 8, 26, 6, tzinfo=UTC),
     },
     {
-        "batch_id": 591282,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 26, 48, tzinfo=UTC),
         "last_time_in_zone_str": "08:26:48",
@@ -1749,7 +1608,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591288,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 27, 49, tzinfo=UTC),
         "last_time_in_zone_str": "08:27:49",
@@ -1761,7 +1619,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591292,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 28, 29, tzinfo=UTC),
         "last_time_in_zone_str": "08:28:29",
@@ -1773,7 +1630,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591292,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 28, 29, tzinfo=UTC),
         "last_time_in_zone_str": "08:28:29",
@@ -1785,7 +1641,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591296,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 29, 10, tzinfo=UTC),
         "last_time_in_zone_str": "08:29:10",
@@ -1797,7 +1652,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591298,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 29, 30, tzinfo=UTC),
         "last_time_in_zone_str": "08:29:30",
@@ -1809,7 +1663,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591330,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -1821,7 +1674,6 @@ expected_set_scem = [
         "timestamp_after_estimate": datetime(2024, 10, 31, 8, 35, 13, tzinfo=UTC),
     },
     {
-        "batch_id": 591334,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 35, 35, tzinfo=UTC),
         "last_time_in_zone_str": "08:35:35",
@@ -1833,7 +1685,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591346,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 37, 36, tzinfo=UTC),
         "last_time_in_zone_str": "08:37:36",
@@ -1845,7 +1696,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591354,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 38, 57, tzinfo=UTC),
         "last_time_in_zone_str": "08:38:57",
@@ -1857,7 +1707,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591364,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 40, 39, tzinfo=UTC),
         "last_time_in_zone_str": "08:40:39",
@@ -1869,7 +1718,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591369,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 41, 19, tzinfo=UTC),
         "last_time_in_zone_str": "08:41:19",
@@ -1881,7 +1729,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591375,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 42, 20, tzinfo=UTC),
         "last_time_in_zone_str": "08:42:20",
@@ -1893,7 +1740,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591375,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 42, 20, tzinfo=UTC),
         "last_time_in_zone_str": "08:42:20",
@@ -1905,7 +1751,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591379,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 43, tzinfo=UTC),
         "last_time_in_zone_str": "08:43:00",
@@ -1917,7 +1762,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591387,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 44, 21, tzinfo=UTC),
         "last_time_in_zone_str": "08:44:21",
@@ -1929,7 +1773,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591391,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 45, 2, tzinfo=UTC),
         "last_time_in_zone_str": "08:45:02",
@@ -1941,7 +1784,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591397,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 46, 3, tzinfo=UTC),
         "last_time_in_zone_str": "08:46:03",
@@ -1953,7 +1795,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591399,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 46, 23, tzinfo=UTC),
         "last_time_in_zone_str": "08:46:23",
@@ -1965,7 +1806,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591401,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 46, 43, tzinfo=UTC),
         "last_time_in_zone_str": "08:46:43",
@@ -1977,7 +1817,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591403,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -1989,7 +1828,6 @@ expected_set_scem = [
         "timetable_id": 1231326809,
     },
     {
-        "batch_id": 591405,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -2001,7 +1839,6 @@ expected_set_scem = [
         "timetable_id": 1231326585,
     },
     {
-        "batch_id": 591405,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -2013,7 +1850,6 @@ expected_set_scem = [
         "timetable_id": 1231326553,
     },
     {
-        "batch_id": 591407,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -2025,7 +1861,6 @@ expected_set_scem = [
         "timetable_id": 1231326617,
     },
     {
-        "batch_id": 591407,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -2037,7 +1872,6 @@ expected_set_scem = [
         "timetable_id": 1231326649,
     },
     {
-        "batch_id": 591409,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 48, 4, tzinfo=UTC),
         "last_time_in_zone_str": "08:48:04",
@@ -2049,7 +1883,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591413,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 48, 45, tzinfo=UTC),
         "last_time_in_zone_str": "08:48:45",
@@ -2061,7 +1894,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591417,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 49, 26, tzinfo=UTC),
         "last_time_in_zone_str": "08:49:26",
@@ -2073,7 +1905,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591419,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -2085,7 +1916,6 @@ expected_set_scem = [
         "timetable_id": 1231326777,
     },
     {
-        "batch_id": 591423,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 50, 26, tzinfo=UTC),
         "last_time_in_zone_str": "08:50:26",
@@ -2097,7 +1927,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591427,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 8, 51, 7, tzinfo=UTC),
         "last_time_in_zone_str": "08:51:07",
@@ -2109,7 +1938,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591484,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 0, 33, tzinfo=UTC),
         "last_time_in_zone_str": "09:00:33",
@@ -2121,7 +1949,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591484,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 0, 33, tzinfo=UTC),
         "last_time_in_zone_str": "09:00:33",
@@ -2133,7 +1960,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591486,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -2145,7 +1971,6 @@ expected_set_scem = [
         "timetable_id": 1231326105,
     },
     {
-        "batch_id": 591492,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 1, 54, tzinfo=UTC),
         "last_time_in_zone_str": "09:01:54",
@@ -2157,7 +1982,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591494,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -2169,7 +1993,6 @@ expected_set_scem = [
         "timetable_id": 1231326553,
     },
     {
-        "batch_id": 591498,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 2, 54, tzinfo=UTC),
         "last_time_in_zone_str": "09:02:54",
@@ -2181,7 +2004,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591500,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 3, 15, tzinfo=UTC),
         "last_time_in_zone_str": "09:03:15",
@@ -2193,7 +2015,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591504,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 3, 55, tzinfo=UTC),
         "last_time_in_zone_str": "09:03:55",
@@ -2205,7 +2026,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591538,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 9, 38, tzinfo=UTC),
         "last_time_in_zone_str": "09:09:38",
@@ -2217,7 +2037,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591540,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -2229,7 +2048,6 @@ expected_set_scem = [
         "timetable_id": 1231326055,
     },
     {
-        "batch_id": 591548,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 11, 19, tzinfo=UTC),
         "last_time_in_zone_str": "09:11:19",
@@ -2241,7 +2059,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591552,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 12, tzinfo=UTC),
         "last_time_in_zone_str": "09:12:00",
@@ -2253,7 +2070,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591559,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 13, 1, tzinfo=UTC),
         "last_time_in_zone_str": "09:13:01",
@@ -2265,7 +2081,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591571,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 15, 2, tzinfo=UTC),
         "last_time_in_zone_str": "09:15:02",
@@ -2277,7 +2092,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591590,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 18, 3, tzinfo=UTC),
         "last_time_in_zone_str": "09:18:03",
@@ -2289,7 +2103,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591613,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 20, 25, tzinfo=UTC),
         "last_time_in_zone_str": "09:20:25",
@@ -2301,7 +2114,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591617,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -2313,7 +2125,6 @@ expected_set_scem = [
         "timetable_id": 1231326873,
     },
     {
-        "batch_id": 591643,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 25, 29, tzinfo=UTC),
         "last_time_in_zone_str": "09:25:29",
@@ -2325,7 +2136,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591643,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 25, 29, tzinfo=UTC),
         "last_time_in_zone_str": "09:25:29",
@@ -2337,7 +2147,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591645,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 25, 49, tzinfo=UTC),
         "last_time_in_zone_str": "09:25:49",
@@ -2349,7 +2158,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591652,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 26, 50, tzinfo=UTC),
         "last_time_in_zone_str": "09:26:50",
@@ -2361,7 +2169,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591658,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 27, 50, tzinfo=UTC),
         "last_time_in_zone_str": "09:27:50",
@@ -2373,7 +2180,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591666,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 29, 11, tzinfo=UTC),
         "last_time_in_zone_str": "09:29:11",
@@ -2385,7 +2191,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591670,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 29, 51, tzinfo=UTC),
         "last_time_in_zone_str": "09:29:51",
@@ -2397,7 +2202,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591674,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 30, 32, tzinfo=UTC),
         "last_time_in_zone_str": "09:30:32",
@@ -2409,7 +2213,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591684,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 32, 13, tzinfo=UTC),
         "last_time_in_zone_str": "09:32:13",
@@ -2421,7 +2224,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591686,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 32, 33, tzinfo=UTC),
         "last_time_in_zone_str": "09:32:33",
@@ -2433,7 +2235,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591688,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": None,
         "last_time_in_zone_str": None,
@@ -2445,7 +2246,6 @@ expected_set_scem = [
         "timetable_id": 1231326393,
     },
     {
-        "batch_id": 591692,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 33, 33, tzinfo=UTC),
         "last_time_in_zone_str": "09:33:33",
@@ -2457,7 +2257,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591708,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 36, 16, tzinfo=UTC),
         "last_time_in_zone_str": "09:36:16",
@@ -2469,7 +2268,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591718,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 37, 57, tzinfo=UTC),
         "last_time_in_zone_str": "09:37:57",
@@ -2481,7 +2279,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591730,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 39, 58, tzinfo=UTC),
         "last_time_in_zone_str": "09:39:58",
@@ -2493,7 +2290,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591734,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 40, 38, tzinfo=UTC),
         "last_time_in_zone_str": "09:40:38",
@@ -2505,7 +2301,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591736,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 40, 59, tzinfo=UTC),
         "last_time_in_zone_str": "09:40:59",
@@ -2517,7 +2312,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591744,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 42, 20, tzinfo=UTC),
         "last_time_in_zone_str": "09:42:20",
@@ -2529,7 +2323,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591753,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 43, 41, tzinfo=UTC),
         "last_time_in_zone_str": "09:43:41",
@@ -2541,7 +2334,6 @@ expected_set_scem = [
         "timestamp_after_estimate": None,
     },
     {
-        "batch_id": 591763,
         "group_id": "scem|9|11|2024-10-31",
         "last_time_in_zone": datetime(2024, 10, 31, 9, 46, 2, tzinfo=UTC),
         "last_time_in_zone_str": "09:46:02",
@@ -2605,7 +2397,6 @@ expected_remove_scem = [
 ]
 expected_stop_history_scem = {
     "scem|9|11|2024-10-31": {
-        "last_avl_index": 384,
         "last_avl_time": str(datetime(2024, 10, 31, 9, 49, 26, tzinfo=UTC)),
         "last_avl_latitude": 53.226475,
         "last_avl_longitude": -0.53755,
@@ -2630,7 +2421,6 @@ expected_set_scem2 = [
         "time_difference": 202.0,
         "last_time_in_zone_str": "12:08:22",
         "timetable_id": 1891077807,
-        "batch_id": 1477296,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 8, 22, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2642,7 +2432,6 @@ expected_set_scem2 = [
         "time_difference": 203.0,
         "last_time_in_zone_str": "12:09:23",
         "timetable_id": 1891077743,
-        "batch_id": 1477302,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 9, 23, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2654,7 +2443,6 @@ expected_set_scem2 = [
         "time_difference": 104.0,
         "last_time_in_zone_str": "12:10:44",
         "timetable_id": 1891077679,
-        "batch_id": 1477310,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 10, 44, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2666,7 +2454,6 @@ expected_set_scem2 = [
         "time_difference": -3658.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891077711,
-        "batch_id": 1477310,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 11, 2, tzinfo=UTC),
         "otp_state": "Early",
@@ -2678,7 +2465,6 @@ expected_set_scem2 = [
         "time_difference": -3394.0,
         "last_time_in_zone_str": "12:12:26",
         "timetable_id": 1891079448,
-        "batch_id": 1477320,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 12, 26, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -2690,7 +2476,6 @@ expected_set_scem2 = [
         "time_difference": 127.0,
         "last_time_in_zone_str": "12:13:07",
         "timetable_id": 1891079480,
-        "batch_id": 1477324,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 13, 7, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2702,7 +2487,6 @@ expected_set_scem2 = [
         "time_difference": 105.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891079896,
-        "batch_id": 1477326,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 13, 45, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -2714,7 +2498,6 @@ expected_set_scem2 = [
         "time_difference": 168.0,
         "last_time_in_zone_str": "12:14:48",
         "timetable_id": 1891079384,
-        "batch_id": 1477334,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 14, 48, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2726,7 +2509,6 @@ expected_set_scem2 = [
         "time_difference": -2974.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891079192,
-        "batch_id": 1477336,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 15, 26, tzinfo=UTC),
         "otp_state": "Early",
@@ -2738,7 +2520,6 @@ expected_set_scem2 = [
         "time_difference": 148.0,
         "last_time_in_zone_str": "12:15:28",
         "timetable_id": 1891079224,
-        "batch_id": 1477338,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 15, 28, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2750,7 +2531,6 @@ expected_set_scem2 = [
         "time_difference": -2791.0,
         "last_time_in_zone_str": "12:16:29",
         "timetable_id": 1891079864,
-        "batch_id": 1477344,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 16, 29, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -2762,7 +2542,6 @@ expected_set_scem2 = [
         "time_difference": 130.0,
         "last_time_in_zone_str": "12:17:10",
         "timetable_id": 1891078225,
-        "batch_id": 1477349,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 17, 10, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2774,7 +2553,6 @@ expected_set_scem2 = [
         "time_difference": 145.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891078353,
-        "batch_id": 1477349,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 17, 25, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -2786,7 +2564,6 @@ expected_set_scem2 = [
         "time_difference": -2674.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891078321,
-        "batch_id": 1477349,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 17, 26, tzinfo=UTC),
         "otp_state": "Early",
@@ -2798,7 +2575,6 @@ expected_set_scem2 = [
         "time_difference": 170.0,
         "last_time_in_zone_str": "12:17:50",
         "timetable_id": 1891078385,
-        "batch_id": 1477352,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 17, 50, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2810,7 +2586,6 @@ expected_set_scem2 = [
         "time_difference": 151.0,
         "last_time_in_zone_str": "12:18:31",
         "timetable_id": 1891078481,
-        "batch_id": 1477356,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 18, 31, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2822,7 +2597,6 @@ expected_set_scem2 = [
         "time_difference": 192.0,
         "last_time_in_zone_str": "12:19:12",
         "timetable_id": 1891078513,
-        "batch_id": 1477361,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 19, 12, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2834,7 +2608,6 @@ expected_set_scem2 = [
         "time_difference": -2428.0,
         "last_time_in_zone_str": "12:19:32",
         "timetable_id": 1891079999,
-        "batch_id": 1477363,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 19, 32, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -2846,7 +2619,6 @@ expected_set_scem2 = [
         "time_difference": 172.0,
         "last_time_in_zone_str": "12:19:52",
         "timetable_id": 1891080031,
-        "batch_id": 1477364,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 19, 52, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2858,7 +2630,6 @@ expected_set_scem2 = [
         "time_difference": 213.0,
         "last_time_in_zone_str": "12:20:33",
         "timetable_id": 1891079512,
-        "batch_id": 1477369,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 20, 33, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2870,7 +2641,6 @@ expected_set_scem2 = [
         "time_difference": 214.0,
         "last_time_in_zone_str": "12:21:34",
         "timetable_id": 1891079800,
-        "batch_id": 1477375,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 21, 34, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2882,7 +2652,6 @@ expected_set_scem2 = [
         "time_difference": -2166.0,
         "last_time_in_zone_str": "12:21:54",
         "timetable_id": 1891079768,
-        "batch_id": 1477377,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 21, 54, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -2894,7 +2663,6 @@ expected_set_scem2 = [
         "time_difference": 194.0,
         "last_time_in_zone_str": "12:22:14",
         "timetable_id": 1891079608,
-        "batch_id": 1477379,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 22, 14, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2906,7 +2674,6 @@ expected_set_scem2 = [
         "time_difference": 195.0,
         "last_time_in_zone_str": "12:23:15",
         "timetable_id": 1891079256,
-        "batch_id": 1477385,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 23, 15, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2918,7 +2685,6 @@ expected_set_scem2 = [
         "time_difference": 236.0,
         "last_time_in_zone_str": "12:23:56",
         "timetable_id": 1891079352,
-        "batch_id": 1477389,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 23, 56, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2930,7 +2696,6 @@ expected_set_scem2 = [
         "time_difference": 257.0,
         "last_time_in_zone_str": "12:25:17",
         "timetable_id": 1891079640,
-        "batch_id": 1477397,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 25, 17, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2942,7 +2707,6 @@ expected_set_scem2 = [
         "time_difference": 275.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891079736,
-        "batch_id": 1477397,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 25, 35, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -2954,7 +2718,6 @@ expected_set_scem2 = [
         "time_difference": -1824.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891077967,
-        "batch_id": 1477397,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 25, 36, tzinfo=UTC),
         "otp_state": "Early",
@@ -2966,7 +2729,6 @@ expected_set_scem2 = [
         "time_difference": 317.0,
         "last_time_in_zone_str": "12:26:17",
         "timetable_id": 1891078961,
-        "batch_id": 1477403,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 26, 17, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -2978,7 +2740,6 @@ expected_set_scem2 = [
         "time_difference": 291.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891078993,
-        "batch_id": 1477405,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 26, 51, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -2990,7 +2751,6 @@ expected_set_scem2 = [
         "time_difference": -1562.0,
         "last_time_in_zone_str": "12:26:58",
         "timetable_id": 1891079025,
-        "batch_id": 1477407,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 26, 58, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -3002,7 +2762,6 @@ expected_set_scem2 = [
         "time_difference": 258.0,
         "last_time_in_zone_str": "12:27:18",
         "timetable_id": 1891079057,
-        "batch_id": 1477409,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 27, 18, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3014,7 +2773,6 @@ expected_set_scem2 = [
         "time_difference": 278.0,
         "last_time_in_zone_str": "12:27:38",
         "timetable_id": 1891079160,
-        "batch_id": 1477411,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 27, 38, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3026,7 +2784,6 @@ expected_set_scem2 = [
         "time_difference": -1304.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891079128,
-        "batch_id": 1477413,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 28, 16, tzinfo=UTC),
         "otp_state": "Early",
@@ -3038,7 +2795,6 @@ expected_set_scem2 = [
         "time_difference": 199.0,
         "last_time_in_zone_str": "12:28:19",
         "timetable_id": 1891077775,
-        "batch_id": 1477415,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 28, 19, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3050,7 +2806,6 @@ expected_set_scem2 = [
         "time_difference": 259.0,
         "last_time_in_zone_str": "12:29:19",
         "timetable_id": 1891079973,
-        "batch_id": 1477421,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 29, 19, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3062,7 +2817,6 @@ expected_set_scem2 = [
         "time_difference": 220.0,
         "last_time_in_zone_str": "12:29:40",
         "timetable_id": 1891079102,
-        "batch_id": 1477423,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 29, 40, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3074,7 +2828,6 @@ expected_set_scem2 = [
         "time_difference": 200.0,
         "last_time_in_zone_str": "12:30:20",
         "timetable_id": 1891079928,
-        "batch_id": 1477427,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 30, 20, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3086,7 +2839,6 @@ expected_set_scem2 = [
         "time_difference": -866.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891078193,
-        "batch_id": 1477427,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 30, 34, tzinfo=UTC),
         "otp_state": "Early",
@@ -3098,7 +2850,6 @@ expected_set_scem2 = [
         "time_difference": 181.0,
         "last_time_in_zone_str": "12:31:01",
         "timetable_id": 1891078865,
-        "batch_id": 1477431,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 31, 1, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3110,7 +2861,6 @@ expected_set_scem2 = [
         "time_difference": -779.0,
         "last_time_in_zone_str": "12:31:01",
         "timetable_id": 1891078577,
-        "batch_id": 1477431,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 31, 1, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -3122,7 +2872,6 @@ expected_set_scem2 = [
         "time_difference": 161.0,
         "last_time_in_zone_str": "12:31:41",
         "timetable_id": 1891078641,
-        "batch_id": 1477436,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 31, 41, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3134,7 +2883,6 @@ expected_set_scem2 = [
         "time_difference": 142.0,
         "last_time_in_zone_str": "12:32:22",
         "timetable_id": 1891078673,
-        "batch_id": 1477440,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 32, 22, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3146,7 +2894,6 @@ expected_set_scem2 = [
         "time_difference": 162.0,
         "last_time_in_zone_str": "12:32:42",
         "timetable_id": 1891078737,
-        "batch_id": 1477441,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 32, 42, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3158,7 +2905,6 @@ expected_set_scem2 = [
         "time_difference": 180.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891078769,
-        "batch_id": 1477448,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 34, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3170,7 +2916,6 @@ expected_set_scem2 = [
         "time_difference": 161.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891078801,
-        "batch_id": 1477452,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 34, 41, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3182,7 +2927,6 @@ expected_set_scem2 = [
         "time_difference": 124.0,
         "last_time_in_zone_str": "12:35:04",
         "timetable_id": 1891078833,
-        "batch_id": 1477456,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 35, 4, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3194,7 +2938,6 @@ expected_set_scem2 = [
         "time_difference": 125.0,
         "last_time_in_zone_str": "12:36:05",
         "timetable_id": 1891078257,
-        "batch_id": 1477462,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 36, 5, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3206,7 +2949,6 @@ expected_set_scem2 = [
         "time_difference": 105.0,
         "last_time_in_zone_str": "12:36:45",
         "timetable_id": 1891078289,
-        "batch_id": 1477466,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 36, 45, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3218,7 +2960,6 @@ expected_set_scem2 = [
         "time_difference": 208.0,
         "last_time_in_zone_str": "12:40:28",
         "timetable_id": 1891077871,
-        "batch_id": 1477488,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 40, 28, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3230,7 +2971,6 @@ expected_set_scem2 = [
         "time_difference": 28.0,
         "last_time_in_zone_str": "12:40:28",
         "timetable_id": 1891077903,
-        "batch_id": 1477488,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 40, 28, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3242,7 +2982,6 @@ expected_set_scem2 = [
         "time_difference": 5.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891078161,
-        "batch_id": 1477490,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 41, 5, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3254,7 +2993,6 @@ expected_set_scem2 = [
         "time_difference": -11.0,
         "last_time_in_zone_str": "12:41:49",
         "timetable_id": 1891078705,
-        "batch_id": 1477496,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 41, 49, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3266,7 +3004,6 @@ expected_set_scem2 = [
         "time_difference": -55.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891078609,
-        "batch_id": 1477496,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 42, 5, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3278,7 +3015,6 @@ expected_set_scem2 = [
         "time_difference": -70.0,
         "last_time_in_zone_str": "12:42:50",
         "timetable_id": 1891078577,
-        "batch_id": 1477502,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 42, 50, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -3290,7 +3026,6 @@ expected_set_scem2 = [
         "time_difference": -110.0,
         "last_time_in_zone_str": "12:43:10",
         "timetable_id": 1891078193,
-        "batch_id": 1477505,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 43, 10, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -3302,7 +3037,6 @@ expected_set_scem2 = [
         "time_difference": -229.0,
         "last_time_in_zone_str": "12:44:11",
         "timetable_id": 1891079083,
-        "batch_id": 1477511,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 44, 11, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -3314,7 +3048,6 @@ expected_set_scem2 = [
         "time_difference": -271.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891079954,
-        "batch_id": 1477511,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 44, 29, tzinfo=UTC),
         "otp_state": "Early",
@@ -3326,7 +3059,6 @@ expected_set_scem2 = [
         "time_difference": -308.0,
         "last_time_in_zone_str": "12:44:52",
         "timetable_id": 1891079128,
-        "batch_id": 1477514,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 44, 52, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -3338,7 +3070,6 @@ expected_set_scem2 = [
         "time_difference": -307.0,
         "last_time_in_zone_str": "12:46:53",
         "timetable_id": 1891078897,
-        "batch_id": 1477527,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 46, 53, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -3350,7 +3081,6 @@ expected_set_scem2 = [
         "time_difference": -144.0,
         "last_time_in_zone_str": "12:50:36",
         "timetable_id": 1891079025,
-        "batch_id": 1477549,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 50, 36, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -3362,7 +3092,6 @@ expected_set_scem2 = [
         "time_difference": -223.0,
         "last_time_in_zone_str": "12:51:17",
         "timetable_id": 1891078929,
-        "batch_id": 1477553,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 51, 17, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -3374,7 +3103,6 @@ expected_set_scem2 = [
         "time_difference": 21.0,
         "last_time_in_zone_str": "12:56:21",
         "timetable_id": 1891077967,
-        "batch_id": 1477583,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 56, 21, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3386,7 +3114,6 @@ expected_set_scem2 = [
         "time_difference": 40.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891079672,
-        "batch_id": 1477583,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 12, 56, 40, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3398,7 +3125,6 @@ expected_set_scem2 = [
         "time_difference": 42.0,
         "last_time_in_zone_str": "12:57:42",
         "timetable_id": 1891079320,
-        "batch_id": 1477591,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 57, 42, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3410,7 +3136,6 @@ expected_set_scem2 = [
         "time_difference": 23.0,
         "last_time_in_zone_str": "12:58:23",
         "timetable_id": 1891079288,
-        "batch_id": 1477596,
         "last_time_in_zone": datetime(2024, 11, 6, 12, 58, 23, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3422,7 +3147,6 @@ expected_set_scem2 = [
         "time_difference": 125.0,
         "last_time_in_zone_str": "13:00:05",
         "timetable_id": 1891079768,
-        "batch_id": 1477606,
         "last_time_in_zone": datetime(2024, 11, 6, 13, 0, 5, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3434,7 +3158,6 @@ expected_set_scem2 = [
         "time_difference": 206.0,
         "last_time_in_zone_str": "13:02:26",
         "timetable_id": 1891079544,
-        "batch_id": 1477620,
         "last_time_in_zone": datetime(2024, 11, 6, 13, 2, 26, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3446,7 +3169,6 @@ expected_set_scem2 = [
         "time_difference": 246.0,
         "last_time_in_zone_str": "13:03:06",
         "timetable_id": 1891079576,
-        "batch_id": 1477624,
         "last_time_in_zone": datetime(2024, 11, 6, 13, 3, 6, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3458,7 +3180,6 @@ expected_set_scem2 = [
         "time_difference": 247.0,
         "last_time_in_zone_str": "13:04:07",
         "timetable_id": 1891079999,
-        "batch_id": 1477630,
         "last_time_in_zone": datetime(2024, 11, 6, 13, 4, 7, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3470,7 +3191,6 @@ expected_set_scem2 = [
         "time_difference": 208.0,
         "last_time_in_zone_str": "13:04:28",
         "timetable_id": 1891078545,
-        "batch_id": 1477632,
         "last_time_in_zone": datetime(2024, 11, 6, 13, 4, 28, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3482,7 +3202,6 @@ expected_set_scem2 = [
         "time_difference": 248.0,
         "last_time_in_zone_str": "13:05:08",
         "timetable_id": 1891078449,
-        "batch_id": 1477636,
         "last_time_in_zone": datetime(2024, 11, 6, 13, 5, 8, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3494,7 +3213,6 @@ expected_set_scem2 = [
         "time_difference": 229.0,
         "last_time_in_zone_str": "13:05:49",
         "timetable_id": 1891078417,
-        "batch_id": 1477640,
         "last_time_in_zone": datetime(2024, 11, 6, 13, 5, 49, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3506,7 +3224,6 @@ expected_set_scem2 = [
         "time_difference": 261.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1891078321,
-        "batch_id": 1477642,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 11, 6, 13, 6, 21, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3518,7 +3235,6 @@ expected_set_scem2 = [
         "time_difference": 271.0,
         "last_time_in_zone_str": "13:07:31",
         "timetable_id": 1891079864,
-        "batch_id": 1477658,
         "last_time_in_zone": datetime(2024, 11, 6, 13, 7, 31, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3530,7 +3246,6 @@ expected_set_scem2 = [
         "time_difference": 73.0,
         "last_time_in_zone_str": "13:10:13",
         "timetable_id": 1891079448,
-        "batch_id": 1477673,
         "last_time_in_zone": datetime(2024, 11, 6, 13, 10, 13, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3542,7 +3257,6 @@ expected_set_scem2 = [
         "time_difference": 35.0,
         "last_time_in_zone_str": "13:12:35",
         "timetable_id": 1891077711,
-        "batch_id": 1477681,
         "last_time_in_zone": datetime(2024, 11, 6, 13, 12, 35, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3554,7 +3268,6 @@ expected_set_scem2 = [
         "time_difference": -203.0,
         "last_time_in_zone_str": "13:14:37",
         "timetable_id": 1891077840,
-        "batch_id": 1477689,
         "last_time_in_zone": datetime(2024, 11, 6, 13, 14, 37, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3577,7 +3290,6 @@ expected_remove_scem2 = [
 ]
 expected_stop_history_scem2 = {
     "scem|9|27|2024-11-06": {
-        "last_avl_index": 371,
         "last_avl_time": "2024-11-06 14:16:06+00:00",
         "last_avl_latitude": 53.20123,
         "last_avl_longitude": -0.587637,
@@ -3602,7 +3314,6 @@ expected_set_coac30 = [
         "time_difference": 174.0,
         "last_time_in_zone_str": "17:12:54",
         "timetable_id": 1220965344,
-        "batch_id": 585802,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 12, 54, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3614,7 +3325,6 @@ expected_set_coac30 = [
         "time_difference": 154.0,
         "last_time_in_zone_str": "17:13:52",
         "timetable_id": 1220965440,
-        "batch_id": 585808,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 13, 52, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3626,7 +3336,6 @@ expected_set_coac30 = [
         "time_difference": 180.0,
         "last_time_in_zone_str": "17:18:00",
         "timetable_id": 1220965462,
-        "batch_id": 585831,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 18, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3638,7 +3347,6 @@ expected_set_coac30 = [
         "time_difference": 130.0,
         "last_time_in_zone_str": "17:20:10",
         "timetable_id": 1220965485,
-        "batch_id": 585845,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 20, 10, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3650,7 +3358,6 @@ expected_set_coac30 = [
         "time_difference": 184.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220965519,
-        "batch_id": 585859,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 17, 22, 46, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3662,7 +3369,6 @@ expected_set_coac30 = [
         "time_difference": 212.0,
         "last_time_in_zone_str": "17:24:58",
         "timetable_id": 1220965474,
-        "batch_id": 585874,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 24, 58, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3674,7 +3380,6 @@ expected_set_coac30 = [
         "time_difference": 192.0,
         "last_time_in_zone_str": "17:25:46",
         "timetable_id": 1220965612,
-        "batch_id": 585880,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 25, 46, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3686,7 +3391,6 @@ expected_set_coac30 = [
         "time_difference": 162.0,
         "last_time_in_zone_str": "17:26:08",
         "timetable_id": 1220965531,
-        "batch_id": 585882,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 26, 8, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3698,7 +3402,6 @@ expected_set_coac30 = [
         "time_difference": 136.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220965543,
-        "batch_id": 585882,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 17, 26, 36, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3710,7 +3413,6 @@ expected_set_coac30 = [
         "time_difference": 93.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220965566,
-        "batch_id": 585883,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 17, 27, 7, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3722,7 +3424,6 @@ expected_set_coac30 = [
         "time_difference": 71.0,
         "last_time_in_zone_str": "17:28:11",
         "timetable_id": 1220965589,
-        "batch_id": 585892,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 28, 11, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3734,7 +3435,6 @@ expected_set_coac30 = [
         "time_difference": 77.0,
         "last_time_in_zone_str": "17:30:17",
         "timetable_id": 1220965332,
-        "batch_id": 585908,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 30, 17, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3746,7 +3446,6 @@ expected_set_coac30 = [
         "time_difference": 78.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220965646,
-        "batch_id": 585919,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 17, 32, 24, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3758,7 +3457,6 @@ expected_set_coac30 = [
         "time_difference": 212.0,
         "last_time_in_zone_str": "17:38:32",
         "timetable_id": 1220965680,
-        "batch_id": 585957,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 38, 32, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3770,7 +3468,6 @@ expected_set_coac30 = [
         "time_difference": -52.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220965832,
-        "batch_id": 585981,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 17, 42, 43, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3782,7 +3479,6 @@ expected_set_coac30 = [
         "time_difference": 122.0,
         "last_time_in_zone_str": "17:45:02",
         "timetable_id": 1220965784,
-        "batch_id": 585996,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 45, 2, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3794,7 +3490,6 @@ expected_set_coac30 = [
         "time_difference": 169.0,
         "last_time_in_zone_str": "17:46:24",
         "timetable_id": 1220965832,
-        "batch_id": 586005,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 46, 24, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3806,7 +3501,6 @@ expected_set_coac30 = [
         "time_difference": 220.0,
         "last_time_in_zone_str": "17:51:06",
         "timetable_id": 1220965845,
-        "batch_id": 586031,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 51, 6, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3818,7 +3512,6 @@ expected_set_coac30 = [
         "time_difference": 260.0,
         "last_time_in_zone_str": "17:52:20",
         "timetable_id": 1220965881,
-        "batch_id": 586039,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 52, 20, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3830,7 +3523,6 @@ expected_set_coac30 = [
         "time_difference": 272.0,
         "last_time_in_zone_str": "17:52:50",
         "timetable_id": 1220965895,
-        "batch_id": 586043,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 52, 50, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3842,7 +3534,6 @@ expected_set_coac30 = [
         "time_difference": 258.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220965920,
-        "batch_id": 586052,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 17, 54, 23, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -3854,7 +3545,6 @@ expected_set_coac30 = [
         "time_difference": 278.0,
         "last_time_in_zone_str": "17:55:38",
         "timetable_id": 1220965956,
-        "batch_id": 586059,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 55, 38, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3866,7 +3556,6 @@ expected_set_coac30 = [
         "time_difference": 264.0,
         "last_time_in_zone_str": "17:56:24",
         "timetable_id": 1220965970,
-        "batch_id": 586063,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 56, 24, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3878,7 +3567,6 @@ expected_set_coac30 = [
         "time_difference": -292.0,
         "last_time_in_zone_str": "17:57:08",
         "timetable_id": 1220966010,
-        "batch_id": 586075,
         "last_time_in_zone": datetime(2024, 10, 30, 17, 57, 8, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "Early",
@@ -3890,7 +3578,6 @@ expected_set_coac30 = [
         "time_difference": 76.0,
         "last_time_in_zone_str": "18:03:16",
         "timetable_id": 1220966010,
-        "batch_id": 586106,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 3, 16, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3902,7 +3589,6 @@ expected_set_coac30 = [
         "time_difference": 80.0,
         "last_time_in_zone_str": "18:05:44",
         "timetable_id": 1220966037,
-        "batch_id": 586119,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 5, 44, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3914,7 +3600,6 @@ expected_set_coac30 = [
         "time_difference": 56.0,
         "last_time_in_zone_str": "18:06:56",
         "timetable_id": 1220966132,
-        "batch_id": 586126,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 6, 56, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3926,7 +3611,6 @@ expected_set_coac30 = [
         "time_difference": 57.0,
         "last_time_in_zone_str": "18:08:06",
         "timetable_id": 1220966051,
-        "batch_id": 586131,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 8, 6, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3938,7 +3622,6 @@ expected_set_coac30 = [
         "time_difference": 35.0,
         "last_time_in_zone_str": "18:08:22",
         "timetable_id": 1220966078,
-        "batch_id": 586134,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 8, 22, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3950,7 +3633,6 @@ expected_set_coac30 = [
         "time_difference": -4.0,
         "last_time_in_zone_str": "18:08:56",
         "timetable_id": 1220966105,
-        "batch_id": 586137,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 8, 56, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3962,7 +3644,6 @@ expected_set_coac30 = [
         "time_difference": 13.0,
         "last_time_in_zone_str": "18:10:13",
         "timetable_id": 1220965293,
-        "batch_id": 586144,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 10, 13, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3974,7 +3655,6 @@ expected_set_coac30 = [
         "time_difference": -24.0,
         "last_time_in_zone_str": "18:11:36",
         "timetable_id": 1220965307,
-        "batch_id": 586154,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 11, 36, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3986,7 +3666,6 @@ expected_set_coac30 = [
         "time_difference": -10.0,
         "last_time_in_zone_str": "18:12:39",
         "timetable_id": 1220967088,
-        "batch_id": 586157,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 12, 39, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -3998,7 +3677,6 @@ expected_set_coac30 = [
         "time_difference": 14.0,
         "last_time_in_zone_str": "18:15:02",
         "timetable_id": 1220966153,
-        "batch_id": 586172,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 15, 2, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4010,7 +3688,6 @@ expected_set_coac30 = [
         "time_difference": 3.0,
         "last_time_in_zone_str": "18:17:03",
         "timetable_id": 1220966197,
-        "batch_id": 586187,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 17, 3, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4022,7 +3699,6 @@ expected_set_coac30 = [
         "time_difference": -32.0,
         "last_time_in_zone_str": "18:20:28",
         "timetable_id": 1220966276,
-        "batch_id": 586207,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 20, 28, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4034,7 +3710,6 @@ expected_set_coac30 = [
         "time_difference": -11.0,
         "last_time_in_zone_str": "18:21:44",
         "timetable_id": 1220966310,
-        "batch_id": 586215,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 21, 44, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4046,7 +3721,6 @@ expected_set_coac30 = [
         "time_difference": 0.0,
         "last_time_in_zone_str": "18:24:20",
         "timetable_id": 1220966346,
-        "batch_id": 586230,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 24, 20, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4058,7 +3732,6 @@ expected_set_coac30 = [
         "time_difference": 24.0,
         "last_time_in_zone_str": "18:26:06",
         "timetable_id": 1220966358,
-        "batch_id": 586241,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 26, 6, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4070,7 +3743,6 @@ expected_set_coac30 = [
         "time_difference": 47.0,
         "last_time_in_zone_str": "18:26:47",
         "timetable_id": 1220966394,
-        "batch_id": 586245,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 26, 47, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4082,7 +3754,6 @@ expected_set_coac30 = [
         "time_difference": 65.0,
         "last_time_in_zone_str": "18:27:44",
         "timetable_id": 1220966406,
-        "batch_id": 586249,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 27, 44, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4094,7 +3765,6 @@ expected_set_coac30 = [
         "time_difference": 69.0,
         "last_time_in_zone_str": "18:29:00",
         "timetable_id": 1220966430,
-        "batch_id": 586258,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 29, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4106,7 +3776,6 @@ expected_set_coac30 = [
         "time_difference": 86.0,
         "last_time_in_zone_str": "18:30:24",
         "timetable_id": 1220966478,
-        "batch_id": 586266,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 30, 24, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4118,7 +3787,6 @@ expected_set_coac30 = [
         "time_difference": 55.0,
         "last_time_in_zone_str": "18:35:03",
         "timetable_id": 1220966526,
-        "batch_id": 586293,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 35, 3, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4130,7 +3798,6 @@ expected_set_coac30 = [
         "time_difference": 76.0,
         "last_time_in_zone_str": "18:35:54",
         "timetable_id": 1220966574,
-        "batch_id": 586301,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 35, 54, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4142,7 +3809,6 @@ expected_set_coac30 = [
         "time_difference": 97.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220967113,
-        "batch_id": 586302,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 18, 36, 37, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -4154,7 +3820,6 @@ expected_set_coac30 = [
         "time_difference": 148.0,
         "last_time_in_zone_str": "18:38:20",
         "timetable_id": 1220967137,
-        "batch_id": 586315,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 38, 20, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4166,7 +3831,6 @@ expected_set_coac30 = [
         "time_difference": 128.0,
         "last_time_in_zone_str": "18:39:08",
         "timetable_id": 1220965395,
-        "batch_id": 586321,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 39, 8, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4178,7 +3842,6 @@ expected_set_coac30 = [
         "time_difference": 112.0,
         "last_time_in_zone_str": "18:40:10",
         "timetable_id": 1220965419,
-        "batch_id": 586328,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 40, 10, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4190,7 +3853,6 @@ expected_set_coac30 = [
         "time_difference": 134.0,
         "last_time_in_zone_str": "18:41:14",
         "timetable_id": 1220965268,
-        "batch_id": 586332,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 41, 14, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4202,7 +3864,6 @@ expected_set_coac30 = [
         "time_difference": 125.0,
         "last_time_in_zone_str": "18:41:44",
         "timetable_id": 1220967149,
-        "batch_id": 586336,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 41, 44, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4214,7 +3875,6 @@ expected_set_coac30 = [
         "time_difference": 111.0,
         "last_time_in_zone_str": "18:42:06",
         "timetable_id": 1220967161,
-        "batch_id": 586339,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 42, 6, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4226,7 +3886,6 @@ expected_set_coac30 = [
         "time_difference": 111.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220966670,
-        "batch_id": 586342,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 18, 42, 54, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -4238,7 +3897,6 @@ expected_set_coac30 = [
         "time_difference": 85.0,
         "last_time_in_zone_str": "18:43:12",
         "timetable_id": 1220966646,
-        "batch_id": 586344,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 43, 12, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4250,7 +3908,6 @@ expected_set_coac30 = [
         "time_difference": 86.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220966586,
-        "batch_id": 586349,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 18, 44, 26, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -4262,7 +3919,6 @@ expected_set_coac30 = [
         "time_difference": 79.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220966610,
-        "batch_id": 586354,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 18, 45, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -4274,7 +3930,6 @@ expected_set_coac30 = [
         "time_difference": 75.0,
         "last_time_in_zone_str": "18:46:00",
         "timetable_id": 1220966742,
-        "batch_id": 586362,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 46, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4286,7 +3941,6 @@ expected_set_coac30 = [
         "time_difference": 47.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220966730,
-        "batch_id": 586365,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 18, 46, 43, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -4298,7 +3952,6 @@ expected_set_coac30 = [
         "time_difference": 36.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220966706,
-        "batch_id": 586365,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 18, 46, 58, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -4310,7 +3963,6 @@ expected_set_coac30 = [
         "time_difference": 58.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220967065,
-        "batch_id": 586377,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 18, 48, 58, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -4322,7 +3974,6 @@ expected_set_coac30 = [
         "time_difference": 38.0,
         "last_time_in_zone_str": "18:52:00",
         "timetable_id": 1220966957,
-        "batch_id": 586398,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 52, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4334,7 +3985,6 @@ expected_set_coac30 = [
         "time_difference": 60.0,
         "last_time_in_zone_str": "18:53:12",
         "timetable_id": 1220966945,
-        "batch_id": 586403,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 53, 12, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4346,7 +3996,6 @@ expected_set_coac30 = [
         "time_difference": 114.0,
         "last_time_in_zone_str": "18:54:54",
         "timetable_id": 1220966909,
-        "batch_id": 586415,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 54, 54, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4358,7 +4007,6 @@ expected_set_coac30 = [
         "time_difference": 90.0,
         "last_time_in_zone_str": None,
         "timetable_id": 1220966885,
-        "batch_id": 586418,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime(2024, 10, 30, 18, 55, 42, tzinfo=UTC),
         "otp_state": "OnTime",
@@ -4370,7 +4018,6 @@ expected_set_coac30 = [
         "time_difference": 58.0,
         "last_time_in_zone_str": "18:56:18",
         "timetable_id": 1220966873,
-        "batch_id": 586424,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 56, 18, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4382,7 +4029,6 @@ expected_set_coac30 = [
         "time_difference": 65.0,
         "last_time_in_zone_str": "18:57:20",
         "timetable_id": 1220966921,
-        "batch_id": 586430,
         "last_time_in_zone": datetime(2024, 10, 30, 18, 57, 20, tzinfo=UTC),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -4399,7 +4045,6 @@ expected_remove_coac30 = [
 
 expected_stop_history_coac30 = {
     "coac|99|1710|2024-10-30": {
-        "last_avl_index": 398,
         "last_avl_time": str(datetime(2024, 10, 30, 18, 58, 34, tzinfo=UTC)),
         "last_avl_latitude": 51.565052,
         "last_avl_longitude": -1.784906,
@@ -4415,7 +4060,6 @@ expected_stop_history_coac30 = {
         },
         "potential_matches": {
             "75": {
-                "last_avl_index": 398,
                 "last_distance": 19.030482529160707,
                 "last_time_in_zone": str(
                     datetime(2024, 10, 30, 18, 58, 34, tzinfo=UTC),
@@ -4428,7 +4072,6 @@ expected_stop_history_coac30 = {
 
 expected_stop_history_fbri_m4_0740_2024_11_28 = {
     "fbri|m4|0740|2024-11-28|inbound": {
-        "last_avl_index": 171,
         "last_avl_latitude": 51.45371,
         "last_avl_longitude": -2.597056,
         "last_avl_time": "2024-11-28 08:44:35+00:00",
@@ -4445,7 +4088,6 @@ expected_stop_history_fbri_m4_0740_2024_11_28 = {
         "potential_matches": {},
     },
     "fbri|m4|0740|2024-11-28|outbound": {
-        "last_avl_index": 126,
         "last_avl_latitude": 51.526817,
         "last_avl_longitude": -2.596336,
         "last_avl_time": "2024-11-28 08:28:06+00:00",
@@ -4464,7 +4106,6 @@ expected_stop_history_fbri_m4_0740_2024_11_28 = {
 }
 expected_set_fbri_m4_0740_2024_11_28 = [
     {
-        "batch_id": 1666196,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4484,7 +4125,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259651,
     },
     {
-        "batch_id": 1666209,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4504,7 +4144,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259511,
     },
     {
-        "batch_id": 1666211,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4524,7 +4163,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260598,
     },
     {
-        "batch_id": 1666231,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4544,7 +4182,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259467,
     },
     {
-        "batch_id": 1666283,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4564,7 +4201,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260503,
     },
     {
-        "batch_id": 1666284,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4584,7 +4220,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259423,
     },
     {
-        "batch_id": 1666297,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4604,7 +4239,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260455,
     },
     {
-        "batch_id": 1666299,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4624,7 +4258,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259933,
     },
     {
-        "batch_id": 1666309,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4644,7 +4277,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260028,
     },
     {
-        "batch_id": 1666317,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4664,7 +4296,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260123,
     },
     {
-        "batch_id": 1666329,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4684,7 +4315,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260313,
     },
     {
-        "batch_id": 1666342,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4704,7 +4334,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260218,
     },
     {
-        "batch_id": 1666346,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4724,7 +4353,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259746,
     },
     {
-        "batch_id": 1666358,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4744,7 +4372,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259841,
     },
     {
-        "batch_id": 1666369,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4764,7 +4391,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259890,
     },
     {
-        "batch_id": 1666385,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4784,7 +4410,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260267,
     },
     {
-        "batch_id": 1666388,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4804,7 +4429,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259794,
     },
     {
-        "batch_id": 1666403,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4824,7 +4448,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260362,
     },
     {
-        "batch_id": 1666417,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4844,7 +4467,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260409,
     },
     {
-        "batch_id": 1666438,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4864,7 +4486,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260552,
     },
     {
-        "batch_id": 1666448,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4884,7 +4505,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260171,
     },
     {
-        "batch_id": 1666464,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4904,7 +4524,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260076,
     },
     {
-        "batch_id": 1666475,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4924,7 +4543,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099260647,
     },
     {
-        "batch_id": 1666481,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4944,7 +4562,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259981,
     },
     {
-        "batch_id": 1666504,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4964,7 +4581,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259379,
     },
     {
-        "batch_id": 1666562,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -4984,7 +4600,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259559,
     },
     {
-        "batch_id": 1666569,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
@@ -5004,7 +4619,6 @@ expected_set_fbri_m4_0740_2024_11_28 = [
         "timetable_id": 2099259607,
     },
     {
-        "batch_id": 1666576,
         "group_id": "fbri|m4|0740|2024-11-28",
         "last_time_in_zone": datetime(
             2024,
