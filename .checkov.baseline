@@ -86,8 +86,7 @@
                 {
                     "resource": "/docker/pgadmin/Dockerfile.",
                     "check_ids": [
-                        "CKV_DOCKER_2",
-                        "CKV_DOCKER_3"
+                        "CKV_DOCKER_2"
                     ]
                 }
             ]
@@ -150,7 +149,7 @@
                     ]
                 },
                 {
-                    "resource": "AWS::S3::Bucket.LandingBucket",
+                    "resource": "AWS::S3::Bucket.ExporterBucket",
                     "check_ids": [
                         "CKV_AWS_18",
                         "CKV_AWS_21",
@@ -649,6 +648,14 @@
                     "resource": "AWS::SQS::Queue.SiriVmProcessQueue",
                     "check_ids": [
                         "CKV_AWS_27"
+                    ]
+                },
+                {
+                    "resource": "AWS::Serverless::Function.ConvertToParquetFunction",
+                    "check_ids": [
+                        "CKV_AWS_115",
+                        "CKV_AWS_116",
+                        "CKV_AWS_173"
                     ]
                 },
                 {

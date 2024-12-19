@@ -6,10 +6,11 @@ on:
         type: choice
         description: name of service to build
         required: true
-        default: "pglifecycle"
+        default: "historic-matching"
         options:
           - "pglifecycle"
           - "datadog-agent"
+          - "historic-matching"
       imageTag:
         description: Custom tag to apply to images. If 'blank', use git commit sha
         type: string
@@ -90,6 +91,7 @@ jobs:
           ECR_REPOSITORY: ${{ env.SVC_NAME }}
           IMAGE_TAG: ${{ needs.validation.outputs.tag }}
         run: |
+          type ./pre-build.sh && ./pre-build.sh
           docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           echo "[INFO] Image $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"

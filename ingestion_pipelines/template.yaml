@@ -745,6 +745,56 @@ Resources:
       KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
       RetentionInDays: 30
 
+  ##########################################################
+  #### CONVERT TO PARQUET FUNCTION (& ASSC. RESOURCES) #####
+  ##########################################################
+  ConvertToParquetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      # checkov:skip=CKV_AWS_117:No need to run in a vpc, only accesses AWS API
+      FunctionName: !Sub '${ProjectName}-${Environment}-convert-to-parquet-function'
+      CodeUri: ./convert_to_parquet_function
+      Handler: convert_to_parquet_function.app.lambda_handler
+      Timeout: 60
+      MemorySize: 5000
+      Layers: !If
+        - IsNotLocal
+        - - !Ref IngestionFunctionLayer
+        - []
+      Policies:
+        - KMSDecryptPolicy:
+            KeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/s3/arn}}'
+        - S3CrudPolicy:
+            BucketName: !Ref ExporterBucket
+        - Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: !GetAtt ConvertToParquetFunctionLogGroup.Arn
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: convert_to_parquet_function
+          POWERTOOLS_LOG_LEVEL: INFO
+          PROJECT_ENV: !Ref Environment
+          PROJECT_NAME: !Ref ProjectName
+          EXPORTER_BUCKET: !If
+            - IsNotLocal
+            - !Ref ExporterBucket
+            - !Ref AWS::NoValue
+      LoggingConfig:
+        LogGroup: !Ref ConvertToParquetFunctionLogGroup
+
+  ConvertToParquetFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Condition: IsNotLocal
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ProjectName}-${Environment}-convert-to-parquet-function'
+      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
+      RetentionInDays: 30
+
   #########################################
   #### GENERAL CONFIGURATION RESOURCES ####
   #########################################
@@ -801,6 +851,13 @@ Resources:
     Condition: IsNotLocal
     Properties:
       BucketName: !Sub '${ProjectName}-${Environment}-process-bucket'
+
+  ExporterBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Condition: IsNotLocal
+    Properties:
+      BucketName: !Sub '${ProjectName}-${Environment}-exporter-bucket'
 
   SiriVmIngestionQueue:
     Type: AWS::SQS::Queue
