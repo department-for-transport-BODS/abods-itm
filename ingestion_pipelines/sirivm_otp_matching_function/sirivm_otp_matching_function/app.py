@@ -14,8 +14,9 @@ from .client_s3 import TimetableS3Client, filter_avl_list
 from .matcher.handle_stop_history import clean_stop_history
 from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import match_avl_batch
-from .matcher.models import LiveAVLRecord, OperatorShards, Timetable
+from .matcher.models import LiveAVLRecord, Timetable
 from .matcher.utils import timer
+from .shards import shards
 
 logger = Logger()
 
@@ -31,7 +32,6 @@ def read_timetable(timetable_name: str) -> Timetable:
 
 
 class _Cache(TypedDict):
-    shards: NotRequired[OperatorShards]
     main_timetable: NotRequired[Timetable]
 
 
@@ -56,11 +56,8 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             },
         )
 
-        if "shards" not in _cache:
-            _cache["shards"] = s3_client.get_shards()
-
         if "Historic" in rec.message_attributes:
-            historic_record_handler(rec, _cache["shards"])
+            historic_record_handler(rec)
             continue
 
         # sirivm_timetable_s3_generation_function sends this message when done refreshing the extract
@@ -73,10 +70,10 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             logger.info("Fetching main timetable")
             _cache["main_timetable"] = s3_client.download_main_timetable()
 
-        live_record_handler(rec, _cache["shards"], _cache["main_timetable"])
+        live_record_handler(rec, _cache["main_timetable"])
 
 
-def historic_record_handler(rec: SQSRecord, shards: OperatorShards) -> None:
+def historic_record_handler(rec: SQSRecord) -> None:
     """Fetch the historic AVL records and timetable to do historic OTP matching"""
     logger.append_keys(historic=True)
     logger.info("Processing historic record")
@@ -162,7 +159,6 @@ def validate_avl_list(
 
 def live_record_handler(
     rec: SQSRecord,
-    shards: OperatorShards,
     timetable: Timetable,
 ) -> None:
     """Fetch the live AVL records and timetable to do live OTP matching"""
