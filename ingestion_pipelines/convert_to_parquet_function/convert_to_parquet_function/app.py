@@ -9,6 +9,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from dateutil.parser import parse
 from pyarrow import fs
 
+# Input data is from the public.historic_timetable_export procedure in the database
 timetable_cols = [
     "group_id",
     "stop_index",
@@ -18,10 +19,13 @@ timetable_cols = [
     "timetable_id",
     "date_of_journey",
     "direction",
+    "operator_noc",
 ]
 
+timetable_superfluous_cols = []
+
+# Input data is from the public.historic_avl_export procedure in the database
 avl_cols = [
-    "siri_vm_positions_id",
     "operator_ref",
     "line_name",
     "journey_ref",
@@ -30,11 +34,16 @@ avl_cols = [
     "latitude",
     "longitude",
     "vehicle_ref",
-    "batch_id",
     "recorded_at_time",
     "response_time_stamp",
-    "load_time_stamp",
     "group_id",
+    "origin_ref",
+    "destination_ref",
+    "departure_time",
+]
+
+# We don't need these for historic matching
+avl_superfluous_cols = [
     "origin_ref",
     "destination_ref",
     "departure_time",
@@ -80,14 +89,15 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
             else:
                 stream_and_convert(
                     input_path=base_input_path,
+                    input_columns=timetable_cols,
                     output_path=output_path,
-                    column_names=timetable_cols,
+                    columns_to_drop=timetable_superfluous_cols,
                 )
                 output["timetable"]["processed"] = True
 
     if event.get("skip_avl") != "true":
         base_input_path = get_s3_path(
-            f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv",
+            f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}-{pd_month}-{pd_day}.csv",
         )
         if not s3_fs.get_file_info(base_input_path).is_file:
             output["avl"]["input_missing"] = True
@@ -103,8 +113,9 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
             else:
                 stream_and_convert(
                     input_path=base_input_path,
+                    input_columns=avl_cols,
                     output_path=output_path,
-                    column_names=avl_cols,
+                    columns_to_drop=avl_superfluous_cols,
                 )
                 output["avl"]["processed"] = True
 
@@ -113,8 +124,9 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
 
 def stream_and_convert(
     input_path: str,
+    input_columns: list[str],
     output_path: str,
-    column_names: list[str],
+    columns_to_drop: list[str],
 ) -> None:
     paths = [input_path]
     part = 2
@@ -132,7 +144,9 @@ def stream_and_convert(
         part = part + 1
 
     logger.info(f"Converting {input_path} --> [{output_path}]")
-    schema = pa.schema([(col, pa.string()) for col in column_names])
+    schema = pa.schema(
+        [(col, pa.string()) for col in input_columns if col not in columns_to_drop],
+    )
     batch_id = 0
 
     with (
@@ -147,7 +161,7 @@ def stream_and_convert(
                     input_stream,
                     read_options=pv.ReadOptions(
                         block_size=150 * 1_000_000,
-                        column_names=column_names,
+                        column_names=input_columns,
                     ),
                     parse_options=pv.ParseOptions(delimiter=",", quote_char='"'),
                     convert_options=pv.ConvertOptions(column_types=schema),
@@ -156,4 +170,4 @@ def stream_and_convert(
                 for batch in reader:
                     batch_id += 1
                     logger.info(f"Writing batch {batch_id}")
-                    writer.write_batch(batch)
+                    writer.write_batch(batch.drop_columns(columns_to_drop))

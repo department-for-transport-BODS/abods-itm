@@ -857,8 +857,8 @@ def match_group_id_avls(
         journey_matches (Sequence): The matched stops which require updates in the database
 
     """
-    journey_matches = []
-    stop_history = {}
+    journey_matches: list[RecordToAdd] = []
+    stop_history: StopHistory = {}
     for avl in avls:
         to_set, to_remove, stop_history = match_avl(
             timetable,
@@ -874,6 +874,13 @@ def match_group_id_avls(
             if rec["timetable_id"] not in remove_timetable_ids
         ]
         journey_matches.extend(to_set)
+    for journey_index, history in stop_history.items():
+        if len(history["matched_stops"]) == 0:
+            logger.info(
+                "Did not match any stops in journey",
+                stop_history_index=journey_index,
+                potential_match_count=len(history["potential_matches"]),
+            )
     return journey_matches
 
 

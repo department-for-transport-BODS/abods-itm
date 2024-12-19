@@ -73,7 +73,6 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                         journey_ref,
                         direction_ref,
                         date_of_journey,
-                        batch_id,
                         group_id,
                     ) in process_conn.execute(
                         f"""
@@ -87,7 +86,6 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                                 journey_ref,
                                 direction_ref,
                                 date_of_journey,
-                                batch_id,
                                 group_id
                             FROM avl
                             WHERE operator_ref = '{operator_ref}'
@@ -105,11 +103,13 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                                 "journey_ref": str(journey_ref),
                                 "direction_ref": str(direction_ref),
                                 "date_of_journey": str(date_of_journey),
-                                "batch_id": int(batch_id),
                             },
                         )
                 timetable: dict[str, dict[str, StopDetails]] = {}
                 with log_execution_time(logger, "fetch_timetable"):
+                    group_id_col_index = 0
+                    direction_col_index = 2
+                    stop_index_col_index = 8
                     stop_data = process_conn.execute(
                         f"""
                             SELECT
@@ -129,15 +129,17 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                     # Initially bucket by group_id, since we need to do something different if there are multiple directions within each
                     by_group_id = {}
                     for data in stop_data:
-                        by_group_id.setdefault(data[0], []).append(data)
+                        by_group_id.setdefault(data[group_id_col_index], []).append(
+                            data,
+                        )
 
                     for group_id, stops in by_group_id.items():
                         # sort just in case duckdb returns in the wrong order
-                        stops.sort(key=lambda x: int(x[7]))
+                        stops.sort(key=lambda x: int(x[stop_index_col_index]))
 
-                        directions = {rec[0] for rec in stops}
+                        directions = {rec[direction_col_index] for rec in stops}
                         for (
-                            _,
+                            _group_id,
                             _operator_noc,
                             direction,
                             stop_latitude,
@@ -223,6 +225,7 @@ if __name__ == "__main__":
         operator_queue = Queue()
         with duckdb.connect("avl_timetable.db") as conn:
             with log_execution_time(logger, "build_db"):
+                # Input data is created in the convert_to_parquet function
                 conn.execute(f"""
                     CREATE TABLE avl AS
                     SELECT *
