@@ -95,7 +95,7 @@ $procedure$;
 CREATE OR REPLACE PROCEDURE public.historic_matching_summary_generation(IN partition_date DATE)
     LANGUAGE plpgsql
 AS
-$$
+$procedure$
 BEGIN
     RAISE NOTICE '----------------Calling generate_expected_tables----------------';
     CALL public.generate_expected_tables(partition_date);
@@ -115,7 +115,7 @@ BEGIN
     RAISE NOTICE '----------------Calling summary_by_operators----------------';
     CALL public.summary_by_operators(partition_date);
 END;
-$$;
+$procedure$;
 
 ALTER PROCEDURE historic_matching_summary_generation(DATE) OWNER TO abods_proxy_rw;
 
