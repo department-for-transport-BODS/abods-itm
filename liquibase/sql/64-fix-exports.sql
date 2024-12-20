@@ -92,7 +92,7 @@ END;
 $procedure$;
 
 
-CREATE OR REPLACE PROCEDURE historic_matching_summary_generation(IN partition_date DATE)
+CREATE OR REPLACE PROCEDURE public.historic_matching_summary_generation(IN partition_date DATE)
     LANGUAGE plpgsql
 AS
 $$
@@ -120,10 +120,10 @@ $$;
 ALTER PROCEDURE historic_matching_summary_generation(DATE) OWNER TO abods_proxy_rw;
 
 
-CREATE OR REPLACE PROCEDURE populate_headway(IN pt_date DATE)
+CREATE OR REPLACE PROCEDURE public.populate_headway(IN pt_date DATE)
     LANGUAGE plpgsql
 AS
-$$
+$procedure$
 DECLARE
 	partition_date DATE := pt_date;
 BEGIN
@@ -210,17 +210,17 @@ BEGIN
         'drop table if exists  public.temp_timetable_max_siri_vm_positions_id;'
     );
 END;
-$$;
+$procedure$;
 
 ALTER PROCEDURE populate_headway(DATE) OWNER TO lingesh;
 
 GRANT EXECUTE ON PROCEDURE populate_headway(DATE) TO jonathan_rw;
 
 
-CREATE OR REPLACE PROCEDURE summary_by_stops(IN partition_date DATE DEFAULT (CURRENT_DATE - '1 day'::INTERVAL))
+CREATE OR REPLACE PROCEDURE public.summary_by_stops(IN partition_date DATE DEFAULT (CURRENT_DATE - '1 day'::INTERVAL))
     LANGUAGE plpgsql
 AS
-$$
+$procedure$
 DECLARE
 	tablename TEXT;
 
@@ -366,7 +366,7 @@ BEGIN
 					ttb.expected_headway,
 					ttb.actual_headway,
 					ttb.headway_time_difference,
-					(timestamp_after_estimate is not null) AS estimated
+					(ttb.timestamp_after_estimate is not null) AS estimated
 				FROM
 					public."Timetable" ttb
 					INNER JOIN public.expected_services es
@@ -410,17 +410,17 @@ BEGIN
 	partition_date := partition_date + INTERVAL '1' DAY;
 -- END LOOP;
 END;
-$$;
+$procedure$;
 
 ALTER PROCEDURE summary_by_stops(DATE) OWNER TO abods_rw;
 
 GRANT EXECUTE ON PROCEDURE summary_by_stops(DATE) TO jonathan_rw;
 
 
-CREATE OR REPLACE PROCEDURE summary_by_services(IN partition_date DATE DEFAULT (CURRENT_DATE - '1 day'::INTERVAL))
+CREATE OR REPLACE PROCEDURE public.summary_by_services(IN partition_date DATE DEFAULT (CURRENT_DATE - '1 day'::INTERVAL))
     LANGUAGE plpgsql
 AS
-$$
+$procedure$
 DECLARE
 	tablename TEXT;
 
@@ -551,7 +551,7 @@ BEGIN
 						time_difference AS avg_time_difference,
 						es.admin_area_id,
 						ttb.actual_headway,
-						(timestamp_after_estimate is not null) AS estimated,
+						(ttb.timestamp_after_estimate is not null) AS estimated,
 						ttb.timestamp_after_estimate
 					FROM
 						public."Timetable" ttb
@@ -591,17 +591,17 @@ BEGIN
 	partition_date := partition_date + INTERVAL '1' DAY;
 -- END LOOP;
 END;
-$$;
+$procedure$;
 
 ALTER PROCEDURE summary_by_services(DATE) OWNER TO abods_rw;
 
 GRANT EXECUTE ON PROCEDURE summary_by_services(DATE) TO jonathan_rw;
 
 
-CREATE OR REPLACE PROCEDURE summary_by_operators(IN partition_date DATE DEFAULT (CURRENT_DATE - '1 day'::INTERVAL))
+CREATE OR REPLACE PROCEDURE public.summary_by_operators(IN partition_date DATE DEFAULT (CURRENT_DATE - '1 day'::INTERVAL))
     LANGUAGE plpgsql
 AS
-$$
+$procedure$
 
 DECLARE
 	tablename TEXT:= 'timetable_summary_operator_t_' || to_char(partition_date, 'YYYY_MM_DD');
@@ -716,7 +716,7 @@ BEGIN
 	partition_date
 );
 END;
-$$;
+$procedure$;
 
 ALTER PROCEDURE summary_by_operators(DATE) OWNER TO abods_rw;
 
