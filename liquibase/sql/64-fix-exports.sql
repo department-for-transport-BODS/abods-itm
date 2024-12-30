@@ -56,22 +56,23 @@ BEGIN
     PERFORM (SELECT COUNT(*)
              FROM aws_s3.query_export_to_s3(
                      format('SELECT
-                                lower(concat_ws(''|'', operator_ref, line_name, journey_ref, date_of_journey)) as group_id,
-                                recorded_at_time,
-                                response_time_stamp,
-                                latitude,
-                                longitude,
-                                line_name,
-                                operator_ref,
-                                vehicle_ref,
-                                journey_ref,
-                                direction_ref,
-                                date_of_journey,
-                                origin_ref,
-                                destination_ref,
-                                departure_time
-                             FROM public."SiriVMPositions"
-                             WHERE date_of_journey = ''%s''::DATE', datestring),
+                                lower(concat_ws(''|'', s.operator_ref, s.line_name, s.journey_ref, s.date_of_journey)) as group_id,
+                                to_json(s.recorded_at_time)#>>''{}'' as recorded_at_time,
+                                to_json(s.response_time_stamp)#>>''{}'' as response_time_stamp,
+                                s.latitude,
+                                s.longitude,
+                                s.line_name,
+                                s.operator_ref,
+                                s.vehicle_ref,
+                                s.journey_ref,
+                                s.direction_ref,
+                                s.date_of_journey,
+                                s.origin_ref,
+                                s.destination_ref,
+                                to_json(s.departure_time)#>>''{}'' as departure_time
+                             FROM public."SiriVMPositions" s
+                             WHERE date_of_journey = ''%s''::DATE
+                             ORDER BY s.operator_ref, s.line_name, s.journey_ref, s.date_of_journey, s.direction_ref, s.vehicle_ref, s.recorded_at_time', datestring),
                      aws_commons.create_s3_uri(
                              concat('abods-', SPLIT_PART(aurora_db_instance_identifier(), '-', 2), '-exporter-bucket'),
                              concat(
