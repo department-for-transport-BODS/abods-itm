@@ -22,8 +22,6 @@ timetable_cols = [
     "operator_noc",
 ]
 
-timetable_superfluous_cols = []
-
 # Input data is from the public.historic_avl_export procedure in the database
 avl_cols = [
     "group_id",
@@ -37,13 +35,6 @@ avl_cols = [
     "journey_ref",
     "direction_ref",
     "date_of_journey",
-    "origin_ref",
-    "destination_ref",
-    "departure_time",
-]
-
-# We don't need these for historic matching
-avl_superfluous_cols = [
     "origin_ref",
     "destination_ref",
     "departure_time",
@@ -91,7 +82,6 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
                     input_path=base_input_path,
                     input_columns=timetable_cols,
                     output_path=output_path,
-                    columns_to_drop=timetable_superfluous_cols,
                 )
                 output["timetable"]["processed"] = True
 
@@ -115,7 +105,6 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
                     input_path=base_input_path,
                     input_columns=avl_cols,
                     output_path=output_path,
-                    columns_to_drop=avl_superfluous_cols,
                 )
                 output["avl"]["processed"] = True
 
@@ -126,7 +115,6 @@ def stream_and_convert(
     input_path: str,
     input_columns: list[str],
     output_path: str,
-    columns_to_drop: list[str],
 ) -> None:
     paths = [input_path]
     part = 2
@@ -145,7 +133,7 @@ def stream_and_convert(
 
     logger.info(f"Converting {input_path} --> [{output_path}]")
     schema = pa.schema(
-        [(col, pa.string()) for col in input_columns if col not in columns_to_drop],
+        [(col, pa.string()) for col in input_columns],
     )
     batch_id = 0
 
@@ -170,4 +158,4 @@ def stream_and_convert(
                 for batch in reader:
                     batch_id += 1
                     logger.info(f"Writing batch {batch_id}")
-                    writer.write_batch(batch.drop_columns(columns_to_drop))
+                    writer.write_batch(batch)
