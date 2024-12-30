@@ -7,38 +7,38 @@ import pyarrow.parquet as pq
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from dateutil.parser import parse
-from pyarrow import fs
+from pyarrow import DataType, fs
 
-timetable_cols = [
-    "group_id",
-    "stop_index",
-    "stop_latitude",
-    "stop_longitude",
-    "expected_departure_time",
-    "timetable_id",
-    "date_of_journey",
-    "direction",
-]
+# output schema also matches the column order of the input data from the public.historic_timetable_export procedure
+timetable_output_schema = {
+    "group_id": pa.string(),
+    "stop_index": pa.string(),
+    "stop_latitude": pa.string(),
+    "stop_longitude": pa.string(),
+    "expected_departure_time": pa.string(),
+    "timetable_id": pa.string(),
+    "date_of_journey": pa.string(),
+    "direction": pa.string(),
+    "operator_noc": pa.string(),
+}
 
-avl_cols = [
-    "siri_vm_positions_id",
-    "operator_ref",
-    "line_name",
-    "journey_ref",
-    "direction_ref",
-    "date_of_journey",
-    "latitude",
-    "longitude",
-    "vehicle_ref",
-    "batch_id",
-    "recorded_at_time",
-    "response_time_stamp",
-    "load_time_stamp",
-    "group_id",
-    "origin_ref",
-    "destination_ref",
-    "departure_time",
-]
+# output schema also matches the column order of the input data from the public.historic_avl_export procedure
+avl_output_schema = {
+    "group_id": pa.string(),
+    "recorded_at_time": pa.timestamp(unit="ms", tz="UTC"),
+    "response_timestamp": pa.timestamp(unit="ms", tz="UTC"),
+    "latitude": pa.float32(),
+    "longitude": pa.float32(),
+    "line_name": pa.string(),
+    "operator_ref": pa.string(),
+    "vehicle_ref": pa.string(),
+    "journey_ref": pa.string(),
+    "direction_ref": pa.string(),
+    "date_of_journey": pa.date32(),
+    "origin_ref": pa.string(),
+    "destination_ref": pa.string(),
+    "departure_time": pa.timestamp(unit="ms", tz="UTC"),
+}
 
 logger = Logger()
 
@@ -80,14 +80,14 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
             else:
                 stream_and_convert(
                     input_path=base_input_path,
+                    column_types=timetable_output_schema,
                     output_path=output_path,
-                    column_names=timetable_cols,
                 )
                 output["timetable"]["processed"] = True
 
     if event.get("skip_avl") != "true":
         base_input_path = get_s3_path(
-            f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}{pd_month}{pd_day}.csv",
+            f"historic/csv/siri/YYYY={pd_year}/MM={pd_month}/siri_vm_{pd_year}-{pd_month}-{pd_day}.csv",
         )
         if not s3_fs.get_file_info(base_input_path).is_file:
             output["avl"]["input_missing"] = True
@@ -103,8 +103,8 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
             else:
                 stream_and_convert(
                     input_path=base_input_path,
+                    column_types=avl_output_schema,
                     output_path=output_path,
-                    column_names=avl_cols,
                 )
                 output["avl"]["processed"] = True
 
@@ -113,8 +113,8 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> dict:
 
 def stream_and_convert(
     input_path: str,
+    column_types: dict[str, DataType],
     output_path: str,
-    column_names: list[str],
 ) -> None:
     paths = [input_path]
     part = 2
@@ -132,9 +132,9 @@ def stream_and_convert(
         part = part + 1
 
     logger.info(f"Converting {input_path} --> [{output_path}]")
-    schema = pa.schema([(col, pa.string()) for col in column_names])
     batch_id = 0
 
+    schema = pa.schema(list(column_types.items()))
     with (
         s3_fs.open_output_stream(output_path) as output_stream,
         pq.ParquetWriter(output_stream, schema) as writer,
@@ -147,7 +147,7 @@ def stream_and_convert(
                     input_stream,
                     read_options=pv.ReadOptions(
                         block_size=150 * 1_000_000,
-                        column_names=column_names,
+                        column_names=list(column_types.keys()),
                     ),
                     parse_options=pv.ParseOptions(delimiter=",", quote_char='"'),
                     convert_options=pv.ConvertOptions(column_types=schema),
