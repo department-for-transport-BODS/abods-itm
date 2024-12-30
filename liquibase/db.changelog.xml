@@ -201,4 +201,7 @@
     <changeSet id="63" author="abodsuser">
         <sqlFile path="sql/63-export-data-to-exporter-bucket.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="64" author="abodsuser">
+        <sqlFile path="sql/64-fix-exports.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
