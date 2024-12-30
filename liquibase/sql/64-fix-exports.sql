@@ -213,9 +213,7 @@ BEGIN
 END;
 $procedure$;
 
-ALTER PROCEDURE populate_headway(DATE) OWNER TO lingesh;
-
-GRANT EXECUTE ON PROCEDURE populate_headway(DATE) TO jonathan_rw;
+ALTER PROCEDURE populate_headway(DATE) OWNER TO abods_proxy_rw;
 
 
 CREATE OR REPLACE PROCEDURE public.summary_by_stops(IN partition_date DATE DEFAULT (CURRENT_DATE - '1 day'::INTERVAL))
@@ -415,8 +413,6 @@ $procedure$;
 
 ALTER PROCEDURE summary_by_stops(DATE) OWNER TO abods_rw;
 
-GRANT EXECUTE ON PROCEDURE summary_by_stops(DATE) TO jonathan_rw;
-
 
 CREATE OR REPLACE PROCEDURE public.summary_by_services(IN partition_date DATE DEFAULT (CURRENT_DATE - '1 day'::INTERVAL))
     LANGUAGE plpgsql
@@ -596,8 +592,6 @@ $procedure$;
 
 ALTER PROCEDURE summary_by_services(DATE) OWNER TO abods_rw;
 
-GRANT EXECUTE ON PROCEDURE summary_by_services(DATE) TO jonathan_rw;
-
 
 CREATE OR REPLACE PROCEDURE public.summary_by_operators(IN partition_date DATE DEFAULT (CURRENT_DATE - '1 day'::INTERVAL))
     LANGUAGE plpgsql
@@ -720,6 +714,4 @@ END;
 $procedure$;
 
 ALTER PROCEDURE summary_by_operators(DATE) OWNER TO abods_rw;
-
-GRANT EXECUTE ON PROCEDURE summary_by_operators(DATE) TO jonathan_rw;
 
