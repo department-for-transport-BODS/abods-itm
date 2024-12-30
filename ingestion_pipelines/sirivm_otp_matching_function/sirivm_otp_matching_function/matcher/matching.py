@@ -27,6 +27,7 @@ from .models import (
 from .utils import (
     get_otp_state,
     get_time_difference,
+    log_execution_time,
     timer,
     transform_coordinates_and_calculate_intersections,
     validate_date,
@@ -803,7 +804,6 @@ def move_potential_match_to_match(
         )
 
 
-@timer(logger)
 def match_avl_batch(
     timetable: TimetableStore,
     avls: Sequence[AVLRecord],
@@ -827,15 +827,21 @@ def match_avl_batch(
     """
     all_matched: list[RecordToAdd] = []
     all_removed: list[RecordToRemove] = []
-    for avl in avls:
-        to_add, to_remove, stop_history = match_avl(timetable, avl, stop_history)
-        # After initially matching a stop, a later avl might provide evidence that the match was incorrect.
-        # Each batch should contain only a single avl for a particular journey, and we can't see future avls
-        # Therefore, the caller needs to add the match, and then wipe it if we determine that in a later batch.
-        all_matched.extend(to_add)
-        all_removed.extend(to_remove)
+    with log_execution_time(logger, "match_avl_batch", avl_count=len(avls)):
+        for avl in avls:
+            to_add, to_remove, stop_history = match_avl(timetable, avl, stop_history)
+            # After initially matching a stop, a later avl might provide evidence that the match was incorrect.
+            # Each batch should contain only a single avl for a particular journey, and we can't see future avls
+            # Therefore, the caller needs to add the match, and then wipe it if we determine that in a later batch.
+            all_matched.extend(to_add)
+            all_removed.extend(to_remove)
 
     logger.remove_keys(["avl", "group_id", "stop_history_index"])
+    logger.info(
+        "Processed batch",
+        new_matches=len(all_matched),
+        removed_matches=len(all_removed),
+    )
     return all_matched, all_removed, stop_history
 
 
@@ -843,7 +849,7 @@ def match_avl_batch(
 def match_group_id_avls(
     timetable: TimetableStore,
     avls: Sequence[AVLRecord],
-) -> Sequence[RecordToAdd]:
+) -> tuple[Sequence[RecordToAdd], int, int]:
     """
     Perform matching on all avls for a group_id.
 
@@ -880,6 +886,7 @@ def match_group_id_avls(
 
     unprocessed_avls = 0
     expected_matched_stops = 0
+    processed_route_indexes = set()
     for group_id, direction_ref in groups_and_directions:
         stop_history_index, route = timetable.get_route_details(group_id, direction_ref)
         avl_count = sum(
@@ -898,16 +905,21 @@ def match_group_id_avls(
             unprocessed_avls += avl_count
             continue
         expected_matched_stops += len(route)
+        processed_route_indexes.add(stop_history_index)
 
+    match_count = len({match["timetable_id"] for match in journey_matches})
+    processed_routes = len(processed_route_indexes)
     logger.info(
         "Processed group_id",
         expected_stop_count=expected_matched_stops,
         processed_avls=len(avls) - unprocessed_avls,
         skipped_avls=unprocessed_avls,
-        match_count=len({match["timetable_id"] for match in journey_matches}),
+        match_count=match_count,  # If this is ever different to match_length, then we should consider de-duplicating
+        match_length=len(journey_matches),
+        processed_routes=processed_routes,
     )
 
-    return journey_matches
+    return journey_matches, processed_routes, match_count
 
 
 def match_avl(

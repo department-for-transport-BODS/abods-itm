@@ -27,7 +27,7 @@ logger = Logger()
 two_hours_secs = -7200
 
 
-def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
+def operator_worker_task(  # noqa: PLR0915, C901 Complexity not much of an issue here
     date_str: str,
     task_count: int,
     task_queue: Queue,
@@ -177,17 +177,30 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                             )
                 timetable_store = LiveTimetableStore(timetable)
 
+                total_routes = len(timetable)
+                total_stops = sum(len(route) for route in timetable.values())
+                total_matches = 0
+                routes_processed = 0
+
                 with log_execution_time(
                     logger,
                     "process_operator_data",
                     operator_journeys=len(avls_by_group_id),
                     operator_timetables=len(timetable),
+                    operator_ref=operator_ref,
                 ):
-                    for avls in avls_by_group_id.values():
+                    for group_avls in avls_by_group_id.values():
                         # sort just in case duckdb returns in the wrong order
-                        avls.sort(key=lambda x: x["recorded_at_time"])
+                        group_avls.sort(key=lambda x: x["recorded_at_time"])
 
-                        journey_matches = match_group_id_avls(timetable_store, avls)
+                        journey_matches, processed_routes, match_count = (
+                            match_group_id_avls(
+                                timetable_store,
+                                group_avls,
+                            )
+                        )
+                        routes_processed += processed_routes
+                        total_matches += match_count
 
                         db_client.historic_update_success(
                             None,  # We aren't using avl batches, so we need to skip the batch table update
@@ -195,6 +208,14 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                             [],
                             date_str,
                         )
+                logger.info(
+                    "Processed operator data",
+                    total_routes=total_routes,
+                    routes_processed=routes_processed,
+                    total_stops=total_stops,
+                    total_matches=total_matches,
+                    operator_ref=operator_ref,
+                )
             except Exception:
                 logger.exception("An error occurred when processing historic record")
 
