@@ -3,6 +3,7 @@
 
 import os
 import sys
+from datetime import UTC, datetime
 from multiprocessing import Process, Queue
 from queue import Empty
 from typing import TYPE_CHECKING
@@ -51,6 +52,11 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                 logger.exception("An unexpected exception occurred")
                 continue
 
+            def utc_iso_string(val: str | datetime) -> str:
+                if isinstance(val, datetime):
+                    return val.astimezone(UTC).isoformat()
+                return str(val)
+
             try:
                 logger.info(
                     "Processing operator",
@@ -65,7 +71,7 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                 with log_execution_time(logger, "fetch_avls"):
                     for (
                         recorded_at_time,
-                        response_time_stamp,
+                        response_timestamp,
                         latitude,
                         longitude,
                         line_name,
@@ -78,7 +84,7 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                         f"""
                             SELECT
                                 recorded_at_time,
-                                response_time_stamp,
+                                response_timestamp,
                                 latitude,
                                 longitude,
                                 line_name,
@@ -93,8 +99,10 @@ def operator_worker_task(  # noqa: C901 Complexity not much of an issue here
                     ).fetchall():
                         avls_by_group_id.setdefault(group_id, []).append(
                             {
-                                "recorded_at_time": str(recorded_at_time),
-                                "response_timestamp": str(response_time_stamp),
+                                "recorded_at_time": utc_iso_string(recorded_at_time),
+                                "response_timestamp": utc_iso_string(
+                                    response_timestamp,
+                                ),
                                 "latitude": float(latitude),
                                 "longitude": float(longitude),
                                 "line_name": str(line_name),
