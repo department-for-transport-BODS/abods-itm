@@ -56,7 +56,8 @@ class LiveAVLRecord(AVLRecord):
     batch_id: int
 
 
-avl_data_type = {
+# Live avl files contain more records than we need, and the ordering is important so defined here to be explicit
+live_avl_file_columns = {
     "recorded_at_time": str,
     "response_timestamp": str,
     "latitude": float,

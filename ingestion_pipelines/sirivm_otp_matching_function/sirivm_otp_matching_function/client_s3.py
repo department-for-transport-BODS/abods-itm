@@ -19,7 +19,7 @@ from .matcher.models import (
     OperatorShards,
     StopHistory,
     Timetable,
-    avl_data_type,
+    live_avl_file_columns,
 )
 from .matcher.utils import timer
 
@@ -178,12 +178,12 @@ class TimetableS3Client:
             number_of_files=len(filename),
         )
         start_time = time.time()
-        keys = list(avl_data_type.keys())
+        keys = list(live_avl_file_columns.keys())
         data = wr.s3.read_csv(
             path=paths,
             use_threads=True,
             names=keys,
-            dtype=avl_data_type,
+            dtype=live_avl_file_columns,
             usecols=keys,
             header=None,
         )
