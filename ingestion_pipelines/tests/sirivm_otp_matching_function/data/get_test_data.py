@@ -8,7 +8,7 @@ import pandas as pd
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
     AVLRecord,
     Timetable,
-    avl_data_type,
+    live_avl_file_columns,
 )
 
 test_data_dir = Path(__file__).parent
@@ -22,7 +22,7 @@ def read_timetable(file_name: str) -> Timetable:
 
 def read_avl(file_name: str) -> list[AVLRecord]:
     path = test_data_dir / "avl" / file_name
-    data = pd.read_csv(path, dtype=avl_data_type, header=0)
+    data = pd.read_csv(path, dtype=live_avl_file_columns, header=0)
     data["line_name"] = data["line_name"].fillna("")
     data["direction_ref"] = data["direction_ref"].fillna("")
 
