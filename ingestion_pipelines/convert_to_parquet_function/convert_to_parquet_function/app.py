@@ -25,10 +25,10 @@ timetable_output_schema = {
 # output schema also matches the column order of the input data from the public.historic_avl_export procedure
 avl_output_schema = {
     "group_id": pa.string(),
-    "recorded_at_time": pa.date64(),
-    "response_timestamp": pa.date64(),
-    "latitude": pa.Float32,
-    "longitude": pa.Float32,
+    "recorded_at_time": pa.timestamp(unit="ms", tz="UTC"),
+    "response_timestamp": pa.timestamp(unit="ms", tz="UTC"),
+    "latitude": pa.float32(),
+    "longitude": pa.float32(),
     "line_name": pa.string(),
     "operator_ref": pa.string(),
     "vehicle_ref": pa.string(),
@@ -37,7 +37,7 @@ avl_output_schema = {
     "date_of_journey": pa.date32(),
     "origin_ref": pa.string(),
     "destination_ref": pa.string(),
-    "departure_time": pa.date64(),
+    "departure_time": pa.timestamp(unit="ms", tz="UTC"),
 }
 
 logger = Logger()
