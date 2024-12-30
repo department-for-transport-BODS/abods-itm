@@ -56,17 +56,17 @@ BEGIN
     PERFORM (SELECT COUNT(*)
              FROM aws_s3.query_export_to_s3(
                      format('SELECT
-                                operator_ref,
+                                lower(concat_ws(''|'', operator_ref, line_name, journey_ref, date_of_journey)) as group_id,
+                                recorded_at_time,
+                                response_time_stamp,
+                                latitude,
+                                longitude,
                                 line_name,
+                                operator_ref,
+                                vehicle_ref,
                                 journey_ref,
                                 direction_ref,
                                 date_of_journey,
-                                latitude,
-                                longitude,
-                                vehicle_ref,
-                                recorded_at_time,
-                                response_time_stamp,
-                                lower(concat_ws(''|'', operator_ref, line_name, journey_ref, date_of_journey)) as group_id,
                                 origin_ref,
                                 destination_ref,
                                 departure_time
