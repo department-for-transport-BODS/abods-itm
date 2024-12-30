@@ -56,7 +56,19 @@ class LiveAVLRecord(AVLRecord):
     batch_id: int
 
 
-avl_data_type = AVLRecord.__annotations__
+avl_data_type = {
+    "recorded_at_time": str,
+    "response_timestamp": str,
+    "latitude": float,
+    "longitude": float,
+    "line_name": str,
+    "operator_ref": str,
+    "vehicle_ref": str,
+    "journey_ref": str,
+    "direction_ref": str,
+    "date_of_journey": str,
+    "batch_id": int,
+}
 
 
 def avl_group_id(avl: AVLRecord) -> str:
