@@ -755,7 +755,7 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-convert-to-parquet-function'
       CodeUri: ./convert_to_parquet_function
       Handler: convert_to_parquet_function.app.lambda_handler
-      Timeout: 120
+      Timeout: 600
       MemorySize: 5000
       Layers: !If
         - IsNotLocal
