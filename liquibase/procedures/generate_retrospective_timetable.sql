@@ -903,6 +903,11 @@ where drv.journey_code is null
             concat('timetable_stop_prev_group_id', timetable_suffix)
             );
 
+    execute format(
+            'drop table if exists public.%I',
+            concat('potential_revisions', timetable_suffix)
+            );
+
     RAISE NOTICE '% generate_retrospective_timetable complete', clock_timestamp();
 end;
 $$;
