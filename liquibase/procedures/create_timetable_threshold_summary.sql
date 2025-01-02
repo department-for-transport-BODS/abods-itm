@@ -138,3 +138,5 @@ BEGIN
 -- END LOOP;
 END;
 $$;
+
+alter procedure create_timetable_threshold_summary owner to abods_proxy_rw;

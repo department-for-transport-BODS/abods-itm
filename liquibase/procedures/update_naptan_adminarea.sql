@@ -20,3 +20,5 @@ begin
                                                                              EXCLUDED.atco_code, EXCLUDED.ui_lta_id);
 end;
 $$;
+
+alter procedure update_naptan_adminarea owner to abods_proxy_rw;

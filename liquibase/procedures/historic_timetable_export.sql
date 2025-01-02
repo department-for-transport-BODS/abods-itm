@@ -44,3 +44,5 @@ BEGIN
     RAISE NOTICE 'Exported timetable for date %', partition_date::TEXT;
 END;
 $$;
+
+alter procedure historic_timetable_export owner to abods_proxy_rw;

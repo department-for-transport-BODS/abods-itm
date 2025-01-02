@@ -22,3 +22,5 @@ BEGIN
     CALL public.summary_by_operators(partition_date);
 END;
 $$;
+
+alter procedure historic_matching_summary_generation owner to abods_proxy_rw;

@@ -45,3 +45,5 @@ ON CONFLICT DO NOTHING
 
 END;
 $$;
+
+alter procedure load_avl_tables_historic owner to abods_proxy_rw;

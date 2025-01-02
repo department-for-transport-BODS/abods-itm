@@ -54,3 +54,5 @@ begin
 end;
 
 $$;
+
+alter procedure update_organisation_dataset owner to abods_proxy_rw;

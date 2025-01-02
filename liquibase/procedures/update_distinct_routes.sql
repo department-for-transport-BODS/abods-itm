@@ -57,3 +57,5 @@ begin
 
 end;
 $$;
+
+alter procedure update_distinct_routes owner to abods_proxy_rw;

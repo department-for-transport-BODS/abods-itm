@@ -21,3 +21,5 @@ GROUP BY oo.id,
                  WHEN to2.name IS NULL THEN concat('Not in Traveline: ', oo.noc)::character varying
                  ELSE to2.name
                  END);
+
+alter view all_operators owner to abods_proxy_rw;

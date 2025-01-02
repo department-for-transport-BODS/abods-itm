@@ -33,3 +33,5 @@ begin
     call public.update_transmodel_servicepattern_admin_areas();
 end;
 $$;
+
+alter procedure update_all_transmodel_tables owner to abods_proxy_rw;

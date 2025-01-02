@@ -19,3 +19,5 @@ begin
     on conflict do nothing;
 end;
 $$;
+
+alter procedure update_transmodel_servicedorganisationvehiclejourney owner to abods_proxy_rw;

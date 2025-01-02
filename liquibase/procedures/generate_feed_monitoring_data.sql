@@ -274,3 +274,5 @@ begin
 
 end;
 $$;
+
+alter procedure generate_feed_monitoring_data owner to abods_proxy_rw;

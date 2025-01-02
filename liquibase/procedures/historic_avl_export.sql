@@ -46,3 +46,5 @@ BEGIN
     RAISE NOTICE 'Exported sirivmpositions for date %', partition_date::TEXT;
 END;
 $$;
+
+alter procedure historic_avl_export owner to abods_proxy_rw;

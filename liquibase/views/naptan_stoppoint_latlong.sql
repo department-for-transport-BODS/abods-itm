@@ -16,3 +16,5 @@ SELECT id,
        st_x(location) AS longitude,
        st_y(location) AS latitude
 FROM naptan_stoppoint;
+
+alter view naptan_stoppoint_latlong owner to abods_proxy_rw;

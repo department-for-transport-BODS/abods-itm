@@ -51,3 +51,5 @@ begin
 
 end;
 $$;
+
+alter procedure generate_feed_monitoring_daily_summary owner to abods_proxy_rw;

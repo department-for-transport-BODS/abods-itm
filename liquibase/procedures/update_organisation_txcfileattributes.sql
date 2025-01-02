@@ -47,3 +47,5 @@ begin
     on conflict do nothing;
 end;
 $$;
+
+alter procedure update_organisation_txcfileattributes owner to abods_proxy_rw;

@@ -174,3 +174,5 @@ BEGIN
         END LOOP;
 END
 $$;
+
+alter procedure update_performance_statistics_v4 owner to abods_proxy_rw;

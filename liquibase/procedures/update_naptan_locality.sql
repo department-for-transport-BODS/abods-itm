@@ -23,3 +23,5 @@ begin
                                                                                  EXCLUDED.district_id);
 end;
 $$;
+
+alter procedure update_naptan_locality owner to abods_proxy_rw;

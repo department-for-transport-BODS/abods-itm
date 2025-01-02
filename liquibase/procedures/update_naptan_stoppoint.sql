@@ -56,3 +56,5 @@ begin
         );
 end;
 $$;
+
+alter procedure update_naptan_stoppoint owner to abods_proxy_rw;

@@ -18,3 +18,5 @@ FROM bods_organisation bo
          RIGHT JOIN bods.organisation_organisation_admin_areas ooaa ON bo.id = ooaa.organisation_id
          LEFT JOIN noc_adminarea na ON na.adminarea_id = ooaa.adminarea_id
 GROUP BY bo.id, na.national_operator_code;
+
+alter view bods_organisationoperator owner to abods_proxy_rw;

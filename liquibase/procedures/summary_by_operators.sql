@@ -117,3 +117,5 @@ BEGIN
             );
 END;
 $$;
+
+alter procedure summary_by_operators owner to abods_proxy_rw;

@@ -11,3 +11,5 @@ SELECT id,
        bool_or(is_abods_global_viewer) AS is_abods_global_viewer
 FROM all_orgs
 GROUP BY id, name;
+
+alter view bods_organisation owner to abods_proxy_rw;

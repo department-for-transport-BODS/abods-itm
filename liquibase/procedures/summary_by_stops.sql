@@ -190,3 +190,5 @@ BEGIN
 -- END LOOP;
 END;
 $$;
+
+alter procedure summary_by_stops owner to abods_proxy_rw;

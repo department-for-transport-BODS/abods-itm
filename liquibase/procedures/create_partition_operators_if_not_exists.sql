@@ -127,3 +127,5 @@ begin
             );
 end;
 $$;
+
+alter procedure create_partition_operators_if_not_exists owner to abods_proxy_rw;

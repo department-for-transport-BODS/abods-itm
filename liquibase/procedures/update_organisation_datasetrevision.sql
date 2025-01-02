@@ -135,3 +135,5 @@ begin
         );
 end;
 $$;
+
+alter procedure update_organisation_datasetrevision owner to abods_proxy_rw;

@@ -158,3 +158,5 @@ begin
 
 end;
 $$;
+
+alter procedure generate_expected_tables owner to abods_proxy_rw;

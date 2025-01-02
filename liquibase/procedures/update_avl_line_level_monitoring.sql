@@ -16,3 +16,5 @@ begin
 
 end;
 $$;
+
+alter procedure update_avl_line_level_monitoring owner to abods_proxy_rw;

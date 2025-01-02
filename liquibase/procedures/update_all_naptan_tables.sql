@@ -11,3 +11,5 @@ begin
     call public.update_naptan_stoppoint();
 end;
 $$;
+
+alter procedure update_all_naptan_tables owner to abods_proxy_rw;

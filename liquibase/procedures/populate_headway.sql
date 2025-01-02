@@ -88,3 +88,5 @@ BEGIN
             );
 END;
 $$;
+
+alter procedure populate_headway owner to abods_proxy_rw;

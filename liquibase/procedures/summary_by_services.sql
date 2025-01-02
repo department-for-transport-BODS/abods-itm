@@ -171,3 +171,5 @@ BEGIN
 -- END LOOP;
 END;
 $$;
+
+alter procedure summary_by_services owner to abods_proxy_rw;

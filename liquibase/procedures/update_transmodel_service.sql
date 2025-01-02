@@ -29,3 +29,5 @@ begin
     on conflict do nothing;
 end;
 $$;
+
+alter procedure update_transmodel_service owner to abods_proxy_rw;

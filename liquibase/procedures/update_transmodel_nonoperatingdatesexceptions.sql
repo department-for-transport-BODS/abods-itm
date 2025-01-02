@@ -17,3 +17,5 @@ begin
     on conflict do nothing;
 end;
 $$;
+
+alter procedure update_transmodel_nonoperatingdatesexceptions owner to abods_proxy_rw;

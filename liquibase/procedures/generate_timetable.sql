@@ -812,3 +812,5 @@ where drv.journey_code is null
 
 end;
 $$;
+
+alter procedure generate_timetable owner to abods_proxy_rw;

@@ -19,3 +19,5 @@ FROM bods_userorganisation bu
 GROUP BY uu.id, uu.username, uu.email, uu.first_name, uu.last_name, uu.password, uu.is_superuser, uu.is_active,
          uu.account_type
 ORDER BY uu.account_type, uu.id;
+
+alter view bods_user owner to abods_proxy_rw;

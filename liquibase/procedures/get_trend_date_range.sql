@@ -32,3 +32,5 @@ BEGIN
     END IF;
 END;
 $$;
+
+alter procedure get_trend_date_range owner to abods_proxy_rw;

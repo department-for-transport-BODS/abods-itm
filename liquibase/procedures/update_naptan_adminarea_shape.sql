@@ -11,3 +11,5 @@ begin
     group by admin_area_id;
 end;
 $$;
+
+alter procedure aa owner to abods_proxy_rw;
