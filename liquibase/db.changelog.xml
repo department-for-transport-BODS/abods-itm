@@ -336,4 +336,7 @@
         <sqlFile path="procedures/historic_matching_summary_generation.sql" splitStatements="false"/>
     </changeSet>
 
+    <changeSet id="108" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/import_historic_avl.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
