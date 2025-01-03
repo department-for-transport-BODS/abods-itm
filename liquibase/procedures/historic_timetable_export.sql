@@ -31,7 +31,7 @@ BEGIN
                                      'historic/csv/timetable/YYYY=',
                                      DATE_PART('year', partition_date),
                                      '/MM=',
-                                     DATE_PART('month', partition_date),
+                                     LPAD(DATE_PART('month', partition_date)::TEXT, 2, '0'),
                                      '/',
                                      datestring,
                                      '.csv'

@@ -34,7 +34,7 @@ BEGIN
                                      'historic/csv/siri/YYYY=',
                                      DATE_PART('year', partition_date),
                                      '/MM=',
-                                     DATE_PART('month', partition_date),
+                                     LPAD(DATE_PART('month', partition_date)::TEXT, 2, '0'),
                                      '/siri_vm_',
                                      datestring,
                                      '.csv'
