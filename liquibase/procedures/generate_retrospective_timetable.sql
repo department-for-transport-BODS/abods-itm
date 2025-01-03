@@ -534,8 +534,6 @@ where drv.journey_code is null
 
 	join public.transmodel_servicepatternstop stop
 	on tvw.transmodel_vehiclejourney_id = stop.vehicle_journey_id
-
-	where trim(tvw.journey_code) <> ''''
 	',
             concat('timetable_journey', timetable_suffix),
             concat('timetable_vj_per_groupid', timetable_suffix)
