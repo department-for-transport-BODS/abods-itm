@@ -14,7 +14,7 @@ PROJECT_NAME="abods"
 PRIVATE_SUBNET_IDS=$(aws ssm get-parameter --name "/$PROJECT_NAME/$ENVIRONMENT/vpc/subnets/private" --output text --query Parameter.Value)
 VPC_SG_IDS=$(aws ssm get-parameter --name "/$PROJECT_NAME/$ENVIRONMENT/ec2/securitygroup/rdsproxy-access/id" --output text --query Parameter.Value)
 
-TASK_ID=$(aws ecs run-task --cluster "$PROJECT_NAME-$ENVIRONMENT" --task-definition "$PROJECT_NAME-$ENVIRONMENT-historic-matching" --overrides "{ \"containerOverrides\": [ { \"name\": \"matcher\", \"environment\": [ { \"name\": \"PROCESS_DATE\", \"value\": \"$PROCESS_DATE\" } ] } ] }" --count 1 --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$VPC_SG_IDS]}" | jq -r '.tasks.[0].taskArn' | cut -d "/" -f 3)
+TASK_ID=$(aws ecs run-task --cluster "$PROJECT_NAME-$ENVIRONMENT" --task-definition "$PROJECT_NAME-$ENVIRONMENT-historic-matching" --overrides "{ \"containerOverrides\": [ { \"name\": \"matcher\", \"environment\": [ { \"name\": \"PROCESS_DATE\", \"value\": \"$PROCESS_DATE\" }, { \"name\": \"SIRIVM_BUCKET\", \"value\": \"abods-$ENVIRONMENT-exporter-bucket\" } ] } ] }" --count 1 --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$VPC_SG_IDS]}" | jq -r '.tasks.[0].taskArn' | cut -d "/" -f 3)
 
 ecs_logs_link="https://eu-west-2.console.aws.amazon.com/ecs/v2/clusters/$PROJECT_NAME-$ENVIRONMENT/tasks/$TASK_ID/logs?region=eu-west-2"
 
