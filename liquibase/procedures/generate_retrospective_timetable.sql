@@ -903,7 +903,7 @@ where drv.journey_code is null
             concat('timetable_stop_prev_group_id', timetable_suffix)
             );
 
-
+    RAISE NOTICE '% Done', clock_timestamp();
 end;
 $$;
 
