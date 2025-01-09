@@ -713,7 +713,7 @@ where drv.journey_code is null
 -- Create dated partition --
 ----------------------------
 
-    RAISE NOTICE '% (Re)Creating partition', clock_timestamp();
+    RAISE NOTICE '% (Re)Creating partition public.%', clock_timestamp(), tablename;
 
 
     execute format(
@@ -732,7 +732,7 @@ where drv.journey_code is null
 -- Deleting from partition --
 ------------------------------
 
-    RAISE NOTICE '% Deleting from partition', clock_timestamp();
+    RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
 
     execute format(
             'DELETE FROM public.%I',
@@ -743,7 +743,7 @@ where drv.journey_code is null
     --Importing to partition --
 --------------------------
 
-    RAISE NOTICE '% Inserting into partition', clock_timestamp();
+    RAISE NOTICE '% Inserting into %', clock_timestamp(), tablename;
 
     execute format(
             'Insert into public.%I (
@@ -903,7 +903,7 @@ where drv.journey_code is null
             concat('timetable_stop_prev_group_id', timetable_suffix)
             );
 
-    RAISE NOTICE '% Done', clock_timestamp();
+    RAISE NOTICE '% generate_retrospective_timetable complete', clock_timestamp();
 end;
 $$;
 
