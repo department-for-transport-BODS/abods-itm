@@ -48,7 +48,7 @@ if __name__ == "__main__":
     # TODO: get from secrets manager
     db_password = getpass(f"Enter password for database user {db_user}: ")
 
-    while current < end:
+    while current <= end:
         dstr = current.strftime("%Y-%m-%d")
         print(f"{datetime.now()} Generating {dstr} timetable")
         print("hit q then enter to exit after completion")
