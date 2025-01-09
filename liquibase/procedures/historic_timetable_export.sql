@@ -5,7 +5,7 @@ $$
 DECLARE
     datestring TEXT := to_char(partition_date, 'YYYY-MM-DD');
 BEGIN
-    RAISE NOTICE 'Exporting timetable for date %', partition_date::TEXT;
+    RAISE NOTICE '% Exporting timetable for date %', clock_timestamp(), partition_date::TEXT;
 
     PERFORM (SELECT COUNT(*)
              FROM aws_s3.query_export_to_s3(
@@ -41,7 +41,7 @@ BEGIN
                      options := 'format csv'
                   ));
 
-    RAISE NOTICE 'Exported timetable for date %', partition_date::TEXT;
+    RAISE NOTICE '% Exported timetable for date %', clock_timestamp(), partition_date::TEXT;
 END;
 $$;
 
