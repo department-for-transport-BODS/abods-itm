@@ -206,161 +206,133 @@
     </changeSet>
 
     <changeSet id="65" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="views/all_operators.sql" splitStatements="false"/>
-    </changeSet>
-    <changeSet id="66" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="views/bods_operators.sql" splitStatements="false"/>
-    </changeSet>
-    <changeSet id="67" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="views/bods_organisation.sql" splitStatements="false"/>
-    </changeSet>
-    <changeSet id="68" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="views/bods_organisation_organisation_admin_areas.sql" splitStatements="false"/>
-    </changeSet>
-    <changeSet id="69" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="views/bods_organisationoperator.sql" splitStatements="false"/>
-    </changeSet>
-    <changeSet id="70" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="views/bods_user.sql" splitStatements="false"/>
-    </changeSet>
-    <changeSet id="71" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="views/bods_userorganisation.sql" splitStatements="false"/>
-    </changeSet>
-    <changeSet id="72" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="views/naptan_adminarea_with_shape.sql" splitStatements="false"/>
-    </changeSet>
-    <changeSet id="73" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="views/naptan_stoppoint_latlong.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="74" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="functions/load_avl_tables.sql" splitStatements="false"/>
     </changeSet>
 
-    <changeSet id="75" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="66" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/create_partition_operators_if_not_exists.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="76" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="67" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/create_partition_summary_service.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="77" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="68" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/create_timetable_threshold_summary.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="78" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="69" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/generate_expected_tables.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="79" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="70" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/generate_feed_monitor_summary.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="80" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="71" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/generate_feed_monitoring_daily_summary.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="81" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="72" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/generate_feed_monitoring_data.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="82" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="73" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/generate_retrospective_timetable.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="83" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="74" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/generate_timetable.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="84" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="75" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/get_date_range.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="85" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="76" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/get_trend_date_range.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="86" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="77" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/historic_avl_export.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="87" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="78" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/historic_timetable_export.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="88" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="79" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/load_avl_tables_historic.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="89" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="80" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/populate_headway.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="90" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="81" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/summary_by_operators.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="91" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="82" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/summary_by_services.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="92" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="83" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/summary_by_stops.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="93" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="84" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_avl_line_level_monitoring.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="94" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="85" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_distinct_routes.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="95" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="86" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_naptan_adminarea.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="96" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="87" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_naptan_adminarea_shape.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="97" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="88" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_naptan_locality.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="98" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="89" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_naptan_stoppoint.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="99" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="90" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_organisation_dataset.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="100" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="91" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_organisation_datasetrevision.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="101" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="92" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_organisation_txcfileattributes.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="102" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="93" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_nonoperatingdatesexceptions.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="103" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="94" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_operatingdatesexceptions.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="104" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="95" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_operatingprofile.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="105" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="96" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_service.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="106" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="97" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_service_service_patterns.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="107" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="98" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_servicedorganisationvehiclejourney.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="108" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="99" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_servicedorganisationworkingdays.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="109" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="100" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_servicepattern.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="110" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="101" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_servicepattern_admin_areas.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="111" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="102" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_servicepatternstop.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="112" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="103" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_vehiclejourney.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="113" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="104" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_performance_statistics_v4.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="114" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="105" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_all_transmodel_tables.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="115" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="106" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_all_naptan_tables.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="116" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="107" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/historic_matching_summary_generation.sql" splitStatements="false"/>
     </changeSet>
 
