@@ -35,91 +35,81 @@ BEGIN
         RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
 
         EXECUTE format(
-                'INSERT INTO public.%I (
-				operator_noc,
-				line_name,
-				noc_and_line_and_servicecode,
-				service_name,
-				time_diff_minutes,
-				date_of_journey,
-				is_timing_point,
-				admin_areas,
-				departure_hour,
-				otp_count,
-				day_of_week,
-				estimated
-			)
-		select
-			operator_noc,
-			line_name,
-			noc_and_line_and_servicecode,
-			service_name,
-			time_diff_minutes,
-			date_of_journey,
-			is_timing_point,
-			ARRAY(SELECT DISTINCT unnest (array_admin)) as array_admin_area,
-			departure_hour,
-			otp_count  ,
-			day_of_week,
-			estimated
-			from
-			(
-			select
-			ttb.operator_noc ,
-			ttb.line_name ,
-			es.noc_and_line_and_servicecode,
-			es.service_name,
-			floor(ttb.time_difference::float/60) as time_diff_minutes,
-			ttb.date_of_journey,
-			ttb.is_timing_point,
-			array_agg( ttb.admin_area_id) over (partition by 			ttb.operator_noc ,
-			ttb.line_name ,
-			ttb.date_of_journey,
-			ttb.is_timing_point) array_admin,
-			date_trunc(''hour'', ttb.expected_departure_time) AS departure_hour,
-			ttb.day_of_week,
-			count(*) as otp_count,
-			estimated
-			FROM
-			(
-				select operator_noc,
-                     line_name,
-					  service_code,
-                     case when first_value(timetable_id) over( partition by group_id, vehiclejourney_id order by group_id,expected_departure_time desc,stop_index  desc  )
-                               = timetable_id and time_difference < 0
-                           then 0
-                           else time_difference
-                      end as time_difference,
-                     date_of_journey,
-                     is_timing_point,
-                     expected_departure_time,
-                     day_of_week ,
-                     admin_area_id,
-                     stop_index,
-                     (timestamp_after_estimate is not null) AS estimated
-              from public."Timetable" where date_of_journey = %L ) ttb
-			INNER JOIN public.expected_services es
-				ON ttb.date_of_journey = es.date_of_journey
-				AND ttb.operator_noc = es.operator_noc
-				AND ttb.line_name = es.line_name
-				AND ttb.service_code = split_part(
-										es.noc_and_line_and_servicecode,
-										''-''
-										, -1)
-			WHERE  ttb.date_of_journey = %L and ttb.time_difference is not null
-			group by
-			ttb.operator_noc ,
-			ttb.line_name ,
-			es.noc_and_line_and_servicecode,
-			es.service_name,
-			ttb.date_of_journey,
-			ttb.is_timing_point,
-			ttb.admin_area_id,
-			floor(ttb.time_difference::float/60),
-			date_trunc(''hour'', ttb.expected_departure_time),
-			ttb.day_of_week,
-			estimated
-			) x ',
+            'INSERT INTO public.%I (
+                operator_noc,
+                line_name,
+                noc_and_line_and_servicecode,
+                service_name,
+                time_diff_minutes,
+                date_of_journey,
+                is_timing_point,
+                admin_areas,
+                departure_hour,
+                otp_count,
+                day_of_week,
+                estimated
+            )
+            SELECT operator_noc,
+                   line_name,
+                   noc_and_line_and_servicecode,
+                   service_name,
+                   time_diff_minutes,
+                   date_of_journey,
+                   is_timing_point,
+                   ARRAY(SELECT DISTINCT UNNEST (array_admin)) AS array_admin_area,
+                   departure_hour,
+                   otp_count,
+                   day_of_week,
+                   estimated
+            FROM
+              (SELECT ttb.operator_noc,
+                      ttb.line_name,
+                      es.noc_and_line_and_servicecode,
+                      es.service_name,
+                      floor(ttb.time_difference::float/60) AS time_diff_minutes,
+                      ttb.date_of_journey,
+                      ttb.is_timing_point,
+                      ARRAY_AGG(ttb.admin_area_id) OVER (PARTITION BY ttb.operator_noc, ttb.line_name, ttb.date_of_journey, ttb.is_timing_point) array_admin,
+                      date_trunc(''hour'', ttb.expected_departure_time) AS departure_hour,
+                      ttb.day_of_week,
+                      count(*) AS otp_count,
+                      estimated
+               FROM
+                 (SELECT operator_noc,
+                         line_name,
+                         service_code,
+                         CASE
+                             WHEN timetable_id = first_value(timetable_id) OVER(PARTITION BY group_id, vehiclejourney_id
+                                                                                ORDER BY group_id, expected_departure_time DESC, stop_index DESC)
+                                  AND time_difference < 0 THEN 0
+                             ELSE time_difference
+                         END AS time_difference,
+                         date_of_journey,
+                         is_timing_point,
+                         expected_departure_time,
+                         day_of_week,
+                         admin_area_id,
+                         stop_index,
+                         (timestamp_after_estimate IS NOT NULL) AS estimated
+                  FROM public."Timetable"
+                  WHERE date_of_journey = %L) ttb
+               INNER JOIN public.expected_services es ON ttb.date_of_journey = es.date_of_journey
+               AND ttb.operator_noc = es.operator_noc
+               AND ttb.line_name = es.line_name
+               AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, ''-'', -1)
+               WHERE ttb.date_of_journey = %L
+                 AND ttb.time_difference IS NOT NULL
+               GROUP BY ttb.operator_noc,
+                        ttb.line_name,
+                        es.noc_and_line_and_servicecode,
+                        es.service_name,
+                        ttb.date_of_journey,
+                        ttb.is_timing_point,
+                        ttb.admin_area_id,
+                        floor(ttb.time_difference::float/60),
+                        DATE_TRUNC(''hour'', ttb.expected_departure_time),
+                        ttb.day_of_week,
+                        estimated) x;',
                 tablename,
                 partition_date,
                 partition_date);
