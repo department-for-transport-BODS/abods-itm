@@ -7,8 +7,7 @@ DECLARE
     tablename TEXT := 'timetable_summary_operator_t_' || to_char(partition_date, 'YYYY_MM_DD');
 
 BEGIN
-    RAISE NOTICE 'Creating timetable_summary_operator_t partition if not exists %', tablename;
-    RAISE NOTICE '(Re)Creating timetable_summary_operator_t partition';
+    RAISE NOTICE '% (Re)Creating partition public.%', clock_timestamp(), tablename;
 
     EXECUTE format(
             'CREATE TABLE if not exists public.%I partition of public.timetable_summary_operator_t FOR VALUES FROM (%L) TO (%L)',
@@ -22,20 +21,14 @@ BEGIN
                    tablename
             );
 
-    ------------------------------
-    -- Deleting from partition --
-    ------------------------------
-
-    RAISE NOTICE 'Deleting from timetable_summary_operator_t partition';
+    RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
 
     EXECUTE format(
             'DELETE FROM public.%I',
             tablename
             );
 
-    ----- example insert my new data
-
-    RAISE NOTICE 'Adding new data to timetable_summary_operator_t partition';
+    RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
 
     EXECUTE format(
             'INSERT INTO public.%I (
@@ -115,6 +108,8 @@ BEGIN
             partition_date,
             partition_date
             );
+
+    RAISE NOTICE '% summary_by_operators complete', clock_timestamp();
 END;
 $$;
 

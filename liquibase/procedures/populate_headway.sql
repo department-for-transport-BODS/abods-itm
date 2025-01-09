@@ -5,7 +5,7 @@ $$
 DECLARE
     partition_date DATE := pt_date;
 BEGIN
-    RAISE NOTICE 'Creating temp_timetable_headway';
+    RAISE NOTICE '% Creating temp_timetable_headway', clock_timestamp();
 
     EXECUTE format(
             'drop table if exists public.temp_timetable_headway;'
@@ -27,7 +27,7 @@ BEGIN
             partition_date
             );
 
-    RAISE NOTICE 'Updating timetable table with headway data';
+    RAISE NOTICE '% Updating timetable table with headway data', clock_timestamp();
 
     EXECUTE format(
             'update public."Timetable" y
@@ -40,7 +40,7 @@ BEGIN
             partition_date
             );
 
-    RAISE NOTICE 'Creating temp_timetable_max_siri_vm_positions_id';
+    RAISE NOTICE '% Creating temp_timetable_max_siri_vm_positions_id', clock_timestamp();
 
     EXECUTE format(
             'drop table if exists  public.temp_timetable_max_siri_vm_positions_id;'
@@ -65,7 +65,7 @@ BEGIN
             partition_date
             );
 
-    RAISE NOTICE 'Updating timetable table with siri_vm_position_id data';
+    RAISE NOTICE '% Updating timetable table with siri_vm_position_id data', clock_timestamp();
 
     EXECUTE format(
             'update public."Timetable" y
@@ -77,7 +77,7 @@ BEGIN
             );
 
 
-    RAISE NOTICE 'Dropping temp tables';
+    RAISE NOTICE '% Dropping temp tables', clock_timestamp();
 
     EXECUTE format(
             'drop table if exists public.temp_timetable_headway;'
@@ -86,6 +86,8 @@ BEGIN
     EXECUTE format(
             'drop table if exists  public.temp_timetable_max_siri_vm_positions_id;'
             );
+
+    RAISE NOTICE '% populate_headway complete', clock_timestamp();
 END;
 $$;
 
