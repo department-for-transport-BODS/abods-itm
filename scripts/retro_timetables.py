@@ -1,4 +1,5 @@
 import subprocess
+import time
 from datetime import datetime, timedelta
 from getpass import getpass
 import sys
@@ -58,6 +59,9 @@ if __name__ == "__main__":
         run_query(
             f"CALL public.historic_timetable_export('{dstr}');", password=db_password
         )
+        time.sleep(
+            10 * 60
+        )  # Give live matching time to catch up after DOSing it by hogging the Timetable table
         # TODO: Convert the timetable data and start historic matching
 
         print(f"{datetime.now()} Generated {dstr} timetable")
