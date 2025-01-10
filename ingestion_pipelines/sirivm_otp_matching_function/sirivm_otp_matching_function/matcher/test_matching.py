@@ -1,1974 +1,881 @@
+import json
 import os
+from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
+from unittest import mock
 
-import pytest
-
+from .live_timetable_store import LiveTimetableStore
 from .matching import (
-    check_estimated_match,
-    check_update_first_stop,
-    find_matches_in_potential_matches,
-    find_potential_matches,
-    map_matched_stop_to_db,
-    move_potential_match_to_match,
-    remove_matched_stops,
-    select_potential_match_with_same_recordedattime,
-    update_matched_stop,
-    update_potential_match_with_recorded_at_time,
-    update_potential_match_without_recorded_at_time,
+    distance_from_stop,
+    match_avl_batch,
 )
 from .models import (
     AVLRecord,
-    PotentialMatch,
     Route,
     RouteHistory,
-    Stop,
+    StopHistory,
+    Timetable,
     avl_group_id,
-    avl_recorded_at_time_utc,
-    stop_departure_time,
+    stop_timetable_id,
 )
-from .test_data.get_test_data import read_avl, read_timetable
+
+start_location = (0.0, 0.0)
+stop_2_location = (1.0, 1.0)
+stop_3_location = (2.0, 2.0)
+stop_4_location = (3.0, 3.0)
+final_location = (4.0, 4.0)
+far_away_location = (-1, -1)
+date_of_journey = "2025-01-01"
+final_stop_index = "5"
+route: Route = {
+    "1": (start_location, "00:00:00", 0, date_of_journey),
+    "2": (stop_2_location, "00:01:00", 1, date_of_journey),
+    "3": (stop_3_location, "00:02:00", 2, date_of_journey),
+    "4": (stop_4_location, "00:03:00", 3, date_of_journey),
+    final_stop_index: (final_location, "00:04:00", 4, date_of_journey),
+}
+base_time = datetime(2025, 1, 1, 0, 0, 0, tzinfo=UTC)
 
 
-class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
-    avl_record = read_avl("check_update_first_stop.csv")[1]
-    avl_record_5_mins = read_avl("check_update_first_stop.csv")[0]
-    timetable = read_timetable("TLCT37812152024-08-20.json")
-    group_id = "tlct|378|1215|2024-08-20"
-    bad_matches_5_mins = []  # noqa: RUF012 - BODS-7131
-    route_history_5_mins = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 20, 11, 24, 58, tzinfo=UTC)),
-        "matched_stops": {
-            "1": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 23, 48, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-        "potential_matches": {
-            "2": {
-                "last_distance": 58.596598093401845,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 24, 58, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
+def create_avl(
+    time: datetime = base_time,
+    location: tuple[float, float] = start_location,
+) -> AVLRecord:
+    return {
+        "recorded_at_time": time.isoformat(),
+        "latitude": location[0],
+        "longitude": location[1],
+        "line_name": "2a",
+        "operator_ref": "TEST",
+        "journey_ref": "1337",
+        "direction_ref": "outbound",
+        "date_of_journey": date_of_journey,
     }
-    expected_matched_stops_5_mins = {}  # noqa: RUF012 - BODS-7131
-    expected_potential_matches_5_mins = {  # noqa: RUF012 - BODS-7131
-        "1": {
-            "last_distance": 37.35876375439114,
-            "last_time_in_zone": str(avl_recorded_at_time_utc(avl_record_5_mins)),
-            "is_estimate": False,
-        },
-        "2": {
-            "last_distance": 58.596598093401845,
-            "last_time_in_zone": str(datetime(2024, 8, 20, 11, 24, 58, tzinfo=UTC)),
-            "is_estimate": False,
-        },
-    }
-    expected_bad_matches_5_mins = [  # noqa: RUF012 - BODS-7131
-        {
-            "timetable_id": 893823336,
-        },
-    ]
-    route_history = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 20, 11, 34, 37, tzinfo=UTC)),
-        "matched_stops": {
-            "1": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 32, 5, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-        "potential_matches": {
-            "2": {
-                "last_distance": 58.596598093401845,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 34, 37, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-    }
-    bad_matches = []  # noqa: RUF012 - BODS-7131
-    expected_matched_stops = {  # noqa: RUF012 - BODS-7131
-        "1": {
-            "last_match_time": str(datetime(2024, 8, 20, 11, 32, 5, tzinfo=UTC)),
-            "is_estimate": False,
-        },
-    }
-    expected_potential_matches = {  # noqa: RUF012 - BODS-7131
-        "2": {
-            "last_distance": 58.596598093401845,
-            "last_time_in_zone": str(datetime(2024, 8, 20, 11, 34, 37, tzinfo=UTC)),
-            "is_estimate": False,
-        },
-    }
-    expected_bad_matches = []  # noqa: RUF012 - BODS-7131
 
-    @pytest.mark.parametrize(
-        (
-            "rec",
-            "timetable_dict",
-            "route_history",
-            "bad_matches",
-            "expected_matched_stops",
-            "expected_potential_matches",
-            "expected_bad_matches",
-        ),
-        [
-            pytest.param(
-                avl_record_5_mins,
-                timetable,
-                route_history_5_mins,
-                bad_matches_5_mins,
-                expected_matched_stops_5_mins,
-                expected_potential_matches_5_mins,
-                expected_bad_matches_5_mins,
-                id="Revisiting stop 1 within 5 mins",
-            ),
-            pytest.param(
-                avl_record,
-                timetable,
-                route_history,
-                bad_matches,
-                expected_matched_stops,
-                expected_potential_matches,
-                expected_bad_matches,
-                id="Revisiting stop 1 after 5 mins",
-            ),
-        ],
+
+def test_no_avls_does_nothing() -> None:
+    to_set, to_remove, new_stop_history = run_matcher(
+        {},
+        [],
+        {},
     )
-    def test_check_update_first_stop_avl_within_5_mins(  # noqa: D102 - BODS-7131
-        self,
-        rec: AVLRecord,
-        timetable_dict: dict,
-        route_history: dict,
-        bad_matches: list,
-        expected_matched_stops: dict,
-        expected_potential_matches: dict,
-        expected_bad_matches: list,
-    ) -> None:
-        check_update_first_stop(
-            rec,
-            timetable_dict[avl_group_id(rec)],
-            route_history,
-            bad_matches,
-        )
-        assert route_history["matched_stops"] == expected_matched_stops
-        assert route_history["potential_matches"] == expected_potential_matches
-        assert bad_matches == expected_bad_matches
+
+    assert new_stop_history == {}
+    assert to_remove == []
+    assert to_set == []
 
 
-class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
-    avl_record = read_avl("FSRV9509052024-10-10.csv")[0]
-    avl_record_2 = read_avl("FSRV9509052024-10-10.csv")[1]
-    avl_record_scem = read_avl("scem9132024-10-31.csv")[5]
-    timetable = read_timetable("FSRV9509052024-10-10.json")
-    timetable_scem = read_timetable("scem9132024-10-31.json")
-    route = timetable[avl_group_id(avl_record)]
-    route_scem = timetable_scem[avl_group_id(avl_record_scem)]
-    route_history = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC)),
-        "last_avl_longitude": None,
-        "last_avl_latitude": None,
+def test_missing_timetable_does_nothing() -> None:
+    avl = create_avl()
+    to_set, to_remove, new_stop_history = run_matcher(
+        {},
+        [avl],
+        {},
+    )
+
+    assert new_stop_history == {}
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_initial_avl_outside_any_stop_zone_just_adds_journey_history() -> None:
+    avl = create_avl(location=far_away_location)
+    group_id = avl_group_id(avl)
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        {},
+    )
+
+    assert new_stop_history == {
+        group_id: {
+            "last_avl_latitude": far_away_location[0],
+            "last_avl_longitude": far_away_location[1],
+            "last_avl_time": str(base_time),
+            "matched_stops": {},
+            "potential_matches": {},
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_same_avl_time_does_nothing() -> None:
+    avl = create_avl(location=far_away_location)
+    group_id = avl_group_id(avl)
+    journey_history = {
+        "last_avl_latitude": start_location[0],
+        "last_avl_longitude": start_location[1],
+        "last_avl_time": str(base_time),
         "matched_stops": {},
         "potential_matches": {},
     }
-    route_history_2 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 10, 10, 8, 25, 56, tzinfo=UTC)),
-        "last_avl_longitude": None,
-        "last_avl_latitude": None,
-        "matched_stops": {
-            "13": {
-                "last_match_time": str(datetime(2024, 10, 10, 8, 24, 26, tzinfo=UTC)),
-                "is_estimate": False,
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        {group_id: journey_history},
+    )
+
+    assert new_stop_history == {group_id: journey_history}
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_within_first_stop_zone_adds_potential_match() -> None:
+    avl = create_avl()
+    group_id = avl_group_id(avl)
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        {},
+    )
+
+    assert new_stop_history == {
+        group_id: {
+            "last_avl_latitude": start_location[0],
+            "last_avl_longitude": start_location[1],
+            "last_avl_time": str(base_time),
+            "matched_stops": {},
+            "potential_matches": {
+                "1": {
+                    "is_estimate": False,
+                    "last_distance": distance_from_stop(avl, route["1"]),
+                    "last_time_in_zone": str(base_time),
+                },
             },
-            "14": {
-                "last_match_time": str(datetime(2024, 10, 10, 8, 25, 6, tzinfo=UTC)),
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_avl_outside_first_stop_zone_does_not_update_first_stop_match() -> None:
+    avl_time = base_time + timedelta(minutes=1)
+    avl = create_avl(time=avl_time, location=far_away_location)
+    group_id = avl_group_id(avl)
+
+    journey_history = {
+        "last_avl_latitude": stop_2_location[0],
+        "last_avl_longitude": stop_2_location[1],
+        "last_avl_time": str(base_time),
+        "matched_stops": {
+            "1": {
+                "last_match_time": str(base_time),
                 "is_estimate": False,
             },
         },
         "potential_matches": {},
     }
-    route_history_scem = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC)),
-        "last_avl_latitude": 51.565052,
-        "last_avl_longitude": -1.784906,
+
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        {group_id: journey_history},
+    )
+    assert new_stop_history == {
+        group_id: {
+            **journey_history,
+            "last_avl_time": str(avl_time),
+            "last_avl_latitude": -1,
+            "last_avl_longitude": -1,
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_revisit_first_stop_removes_match_and_adds_potential_match() -> None:
+    avl_time = base_time + timedelta(minutes=4, seconds=59)
+    avl = create_avl(time=avl_time)
+    group_id = avl_group_id(avl)
+
+    journey_history = {
+        "last_avl_latitude": stop_2_location[0],
+        "last_avl_longitude": stop_2_location[1],
+        "last_avl_time": str(base_time),
+        "matched_stops": {
+            "1": {
+                "last_match_time": str(base_time),
+                "is_estimate": False,
+            },
+        },
+        "potential_matches": {},
+    }
+    stop_history = {group_id: journey_history}
+
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        stop_history,
+    )
+    assert new_stop_history == {
+        **stop_history,
+        group_id: {
+            **journey_history,
+            "last_avl_time": str(avl_time),
+            "last_avl_latitude": start_location[0],
+            "last_avl_longitude": start_location[1],
+            "matched_stops": {},
+            "potential_matches": {
+                "1": {
+                    "is_estimate": False,
+                    "last_distance": distance_from_stop(avl, route["1"]),
+                    "last_time_in_zone": str(avl_time),
+                },
+            },
+        },
+    }
+    assert to_remove == [
+        {"timetable_id": stop_timetable_id(route["1"])},
+    ]
+    assert to_set == []
+
+
+def test_revisit_first_stop_adds_potential_match_but_does_not_delete_match_if_five_minutes_have_passed() -> (
+    None
+):
+    avl_time = base_time + timedelta(minutes=5)
+    avl = create_avl(time=avl_time)
+    group_id = avl_group_id(avl)
+
+    journey_history = {
+        "last_avl_latitude": stop_2_location[0],
+        "last_avl_longitude": stop_2_location[1],
+        "last_avl_time": str(base_time),
+        "matched_stops": {
+            "1": {
+                "last_match_time": str(base_time),
+                "is_estimate": False,
+            },
+        },
+        "potential_matches": {},
+    }
+    stop_history = {group_id: journey_history}
+
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        stop_history,
+    )
+    assert new_stop_history == {
+        **stop_history,
+        group_id: {
+            **journey_history,
+            "last_avl_time": str(avl_time),
+            "last_avl_latitude": start_location[0],
+            "last_avl_longitude": start_location[1],
+            "potential_matches": {
+                "1": {
+                    "is_estimate": False,
+                    "last_distance": distance_from_stop(avl, route["1"]),
+                    "last_time_in_zone": str(avl_time),
+                },
+            },
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_avl_at_final_stop_does_not_produce_potential_match_when_only_one_existing_match() -> (
+    None
+):
+    avl_time = base_time + timedelta(minutes=5)
+    avl = create_avl(time=avl_time, location=final_location)
+    group_id = avl_group_id(avl)
+
+    journey_history = {
+        "last_avl_latitude": final_location[0],
+        "last_avl_longitude": final_location[1],
+        "last_avl_time": str(base_time),
+        "matched_stops": {
+            "1": {
+                "last_match_time": str(base_time),
+                "is_estimate": False,
+            },
+        },
+        "potential_matches": {},
+    }
+    stop_history = {group_id: journey_history}
+
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        stop_history,
+    )
+    assert new_stop_history == {
+        **stop_history,
+        group_id: {
+            **journey_history,
+            "last_avl_time": str(avl_time),
+            "last_avl_latitude": final_location[0],
+            "last_avl_longitude": final_location[1],
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_avl_at_final_stop_does_not_produce_potential_match_it_is_already_matched() -> (
+    None
+):
+    avl_time = base_time + timedelta(minutes=5)
+    avl = create_avl(time=avl_time, location=final_location)
+    group_id = avl_group_id(avl)
+
+    journey_history = {
+        "last_avl_latitude": final_location[0],
+        "last_avl_longitude": final_location[1],
+        "last_avl_time": str(base_time),
+        "matched_stops": {
+            "1": {
+                "last_match_time": str(base_time),
+                "is_estimate": False,
+            },
+            "2": {
+                "last_match_time": str(base_time + timedelta(minutes=1)),
+                "is_estimate": False,
+            },
+            final_stop_index: {
+                "last_match_time": str(base_time + timedelta(minutes=2)),
+                "is_estimate": False,
+            },
+        },
+        "potential_matches": {},
+    }
+    stop_history = {group_id: journey_history}
+
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        stop_history,
+    )
+    assert new_stop_history == {
+        **stop_history,
+        group_id: {
+            **journey_history,
+            "last_avl_time": str(avl_time),
+            "last_avl_latitude": final_location[0],
+            "last_avl_longitude": final_location[1],
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_avl_across_final_stop_does_not_produce_estimated_potential_match() -> None:
+    avl_time = base_time + timedelta(minutes=5)
+    avl_location = (final_location[0] + 0.1, final_location[1])
+    avl = create_avl(time=avl_time, location=avl_location)
+    group_id = avl_group_id(avl)
+
+    journey_history = {
+        "last_avl_latitude": final_location[0] - 0.1,
+        "last_avl_longitude": final_location[1],
+        "last_avl_time": str(base_time),
+        "matched_stops": {
+            "1": {
+                "last_match_time": str(base_time),
+                "is_estimate": False,
+            },
+            "2": {
+                "last_match_time": str(base_time + timedelta(minutes=1)),
+                "is_estimate": False,
+            },
+        },
+        "potential_matches": {},
+    }
+    stop_history = {group_id: journey_history}
+
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        stop_history,
+    )
+    assert new_stop_history == {
+        **stop_history,
+        group_id: {
+            **journey_history,
+            "last_avl_time": str(avl_time),
+            "last_avl_latitude": avl_location[0],
+            "last_avl_longitude": avl_location[1],
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_avl_across_stop_updates_distance_if_a_potential_match_already_exists() -> None:
+    avl_time = base_time + timedelta(minutes=2, seconds=30)
+    # Would otherwise be an estimated potential match
+    avl_location = (stop_3_location[0] + 0.001, stop_3_location[1])
+    avl = create_avl(time=avl_time, location=avl_location)
+    group_id = avl_group_id(avl)
+
+    journey_history = {
+        "last_avl_latitude": stop_3_location[0] - 0.001,
+        "last_avl_longitude": stop_3_location[1],
+        "last_avl_time": str(base_time + timedelta(minutes=2)),
+        "matched_stops": {
+            "1": {
+                "last_match_time": str(base_time),
+                "is_estimate": False,
+            },
+            "2": {
+                "last_match_time": str(base_time + timedelta(minutes=1)),
+                "is_estimate": False,
+            },
+        },
+        "potential_matches": {
+            "3": {
+                "last_distance": 10,
+                "last_time_in_zone": str(base_time + timedelta(minutes=2)),
+                "is_estimate": True,
+            },
+        },
+    }
+    stop_history = {group_id: journey_history}
+
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        stop_history,
+    )
+    assert new_stop_history == {
+        **stop_history,
+        group_id: {
+            **journey_history,
+            "last_avl_time": str(avl_time),
+            "last_avl_latitude": avl_location[0],
+            "last_avl_longitude": avl_location[1],
+            "potential_matches": {
+                **journey_history["potential_matches"],
+                "3": {
+                    **journey_history["potential_matches"]["3"],
+                    "last_distance": distance_from_stop(avl, route["3"]),
+                    "is_estimate": True, # This is probably wrong and should change to False
+                },
+            },
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_avl_across_stop_does_not_produce_estimated_potential_match_if_a_match_already_exists() -> (
+    None
+):
+    avl_time = base_time + timedelta(minutes=2, seconds=30)
+    avl_location = (stop_3_location[0] + 0.001, stop_3_location[1])
+    avl = create_avl(time=avl_time, location=avl_location)
+    group_id = avl_group_id(avl)
+
+    journey_history = {
+        "last_avl_latitude": stop_3_location[0] - 0.001,
+        "last_avl_longitude": stop_3_location[1],
+        "last_avl_time": str(base_time + timedelta(minutes=2)),
+        "matched_stops": {
+            "1": {
+                "last_match_time": str(base_time),
+                "is_estimate": False,
+            },
+            "2": {
+                "last_match_time": str(base_time + timedelta(minutes=1)),
+                "is_estimate": False,
+            },
+            "3": {
+                "last_match_time": str(base_time + timedelta(minutes=1)),
+                "is_estimate": False,
+            },
+        },
+        "potential_matches": {},
+    }
+    stop_history = {group_id: journey_history}
+
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        stop_history,
+    )
+    assert new_stop_history == {
+        **stop_history,
+        group_id: {
+            **journey_history,
+            "last_avl_time": str(avl_time),
+            "last_avl_latitude": avl_location[0],
+            "last_avl_longitude": avl_location[1],
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_avl_across_stop_adds_estimated_potential_match_if_stop_not_in_history() -> (
+    None
+):
+    avl_time = base_time + timedelta(minutes=2, seconds=30)
+    avl_location = (stop_3_location[0] + 0.001, stop_3_location[1])
+    avl = create_avl(time=avl_time, location=avl_location)
+    group_id = avl_group_id(avl)
+
+    journey_history = {
+        "last_avl_latitude": stop_3_location[0] - 0.001,
+        "last_avl_longitude": stop_3_location[1],
+        "last_avl_time": str(base_time + timedelta(minutes=2)),
+        "matched_stops": {
+            "1": {
+                "last_match_time": str(base_time),
+                "is_estimate": False,
+            },
+            "2": {
+                "last_match_time": str(base_time + timedelta(minutes=1)),
+                "is_estimate": False,
+            },
+        },
+        "potential_matches": {},
+    }
+    stop_history = {group_id: journey_history}
+
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        stop_history,
+    )
+    assert new_stop_history == {
+        **stop_history,
+        group_id: {
+            **journey_history,
+            "last_avl_time": str(avl_time),
+            "last_avl_latitude": avl_location[0],
+            "last_avl_longitude": avl_location[1],
+            "potential_matches": {
+                **journey_history["potential_matches"],
+                "3": {
+                    "is_estimate": True,
+                    "last_distance": distance_from_stop(avl, route["3"]),
+                    # time is deterministic but not very predictable, so hardcoded
+                    "last_time_in_zone": "2025-01-01T00:02:24.476909+00:00",
+                },
+            },
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_outside_first_stop_zone_updates_initial_potential_match() -> None:
+    avl_time = base_time + timedelta(minutes=1)
+    avl = create_avl(time=avl_time, location=far_away_location)
+    group_id = avl_group_id(avl)
+    journey_history = {
+        "last_avl_latitude": start_location[0],
+        "last_avl_longitude": start_location[1],
+        "last_avl_time": str(base_time),
+        "matched_stops": {},
+        "potential_matches": {
+            "1": {
+                "is_estimate": False,
+                "last_distance": 0,
+                "last_time_in_zone": str(base_time),
+            },
+        },
+    }
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        {group_id: journey_history},
+    )
+
+    assert new_stop_history == {
+        group_id: {
+            **journey_history,
+            "last_avl_latitude": far_away_location[0],
+            "last_avl_longitude": far_away_location[1],
+            "last_avl_time": str(avl_time),
+            "matched_stops": {},
+            "potential_matches": {
+                "1": {
+                    "is_estimate": False,
+                    "last_distance": distance_from_stop(avl, route["1"]),
+                    "last_time_in_zone": str(base_time),
+                },
+            },
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_second_ping_inside_final_stop_zone_creates_match() -> None:
+    avl_time = base_time + timedelta(minutes=1)
+    avl = create_avl(time=avl_time, location=final_location)
+    group_id = avl_group_id(avl)
+    journey_history = {
+        "last_avl_latitude": final_location[0],
+        "last_avl_longitude": final_location[1],
+        "last_avl_time": str(base_time),
         "matched_stops": {
             "3": {
-                "last_match_time": datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC),
                 "is_estimate": False,
+                "last_match_time": str(base_time),
             },
         },
-        "potential_matches": {  # noqa: RUF012 - BODS-7131
-            "2": {
-                "last_distance": 61.599382260785646,
-                "last_time_in_zone": str(datetime(2024, 10, 31, 8, 7, 56, tzinfo=UTC)),
+        "potential_matches": {
+            final_stop_index: {
                 "is_estimate": False,
+                "last_distance": 0,
+                "last_time_in_zone": str(base_time),
             },
         },
     }
-
-    @pytest.mark.parametrize(
-        (
-            "avl",
-            "route",
-            "route_history",
-            "expected_potential_matches",
-        ),
-        [
-            pytest.param(
-                avl_record,
-                route,
-                route_history,
-                {},
-                id="Drivers changing journey code early, reaching stop 15, no potential matches should be created",
-            ),
-            pytest.param(
-                avl_record_2,
-                route,
-                route_history_2,
-                {
-                    "15": {
-                        "last_distance": 13.738176401886017,
-                        "last_time_in_zone": str(
-                            datetime(2024, 10, 10, 8, 25, 56, tzinfo=UTC),
-                        ),
-                        "is_estimate": False,
-                    },
-                },
-                id="Bus reaching stop 15 and there's one actual match",
-            ),
-            pytest.param(
-                avl_record_scem,
-                route_scem,
-                route_history_scem,
-                {
-                    "2": {
-                        "last_distance": 48.83984813250945,
-                        "last_time_in_zone": str(
-                            datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC),
-                        ),
-                        "is_estimate": False,
-                    },
-                    "1": {
-                        "last_distance": 53.71237107009338,
-                        "last_time_in_zone": str(
-                            datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC),
-                        ),
-                        "is_estimate": False,
-                    },
-                },
-                id="Bus started early, matched with stop 3 and go back to the starting/end stop, final stop should not become a potential match",
-            ),
-        ],
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        {group_id: journey_history},
     )
-    def test_find_potential_matches(  # noqa: D102 - BODS-7131
-        self,
-        avl: AVLRecord,
-        route: Route,
-        route_history: RouteHistory,
-        expected_potential_matches: dict[str, PotentialMatch],
-    ) -> None:
-        find_potential_matches(
-            avl,
-            route,
-            route_history,
-            True
-        )
-        assert route_history["potential_matches"] == expected_potential_matches
 
-
-class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
-    avl_record = read_avl("TLCT37812152024-08-20.csv")[73]
-    avl_record_2 = read_avl("TLCT37812152024-08-20.csv")[220]
-    avl_record_3 = read_avl("TLCT37812152024-08-20.csv")[222]
-    avl_record_4 = read_avl("TLCT37812152024-08-20.csv")[183]
-    avl_record_5 = read_avl("FSMR3507042024-08-21.csv")[0]
-    avl_record_6 = read_avl("FSMR3507042024-08-21.csv")[101]
-    timetable = read_timetable("TLCT37812152024-08-20.json")
-    timetable_5 = read_timetable("FSMR3507042024-08-21.json")
-    group_id = "tlct|378|1215|2024-08-20"
-    group_id_5 = "fsmr|35|0704|2024-08-21"
-    route_history = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC)),
-        "matched_stops": {
-            "4": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 32, 20, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-            "5": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 32, 50, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-        "potential_matches": {
-            "6": {
-                "last_distance": 142,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 34, 42, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-    }
-    route_history_2 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC)),
-        "matched_stops": {
-            "42": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 58, 43, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-            "43": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 59, 5, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-        "potential_matches": {
-            "45": {
-                "last_distance": 11,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-            "44": {
-                "last_distance": 13,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 59, 27, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-    }
-    route_history_3 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 20, 12, 00, 5, tzinfo=UTC)),
-        "matched_stops": {
-            "43": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 59, 5, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-            "45": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-        "potential_matches": {
-            "44": {
-                "last_distance": 332,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 59, 27, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-    }
-    route_history_4 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 20, 11, 54, 9, tzinfo=UTC)),
-        "matched_stops": {
-            "34": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 51, 35, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-            "35": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 53, 8, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-        "potential_matches": {
-            "36": {
-                "last_distance": 8,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 53, 43, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-    }
-    route_history_5 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 21, 7, 1, 3, tzinfo=UTC)),
-        "matched_stops": {},
-        "potential_matches": {
-            "1": {
-                "last_distance": 11.812096582392824,
-                "last_time_in_zone": str(datetime(2024, 8, 21, 7, 1, 3, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-            "41": {
-                "last_distance": 10.812096582392824,
-                "last_time_in_zone": str(datetime(2024, 8, 21, 7, 1, 34, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-    }
-    route_history_6 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 21, 7, 43, 25, tzinfo=UTC)),
-        "matched_stops": {
-            "40": {
-                "last_match_time": str(datetime(2024, 8, 20, 7, 42, 26, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-        "potential_matches": {
-            "41": {
-                "last_distance": 10.812096582392824,
-                "last_time_in_zone": str(datetime(2024, 8, 21, 7, 43, 25, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-    }
-
-    @pytest.mark.parametrize(
-        (
-            "avl",
-            "timetable_dict",
-            "route_history",
-            "new_matches",
-            "potential_matches_to_delete",
-            "bad_matches",
-            "expected_route_history",
-            "expected_potential_matches_to_delete",
-        ),
-        [
-            pytest.param(
-                avl_record,
-                timetable,
-                route_history,
-                [],  # stop pos dist
-                [],  # potential_matches_to_delete
-                [],  # bad_matches,
-                {
-                    "last_avl_time": str(datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC)),
-                    "matched_stops": {
-                        "5": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    32,
-                                    50,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                        "6": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    34,
-                                    42,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                    },
-                    "potential_matches": {
-                        "6": {
-                            "last_distance": 142,
-                            "last_time_in_zone": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    34,
-                                    42,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                    },
-                },
-                ["6"],
-                id="avl_pm_distance greater than last distance which is greater than threshold, move this potential match to a match",
-            ),
-            pytest.param(
-                avl_record_2,
-                timetable,
-                route_history_2,
-                [],  # stop pos dist
-                [],  # potential_matches_to_delete
-                [],  # bad_matches,
-                {
-                    "last_avl_time": str(datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC)),
-                    "matched_stops": {
-                        "43": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    59,
-                                    5,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                        "45": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    59,
-                                    57,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                    },
-                    "potential_matches": {
-                        "45": {
-                            "last_distance": 11,
-                            "last_time_in_zone": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    59,
-                                    57,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                        "44": {
-                            "last_distance": 332.5369444168041,
-                            "last_time_in_zone": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    59,
-                                    27,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                    },
-                },
-                ["45"],
-                id="pm_index is the final stop, move final stop to be a match",
-            ),
-            pytest.param(
-                avl_record_3,
-                timetable,
-                route_history_3,
-                [],  # stop pos dist
-                [],  # potential_matches_to_delete
-                [],  # bad_matches,
-                {
-                    "last_avl_time": str(datetime(2024, 8, 20, 12, 00, 5, tzinfo=UTC)),
-                    "matched_stops": {
-                        "44": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    59,
-                                    27,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                        "45": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    59,
-                                    57,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                    },
-                    "potential_matches": {
-                        "44": {
-                            "last_distance": 332,
-                            "last_time_in_zone": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    59,
-                                    27,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                    },
-                },
-                ["44"],
-                id="final stop has been matched, but the ping after the last match fulfills the criteria for the previous stop to match, match previous stop",
-            ),
-            pytest.param(
-                avl_record_4,
-                timetable,
-                route_history_4,
-                [],  # stop pos dist
-                [],  # potential_matches_to_delete
-                [],  # bad_matches,
-                {
-                    "last_avl_time": str(datetime(2024, 8, 20, 11, 54, 9, tzinfo=UTC)),
-                    "matched_stops": {
-                        "34": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    51,
-                                    35,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                        "35": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    53,
-                                    8,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                    },
-                    "potential_matches": {
-                        "36": {
-                            "last_distance": 15.608686190208905,
-                            "last_time_in_zone": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    11,
-                                    54,
-                                    9,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                    },
-                },
-                [],
-                id="the potential match is not a final stop and avl_pm_distance is less than threshold, update potential match details",
-            ),
-            pytest.param(
-                avl_record_5,
-                timetable_5,
-                route_history_5,
-                [],  # stop pos dist
-                [],  # potential_matches_to_delete
-                [],  # bad_matches,
-                {
-                    "last_avl_time": str(datetime(2024, 8, 21, 7, 1, 3, tzinfo=UTC)),
-                    "matched_stops": {},
-                    "potential_matches": {
-                        "1": {
-                            "last_distance": 11.812096582392824,
-                            "last_time_in_zone": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    21,
-                                    7,
-                                    1,
-                                    3,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                        "41": {
-                            "last_distance": 10.812096582392824,
-                            "last_time_in_zone": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    21,
-                                    7,
-                                    1,
-                                    34,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                    },
-                },
-                [],
-                id="the potential match is a final stop but there're no previous matches",
-            ),
-            pytest.param(
-                avl_record_6,
-                timetable_5,
-                route_history_6,
-                [],  # stop pos dist
-                [],  # potential_matches_to_delete
-                [],  # bad_matches,
-                {
-                    "last_avl_time": str(datetime(2024, 8, 21, 7, 43, 25, tzinfo=UTC)),
-                    "matched_stops": {
-                        "40": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    20,
-                                    7,
-                                    42,
-                                    26,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                        "41": {
-                            "last_match_time": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    21,
-                                    7,
-                                    43,
-                                    25,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                    },
-                    "potential_matches": {
-                        "41": {
-                            "last_distance": 10.812096582392824,
-                            "last_time_in_zone": str(
-                                datetime(
-                                    2024,
-                                    8,
-                                    21,
-                                    7,
-                                    43,
-                                    25,
-                                    tzinfo=UTC,
-                                ),
-                            ),
-                            "is_estimate": False,
-                        },
-                    },
-                },
-                ["41"],
-                id="the potential match is a final stop but there're no previous matches",
-            ),
-        ],
-    )
-    def test_find_matches_in_potential_matches(  # noqa: D102 - BODS-7131
-        self,
-        avl: AVLRecord,
-        timetable_dict: dict,
-        route_history: dict,
-        new_matches: list,
-        potential_matches_to_delete: list,
-        bad_matches: list,
-        expected_route_history: dict,
-        expected_potential_matches_to_delete: list,
-    ) -> None:
-        find_matches_in_potential_matches(
-            avl,
-            timetable_dict[avl_group_id(avl)],
-            route_history,
-            new_matches,
-            potential_matches_to_delete,
-            bad_matches,
-        )
-        assert route_history == expected_route_history
-        assert potential_matches_to_delete == expected_potential_matches_to_delete
-
-
-class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
-    timetable = read_timetable("TLCT37812152024-08-20.json")
-    matches_to_delete = ["2"]  # noqa: RUF012 - BODS-7131
-
-    def test_remove_matched_stops(self) -> None:  # noqa: D102 - BODS-7131
-        route_history = {
-            "last_avl_time": str(
-                datetime(2024, 9, 1, 11, 34, 37, tzinfo=UTC),
-            ),
+    assert new_stop_history == {
+        group_id: {
+            **journey_history,
+            "last_avl_latitude": final_location[0],
+            "last_avl_longitude": final_location[1],
+            "last_avl_time": str(avl_time),
             "matched_stops": {
-                "1": {
-                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5, tzinfo=UTC)),
+                **journey_history["matched_stops"],
+                final_stop_index: {
                     "is_estimate": False,
-                },
-            },
-            "potential_matches": {
-                "2": {
-                    "last_distance": 58.596598093401845,
-                    "last_time_in_zone": str(
-                        datetime(2024, 9, 1, 11, 34, 37, tzinfo=UTC),
-                    ),
-                },
-            },
-            "last_avl_latitude": None,
-            "last_avl_longitude": None,
-        }
-        expected_route_history = {
-            "last_avl_time": str(
-                datetime(2024, 9, 1, 11, 34, 37, tzinfo=UTC),
-            ),
-            "matched_stops": {
-                "1": {
-                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5, tzinfo=UTC)),
-                    "is_estimate": False,
+                    "last_match_time": str(base_time),
                 },
             },
             "potential_matches": {},
-            "last_avl_latitude": None,
-            "last_avl_longitude": None,
-        }
-        remove_matched_stops(
-            route_history,
-            self.matches_to_delete,
-        )
-        assert route_history == expected_route_history
+        },
+    }
+    assert to_remove == []
+    assert to_set == [
+        {
+            "last_time_in_zone": base_time,
+            "last_time_in_zone_str": base_time.time().isoformat(),
+            "otp_state": "OnTime",
+            "stop_index": final_stop_index,
+            "stop_type": "final",
+            "time_difference": -240.0,
+            "timestamp_after_estimate": None,
+            "timetable_id": stop_timetable_id(route[final_stop_index]),
+        },
+    ]
 
 
-class TestMapMatchedStopToDb:  # noqa: D101 - BODS-7131
-    avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
-    pm_index = "1"
-    last_time_in_zone = datetime(2024, 9, 1, 11, 32, 5, tzinfo=UTC)
-    route_history = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(
-            datetime(2024, 9, 1, 11, 30, 57, tzinfo=UTC),
-        ),
+def test_second_ping_inside_final_stop_zone_skips_potential_match_if_no_matches_exists() -> (
+    None
+):
+    avl_time = base_time + timedelta(minutes=1)
+    avl = create_avl(time=avl_time, location=final_location)
+    group_id = avl_group_id(avl)
+    journey_history = {
+        "last_avl_latitude": final_location[0],
+        "last_avl_longitude": final_location[1],
+        "last_avl_time": str(base_time),
+        "matched_stops": {},
+        "potential_matches": {
+            final_stop_index: {
+                "is_estimate": False,
+                "last_distance": 0,
+                "last_time_in_zone": str(base_time),
+            },
+        },
+    }
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        {group_id: journey_history},
+    )
+
+    assert new_stop_history == {
+        group_id: {
+            **journey_history,
+            "last_avl_latitude": final_location[0],
+            "last_avl_longitude": final_location[1],
+            "last_avl_time": str(avl_time),
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_second_ping_inside_final_stop_zone_skips_potential_match_if_final_stop_already_matched() -> (
+    None
+):
+    avl_time = base_time + timedelta(minutes=1)
+    avl = create_avl(time=avl_time, location=final_location)
+    group_id = avl_group_id(avl)
+    journey_history = {
+        "last_avl_latitude": final_location[0],
+        "last_avl_longitude": final_location[1],
+        "last_avl_time": str(base_time),
+        "matched_stops": {
+            final_stop_index: {
+                "is_estimate": False,
+                "last_match_time": str(base_time),
+            },
+        },
+        "potential_matches": {
+            final_stop_index: {
+                "is_estimate": False,
+                "last_distance": 0,
+                "last_time_in_zone": str(base_time),
+            },
+        },
+    }
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        {group_id: journey_history},
+    )
+
+    assert new_stop_history == {
+        group_id: {
+            **journey_history,
+            "last_avl_latitude": final_location[0],
+            "last_avl_longitude": final_location[1],
+            "last_avl_time": str(avl_time),
+        },
+    }
+    assert to_remove == []
+    assert to_set == []
+
+
+def test_outside_first_stop_zone_creates_match_if_potential_match_distance_is_outside_zone() -> (
+    None
+):
+    avl_time = base_time + timedelta(minutes=2)
+    avl = create_avl(time=avl_time, location=far_away_location)
+    group_id = avl_group_id(avl)
+    journey_history = {
+        "last_avl_latitude": start_location[0],
+        "last_avl_longitude": start_location[1],
+        "last_avl_time": str(base_time),
         "matched_stops": {},
         "potential_matches": {
             "1": {
-                "last_distance": 58.596598093401845,
-                "last_time_in_zone": str(
-                    datetime(2024, 9, 1, 11, 30, 57, tzinfo=UTC),
-                ),
                 "is_estimate": False,
+                "last_distance": distance_from_stop(avl, route["1"])
+                - 1,  # new avl must be moving away, same distance not good enough
+                "last_time_in_zone": str(base_time),
             },
         },
-        "last_avl_latitude": None,
-        "last_avl_longitude": None,
     }
-    potential_matches_to_delete = []  # noqa: RUF012 - BODS-7131
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        {group_id: journey_history},
+    )
 
-    def test_update_matched_stop(self) -> None:  # noqa: D102 - BODS-7131
-        update_matched_stop(
-            self.pm_index,
-            self.last_time_in_zone,
-            self.route_history,
-            self.potential_matches_to_delete,
-            False,  # noqa: FBT003
-        )
-        expected_route_history = {
-            "last_avl_time": str(
-                datetime(2024, 9, 1, 11, 30, 57, tzinfo=UTC),
-            ),
+    assert new_stop_history == {
+        group_id: {
+            **journey_history,
+            "last_avl_latitude": far_away_location[0],
+            "last_avl_longitude": far_away_location[1],
+            "last_avl_time": str(avl_time),
             "matched_stops": {
                 "1": {
-                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5, tzinfo=UTC)),
                     "is_estimate": False,
+                    "last_match_time": str(base_time),
                 },
             },
-            "potential_matches": {
-                "1": {
-                    "last_distance": 58.596598093401845,
-                    "last_time_in_zone": str(
-                        datetime(2024, 9, 1, 11, 30, 57, tzinfo=UTC),
-                    ),
-                    "is_estimate": False,
-                },
-            },
-            "last_avl_latitude": None,
-            "last_avl_longitude": None,
-        }
-        expected_potential_matches_to_delete = ["1"]
-        assert self.route_history == expected_route_history
-        assert self.potential_matches_to_delete == expected_potential_matches_to_delete
-
-
-class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
-    timetable = read_timetable("TLCT37812152024-08-20.json")
-    new_matches_non_final = []  # noqa: RUF012 - BODS-7131
-    new_matches_final = []  # noqa: RUF012 - BODS-7131
-    operator_ref = "TLCT"
-    line_name = "378"
-    journey_ref = "1215"
-    date_of_journey = "2024-08-20"
-    group_id = f"{operator_ref}|{line_name}|{journey_ref}|{date_of_journey}".lower()
-    last_time_in_zone_non_final = datetime(2024, 8, 20, 11, 9, 5, tzinfo=UTC)
-    last_time_in_zone_final = datetime(2024, 8, 20, 11, 35, 0, tzinfo=UTC)
-
-    @pytest.mark.parametrize(
-        (
-            "is_final_stop",
-            "timetable_dict",
-            "new_matches",
-            "pm_index",
-            "last_time_in_zone",
-            "expected_new_matches",
-        ),
-        [
-            pytest.param(
-                False,
-                timetable,
-                new_matches_non_final,
-                "1",
-                last_time_in_zone_non_final,
-                [
-                    {
-                        "stop_index": "1",
-                        "time_difference": -355.0,
-                        "last_time_in_zone_str": "11:09:05",
-                        "timetable_id": 893823336,
-                        "last_time_in_zone": last_time_in_zone_non_final,
-                        "timestamp_after_estimate": None,
-                        "otp_state": "Early",
-                        "stop_type": "Non-final",
-                    },
-                ],
-                id="Write non-final stop to db",
-            ),
-            pytest.param(
-                True,
-                timetable,
-                new_matches_final,
-                "45",
-                last_time_in_zone_final,
-                [
-                    {
-                        "stop_index": "45",
-                        "time_difference": -420.0,
-                        "last_time_in_zone_str": "11:35:00",
-                        "timetable_id": 893822665,
-                        "last_time_in_zone": last_time_in_zone_final,
-                        "timestamp_after_estimate": None,
-                        "otp_state": "OnTime",
-                        "stop_type": "final",
-                    },
-                ],
-                id="Write final stop to db",
-            ),
-            pytest.param(
-                False,
-                timetable,
-                [],
-                "1",
-                last_time_in_zone_non_final - timedelta(seconds=7234),
-                [],
-                id="The match has a time difference more than 2 hours early, it shouldn't be added to the new_matches",
-            ),
-            pytest.param(
-                False,
-                timetable,
-                [],
-                "1",
-                last_time_in_zone_non_final + timedelta(seconds=4000),
-                [
-                    {
-                        "last_time_in_zone": datetime(
-                            2024,
-                            8,
-                            20,
-                            12,
-                            15,
-                            45,
-                            tzinfo=UTC,
-                        ),
-                        "last_time_in_zone_str": "12:15:45",
-                        "otp_state": "Late",
-                        "stop_index": "1",
-                        "stop_type": "Non-final",
-                        "time_difference": 3645.0,
-                        "timestamp_after_estimate": None,
-                        "timetable_id": 893823336,
-                    },
-                ],
-                id="The match has a time difference more than 1 hour late, it should still be added to the new_matches",
-            ),
-        ],
-    )
-    def test_map_matched_stop_to_db(  # noqa: D102 - BODS-7131
-        self,
-        is_final_stop: bool,  # noqa: FBT001 - BODS-7131
-        timetable_dict: dict,
-        new_matches: list,
-        pm_index: str,
-        last_time_in_zone: datetime,
-        expected_new_matches: list,  # noqa: ANN401 - BODS-7131
-    ) -> None:
-        map_matched_stop_to_db(
-            is_final_stop,
-            timetable_dict[self.group_id][pm_index],
-            new_matches,
-            pm_index,
-            last_time_in_zone,
-            is_estimate=False,
-        )
-        assert new_matches == expected_new_matches
-
-
-class TestGetTimetableDepartureTime:  # noqa: D101 - BODS-7131
-    timetable = read_timetable("TLCT37812152024-08-20.json")
-    group_id = "tlct|378|1215|2024-08-20"
-    pm_index = "2"
-
-    def test_get_timetable_departure_time(self) -> None:  # noqa: D102 - BODS-7131
-        details = self.timetable[self.group_id]
-        expected_timtable_departure_time = datetime(2024, 8, 20, 11, 16, 0, tzinfo=UTC)
-        assert (
-            stop_departure_time(details[self.pm_index])
-            == expected_timtable_departure_time
-        )
-
-
-class TestUpdatePotentialMatch:  # noqa: D101 - BODS-7131
-    avl_record = read_avl("update_potential_match.csv")[0]
-    avl_record_wo_datetime = read_avl("update_potential_match.csv")[1]
-    pm_index = "1"
-    expected_pm_details_w_datetime = {  # noqa: RUF012 - BODS-7131
-        "last_distance": 12.123214,
-        "last_time_in_zone": str(datetime(2024, 8, 20, 11, 26, 42, tzinfo=UTC)),
-    }
-    expected_pm_details_wo_datetime = {  # noqa: RUF012 - BODS-7131
-        "last_distance": 72.12345678,
-        "last_time_in_zone": str(datetime(2024, 8, 20, 11, 25, 57, tzinfo=UTC)),
-    }
-
-    def test_update_potential_match_w_datetime(  # noqa: D102 - BODS-7131
-        self,
-    ) -> None:
-        pm_details = {
-            "last_distance": 58.596598093401845,
-            "last_time_in_zone": str(datetime(2024, 8, 20, 11, 25, 57, tzinfo=UTC)),
-        }
-        update_potential_match_with_recorded_at_time(
-            self.avl_record,
-            self.pm_index,
-            pm_details,
-            12.123214,
-        )
-        assert pm_details == self.expected_pm_details_w_datetime
-
-    def test_update_potential_match_wo_datetime(  # noqa: D102 - BODS-7131
-        self,
-    ) -> None:
-        pm_details = {
-            "last_distance": 58.596598093401845,
-            "last_time_in_zone": str(datetime(2024, 8, 20, 11, 25, 57, tzinfo=UTC)),
-        }
-        update_potential_match_without_recorded_at_time(
-            self.pm_index,
-            pm_details,
-            72.12345678,
-        )
-        assert pm_details == self.expected_pm_details_wo_datetime
-
-
-class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
-    route_history_same_recordedattime = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(
-            datetime(2024, 8, 23, 11, 16, 14, tzinfo=UTC),
-        ),
-        "matched_stops": {
-            "39": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 14, 41, tzinfo=UTC)),
-            },
-            "3": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 5, tzinfo=UTC)),
-            },
-        },
-        "potential_matches": {
-            "4": {
-                "last_distance": 311.19398802530185,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 15, 36, tzinfo=UTC),
-                ),
-            },
-            "38": {
-                "last_distance": 294.4630341883636,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 15, 36, tzinfo=UTC),
-                ),
-            },
-            "5": {
-                "last_distance": 17.612857082239692,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16, 14, tzinfo=UTC),
-                ),
-            },
-            "37": {
-                "last_distance": 18.62101754791971,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16, tzinfo=UTC),
-                ),
-            },
+            "potential_matches": {},
         },
     }
-    route_history_same_recordedattime_2 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(
-            datetime(2024, 8, 23, 11, 16, 14, tzinfo=UTC),
-        ),
-        "matched_stops": {
-            "4": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 36, tzinfo=UTC)),
-            },
-            "3": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 5, tzinfo=UTC)),
-            },
+    assert to_remove == []
+    assert to_set == [
+        {
+            "last_time_in_zone": base_time,
+            "last_time_in_zone_str": "00:00:00",
+            "otp_state": "OnTime",
+            "stop_index": "1",
+            "stop_type": "Non-final",
+            "time_difference": 0.0,  # same time as timetable
+            "timestamp_after_estimate": None,
+            "timetable_id": stop_timetable_id(route["1"]),
         },
-        "potential_matches": {
-            "38": {
-                "last_distance": 294.4630341883636,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 15, 36, tzinfo=UTC),
-                ),
-            },
-            "5": {
-                "last_distance": 17.612857082239692,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16, 14, tzinfo=UTC),
-                ),
-            },
-            "37": {
-                "last_distance": 18.62101754791971,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16, tzinfo=UTC),
-                ),
-            },
-        },
-    }
-    route_history_wo_same_recordedattime = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(
-            datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
-        ),
-        "potential_matches": {
-            "1": {
-                "last_distance": 40.03840622665115,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
-                ),
-            },
-        },
-        "matched_stops": {},
-    }
-    route_history_consecutive_index_same_recordedattime = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(
-            datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
-        ),
-        "potential_matches": {
-            "2": {
-                "last_distance": 40.03840622665115,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
-                ),
-            },
-            "3": {
-                "last_distance": 23.1234325,
-                "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
-                ),
-            },
-        },
-        "matched_stops": {},
-    }
-
-    @pytest.mark.parametrize(
-        (
-            "pm_index",
-            "route_history",
-            "potential_matches_to_delete",
-            "expected_selected_index",
-            "expected_potential_matches_to_delete",
-        ),
-        [
-            pytest.param(
-                "4",
-                route_history_same_recordedattime,
-                [],
-                "4",
-                ["38"],
-                id="With more than one potential matches with the same recorded_at_time, select the index closest to the lowest_index",
-            ),
-            pytest.param(
-                "38",
-                route_history_same_recordedattime,
-                ["4"],
-                "38",
-                ["4"],
-                id="With more than one potential matches with the same recorded_at_time, select the index closest to the lowest_index and not in the potential matches to delete",
-            ),
-            pytest.param(
-                "38",
-                route_history_same_recordedattime_2,
-                ["38"],
-                "38",
-                ["38"],
-                id="Running select potential matches with the same recorded_at_time the second time with the same batch of potential matches, skip selecting the potential match index process",
-            ),
-            pytest.param(
-                "1",
-                route_history_wo_same_recordedattime,
-                [],
-                "1",
-                [],
-                id="No potential matches are with the same recorded_at_time, return the current potential index",
-            ),
-            pytest.param(
-                "2",
-                route_history_consecutive_index_same_recordedattime,
-                [],
-                "2",
-                [],
-                id="Consecutive stop indices with the same recorded_at_time, return the current potential index, no potential match needs to be removed",
-            ),
-        ],
-    )
-    def test_select_potential_match_with_same_recordedattime(  # noqa: D102 - BODS-7131
-        self,
-        pm_index: str,
-        route_history: dict,
-        potential_matches_to_delete: list,
-        expected_selected_index: str,
-        expected_potential_matches_to_delete: list,
-    ) -> None:
-        selected_index = select_potential_match_with_same_recordedattime(
-            pm_index,
-            route_history,
-            potential_matches_to_delete,
-        )
-        assert selected_index == expected_selected_index
-        assert potential_matches_to_delete == expected_potential_matches_to_delete
+    ]
 
 
-class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
-    avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
-    avl_record_2 = read_avl("COAC4116302024-10-17.csv")[7]
-    avl_record_3 = read_avl("sleait110302024-10-23.csv")[7]
-    avl_record_4 = read_avl("scem9132024-10-31.csv")[98]
-    timetable = read_timetable("TLCT37812152024-08-20.json")
-    timetable_2 = read_timetable("COAC4116302024-10-17.json")
-    timetable_3 = read_timetable("sleait110302024-10-23.json")
-    timetable_4 = read_timetable("scem9132024-10-31.json")
-    group_id = "tlct|378|1215|2024-08-20"
-    pm_details_1 = {  # noqa: RUF012 - BODS-7131
-        "last_distance": 75.1243252308765,
-        "last_time_in_zone": str(datetime(2024, 8, 20, 11, 15, 48, tzinfo=UTC)),
-        "is_estimate": False,
-    }
-    route_history_1 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 20, 11, 15, 48, tzinfo=UTC)),
-        "potential_matches": {
-            "1": {
-                "last_distance": 75.1243252308765,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 15, 48, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-        "matched_stops": {},
-    }
-    pm_details_2 = {  # noqa: RUF012 - BODS-7131
-        "last_distance": 80.65435437,
-        "last_time_in_zone": str(datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC)),
-        "is_estimate": False,
-    }
-    route_history_2 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC)),
-        "potential_matches": {
-            "3": {
-                "last_distance": 80.65435437,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
+def test_second_ping_outside_stop_zone_creates_match_and_removes_older_match_from_history() -> (
+    None
+):
+    avl_time = base_time + timedelta(minutes=1)
+    avl_location = (3.5, 3.5)
+    avl = create_avl(time=avl_time, location=avl_location)
+    group_id = avl_group_id(avl)
+    journey_history = {
+        "last_avl_latitude": stop_3_location[0],
+        "last_avl_longitude": stop_3_location[1],
+        "last_avl_time": str(base_time),
         "matched_stops": {
             "1": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 15, 48, tzinfo=UTC)),
                 "is_estimate": False,
+                "last_match_time": str(base_time),
             },
             "2": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 17, 6, tzinfo=UTC)),
                 "is_estimate": False,
-            },
-        },
-    }
-    pm_details_3 = {  # noqa: RUF012 - BODS-7131
-        "last_distance": 72.1232432,
-        "last_time_in_zone": str(datetime(2024, 8, 20, 11, 39, 54, tzinfo=UTC)),
-        "is_estimate": False,
-    }
-    route_history_3 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 20, 11, 39, 54, tzinfo=UTC)),
-        "potential_matches": {
-            "15": {
-                "last_distance": 72.1232432,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 37, 54, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-            "23": {
-                "last_distance": 15.12312678,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 39, 54, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-        "matched_stops": {
-            "21": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 34, 23, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-            "22": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 35, 6, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-    }
-
-    pm_details_4 = {  # noqa: RUF012 - BODS-7131
-        "last_distance": 81.123124167,
-        "last_time_in_zone": str(datetime(2024, 8, 20, 11, 36, 54, tzinfo=UTC)),
-        "is_estimate": False,
-    }
-    route_history_4 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 8, 20, 11, 39, 54, tzinfo=UTC)),
-        "potential_matches": {
-            "23": {
-                "last_distance": 81.123124167,
-                "last_time_in_zone": str(datetime(2024, 8, 20, 11, 36, 54, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-        "matched_stops": {
-            "21": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 34, 23, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-            "24": {
-                "last_match_time": str(datetime(2024, 8, 20, 11, 35, 6, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-    }
-
-    pm_details_5 = {  # noqa: RUF012 - BODS-7131
-        "last_distance": 833.8772724535825,
-        "last_time_in_zone": str(
-            datetime(2024, 10, 17, 16, 12, 18, tzinfo=UTC),
-        ),
-        "is_estimate": False,
-    }
-    route_history_5 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": datetime(2024, 10, 17, 16, 15, 41, tzinfo=UTC),
-        "matched_stops": {
-            "10": {
-                "last_match_time": str(
-                    datetime(2024, 10, 17, 16, 10, 6, tzinfo=UTC),
-                ),
-                "is_estimate": False,
+                "last_match_time": str(base_time),
             },
         },
         "potential_matches": {
-            "7": {
-                "last_distance": 833.8772724535825,
-                "last_time_in_zone": str(
-                    datetime(2024, 10, 17, 16, 12, 18, tzinfo=UTC),
-                ),
-                "is_estimate": False,
-            },
-            "2": {
-                "last_distance": 35.482760472101006,
-                "last_time_in_zone": str(
-                    datetime(2024, 10, 17, 16, 14, 58, tzinfo=UTC),
-                ),
-                "is_estimate": False,
-            },
-        },
-    }
-
-    pm_details_6 = {  # noqa: RUF012 - BODS-7131
-        "last_distance": 193.02253400101122,
-        "last_time_in_zone": str(
-            datetime(2024, 10, 23, 15, 39, 4, tzinfo=UTC),
-        ),
-        "is_estimate": False,
-    }
-    route_history_6 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": datetime(2024, 10, 23, 15, 39, 33, tzinfo=UTC),
-        "matched_stops": {
-            "12": {
-                "last_match_time": str(
-                    datetime(2024, 10, 23, 15, 37, 43, tzinfo=UTC),
-                ),
-                "is_estimate": False,
-            },
-            "13": {
-                "last_match_time": str(
-                    datetime(2024, 10, 23, 15, 38, 44, tzinfo=UTC),
-                ),
-                "is_estimate": False,
-            },
-        },
-        "potential_matches": {
-            "11": {
-                "last_distance": 178.07106589653134,
-                "last_time_in_zone": str(
-                    datetime(2024, 10, 23, 15, 39, 4, tzinfo=UTC),
-                ),
-                "is_estimate": False,
-            },
-            "12": {
-                "last_distance": 193.02253400101122,
-                "last_time_in_zone": str(
-                    datetime(2024, 10, 23, 15, 39, 4, tzinfo=UTC),
-                ),
-                "is_estimate": False,
-            },
-            "14": {
-                "last_distance": 47.3828826762825,
-                "last_time_in_zone": str(
-                    datetime(2024, 10, 23, 15, 39, 27, tzinfo=UTC),
-                ),
-                "is_estimate": False,
-            },
-            "15": {
-                "last_distance": 37.35516130497534,
-                "last_time_in_zone": str(
-                    datetime(2024, 10, 23, 15, 39, 33, tzinfo=UTC),
-                ),
-                "is_estimate": False,
-            },
-        },
-    }
-    pm_details_7 = {  # noqa: RUF012 - BODS-7131
-        "last_distance": 37.80104206056258,
-        "last_time_in_zone": str(datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC)),
-        "is_estimate": False,
-    }
-    route_history_7 = {  # noqa: RUF012 - BODS-7131
-        "last_avl_time": str(datetime(2024, 10, 31, 8, 39, 43, tzinfo=UTC)),
-        "matched_stops": {
             "3": {
-                "last_match_time": str(datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC)),
                 "is_estimate": False,
-            },
-            "71": {
-                "last_match_time": str(datetime(2024, 10, 31, 8, 36, 21, tzinfo=UTC)),
-                "is_estimate": False,
-            },
-        },
-        "potential_matches": {
-            "70": {
-                "last_distance": 73.61235793637137,
-                "last_time_in_zone": str(datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC)),
-                "is_estimate": False,
+                "last_distance": 100.0,
+                "last_time_in_zone": str(base_time),
             },
         },
     }
-
-    @pytest.mark.parametrize(
-        (
-            "timetable_dict",
-            "avl",
-            "pm_index",
-            "pm_details",
-            "route_history",
-            "potential_matches_to_delete",
-            "new_matches",
-            "bad_matches",
-            "expected_potential_matches_to_delete",
-            "expected_bad_matches",
-            "expected_matched_stops",
-            "expected_new_matches",
-        ),
-        [
-            pytest.param(
-                timetable,
-                avl_record,
-                "1",
-                pm_details_1,
-                route_history_1,
-                [],
-                [],
-                [],  # stop pos distances remove
-                ["1"],  # expected pm to delete
-                [],  # expected stop pos dist remove
-                {
-                    "1": {
-                        "last_match_time": str(
-                            datetime(
-                                2024,
-                                8,
-                                20,
-                                11,
-                                15,
-                                48,
-                                tzinfo=UTC,
-                            ),
-                        ),
-                        "is_estimate": False,
-                    },
-                },
-                [
-                    {
-                        "stop_index": "1",
-                        "time_difference": 48.0,
-                        "last_time_in_zone_str": "11:15:48",
-                        "timetable_id": 893823336,
-                        "last_time_in_zone": datetime(
-                            2024,
-                            8,
-                            20,
-                            11,
-                            15,
-                            48,
-                            tzinfo=UTC,
-                        ),
-                        "otp_state": "OnTime",
-                        "stop_type": "Non-final",
-                        "timestamp_after_estimate": None,
-                    },
-                ],
-                id="first match",
-            ),
-            pytest.param(
-                timetable,
-                avl_record,
-                "3",
-                pm_details_2,
-                route_history_2,
-                [],
-                [],
-                [],  # bad_matches
-                ["3"],  # expected_potential_matches_to_delete
-                [],  # expected_bad_matches
-                {
-                    "2": {
-                        "last_match_time": str(
-                            datetime(2024, 8, 20, 11, 17, 6, tzinfo=UTC),
-                        ),
-                        "is_estimate": False,
-                    },
-                    "3": {
-                        "last_match_time": str(
-                            datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC),
-                        ),
-                        "is_estimate": False,
-                    },
-                },
-                [
-                    {
-                        "stop_index": "3",
-                        "time_difference": 184.0,
-                        "last_time_in_zone_str": "11:20:04",
-                        "timetable_id": 893823358,
-                        "last_time_in_zone": datetime(
-                            2024,
-                            8,
-                            20,
-                            11,
-                            20,
-                            4,
-                            tzinfo=UTC,
-                        ),
-                        "otp_state": "OnTime",
-                        "stop_type": "Non-final",
-                        "timestamp_after_estimate": None,
-                    },
-                ],
-                id="not first match, the pm index higher than the highest match index saved and it will be the third actual match, move the potential match to be a match and remove the lowest match index from matched stops",
-            ),
-            pytest.param(
-                timetable,
-                avl_record,
-                "15",
-                pm_details_3,
-                route_history_3,
-                [],
-                [],
-                [],
-                ["15"],
-                [],
-                {
-                    "21": {
-                        "last_match_time": str(
-                            datetime(
-                                2024,
-                                8,
-                                20,
-                                11,
-                                34,
-                                23,
-                                tzinfo=UTC,
-                            ),
-                        ),
-                        "is_estimate": False,
-                    },
-                    "22": {
-                        "last_match_time": str(
-                            datetime(2024, 8, 20, 11, 35, 6, tzinfo=UTC),
-                        ),
-                        "is_estimate": False,
-                    },
-                },
-                [],
-                id="not first match, the pm index lower than the lowest match index saved, remove current potential match from potential matches",
-            ),
-            pytest.param(
-                timetable,
-                avl_record,
-                "23",
-                pm_details_4,
-                route_history_4,
-                [],
-                [],
-                [],  # bad_matches
-                ["23"],  # expected_potential_matches_to_delete
-                [
-                    {"timetable_id": 893823127},
-                ],  # expected_bad_matches
-                {
-                    "21": {
-                        "last_match_time": str(
-                            datetime(
-                                2024,
-                                8,
-                                20,
-                                11,
-                                34,
-                                23,
-                                tzinfo=UTC,
-                            ),
-                        ),
-                        "is_estimate": False,
-                    },
-                    "23": {
-                        "last_match_time": str(
-                            datetime(
-                                2024,
-                                8,
-                                20,
-                                11,
-                                36,
-                                54,
-                                tzinfo=UTC,
-                            ),
-                        ),
-                        "is_estimate": False,
-                    },
-                },
-                [
-                    {
-                        "stop_index": "23",
-                        "time_difference": 534.0,
-                        "last_time_in_zone_str": "11:36:54",
-                        "timetable_id": 893823138,
-                        "last_time_in_zone": datetime(
-                            2024,
-                            8,
-                            20,
-                            11,
-                            36,
-                            54,
-                            tzinfo=UTC,
-                        ),
-                        "otp_state": "Late",
-                        "stop_type": "Non-final",
-                        "timestamp_after_estimate": None,
-                    },
-                ],
-                id="not first match, the pm index lower than the highest match index saved and it will be the third actual match, move the potential match to be a match and delete the indices that are higher than the current potential match index in the matched stops",
-            ),
-            pytest.param(
-                timetable_2,
-                avl_record_2,
-                "7",
-                pm_details_5,
-                route_history_5,
-                [],
-                [],
-                [],  # bad_matches
-                ["7"],  # expected_potential_matches_to_delete
-                [
-                    {"timetable_id": 1091293465},
-                ],  # expected_bad_matches
-                {
-                    "7": {
-                        "last_match_time": str(
-                            datetime(2024, 10, 17, 16, 12, 18, tzinfo=UTC),
-                        ),
-                        "is_estimate": False,
-                    },
-                },
-                [
-                    {
-                        "stop_index": "7",
-                        "time_difference": -1375.0,
-                        "last_time_in_zone_str": "16:12:18",
-                        "timetable_id": 1091293263,
-                        "last_time_in_zone": datetime(
-                            2024,
-                            10,
-                            17,
-                            16,
-                            12,
-                            18,
-                            tzinfo=UTC,
-                        ),
-                        "otp_state": "Early",
-                        "stop_type": "Non-final",
-                        "timestamp_after_estimate": None,
-                    },
-                ],
-                id="bus going to the starting point to start the journey and matching backwards, when matching the second bus stop and there's only one actual match, delete the first matched stop",
-            ),
-            pytest.param(
-                timetable_3,
-                avl_record_3,
-                "11",
-                pm_details_6,
-                route_history_6,
-                [],
-                [],
-                [],  # bad_matches
-                ["11"],  # expected_potential_matches_to_delete
-                [],  # expected_bad_matches
-                {
-                    "12": {
-                        "last_match_time": str(
-                            datetime(2024, 10, 23, 15, 37, 43, tzinfo=UTC),
-                        ),
-                        "is_estimate": False,
-                    },
-                    "13": {
-                        "last_match_time": str(
-                            datetime(2024, 10, 23, 15, 38, 44, tzinfo=UTC),
-                        ),
-                        "is_estimate": False,
-                    },
-                },
-                [],
-                id="bus going from A to B to A again, A should not be rematched",
-            ),
-            pytest.param(
-                timetable_4,
-                avl_record_4,
-                "70",
-                pm_details_7,
-                route_history_7,
-                [],
-                [],
-                [],  # bad_matches
-                ["70"],  # expected_potential_matches_to_delete
-                [
-                    {"timetable_id": 1231325785},
-                ],  # expected_bad_matches
-                {
-                    "3": {
-                        "last_match_time": str(
-                            datetime(2024, 10, 31, 8, 6, 55, tzinfo=UTC),
-                        ),
-                        "is_estimate": False,
-                    },
-                    "70": {
-                        "last_match_time": str(
-                            datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC),
-                        ),
-                        "is_estimate": False,
-                    },
-                },
-                [
-                    {
-                        "last_time_in_zone": datetime(
-                            2024,
-                            10,
-                            31,
-                            8,
-                            39,
-                            3,
-                            tzinfo=UTC,
-                        ),
-                        "last_time_in_zone_str": "08:39:03",
-                        "otp_state": "Early",
-                        "stop_index": "70",
-                        "stop_type": "Non-final",
-                        "time_difference": -4377.0,
-                        "timetable_id": 1231325656,
-                        "timestamp_after_estimate": None,
-                    },
-                ],
-                id="bus matched final stops, then non-final stop, the final stop match should be removed",
-            ),
-        ],
+    to_set, to_remove, new_stop_history = run_matcher(
+        {group_id: route},
+        [avl],
+        {group_id: journey_history},
     )
-    def test_move_potential_match_to_match(  # noqa: D102 - BODS-7131
-        self,
-        timetable_dict: dict,
-        avl: AVLRecord,
-        pm_index: str,
-        pm_details: dict,
-        route_history: dict,
-        potential_matches_to_delete: list,
-        new_matches: list,
-        bad_matches: list,
-        expected_potential_matches_to_delete: list,
-        expected_bad_matches: list,
-        expected_matched_stops: dict,
-        expected_new_matches: list,
-    ) -> None:
-        move_potential_match_to_match(
-            timetable_dict[avl_group_id(avl)],
-            pm_index,
-            pm_details,
-            route_history,
-            potential_matches_to_delete,
-            new_matches,
-            bad_matches,
+
+    expected_matched_stops = {
+        **journey_history["matched_stops"],
+        "3": {
+            "is_estimate": False,
+            "last_match_time": str(base_time),
+        },
+    }
+    del expected_matched_stops["1"]
+    assert new_stop_history == {
+        group_id: {
+            **journey_history,
+            "last_avl_latitude": avl_location[0],
+            "last_avl_longitude": avl_location[1],
+            "last_avl_time": str(avl_time),
+            "matched_stops": expected_matched_stops,
+            "potential_matches": {},
+        },
+    }
+    assert to_remove == []
+    assert to_set == [
+        {
+            "last_time_in_zone": base_time,
+            "last_time_in_zone_str": base_time.time().isoformat(),
+            "otp_state": "Early",
+            "stop_index": "3",
+            "stop_type": "Non-final",
+            "time_difference": -120.0,
+            "timestamp_after_estimate": None,
+            "timetable_id": stop_timetable_id(route["3"]),
+        },
+    ]
+
+
+def run_matcher(
+    timetable: Timetable,
+    avls: Sequence[AVLRecord],
+    stop_history: StopHistory,
+) -> tuple[Sequence, Sequence, dict[str, RouteHistory]]:
+    with mock.patch.dict(os.environ, {"ENABLE_ESTIMATED_MATCHING": "true"}):
+        return match_avl_batch(
+            LiveTimetableStore(timetable),
+            avls,
+            json.loads(json.dumps(stop_history)),
         )
-        assert potential_matches_to_delete == expected_potential_matches_to_delete
-        assert bad_matches == expected_bad_matches
-        assert route_history["matched_stops"] == expected_matched_stops
-        assert new_matches == expected_new_matches
-
-
-class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
-
-    @pytest.mark.parametrize(
-        (
-            "avl",
-            "route_history",
-            "stop",
-            "expected_estimated_match",
-        ),
-        [
-            pytest.param(
-                {
-                    "longitude": -1.648382,
-                    "latitude": 53.817693,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                    "last_avl_longitude": -1.659246,
-                    "last_avl_latitude": 53.822937,
-                },
-                ((53.820328, -1.654394), 0),
-                "2024-10-10T07:49:26.156720+00:00",
-                id="Line between 2 AVL points on straight road and within time threshold gives an estimated match",
-            ),
-            pytest.param(
-                {
-                    "longitude": -1.654394,
-                    "latitude": 53.820328,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                    "last_avl_longitude": -1.659246,
-                    "last_avl_latitude": 53.822937,
-                },
-                ((53.820328, -1.654394), 0),
-                None,
-                id="Starting AVL point within stop zone does not give estimated match",
-            ),
-            pytest.param(
-                {
-                    "longitude": -1.659246,
-                    "latitude": 53.822937,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                    "last_avl_longitude": -1.654394,
-                    "last_avl_latitude": 53.820328,
-                },
-                ((53.820328, -1.654394), 0),
-                None,
-                id="Ending AVL point within stop zone does not give estimated match",
-            ),
-            pytest.param(
-                {
-                    "longitude": -1.648382,
-                    "latitude": 53.817693,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 50, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                    "last_avl_longitude": -1.659246,
-                    "last_avl_latitude": 53.822937,
-                },
-                ((53.820328, -1.654394), 0),
-                None,
-                id="Longer than threshold time between AVL stops does not give estimated match",
-            ),
-            pytest.param(
-                {
-                    "longitude": -1.648382,
-                    "latitude": 52.817693,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 50, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 50, 10, tzinfo=UTC)),
-                    "last_avl_longitude": -1.659246,
-                    "last_avl_latitude": 54.822937,
-                },
-                ((53.820328, -1.654394), 0),
-                None,
-                id="Longer than threshold distance between AVL stops does not give estimated match",
-            ),
-            pytest.param(
-                {
-                    "longitude": -1.648382,
-                    "latitude": 53.817693,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                    "last_avl_longitude": -1.648382,
-                    "last_avl_latitude": 53.817693,
-                },
-                ((53.820328, -1.654394), 0),
-                None,
-                id="Same starting and ending AVL points gives no estimated match",
-            ),
-        ],
-    )
-    def test_find_estimated_matches(  # noqa: D102 - BODS-7131
-        self,
-        avl: AVLRecord,
-        route_history: RouteHistory,
-        stop: Stop,
-        expected_estimated_match: str,
-    ) -> None:
-        estimated_match = check_estimated_match(avl, route_history, stop)
-        assert estimated_match == expected_estimated_match

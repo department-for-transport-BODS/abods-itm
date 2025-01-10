@@ -233,6 +233,7 @@ def find_potential_matches(  # noqa:C901 - later
 
         stop = route.get(stop_index)
         if not stop:
+            # todo: try making tests that hit this branch
             logger.warning(
                 "Could not find stop index in timetable extract",
                 stop_index=stop_index,
@@ -311,15 +312,7 @@ def check_update_first_stop(
         logger.debug("First stop index not in matched stops")
         return
 
-    stop = route.get(stop_index)
-    if not stop:
-        logger.warning(
-            "Could not find stop index in timetable extract",
-            stop_index=stop_index,
-            route_indexes=list(route.keys()),
-        )
-        return
-
+    stop = route[stop_index]
     stop_distance_in_meters = distance_from_stop(avl, stop)
 
     if stop_distance_in_meters >= MATCH_ZONE_RADIUS_IN_METERS:
@@ -386,6 +379,7 @@ def find_matches_in_potential_matches(
     for stop_index in sorted(route_history["potential_matches"].keys(), key=int):
         stop = route.get(stop_index)
         if not stop:
+            # todo: try making tests that hit this branch
             logger.warning(
                 "Could not find stop index in timetable extract",
                 stop_index=stop_index,
@@ -479,6 +473,7 @@ def find_matches_in_potential_matches(
         )
 
         if selected_index in potential_matches_to_delete:
+            # todo: try making tests that hit this branch
             continue
 
         logger.debug(f"31-32. selected_index for matching {selected_index}")
@@ -511,6 +506,7 @@ def remove_matched_stops(
     for stop_index in matches_to_delete:
         # Shouldn't happen, as only stops that exist in potential_matches should be marked for deletion
         if stop_index not in stops_list:
+            # todo: try making tests that hit this branch
             logger.warning(
                 "Attempt to remove a potential match that is not in stop history",
                 stop_index=stop_index,
@@ -574,6 +570,7 @@ def map_matched_stop_to_db(
     time_difference = (last_time_in_zone - timetable_departure_time).total_seconds()
 
     if time_difference < MATCHING_TIME_LOWER_LIMIT_IN_SECONDS:
+        # todo: try making tests that hit this branch
         logger.warning(
             "This match is more than 2 hours early",
             timetable_id=timetable_id,
@@ -583,6 +580,7 @@ def map_matched_stop_to_db(
         )
         return
     if time_difference > MATCHING_TIME_UPPER_LIMIT_IN_SECONDS:
+        # todo: try making tests that hit this branch
         logger.warning(
             "This match is more than 1 hour late",
             timetable_id=timetable_id,
@@ -603,6 +601,7 @@ def map_matched_stop_to_db(
     }
 
     if is_estimate:
+        # todo: try making tests that hit this branch
         new_match["timestamp_after_estimate"] = new_match["last_time_in_zone"]
         new_match["last_time_in_zone"] = None
         new_match["last_time_in_zone_str"] = None
@@ -664,6 +663,7 @@ def select_potential_match_with_same_recordedattime(
     potential_matches_to_delete: list[str],
 ) -> str:
     if stop_index in potential_matches_to_delete:
+        # todo: try making tests that hit this branch
         return stop_index
     int_keys = (int(key) for key in route_history["matched_stops"])
     first_matched_stop = next(iter(sorted(int_keys)), 0)
@@ -680,6 +680,7 @@ def select_potential_match_with_same_recordedattime(
     if len(index_with_same_recordedattime) <= 1:
         return stop_index
 
+    # todo: try making tests that hit this branch
     logger.debug(
         f"{stop_index} index_with_same_recordedattime: {index_with_same_recordedattime}",
     )
@@ -735,6 +736,7 @@ def move_potential_match_to_match(  # noqa:PLR0912, PLR0915, C901 - later
     """
     stop = route.get(stop_index)
     if not stop:
+        # todo: try making tests that hit this branch
         logger.warning(
             "Could not find stop index in timetable extract",
             stop_index=stop_index,
@@ -756,7 +758,7 @@ def move_potential_match_to_match(  # noqa:PLR0912, PLR0915, C901 - later
             **matched_stops,
             stop_index: create_matched_stop(
                 last_time_in_zone,
-                potential_match.get("is_estimate", False),
+                potential_match["is_estimate"],
             ),
         }
         # 20. order saved matches by recorded_at_time
@@ -793,6 +795,7 @@ def move_potential_match_to_match(  # noqa:PLR0912, PLR0915, C901 - later
         # 28,29. Will this new match be the (saved match limit + 1) actual match saved and Is this new match the lowest index
         # 29.1 Do the two actual match index's saved have a difference of 1
         if stop_index_int > highest_index_int and stop_index_int != latest_index_int:
+            # todo: try making tests that hit this branch
             logger.debug(
                 f"{stop_index} lower than lowest_matched_stop_index {lowest_index}, remove it from potential matches",
             )
@@ -800,10 +803,13 @@ def move_potential_match_to_match(  # noqa:PLR0912, PLR0915, C901 - later
             potential_matches_to_delete.append(stop_index)
             delete_potential_match = True
         if stop_index_int > lowest_index_int:
+            # todo: try making tests that hit this branch, some incidentally exist
             logger.debug("aaaaaaaaaaa")
         elif len(matched_stops) != SAVED_MATCHES_LIMIT and lowest_index_int != 1:
+            # todo: try making tests that hit this branch
             logger.debug("bbbbbbbbbbb")
         else:
+            # todo: try making tests that hit this branch
             logger.debug(
                 f"{stop_index} lower than lowest_matched_stop_index {lowest_index}, remove it from potential matches",
             )
@@ -813,11 +819,14 @@ def move_potential_match_to_match(  # noqa:PLR0912, PLR0915, C901 - later
 
         #  29. It's in the middle of the matched stop sequence or there's only one matched stop
         if stop_index_int >= highest_index_int:
+            # todo: try making tests that hit this branch, some incidentally exist
             logger.debug("aaaaaaaaaaa")
         elif stop_index_int <= lowest_index_int and len(matched_stops) != 1:
+            # todo: try making tests that hit this branch
             logger.debug("bbbbbbbbbbb")
         # 29.2 is the last stop in the matched stops ordered by recorded_at_time the final stop of the journey?
         elif latest_index_int == final_stop_index:
+            # todo: try making tests that hit this branch
             logger.debug(
                 f"last matched stop in new match sequence {latest_index_int} is final stop, "
                 f"remove lowest matched stop from matched stops {lowest_index_int}",
@@ -829,6 +838,7 @@ def move_potential_match_to_match(  # noqa:PLR0912, PLR0915, C901 - later
             )
             del route_history["matched_stops"][lowest_index]
         else:
+            # todo: try making tests that hit this branch
             # 31.Delete the higher index stored from the db and json
             logger.debug(
                 f"{stop_index} lower than highest_matched_stop_index {highest_index}, "
@@ -842,6 +852,7 @@ def move_potential_match_to_match(  # noqa:PLR0912, PLR0915, C901 - later
             del route_history["matched_stops"][highest_index]
             stop_details = route.get(highest_index)
             if not stop_details:
+                # todo: try making tests that hit this branch
                 logger.warning(
                     "Could not find stop index in timetable extract",
                     stop_index=stop_details,
@@ -853,10 +864,11 @@ def move_potential_match_to_match(  # noqa:PLR0912, PLR0915, C901 - later
                 }
                 bad_matches.append(bad_match)
     if delete_potential_match:
+        # todo: try making tests that hit this branch
         return
 
     # 24. move potential match to be a match
-    is_estimate = potential_match.get("is_estimate", False)
+    is_estimate = potential_match["is_estimate"]
     update_matched_stop(
         stop_index,
         last_time_in_zone,
@@ -1074,6 +1086,7 @@ def match_avl(
         return [], [], stop_history
 
     if last_avl_time > current_avl_time:
+        # todo: try making tests that hit this branch
         logger.warning(
             "Out of order avl matching. Probably from a second vehicle",
             last_avl_time=last_avl_time,
