@@ -223,7 +223,7 @@ def run_migrations(conn_opts: dict, event):
                     f'No versioned objects found in the S3 bucket "{bucket_name}"'
                 )
         remote_path = f"{bucket_prefix}/{release_version}/liquibase"
-        local_path = f'/tmp/{remote_path.split("/")[-1]}'
+        local_path = f"/tmp/{remote_path.split('/')[-1]}"
 
         log.info(f"""DATABASE MIGRATIONS
         Source Bucket: {bucket_name}
@@ -236,9 +236,9 @@ def run_migrations(conn_opts: dict, event):
         with open(liquibase_properties_path, "w") as file:
             file.write(f"""
 changeLogFile=db.changelog.xml
-liquibase.command.url=jdbc:postgresql://{conn_opts['host']}:{conn_opts['port']}/{target_database}
-liquibase.command.username: {conn_opts['user']}
-liquibase.command.password: {conn_opts['password']}
+liquibase.command.url=jdbc:postgresql://{conn_opts["host"]}:{conn_opts["port"]}/{target_database}
+liquibase.command.username: {conn_opts["user"]}
+liquibase.command.password: {conn_opts["password"]}
 logLevel: INFO""")
 
         log.info(

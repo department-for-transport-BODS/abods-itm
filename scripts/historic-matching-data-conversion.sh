@@ -17,4 +17,4 @@ SKIP_AVL="false"
 SKIP_TIMETABLE="false"
 OVERWRITE_EXISTING_OUTPUT="false"
 
-aws lambda invoke --function-name "$PROJECT_NAME-$ENVIRONMENT-convert-to-parquet-function" --cli-binary-format raw-in-base64-out --payload "{\"process_date\":\"$PROCESS_DATE\",\"skip_timetable\":\"$SKIP_TIMETABLE\",\"skip_avl\":\"$SKIP_AVL\",\"overwrite_existing_output\":\"$OVERWRITE_EXISTING_OUTPUT\"}" /dev/stdout
+aws lambda invoke --function-name "$PROJECT_NAME-$ENVIRONMENT-convert-to-parquet-function" --cli-read-timeout 0 --cli-binary-format raw-in-base64-out --payload "{\"process_date\":\"$PROCESS_DATE\",\"skip_timetable\":\"$SKIP_TIMETABLE\",\"skip_avl\":\"$SKIP_AVL\",\"overwrite_existing_output\":\"$OVERWRITE_EXISTING_OUTPUT\"}" /dev/stdout

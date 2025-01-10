@@ -73,7 +73,7 @@ live_avl_file_columns = {
 
 
 def avl_group_id(avl: AVLRecord) -> str:
-    return f'{avl["operator_ref"]}|{avl["line_name"]}|{avl["journey_ref"]}|{avl["date_of_journey"]}'.lower()
+    return f"{avl['operator_ref']}|{avl['line_name']}|{avl['journey_ref']}|{avl['date_of_journey']}".lower()
 
 
 def avl_recorded_at_time_utc(avl: AVLRecord) -> datetime:
