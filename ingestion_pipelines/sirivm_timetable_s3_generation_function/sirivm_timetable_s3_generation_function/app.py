@@ -331,7 +331,7 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
         write_to_s3(timetable_dict, "timetable/timetable.json")
         write_to_s3(timetable_dict, fname)
         for shard_no in range(no_of_shards):
-            queue_name = f"{otp_queue}{shard_no+1}.fifo"
+            queue_name = f"{otp_queue}{shard_no + 1}.fifo"
             queue = getQueue(queue_name)
             resp = queue.send_message(  # noqa: F841 - BODS-7131
                 MessageBody="Put gzip file to S3",
@@ -342,7 +342,7 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
                 },
             )
             logging.info(
-                f"Send message to  {otp_queue}{shard_no+1} so timetable is refreshed.",
+                f"Send message to  {otp_queue}{shard_no + 1} so timetable is refreshed.",
             )
     except Exception as e:
         logging.exception(e)  # noqa: TRY401 - BODS-7131
