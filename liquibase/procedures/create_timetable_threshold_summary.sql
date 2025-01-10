@@ -10,13 +10,12 @@ DECLARE
 BEGIN
     tablename := 'timetable_threshold_summary_' || to_char(partition_date, 'YYYY_MM_DD');
 
-    RAISE NOTICE 'Creating partition if not exists %', tablename;
-
-    IF EXISTS (SELECT 1
-               FROM public."Timetable"
-               WHERE date_of_journey = partition_date
-               LIMIT 1) THEN
-        RAISE NOTICE '(Re)Creating partition';
+    IF NOT EXISTS (SELECT 1
+                   FROM public."Timetable"
+                   WHERE date_of_journey = partition_date) THEN
+        RAISE NOTICE '% No timetable data for date %', clock_timestamp(), pt_date;
+    ELSE
+        RAISE NOTICE '% (Re)Creating partition public.%', clock_timestamp(), tablename;
 
         EXECUTE format(
                 'CREATE TABLE IF NOT EXISTS public.%I PARTITION OF public.timetable_threshold_summary FOR VALUES FROM (%L) TO (%L)',
@@ -27,18 +26,13 @@ BEGIN
 
         EXECUTE format('ALTER TABLE public.%I OWNER TO abods_rw', tablename);
 
-        ------------------------------
-        -- Deleting from partition --
-        ------------------------------
-
-        RAISE NOTICE 'Deleting from partition';
+        RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
 
         EXECUTE format(
                 'DELETE FROM public.%I',
                 tablename
                 );
-
-        ----- example insert my new data
+        RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
 
         EXECUTE format(
                 'INSERT INTO public.%I (
@@ -129,13 +123,9 @@ BEGIN
                 tablename,
                 partition_date,
                 partition_date);
-
-
-        -- EXECUTE format(query, tablename, partition_date, partition_date);
     END IF;
 
-    partition_date := partition_date + interval '1' day;
--- END LOOP;
+    RAISE NOTICE '% create_timetable_threshold_summary complete', clock_timestamp();
 END;
 $$;
 

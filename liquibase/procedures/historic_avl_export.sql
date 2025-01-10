@@ -5,7 +5,7 @@ $$
 DECLARE
     datestring TEXT := to_char(partition_date, 'YYYY-MM-DD');
 BEGIN
-    RAISE NOTICE 'Exporting sirivmpositions for date %', partition_date::TEXT;
+    RAISE NOTICE '% Exporting sirivmpositions for date %', clock_timestamp(), partition_date::TEXT;
 
     PERFORM (SELECT COUNT(*)
              FROM aws_s3.query_export_to_s3(
@@ -43,7 +43,7 @@ BEGIN
                      options := 'format csv'
                   ));
 
-    RAISE NOTICE 'Exported sirivmpositions for date %', partition_date::TEXT;
+    RAISE NOTICE '% Exported sirivmpositions for date %', clock_timestamp(), partition_date::TEXT;
 END;
 $$;
 

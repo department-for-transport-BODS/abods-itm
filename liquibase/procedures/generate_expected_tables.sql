@@ -3,11 +3,11 @@ create or replace procedure generate_expected_tables(IN partition_date date)
 as
 $$
 begin
-    RAISE NOTICE 'Deleting expected journeys for %', partition_date::text;
+    RAISE NOTICE '% Deleting expected journeys for %', clock_timestamp(), partition_date::text;
 
     delete from expected_journeys where date_of_journey = partition_date;
 
-    RAISE NOTICE 'Inserting expected journeys for for %', partition_date::text;
+    RAISE NOTICE '% Inserting expected journeys for %', clock_timestamp(), partition_date::text;
 
     insert into expected_journeys (date_of_journey,
                                    operator_noc,
@@ -75,15 +75,15 @@ begin
              end_time,
              direction;
 
-    RAISE NOTICE 'Analysing expected journeys for for %', partition_date::text;
+    RAISE NOTICE '% Analysing expected journeys for %', clock_timestamp(), partition_date::text;
 
     analyse expected_journeys;
 
-    RAISE NOTICE 'Deleting expected_services_by_date for for %', partition_date::text;
+    RAISE NOTICE '% Deleting expected_services_by_date for %', clock_timestamp(), partition_date::text;
 
     delete from expected_services_by_date where date_of_journey = partition_date;
 
-    RAISE NOTICE 'Inserting expected_services_by_date for for %', partition_date::text;
+    RAISE NOTICE '% Inserting expected_services_by_date for %', clock_timestamp(), partition_date::text;
 
     insert into expected_services_by_date (date_of_journey,
                                            noc_and_line_and_servicecode,
@@ -99,11 +99,11 @@ begin
     group by date_of_journey,
              noc_and_line_and_servicecode;
 
-    RAISE NOTICE 'Analysing expected_services_by_date  for %', partition_date::text;
+    RAISE NOTICE '% Analysing expected_services_by_date for %', clock_timestamp(), partition_date::text;
 
     analyse expected_services_by_date;
 
-    RAISE NOTICE 'Upserting service_details for %', partition_date::text;
+    RAISE NOTICE '% Upserting service_details for %', clock_timestamp(), partition_date::text;
 
     insert into service_details (noc_and_line_and_servicecode,
                                  operator_noc,
@@ -127,19 +127,19 @@ begin
                                EXCLUDED.service_name
         );
 
-    RAISE NOTICE 'Analysing service_details for for %', partition_date::text;
+    RAISE NOTICE '% Analysing service_details for %', clock_timestamp(), partition_date::text;
 
     analyse service_details;
 
-    RAISE NOTICE 'Refreshing expected_services for for %', partition_date::text;
+    RAISE NOTICE '% Refreshing expected_services for %', clock_timestamp(), partition_date::text;
 
     refresh materialized view expected_services;
 
-    RAISE NOTICE 'Deleting expected operators for for %', partition_date::text;
+    RAISE NOTICE '% Deleting expected operators for %', clock_timestamp(), partition_date::text;
 
     delete from expected_operators where date_of_journey = partition_date;
 
-    RAISE NOTICE 'Inserting expected operators for for %', partition_date::text;
+    RAISE NOTICE '% Inserting expected operators for %', clock_timestamp(), partition_date::text;
 
     insert into expected_operators (date_of_journey,
                                     operator_noc,
@@ -150,11 +150,11 @@ begin
         o.noc_code = es.operator_noc
     where es.date_of_journey = partition_date;
 
-    RAISE NOTICE 'Analysing expected operators for for %', partition_date::text;
+    RAISE NOTICE '% Analysing expected operators for %', clock_timestamp(), partition_date::text;
 
     analyse expected_operators;
 
-    RAISE NOTICE 'Done';
+    RAISE NOTICE '% generate_expected_tables complete', clock_timestamp();
 
 end;
 $$;
