@@ -139,7 +139,8 @@ BEGIN
 					ttb.expected_headway,
 					ttb.actual_headway,
 					ttb.headway_time_difference,
-					(ttb.timestamp_after_estimate is not null) AS estimated
+					(ttb.timestamp_after_estimate is not null) AS estimated,
+					(ttb.previous_group_id is not null) AS frequent_service
 				FROM
 					public."Timetable" ttb
 					INNER JOIN public.expected_services es
@@ -172,7 +173,8 @@ BEGIN
 					is_timing_point,
 					max_early,
 					max_late,
-					estimated',
+					estimated,
+					frequent_service',
                 tablename,
                 partition_date,
                 partition_date);

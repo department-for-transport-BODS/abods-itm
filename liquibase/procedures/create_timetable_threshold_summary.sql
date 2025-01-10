@@ -92,7 +92,9 @@ BEGIN
                          stop_index,
                          (timestamp_after_estimate IS NOT NULL) AS estimated
                   FROM public."Timetable"
-                  WHERE date_of_journey = %L and time_difference IS NOT NULL) ttb
+                  WHERE date_of_journey = %L AND
+                        time_difference IS NOT NULL
+                        previous_group_id IS NULL) ttb
                INNER JOIN public.expected_services es ON ttb.date_of_journey = es.date_of_journey
                AND ttb.operator_noc = es.operator_noc
                AND ttb.line_name = es.line_name
