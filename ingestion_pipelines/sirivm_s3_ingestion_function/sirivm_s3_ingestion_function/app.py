@@ -48,7 +48,7 @@ def setup_queues(lambda_group):  # noqa: ANN001, ANN201 - BODS-7131
     global queues  # noqa: PLW0603 - BODS-7131
     queues = []
     for shard_no in range(no_of_shards):
-        queue_name = f"{otp_queue}-backfill-{lambda_group}-{shard_no+1}.fifo"
+        queue_name = f"{otp_queue}-backfill-{lambda_group}-{shard_no + 1}.fifo"
         queues.append(getQueue(queue_name))
 
 
@@ -172,7 +172,7 @@ def backfill_lambda_handler(event, context):  # noqa: ANN001, ANN201, PLR0915 - 
                         if int(avl[4:-3]) >= int(last_avl):
                             fname = avl_path + avl
                             for shard_no in range(len(queues)):
-                                queue_name = f"{otp_queue}-backfill-{lambda_group}-{shard_no+1}.fifo"
+                                queue_name = f"{otp_queue}-backfill-{lambda_group}-{shard_no + 1}.fifo"
                                 resp = queues[shard_no].send_message(  # noqa: F841 - BODS-7131
                                     MessageBody="AVL to process",
                                     MessageDeduplicationId=str(uuid.uuid4()),
@@ -315,7 +315,7 @@ def live_lambda_handler(event: SQSEvent) -> None:  # noqa: PLR0915 - BODS-7131
                         cur.close()
                         # get 7 queues to trigger 7 otp matching lambdas
                         for shard_no in range(no_of_shards):
-                            queue_name = f"{otp_queue}{shard_no+1}.fifo"
+                            queue_name = f"{otp_queue}{shard_no + 1}.fifo"
                             queue = getQueue(queue_name)
                             queue.send_message(  # noqa: F841 - BODS-7131
                                 MessageBody="Put gzip file to S3",
