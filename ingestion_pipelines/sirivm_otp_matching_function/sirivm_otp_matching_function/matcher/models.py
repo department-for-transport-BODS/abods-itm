@@ -1,4 +1,5 @@
-from collections.abc import Mapping, Sequence
+import csv
+from collections.abc import Iterable, Mapping, Sequence
 from datetime import datetime
 from typing import Literal, NotRequired, TypedDict
 
@@ -62,14 +63,30 @@ live_avl_file_columns = {
     "response_timestamp": str,
     "latitude": float,
     "longitude": float,
-    "line_name": str,
+    "line_name": lambda x: str(x or ""),
     "operator_ref": str,
     "vehicle_ref": str,
     "journey_ref": str,
-    "direction_ref": str,
+    "direction_ref": lambda x: str(x or ""),
     "date_of_journey": str,
     "batch_id": int,
 }
+
+
+def parse_live_avl_data(
+    stream: Iterable[str],
+    has_header: bool = False,  # noqa:FBT001,FBT002 boolean params are bad, but this isn't exactly complicating things a lot
+) -> Sequence[LiveAVLRecord]:
+    """Parse live avl csv data into LiveAVLRecord dicts"""
+    rows = []
+    for row in csv.DictReader(
+        stream,
+        fieldnames=list(live_avl_file_columns) if not has_header else None,
+    ):
+        for key, val in row.items():
+            row[key] = live_avl_file_columns.get(key, str)(val)
+        rows.append(row)
+    return rows
 
 
 def avl_group_id(avl: AVLRecord) -> str:
