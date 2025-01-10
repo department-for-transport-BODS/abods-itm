@@ -12,4 +12,4 @@ begin
 end;
 $$;
 
-alter procedure aa owner to abods_proxy_rw;
+alter procedure update_naptan_adminarea_shape owner to abods_proxy_rw;
