@@ -6,7 +6,7 @@ shard_1_operator_id = "TFLO"
 shard_2_operator_id = "NATX"
 
 
-def test_first_shard():
+def test_first_shard() -> None:
     shards = {
         "1": [shard_1_operator_id],
         "2": [shard_2_operator_id, "SCSO"],
@@ -20,7 +20,7 @@ def test_first_shard():
     assert filter_avl_list("1", shards, avl_list) == [avl_list[0]]
 
 
-def test_no_shard():
+def test_no_shard() -> None:
     shards = {
         "1": [shard_1_operator_id],
         "2": [shard_2_operator_id, "SCSO"],
@@ -34,7 +34,7 @@ def test_no_shard():
     assert filter_avl_list("0", shards, avl_list) == [avl_list[2]]
 
 
-def test_unknown_shard():
+def test_unknown_shard() -> None:
     shards = {
         "1": [shard_1_operator_id],
         "2": [shard_2_operator_id, "SCSO"],

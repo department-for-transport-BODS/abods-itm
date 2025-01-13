@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from unittest.mock import ANY, MagicMock, patch
 
 import pytest
@@ -25,7 +26,7 @@ MOCK_NOC_CSV_DATA = [
 
 
 @pytest.fixture(autouse=True)
-def mock_setup_db():
+def mock_setup_db() -> Generator[MagicMock]:
     with patch(
         "ingestion_pipelines.traveline_import_function.traveline_import_function.shared.db.setup_db",
     ) as mock_setup_db:
@@ -35,13 +36,16 @@ def mock_setup_db():
 
 
 @pytest.fixture(autouse=True)
-def mock_env_vars(monkeypatch):
+def mock_env_vars(monkeypatch) -> None:  # noqa: ANN001 type not exported
     monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-2")
 
 
 @patch("petl.fromcsv")
 @patch("psycopg2.extras.execute_values")
-def test_lambda_handler(mock_execute_values, mock_fromcsv):
+def test_lambda_handler(
+    mock_execute_values: MagicMock,
+    mock_fromcsv: MagicMock,
+) -> None:
     from ingestion_pipelines.traveline_import_function.traveline_import_function.app import (
         lambda_handler,
     )
