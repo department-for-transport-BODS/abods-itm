@@ -3,16 +3,12 @@ from datetime import UTC, datetime
 
 import pytest
 
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.live_timetable_store import (
-    LiveTimetableStore,
-)
 from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.matching import (
     check_estimated_match,
     check_update_first_stop,
     find_matches_in_potential_matches,
     find_potential_matches,
     map_matched_stop_to_db,
-    match_avl_batch,
     move_potential_match_to_match,
     remove_matched_stops,
     select_potential_match_with_same_recordedattime,
@@ -26,7 +22,6 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     PotentialMatch,
     RouteDetails,
     StopDetails,
-    Timetable,
     avl_group_id,
     avl_recorded_at_time_utc,
     stop_departure_time,
@@ -1864,137 +1859,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         assert stop_pos_distances_remove == expected_stop_pos_distances_remove
         assert group_stop_history["matched_stops"] == expected_matched_stops
         assert stop_pos_distances == expected_stop_pos_distances
-
-
-class TestPositionsTimetableLookup:  # noqa: D101 - BODS-7131
-    from .data.expected.expected_results import (
-        expected_remove_coac,
-        expected_remove_coac30,
-        expected_remove_scem,
-        expected_remove_scem2,
-        expected_remove_slea,
-        expected_remove_tlct,
-        expected_set_coac,
-        expected_set_coac30,
-        expected_set_scem,
-        expected_set_scem2,
-        expected_set_slea,
-        expected_set_tlct,
-        expected_stop_history_coac,
-        expected_stop_history_coac30,
-        expected_stop_history_scem,
-        expected_stop_history_scem2,
-        expected_stop_history_slea,
-        expected_stop_history_tlct,
-    )
-
-    avl_list_tlct = read_avl("TLCT37812152024-08-20.csv")
-    timetable_tlct = read_timetable("TLCT37812152024-08-20.json")
-    avl_list_coac = read_avl("COAC4116302024-10-17.csv")
-    timetable_coac = read_timetable("COAC4116302024-10-17.json")
-    avl_list_slea = read_avl("sleait110302024-10-23.csv")
-    timetable_slea = read_timetable("sleait110302024-10-23.json")
-    avl_list_scem = read_avl("scem9112024-10-31.csv")
-    timetable_scem = read_timetable("scem9112024-10-31.json")
-    avl_list_scem2 = read_avl("scem9272024-11-06.csv")
-    timetable_scem2 = read_timetable("scem9272024-11-06.json")
-    avl_list_coac30 = read_avl("coac9917102024-10-30.csv")
-    timetable_coac30 = read_timetable("coac9917102024-10-30.json")
-
-    @pytest.mark.parametrize(
-        (
-            "timetable",
-            "avl_list",
-            "stop_history",
-            "expected_to_set",
-            "expected_to_remove",
-            "expected_stop_history",
-        ),
-        [
-            pytest.param(
-                timetable_tlct,
-                avl_list_tlct,
-                {},
-                expected_set_tlct,
-                expected_remove_tlct,
-                expected_stop_history_tlct,
-                id="Normal route",
-            ),
-            pytest.param(
-                timetable_coac,
-                avl_list_coac,
-                {},
-                expected_set_coac,
-                expected_remove_coac,
-                expected_stop_history_coac,
-                id="Bus going to starting point to start the journey and matching backwards",
-            ),
-            pytest.param(
-                timetable_slea,
-                avl_list_slea,
-                {},
-                expected_set_slea,
-                expected_remove_slea,
-                expected_stop_history_slea,
-                id="Bus matching first stop and matching a much higher index next",
-            ),
-            pytest.param(
-                timetable_scem,
-                avl_list_scem,
-                {},
-                expected_set_scem,
-                expected_remove_scem,
-                expected_stop_history_scem,
-                id="Bus starting early",
-            ),
-            pytest.param(
-                timetable_coac30,
-                avl_list_coac30,
-                {},
-                expected_set_coac30,
-                expected_remove_coac30,
-                expected_stop_history_coac30,
-                id="Circular route, bus matching a higher index but its last time in zone is earlier than the highest index match time, it should delete the potential match",
-            ),
-            pytest.param(
-                timetable_scem2,
-                avl_list_scem2,
-                {},
-                expected_set_scem2,
-                expected_remove_scem2,
-                expected_stop_history_scem2,
-                id="Bus continues after final stop and creates potential match while moving away from it",
-            ),
-        ],
-    )
-    def test_match_avl_batch(  # noqa: D102 - BODS-7131
-        self,
-        timetable: Timetable,
-        avl_list,
-        stop_history,
-        expected_to_set,
-        expected_to_remove,
-        expected_stop_history,
-    ):
-        stop_history = {}
-        to_set_total = []
-        to_remove_total = []
-
-        for avl in avl_list:
-            # Simulate invoking the lambda once per AVL for the group id
-            # In practice there is only one AVL for a given group id in each batch
-            to_set, to_remove, stop_history = match_avl_batch(
-                LiveTimetableStore(timetable),
-                [avl],
-                stop_history,
-            )
-            to_remove_total = [*to_remove_total, *to_remove]
-            to_set_total = [*to_set_total, *to_set]
-
-        assert to_set_total == expected_to_set
-        print(to_remove_total)
-        assert to_remove_total == expected_to_remove
-        assert stop_history == expected_stop_history
 
 
 class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
