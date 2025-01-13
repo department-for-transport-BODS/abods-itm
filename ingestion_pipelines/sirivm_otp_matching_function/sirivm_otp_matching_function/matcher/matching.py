@@ -619,6 +619,7 @@ def update_potential_match_with_recorded_at_time(
 
     """
     potential_match["last_time_in_zone"] = str(avl_recorded_at_time_utc(avl))
+    potential_match["is_estimate"] = False
     update_potential_match_without_recorded_at_time(
         stop_index,
         potential_match,
