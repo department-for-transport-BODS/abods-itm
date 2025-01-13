@@ -145,7 +145,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
         expected_matched_stops: dict,
         expected_potential_matches: dict,
         expected_stop_pos_distances_remove: list,
-    ):
+    ) -> None:
         check_update_first_stop(
             rec,
             timetable_dict[avl_group_id(rec)],
@@ -274,7 +274,7 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         group_stop_history: GroupStopHistory,
         final_stop_index: int,
         expected_potential_matches: dict[str, PotentialMatch],
-    ):
+    ) -> None:
         find_potential_matches(
             avl,
             route_details,
@@ -806,7 +806,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         stop_pos_distances_remove: list,
         expected_group_stop_history: dict,
         expected_potential_matches_to_delete: list,
-    ):
+    ) -> None:
         find_matches_in_potential_matches(
             avl,
             timetable_dict[avl_group_id(avl)],
@@ -824,14 +824,14 @@ class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
     timetable = read_timetable("TLCT37812152024-08-20.json")
     matches_to_delete = ["2"]  # noqa: RUF012 - BODS-7131
 
-    def test_remove_matched_stops(self):  # noqa: D102 - BODS-7131
+    def test_remove_matched_stops(self) -> None:  # noqa: D102 - BODS-7131
         group_stop_history = {
             "last_avl_time": str(
-                datetime(2024, 9, 1, 11, 34, 37),
+                datetime(2024, 9, 1, 11, 34, 37, tzinfo=UTC),
             ),
             "matched_stops": {
                 "1": {
-                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5)),
+                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5, tzinfo=UTC)),
                     "is_estimate": False,
                 },
             },
@@ -839,7 +839,7 @@ class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
                 "2": {
                     "last_distance": 58.596598093401845,
                     "last_time_in_zone": str(
-                        datetime(2024, 9, 1, 11, 34, 37),
+                        datetime(2024, 9, 1, 11, 34, 37, tzinfo=UTC),
                     ),
                 },
             },
@@ -848,11 +848,11 @@ class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
         }
         expected_group_stop_history = {
             "last_avl_time": str(
-                datetime(2024, 9, 1, 11, 34, 37),
+                datetime(2024, 9, 1, 11, 34, 37, tzinfo=UTC),
             ),
             "matched_stops": {
                 "1": {
-                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5)),
+                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5, tzinfo=UTC)),
                     "is_estimate": False,
                 },
             },
@@ -870,17 +870,17 @@ class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
 class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
     avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
     pm_index = "1"
-    last_time_in_zone = datetime(2024, 9, 1, 11, 32, 5)
+    last_time_in_zone = datetime(2024, 9, 1, 11, 32, 5, tzinfo=UTC)
     group_stop_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(
-            datetime(2024, 9, 1, 11, 30, 57),
+            datetime(2024, 9, 1, 11, 30, 57, tzinfo=UTC),
         ),
         "matched_stops": {},
         "potential_matches": {
             "1": {
                 "last_distance": 58.596598093401845,
                 "last_time_in_zone": str(
-                    datetime(2024, 9, 1, 11, 30, 57),
+                    datetime(2024, 9, 1, 11, 30, 57, tzinfo=UTC),
                 ),
                 "is_estimate": False,
             },
@@ -890,7 +890,7 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
     }
     potential_matches_to_delete = []  # noqa: RUF012 - BODS-7131
 
-    def test_update_matched_stop(self):  # noqa: D102 - BODS-7131
+    def test_update_matched_stop(self) -> None:  # noqa: D102 - BODS-7131
         update_matched_stop(
             self.pm_index,
             self.last_time_in_zone,
@@ -900,11 +900,11 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
         )
         expected_group_stop_history = {
             "last_avl_time": str(
-                datetime(2024, 9, 1, 11, 30, 57),
+                datetime(2024, 9, 1, 11, 30, 57, tzinfo=UTC),
             ),
             "matched_stops": {
                 "1": {
-                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5)),
+                    "last_match_time": str(datetime(2024, 9, 1, 11, 32, 5, tzinfo=UTC)),
                     "is_estimate": False,
                 },
             },
@@ -912,7 +912,7 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
                 "1": {
                     "last_distance": 58.596598093401845,
                     "last_time_in_zone": str(
-                        datetime(2024, 9, 1, 11, 30, 57),
+                        datetime(2024, 9, 1, 11, 30, 57, tzinfo=UTC),
                     ),
                     "is_estimate": False,
                 },
@@ -999,7 +999,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
         pm_index: str,
         last_time_in_zone: datetime,
         expected_stop_pos_distances: list,  # noqa: ANN401 - BODS-7131
-    ):
+    ) -> None:
         map_matched_stop_to_db(
             is_final_stop,
             timetable_dict[self.group_id],
@@ -1026,7 +1026,7 @@ class TestGetTimetableDepartureTime:  # noqa: D101 - BODS-7131
     group_id = "tlct|378|1215|2024-08-20"
     pm_index = "2"
 
-    def test_get_timetable_departure_time(self):  # noqa: D102 - BODS-7131
+    def test_get_timetable_departure_time(self) -> None:  # noqa: D102 - BODS-7131
         details = self.timetable[self.group_id]
         expected_timtable_departure_time = datetime(2024, 8, 20, 11, 16, 0, tzinfo=UTC)
         assert (
@@ -1050,7 +1050,7 @@ class TestUpdatePotentialMatch:  # noqa: D101 - BODS-7131
 
     def test_update_potential_match_w_datetime(  # noqa: D102 - BODS-7131
         self,
-    ):
+    ) -> None:
         pm_details = {
             "last_distance": 58.596598093401845,
             "last_time_in_zone": str(datetime(2024, 8, 20, 11, 25, 57, tzinfo=UTC)),
@@ -1065,7 +1065,7 @@ class TestUpdatePotentialMatch:  # noqa: D101 - BODS-7131
 
     def test_update_potential_match_wo_datetime(  # noqa: D102 - BODS-7131
         self,
-    ):
+    ) -> None:
         pm_details = {
             "last_distance": 58.596598093401845,
             "last_time_in_zone": str(datetime(2024, 8, 20, 11, 25, 57, tzinfo=UTC)),
@@ -1081,85 +1081,85 @@ class TestUpdatePotentialMatch:  # noqa: D101 - BODS-7131
 class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
     group_stop_history_same_recordedattime = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(
-            datetime(2024, 8, 23, 11, 16, 14),
+            datetime(2024, 8, 23, 11, 16, 14, tzinfo=UTC),
         ),
         "matched_stops": {
             "39": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 14, 41)),
+                "last_match_time": str(datetime(2024, 8, 23, 11, 14, 41, tzinfo=UTC)),
             },
             "3": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 5)),
+                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 5, tzinfo=UTC)),
             },
         },
         "potential_matches": {
             "4": {
                 "last_distance": 311.19398802530185,
                 "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 15, 36),
+                    datetime(2024, 8, 23, 11, 15, 36, tzinfo=UTC),
                 ),
             },
             "38": {
                 "last_distance": 294.4630341883636,
                 "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 15, 36),
+                    datetime(2024, 8, 23, 11, 15, 36, tzinfo=UTC),
                 ),
             },
             "5": {
                 "last_distance": 17.612857082239692,
                 "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16, 14),
+                    datetime(2024, 8, 23, 11, 16, 14, tzinfo=UTC),
                 ),
             },
             "37": {
                 "last_distance": 18.62101754791971,
                 "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16),
+                    datetime(2024, 8, 23, 11, 16, tzinfo=UTC),
                 ),
             },
         },
     }
     group_stop_history_same_recordedattime_2 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(
-            datetime(2024, 8, 23, 11, 16, 14),
+            datetime(2024, 8, 23, 11, 16, 14, tzinfo=UTC),
         ),
         "matched_stops": {
             "4": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 36)),
+                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 36, tzinfo=UTC)),
             },
             "3": {
-                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 5)),
+                "last_match_time": str(datetime(2024, 8, 23, 11, 15, 5, tzinfo=UTC)),
             },
         },
         "potential_matches": {
             "38": {
                 "last_distance": 294.4630341883636,
                 "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 15, 36),
+                    datetime(2024, 8, 23, 11, 15, 36, tzinfo=UTC),
                 ),
             },
             "5": {
                 "last_distance": 17.612857082239692,
                 "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16, 14),
+                    datetime(2024, 8, 23, 11, 16, 14, tzinfo=UTC),
                 ),
             },
             "37": {
                 "last_distance": 18.62101754791971,
                 "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 11, 16),
+                    datetime(2024, 8, 23, 11, 16, tzinfo=UTC),
                 ),
             },
         },
     }
     group_stop_history_wo_same_recordedattime = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(
-            datetime(2024, 8, 23, 10, 57, 48),
+            datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
         ),
         "potential_matches": {
             "1": {
                 "last_distance": 40.03840622665115,
                 "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 10, 57, 48),
+                    datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
                 ),
             },
         },
@@ -1167,19 +1167,19 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
     }
     group_stop_history_consecutive_index_same_recordedattime = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(
-            datetime(2024, 8, 23, 10, 57, 48),
+            datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
         ),
         "potential_matches": {
             "2": {
                 "last_distance": 40.03840622665115,
                 "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 10, 57, 48),
+                    datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
                 ),
             },
             "3": {
                 "last_distance": 23.1234325,
                 "last_time_in_zone": str(
-                    datetime(2024, 8, 23, 10, 57, 48),
+                    datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
                 ),
             },
         },
@@ -1244,7 +1244,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
         potential_matches_to_delete: list,
         expected_selected_index: str,
         expected_potential_matches_to_delete: list,
-    ):
+    ) -> None:
         selected_index = select_potential_match_with_same_recordedattime(
             pm_index,
             group_stop_history,
@@ -1843,7 +1843,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         expected_stop_pos_distances_remove: list,
         expected_matched_stops: dict,
         expected_stop_pos_distances: list,
-    ):
+    ) -> None:
         move_potential_match_to_match(
             final_stop_index,
             timetable_dict[avl_group_id(avl)],
@@ -2014,6 +2014,6 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
         group_stop_history: GroupStopHistory,
         stop: StopDetails,
         expected_estimated_match: str,
-    ):
+    ) -> None:
         estimated_match = check_estimated_match(avl, group_stop_history, stop)
         assert estimated_match == expected_estimated_match

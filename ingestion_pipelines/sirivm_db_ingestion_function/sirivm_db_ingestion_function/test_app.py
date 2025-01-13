@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from unittest.mock import ANY, MagicMock, patch
 
 import pytest
@@ -16,13 +17,13 @@ TEST_EVENT = {
 
 
 @pytest.fixture(autouse=True)
-def mock_env_vars(monkeypatch):
+def mock_env_vars(monkeypatch) -> None:  # noqa: ANN001 type not exported
     monkeypatch.setenv("SIRIVM_BUCKET", "test-bucket")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-2")
 
 
 @pytest.fixture(autouse=True)
-def mock_setup_db():
+def mock_setup_db() -> Generator[MagicMock]:
     with patch(
         "ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.shared.db.setup_db",
     ) as mock_setup_db:
@@ -38,9 +39,9 @@ def mock_setup_db():
     "ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.app.process_batch",
 )
 def test_lambda_handler_success(
-    mock_process_batch,
-    mock_update_batch_status,
-):
+    mock_process_batch: MagicMock,
+    mock_update_batch_status: MagicMock,
+) -> None:
     from ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.app import (
         lambda_handler,
     )
@@ -79,9 +80,9 @@ def test_lambda_handler_success(
     "ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.app.process_batch",
 )
 def test_lambda_handler_error(
-    mock_process_batch,
-    mock_update_batch_status,
-):
+    mock_process_batch: MagicMock,
+    mock_update_batch_status: MagicMock,
+) -> None:
     from ingestion_pipelines.sirivm_db_ingestion_function.sirivm_db_ingestion_function.app import (
         lambda_handler,
     )
