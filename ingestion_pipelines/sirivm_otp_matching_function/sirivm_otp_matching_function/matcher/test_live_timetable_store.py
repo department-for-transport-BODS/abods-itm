@@ -1,9 +1,17 @@
+from datetime import date, timedelta
+
 import pytest
 
 from .live_timetable_store import LiveTimetableStore
-from .models import Route, Timetable
+from .models import AVLRecord, Route, Timetable, avl_group_id
 
-group_id = "test|10|20|2024-12-25"
+avl = {
+    "operator_ref": "TEST",
+    "line_name": "10",
+    "journey_ref": "20",
+    "date_of_journey": "2024-12-25",
+}
+group_id = avl_group_id(avl)
 
 generic_route = {"1": ((1.0, 1.0), "time", "timetable_id", "date")}
 generic_timetable = {group_id: generic_route}
@@ -24,71 +32,81 @@ no_route_for_group_id = {"different_group_id": outbound_route["2"]}
 
 
 @pytest.mark.parametrize(
-    ("timetable", "direction_ref", "expected_index", "expected_route"),
+    ("timetable", "avl_record", "expected_index", "expected_route"),
     [
         pytest.param(
             generic_timetable,
-            "inbound",
+            {**avl, "direction_ref": "inbound"},
             group_id,
             generic_route,
             id="single journey for group id, returns journey data when passed correct direction",
         ),
         pytest.param(
             generic_timetable,
-            "outbound",
+            {**avl, "direction_ref": "outbound"},
             group_id,
             generic_route,
             id="single journey for group id, returns journey data when passed different direction",
         ),
         pytest.param(
             generic_timetable,
-            "random",
+            {**avl, "direction_ref": "random"},
             group_id,
             generic_route,
             id="single journey for group id, returns journey data when passed unknown direction",
         ),
         pytest.param(
             split_timetable,
-            "inbound",
+            {**avl, "direction_ref": "inbound"},
             inbound_index,
             inbound_route,
             id="multiple journeys for group id, returns journey data corresponding to passed inbound direction",
         ),
         pytest.param(
             split_timetable,
-            "outbound",
+            {**avl, "direction_ref": "outbound"},
             outbound_index,
             outbound_route,
             id="multiple journeys for group id, returns journey data corresponding to passed outbound direction",
         ),
         pytest.param(
             split_timetable,
-            "random",
+            {**avl, "direction_ref": "random"},
             group_id + "|random",
             None,
             id="multiple journeys for group id, returns nothing when passed unknown direction",
         ),
         pytest.param(
             no_route_for_group_id,
-            "outbound",
+            {**avl, "direction_ref": "outbound"},
             outbound_index,
             None,
             id="no journey data for group id returns nothing",
+        ),
+        pytest.param(
+            generic_timetable,
+            {
+                **avl,
+                "direction_ref": "inbound",
+                "date_of_journey": (
+                    date.fromisoformat(avl["date_of_journey"]) + timedelta(days=1)
+                ).isoformat(),
+            },
+            group_id,
+            generic_route,
+            id="avl after midnight returns correct timetable",
         ),
     ],
 )
 def test_live_timetable_store(
     timetable: Timetable,
-    direction_ref: str,
+    avl_record: AVLRecord,
     expected_index: str,
     expected_route: Route,
 ) -> None:
     store = LiveTimetableStore(timetable)
 
-    actual_index, actual_timetable = store.get_route(
-        group_id=group_id,
-        direction_ref=direction_ref,
-    )
+    actual_index, actual_timetable = store.get_route(avl_record)
 
     assert actual_index == expected_index
     assert actual_timetable == expected_route
