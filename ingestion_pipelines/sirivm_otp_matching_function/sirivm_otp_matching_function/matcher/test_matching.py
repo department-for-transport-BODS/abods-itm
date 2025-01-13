@@ -27,7 +27,7 @@ from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_functi
     stop_departure_time,
 )
 
-from .data.get_test_data import read_avl, read_timetable
+from .test_data.get_test_data import read_avl, read_timetable
 
 
 class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
