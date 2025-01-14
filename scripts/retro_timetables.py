@@ -28,27 +28,26 @@ def run_query(query: str, password: str):
     )
 
 
-if __name__ == "__main__":
+def main():
     while True:
         try:
-            current = datetime.fromisoformat(
+            start = datetime.fromisoformat(
                 input("Enter start date in yyyy-mm-dd format: ")
             )
             break
         except ValueError:
             print("Incorrect data format, should be YYYY-MM-DD")
-
     while True:
         try:
-            end = datetime.fromisoformat(input("Enter end date in yyyy-mm-dd format: "))
+            current = datetime.fromisoformat(
+                input("Enter end date in yyyy-mm-dd format: ")
+            )
             break
         except ValueError:
             print("Incorrect data format, should be YYYY-MM-DD")
-
     # TODO: get from secrets manager
     db_password = getpass(f"Enter password for database user {db_user}: ")
-
-    while current <= end:
+    while current >= start:
         dstr = current.strftime("%Y-%m-%d")
         print(f"{datetime.now()} Generating {dstr} timetable")
         print("hit q then enter to exit after completion")
@@ -71,4 +70,8 @@ if __name__ == "__main__":
                 if "q" == line.rstrip():
                     sys.exit(0)
                 break
-        current = current + timedelta(days=1)
+        current = current - timedelta(days=1)
+
+
+if __name__ == "__main__":
+    main()
