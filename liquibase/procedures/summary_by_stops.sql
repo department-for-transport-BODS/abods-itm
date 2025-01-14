@@ -24,7 +24,7 @@ BEGIN
 
         EXECUTE format('ALTER TABLE public.%I OWNER TO abods_rw', tablename);
 
-        RAISE NOTICE '% Deleting from ', clock_timestamp(), tablename;
+        RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
 
         EXECUTE format(
                 'DELETE FROM public.%I',

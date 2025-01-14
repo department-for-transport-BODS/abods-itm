@@ -149,4 +149,4 @@ BEGIN
 END;
 $$;
 
-alter procedure create_partition_summary_service owner to abods_proxy_rw;
+alter procedure create_partition_summary_service() owner to abods_proxy_rw;
