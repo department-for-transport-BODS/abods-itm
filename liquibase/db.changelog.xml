@@ -339,4 +339,7 @@
     <changeSet id="108" author="abodsuser">
         <sqlFile path="sql/108-token-expiry.sql" splitStatements="false" />
     </changeSet>
+    <changeSet id="109" author="abodsuser">
+        <sqlFile path="sql/109-frequent-services.sql" splitStatements="false" />
+    </changeSet>
 </databaseChangeLog>
