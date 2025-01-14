@@ -43,7 +43,7 @@ BEGIN
                 'INSERT INTO public.%I (
 				operator_noc,
 				line_name,
-				noc_and_line_and_servicecode,
+				noc_and_line,
 				service_name,
 				date_of_journey,
 				departure_hour,
@@ -61,7 +61,7 @@ BEGIN
 			SELECT
 				sub.operator_noc,
 				sub.line_name,
-				sub.noc_and_line_and_servicecode,
+				sub.noc_and_line,
 				sub.service_name,
 				sub.date_of_journey,
 				date_trunc(''hour'', sub.expected_departure_time) AS departure_hour,
@@ -81,7 +81,7 @@ BEGIN
 						ttb.operator_noc,
 						ttb.operator_name,
 						es.line_name,
-						es.noc_and_line_and_servicecode,
+						es.noc_and_line,
 						es.service_name,
 						ttb.date_of_journey,
 						ttb.day_of_week,
@@ -129,7 +129,7 @@ BEGIN
 				date_of_journey = %L
 			GROUP BY
 				line_name,
-				noc_and_line_and_servicecode,
+				noc_and_line,
 				service_name,
 				operator_noc,
 				date_of_journey,
