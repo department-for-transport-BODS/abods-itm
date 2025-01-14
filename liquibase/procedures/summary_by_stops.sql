@@ -24,7 +24,7 @@ BEGIN
 
         EXECUTE format('ALTER TABLE public.%I OWNER TO abods_rw', tablename);
 
-        RAISE NOTICE '% Deleting from ', clock_timestamp(), tablename;
+        RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
 
         EXECUTE format(
                 'DELETE FROM public.%I',
@@ -61,7 +61,8 @@ BEGIN
 				expected_headway,
 				actual_headway,
 				excess_wait_Time,
-				estimated
+				estimated,
+				frequent_service
 			)
 			SELECT
 				sub.operator_noc,
@@ -95,7 +96,8 @@ BEGIN
 				AVG(sub.expected_headway) AS expected_headway,
 				AVG(sub.actual_headway) FILTER (WHERE sub.actual_headway IS NOT NULL) AS actual_headway,
 				AVG(sub.headway_time_difference) FILTER (WHERE sub.actual_headway IS NOT NULL) AS excess_wait_Time,
-				sub.estimated
+				sub.estimated,
+				sub.frequent_service
 			FROM
 				(
 					SELECT
@@ -139,7 +141,8 @@ BEGIN
 					ttb.expected_headway,
 					ttb.actual_headway,
 					ttb.headway_time_difference,
-					(ttb.timestamp_after_estimate is not null) AS estimated
+					(ttb.timestamp_after_estimate is not null) AS estimated,
+					(ttb.previous_group_id is not null) AS frequent_service
 				FROM
 					public."Timetable" ttb
 					INNER JOIN public.expected_services es
@@ -172,7 +175,8 @@ BEGIN
 					is_timing_point,
 					max_early,
 					max_late,
-					estimated',
+					estimated,
+					frequent_service',
                 tablename,
                 partition_date,
                 partition_date);
