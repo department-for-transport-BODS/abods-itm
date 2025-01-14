@@ -1,40 +1,47 @@
-create or replace procedure summary_by_stops(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
-    language plpgsql
-as
-$$
+CREATE OR REPLACE PROCEDURE public.summary_by_stops(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
+ LANGUAGE plpgsql
+AS $procedure$
 DECLARE
-    tablename TEXT;
+	tablename TEXT;
 
 BEGIN
-    tablename := 'timetable_summary_stops_tz_' || to_char(partition_date, 'YYYY_MM_DD');
+	tablename := 'timetable_summary_stops_tz_' || to_char(partition_date, 'YYYY_MM_DD');
 
-    IF NOT EXISTS (SELECT 1
-                   FROM public."Timetable"
-                   WHERE date_of_journey = partition_date) THEN
-        RAISE NOTICE '% No timetable data for date %', clock_timestamp(), partition_date;
-    ELSE
-        RAISE NOTICE '% (Re)Creating partition public.%', clock_timestamp(), tablename;
+	RAISE NOTICE 'Creating timetable_summary_stops_tz partition if not exists %', tablename;
 
-        EXECUTE format(
-                'CREATE TABLE IF NOT EXISTS public.%I PARTITION OF public.timetable_summary_stops_tz FOR VALUES FROM (%L) TO (%L)',
-                tablename,
-                partition_date,
-                partition_date + INTERVAL '1' DAY
-                );
+	IF EXISTS (
+		SELECT 1
+		FROM public."Timetable"
+		WHERE date_of_journey = partition_date
+	) THEN
+		RAISE NOTICE '(Re)Creating timetable_summary_stops_tz partition';
 
-        EXECUTE format('ALTER TABLE public.%I OWNER TO abods_rw', tablename);
+		EXECUTE format(
+			'CREATE TABLE IF NOT EXISTS public.%I PARTITION OF public.timetable_summary_stops_tz FOR VALUES FROM (%L) TO (%L)',
+			tablename,
+			partition_date,
+			partition_date + INTERVAL '1' DAY
+		);
 
-        RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
+		EXECUTE format('ALTER TABLE public.%I OWNER TO abods_rw', tablename);
 
-        EXECUTE format(
-                'DELETE FROM public.%I',
-                tablename
-                );
+		------------------------------
+		-- Deleting from partition --
+		------------------------------
 
-        RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
+		RAISE NOTICE 'Deleting from timetable_summary_stops_tz partition';
 
-        EXECUTE format(
-                'INSERT INTO public.%I(
+		EXECUTE format(
+			'DELETE FROM public.%I',
+			tablename
+		);
+
+		----- example insert my new data
+
+		RAISE NOTICE 'Adding new data TO timetable_summary_stops_tz partition';
+
+		EXECUTE format(
+			'INSERT INTO public.%I(
 				operator_noc,
 				service_code,
 				noc_and_line_and_servicecode,
@@ -61,7 +68,8 @@ BEGIN
 				expected_headway,
 				actual_headway,
 				excess_wait_Time,
-				estimated
+				estimated, 
+				frequent_service
 			)
 			SELECT
 				sub.operator_noc,
@@ -95,7 +103,8 @@ BEGIN
 				AVG(sub.expected_headway) AS expected_headway,
 				AVG(sub.actual_headway) FILTER (WHERE sub.actual_headway IS NOT NULL) AS actual_headway,
 				AVG(sub.headway_time_difference) FILTER (WHERE sub.actual_headway IS NOT NULL) AS excess_wait_Time,
-				sub.estimated
+				sub.estimated,
+				sub.frequent_service
 			FROM
 				(
 					SELECT
@@ -173,15 +182,17 @@ BEGIN
 					is_timing_point,
 					max_early,
 					max_late,
-					estimated,
+					estimated, 
 					frequent_service',
-                tablename,
-                partition_date,
-                partition_date);
-    END IF;
+            tablename,
+            partition_date,
+            partition_date);
 
-    RAISE NOTICE '% summary_by_stops complete', clock_timestamp();
+		-- EXECUTE format(query, tablename, partition_date, partition_date);
+	END IF;
+
+	partition_date := partition_date + INTERVAL '1' DAY;
+-- END LOOP;
 END;
-$$;
-
-alter procedure summary_by_stops owner to abods_proxy_rw;
+$procedure$
+;
