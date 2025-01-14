@@ -41,7 +41,9 @@ def main():
             f"{base_prefix}csv/timetable/{year_month_prefix}/{date_with_dashes}.csv"
         )
         timetable_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/timetable_{date_without_dashes}.parquet"
-        avl_csv_path = f"{base_prefix}csv/siri/{year_month_prefix}/siri_vm_{date_with_dashes}.csv"
+        avl_csv_path = (
+            f"{base_prefix}csv/siri/{year_month_prefix}/siri_vm_{date_with_dashes}.csv"
+        )
         avl_gz_path = (
             f"{base_prefix}gz/{year_month_day_prefix}/{date_with_dashes}.csv.gz"
         )
