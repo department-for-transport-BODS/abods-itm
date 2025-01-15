@@ -33,6 +33,9 @@ run = [
 [tasks.checks]
 depends = ["checkov", "test", "fmt:check", "lint:check"]
 
+[tasks.example]
+run = "assume --exec \"python -m ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.historic_examples.generate_example\""
+
 [tasks.db]
 run = "assume --exec -- ./scripts/db-connect.sh sandbox"
 
@@ -44,5 +47,3 @@ run = "assume --exec -- ./scripts/db-connect.sh test"
 
 [tasks."db:uat"]
 run = "assume --exec -- ./scripts/db-connect.sh uat"
-
-

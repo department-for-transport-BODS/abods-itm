@@ -227,7 +227,7 @@ if __name__ == "__main__":
             logger.error("Environment variable PROCESS_DATE is missing.")
             sys.exit(1)
 
-        s3_bucket = os.getenv("SIRIVM_BUCKET", "abods-sandbox-exporter-bucket")
+        s3_bucket = os.environ["SIRIVM_BUCKET"]
 
         logger.append_keys(PROCESS_DATE=process_date)
 
@@ -240,14 +240,26 @@ if __name__ == "__main__":
             month = process_date_parts[1].zfill(2)
             day = process_date_parts[2].zfill(2)
             s3 = boto3.client("s3")
-            s3.download_file(
-                Bucket=s3_bucket,
-                Key=f"historic/parquet/YYYY={year}/MM={month}/DD={day}/timetable_{year}{month}{day}.parquet",
-                Filename=local_timetable_path,
+            remote_timetable_path = f"historic/parquet/YYYY={year}/MM={month}/DD={day}/timetable_{year}{month}{day}.parquet"
+            logger.info(
+                "Downloading file",
+                remote_path=remote_timetable_path,
+                local_path=local_timetable_path,
             )
             s3.download_file(
                 Bucket=s3_bucket,
-                Key=f"historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet",
+                Key=remote_timetable_path,
+                Filename=local_timetable_path,
+            )
+            remote_avl_path = f"historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet"
+            logger.info(
+                "Downloading file",
+                remote_path=remote_avl_path,
+                local_path=local_avl_path,
+            )
+            s3.download_file(
+                Bucket=s3_bucket,
+                Key=remote_avl_path,
                 Filename=local_avl_path,
             )
 
@@ -271,7 +283,7 @@ if __name__ == "__main__":
                     """
                         SELECT DISTINCT a.operator_ref
                         FROM timetable t
-                        INNER JOIN avl a ON a.group_id = t.group_id
+                        INNER JOIN avl a ON lower(concat_ws('|', a.operator_ref, a.line_name, a.journey_ref, a.date_of_journey)) = t.group_id
                         """,
                 ).fetchall():
                     operator_queue.put(row[0])
@@ -284,7 +296,7 @@ if __name__ == "__main__":
 
         logger.info(
             "Starting to process AVL data",
-            number_of_groups=operator_count,
+            number_of_operators=operator_count,
         )
         workers = []
         num_workers = 8  # noqa: TD003 TODO(gps035): Should align to number of cores available
