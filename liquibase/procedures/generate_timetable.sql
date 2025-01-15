@@ -736,7 +736,7 @@ where drv.journey_code is null
     -- Clean Up --
     --------------
 
-    IF SPLIT_PART(aurora_db_instance_identifier(), '-', 2) == 'sandbox' THEN
+    IF SPLIT_PART(aurora_db_instance_identifier(), '-', 2) = 'sandbox' THEN
         RAISE NOTICE '% Skipping clean up', clock_timestamp();
     ELSE
         RAISE NOTICE '% Cleaning Up', clock_timestamp();
