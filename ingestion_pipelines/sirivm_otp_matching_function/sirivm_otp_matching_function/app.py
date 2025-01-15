@@ -87,7 +87,6 @@ def historic_record_handler(rec: SQSRecord) -> None:
         logger.append_keys(avl_time=avl_time, avl_datetime=avl_datetime)
 
         shard_stop_history, control_info = s3_client.get_stop_history(
-            avl_datetime,
             shard_identifier,
             int(avl_time),
         )
@@ -177,7 +176,6 @@ def live_record_handler(
 
         current_date = datetime.today()  # noqa: DTZ002 - Stop using today() later
         shard_stop_history, control_info = s3_client.get_stop_history(
-            current_date,
             shard_identifier,
             avl_time_val,
         )

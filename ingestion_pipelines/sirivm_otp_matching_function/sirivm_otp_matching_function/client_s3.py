@@ -120,14 +120,12 @@ class TimetableS3Client:
     @timer(logger)
     def get_stop_history(
         self,
-        query_date: datetime,
         shard_no: str,
         avl_time: int,
     ) -> tuple[StopHistory, ControlInfo]:
         """Get Stop History"""
-        date_str = query_date.strftime("%Y-%m-%d")
         key = (
-            f"timetable_avl/{date_str}/timetable_avl_stop_history_shard{shard_no}.json"
+            f"timetable_avl/timetable_avl_stop_history_shard{shard_no}.json"
         )
         logger.info("Fetching Stop History", s3_key=key)
         try:
