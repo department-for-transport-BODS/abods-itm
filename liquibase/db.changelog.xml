@@ -346,6 +346,9 @@
         <sqlFile path="sql/110-changes-from-sandbox.sql" splitStatements="false"/>
     </changeSet>
     <changeSet id="111" author="abodsuser">
-        <sqlFile path="sql/111-frequent-summary-service.sql" splitStatements="false"/>
+        <sqlFile path="sql/111-remove-headway_valid.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="112" author="abodsuser">
+        <sqlFile path="sql/112-frequent-summary-service.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>

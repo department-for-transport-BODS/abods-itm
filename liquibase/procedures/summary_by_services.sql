@@ -52,7 +52,6 @@ BEGIN
 				max_late,
 				avg_time_difference,
 				admin_areas,
-				headway_valid,
 				estimated
 			)
 			SELECT
@@ -78,10 +77,6 @@ BEGIN
 				sub.max_late,
 				COALESCE(AVG(sub.avg_time_difference/60.0), 0.0) AS avg_time_difference,
 				sub.admin_area_id AS admin_areas,
-				CASE
-					WHEN COUNT(sub.actual_headway) >=1 THEN TRUE
-					ELSE FALSE
-				END AS headway_valid,
 				sub.estimated
 			FROM
 				(
@@ -123,7 +118,6 @@ BEGIN
 						END AS max_late,
 						time_difference AS avg_time_difference,
 						es.admin_area_id,
-						ttb.actual_headway,
 						(ttb.timestamp_after_estimate is not null) AS estimated,
 						ttb.timestamp_after_estimate
 					FROM
