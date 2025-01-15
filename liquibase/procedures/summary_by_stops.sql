@@ -61,8 +61,7 @@ BEGIN
 				expected_headway,
 				actual_headway,
 				excess_wait_Time,
-				estimated,
-				frequent_service
+				estimated
 			)
 			SELECT
 				sub.operator_noc,
@@ -96,8 +95,7 @@ BEGIN
 				AVG(sub.expected_headway) AS expected_headway,
 				AVG(sub.actual_headway) FILTER (WHERE sub.actual_headway IS NOT NULL) AS actual_headway,
 				AVG(sub.headway_time_difference) FILTER (WHERE sub.actual_headway IS NOT NULL) AS excess_wait_Time,
-				sub.estimated,
-				sub.frequent_service
+				sub.estimated
 			FROM
 				(
 					SELECT
@@ -141,8 +139,7 @@ BEGIN
 					ttb.expected_headway,
 					ttb.actual_headway,
 					ttb.headway_time_difference,
-					(ttb.timestamp_after_estimate is not null) AS estimated,
-					(ttb.previous_group_id is not null) AS frequent_service
+					(ttb.timestamp_after_estimate is not null) AS estimated
 				FROM
 					public."Timetable" ttb
 					INNER JOIN public.expected_services es
@@ -155,6 +152,7 @@ BEGIN
 							, -1)
 					WHERE
 						ttb.date_of_journey = %L
+						and ttb.previous_group_id is null
 				) AS sub
 				WHERE
 					date_of_journey = %L
@@ -175,8 +173,7 @@ BEGIN
 					is_timing_point,
 					max_early,
 					max_late,
-					estimated,
-					frequent_service',
+					estimated',
                 tablename,
                 partition_date,
                 partition_date);
