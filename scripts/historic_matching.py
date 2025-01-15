@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from datetime import datetime
 import subprocess
 from datetime import date, timedelta
 from getpass import getpass
@@ -19,7 +20,11 @@ def parse_task_output(output: dict):
         ]
         if len(containers) != 1:
             continue
-        yield task["taskArn"], containers[0]["lastStatus"]
+        status = containers[0]["lastStatus"]
+        arn = containers[0]["taskArn"]
+        process_date = [var["value"] for var in task["overrides"]["containerOverrides"][0]["environment"] if
+                      var["name"] == "PROCESS_DATE"][0]
+        yield arn, status, process_date
 
 
 def run_matching(process_date: date, environment: str):
@@ -70,13 +75,25 @@ task_status = {}
 
 def start_task(current: date, environment: str):
     run_output = run_matching(current, environment)
-    for task_arn, status in parse_task_output(run_output):
+    for task_arn, status, process_date in parse_task_output(run_output):
         task_status[task_arn] = {
             "status": status,
-            "process_date": current.isoformat(),
+            "process_date": process_date,
         }
         cloudwatch = f"https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#logsV2:log-groups/log-group/$252Faws$252Fecs$252Fabods-{environment}/log-events/historic-matching$252Fmatcher$252F{task_arn.split('/')[-1]}"
-        print(f"{current.isoformat()} started. You can read the logs at {cloudwatch}")
+        print(
+            f"{datetime.now().isoformat()}: {process_date} started. You can read the logs at {cloudwatch}")
+
+
+def look_for_existing_tasks(environment: str):
+    arns = boto3.client("ecs").list_tasks(cluster=f"abods-{environment}")["taskArns"]
+    status_output = get_task_status(environment, arns)
+    for task_arn, status, process_date in parse_task_output(status_output):
+        print(f"{datetime.now().isoformat()}: {task_arn} for date {process_date} is {status}")
+        task_status[task_arn] = {
+            "status": status,
+            "process_date": process_date,
+        }
 
 
 def wait_for_tasks(environment: str, db_password: str, max_tasks: int):
@@ -84,10 +101,9 @@ def wait_for_tasks(environment: str, db_password: str, max_tasks: int):
         if len(task_status) < max_tasks:
             return
         status_output = get_task_status(environment, list(task_status))
-        for task_arn, status in parse_task_output(status_output):
-            process_date = task_status[task_arn]["process_date"]
+        for task_arn, status, process_date in parse_task_output(status_output):
             if task_status[task_arn]["status"] != status:
-                print(f"{task_arn} for date {process_date} is {status}")
+                print(f"{datetime.now().isoformat()}: {task_arn} for date {process_date} is {status}")
             task_status[task_arn]["status"] = status
 
         for arn in list(task_status):
@@ -138,6 +154,12 @@ def main():
             break
 
     db_password = getpass(f"Enter password for database user {db_user}: ")
+
+    look_for_existing_tasks(environment)
+    for arn in list(task_status):
+        process_date = date.fromisoformat(task_status[arn]["process_date"])
+        if process_date >= current:
+            current = process_date + timedelta(days=1)
 
     while current <= end:
         wait_for_tasks(environment, db_password, max_tasks=4)
