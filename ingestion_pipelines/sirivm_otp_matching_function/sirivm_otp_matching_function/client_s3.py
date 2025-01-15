@@ -1,6 +1,7 @@
 """Fetching and Uploading Data into S3"""
 
 import codecs
+import gzip
 import hashlib
 import json
 import os
@@ -122,8 +123,12 @@ class TimetableS3Client:
     def get_avl_data(self, filename: str) -> Sequence[LiveAVLRecord]:
         """Get AVL Data from S3 and return a list of AVLData models"""
         logger.info("Getting AVL Data", path=filename)
-        stream = utf8_stream_reader(self._get_from_s3(filename))
-        return parse_live_avl_data(stream)
+        s3_data_stream = self._get_from_s3(filename)
+        with (
+            gzip.GzipFile(fileobj=s3_data_stream) as uncompressed_stream,
+            utf8_stream_reader(uncompressed_stream) as decoded_stream,
+        ):
+            return parse_live_avl_data(decoded_stream)
 
     @timer(logger)
     def export_stop_history(self, stop_history: StopHistory, shard_no: str) -> None:
