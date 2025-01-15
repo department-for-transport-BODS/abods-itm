@@ -8,7 +8,10 @@ from os import environ
 import boto3
 import psycopg2
 
-from .shared.config import TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES
+from .shared.config import (
+    EXPECTED_LATE_RUNNING_SERVICE_INTERVAL_IN_MINUTES,
+    TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES,
+)
 
 session = boto3.Session()
 db_host = environ.get("POSTGRES_HOST")
@@ -45,33 +48,48 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
         conn.autocommit = True
         with conn.cursor() as cur:
             interval_time = TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES
+            late_running_interval = EXPECTED_LATE_RUNNING_SERVICE_INTERVAL_IN_MINUTES
             now = datetime.now()
             cur.execute(
                 """
-                    WITH my_groups AS
-                      (SELECT DISTINCT vehiclejourney_id
-                       FROM public."Timetable"
-                       WHERE date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
-                         AND expected_departure_time BETWEEN current_timestamp(0) - interval '%s' MINUTE AND current_timestamp(0) + interval '%s' MINUTE)
-                    SELECT t.group_id,
-                           row_number() OVER (PARTITION BY t.vehiclejourney_id
-                                              ORDER BY t.group_id, t.expected_departure_time ASC, t.stop_index ASC) AS stop_index,
-                           t.stop_latitude,
-                           t.stop_longitude,
-                           t.expected_departure_time::TIME AS expected_departure_time,
-                           t.timetable_id,
-                           t.date_of_journey,
-                           t.direction
-                    FROM public."Timetable" t
-                    WHERE t.date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
-                      AND t.vehiclejourney_id IN
-                        (SELECT vehiclejourney_id
-                         FROM my_groups)
-                    ORDER BY t.group_id,
-                             t.expected_departure_time ASC,
-                             t.stop_index ASC;
-                """,  # noqa: W291 - BODS-7131,
-                [interval_time, interval_time],
+                WITH partitions AS (
+                   SELECT (now() AT TIME ZONE 'EUROPE/LONDON' + interval '%s' MINUTE)::date AS date UNION
+                   SELECT (now() AT TIME ZONE 'EUROPE/LONDON')::date AS date UNION
+                   SELECT (now() AT TIME ZONE 'EUROPE/LONDON' - interval '%s' MINUTE)::date AS date
+                )
+                WITH my_groups AS
+                  (SELECT DISTINCT vehiclejourney_id
+                   FROM public."Timetable"
+                   WHERE date_of_journey IN (SELECT DISTINCT date FROM partitions)
+                     AND expected_departure_time BETWEEN
+                       current_timestamp(0) - interval '%s' MINUTE AND
+                       current_timestamp(0) + interval '%s' MINUTE)
+                SELECT t.group_id,
+                       row_number() OVER (PARTITION BY t.vehiclejourney_id
+                                          ORDER BY t.group_id,
+                                                   t.expected_departure_time ASC,
+                                                   t.stop_index ASC) AS stop_index,
+                       t.stop_latitude,
+                       t.stop_longitude,
+                       t.expected_departure_time::TIME AS expected_departure_time,
+                       t.timetable_id,
+                       t.date_of_journey,
+                       t.direction
+                FROM public."Timetable" t
+                WHERE t.date_of_journey IN (SELECT DISTINCT date FROM partitions)
+                  AND t.vehiclejourney_id IN
+                    (SELECT vehiclejourney_id
+                     FROM my_groups)
+                ORDER BY t.group_id,
+                         t.expected_departure_time ASC,
+                         t.stop_index ASC;
+                """,
+                [
+                    interval_time,
+                    interval_time + late_running_interval,
+                    interval_time,
+                    interval_time,
+                ],
             )
             timetable_dict = defaultdict(dict)
             res = cur.fetchall()
