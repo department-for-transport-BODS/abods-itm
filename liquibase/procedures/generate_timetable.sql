@@ -677,6 +677,7 @@ begin
               public.%I tvw
               JOIN public.transmodel_servicepatternstop stop
                 ON tvw.transmodel_vehiclejourney_id = stop.vehicle_journey_id
+				WHERE trim(tvw.journey_code) <> ''''
 	        ',
             concat('timetable_journey', timetable_suffix),
             concat('timetable_vj_per_groupid', timetable_suffix)
@@ -694,9 +695,14 @@ begin
               line_name,
               journey_code,
               date_of_journey AS date_of_journey,
-              cast(
-                concat(date_of_journey::text, '' '', departure_time::text) AS timestamp
-              ) AT TIME ZONE ''EUROPE/LONDON'' AS departure_time,
+              (
+				CASE WHEN departure_day_shift IS TRUE 
+				AND departure_time::TIME >= ''00:00:00''
+				AND departure_time::TIME <= ''12:00:00'' 
+				THEN CAST(CONCAT(date_of_journey::TEXT, '' '', departure_time::TEXT) AS TIMESTAMP) AT TIME ZONE ''Europe/London'' + INTERVAL ''1'' DAY 
+				ELSE CAST(CONCAT(date_of_journey::TEXT, '' '', departure_time::TEXT) AS TIMESTAMP) AT TIME ZONE ''Europe/London'' 
+				END
+			  ) AS departure_time,
               stop_id,
               ST_Y(b.location)::real lt,
               ST_X(b.location)::real AS lon,
