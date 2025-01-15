@@ -345,4 +345,7 @@
     <changeSet id="110" author="abodsuser">
         <sqlFile path="sql/110-changes-from-sandbox.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="111" author="abodsuser">
+        <sqlFile path="sql/111-frequent-summary-service.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
