@@ -77,7 +77,7 @@ BEGIN
                                      WHERE sub.actual_headway IS NOT NULL)                    AS excess_wait_Time,
                                  sub.estimated,
                                  sub.stop_id,
-                                 count(sub.stop_id)                                           AS stop_count
+                                 count(sub.actual_headway)                                    AS headway_stop_count
                           FROM (SELECT ttb.operator_noc,
                                        ttb.service_code,
                                        es.noc_and_line_and_servicecode,
@@ -167,11 +167,11 @@ BEGIN
                                  day_of_week,
                                  max_early,
                                  max_late,
-                                 avg(avg_time_difference)           AS avg_time_difference,
-                                 sum(expected_headway * stop_count) AS expected_headway,
-                                 sum(actual_headway * stop_count)   AS actual_headway,
-                                 sum(excess_wait_Time * stop_count) AS excess_wait_Time,
-                                 sum(stop_count)                    AS stop_count,
+                                 avg(avg_time_difference)                   AS avg_time_difference,
+                                 sum(expected_headway * headway_stop_count) AS expected_headway,
+                                 sum(actual_headway * headway_stop_count)   AS actual_headway,
+                                 sum(excess_wait_Time * headway_stop_count) AS excess_wait_Time,
+                                 sum(headway_stop_count)                    AS headway_stop_count,
                                  estimated
                           FROM Timetable_CTE
                           GROUP BY operator_noc,
@@ -196,9 +196,18 @@ BEGIN
                        max_early,
                        max_late,
                        avg_time_difference,
-                       (expected_headway / (stop_count * 60)) AS expected_headway,
-                       (actual_headway / (stop_count * 60))   AS actual_headway,
-                       (excess_wait_Time / (stop_count * 60)) AS excess_wait_Time,
+                       CASE 
+                            WHEN stop_count = 0 THEN 0
+                            ELSE (expected_headway / (headway_stop_count * 60))
+                        END AS expected_headway,
+                        CASE 
+                            WHEN stop_count = 0 THEN 0
+                            ELSE (actual_headway / (headway_stop_count * 60))
+                        END AS actual_headway,
+                        CASE 
+                            WHEN stop_count = 0 THEN 0
+                            ELSE (excess_wait_Time / (headway_stop_count * 60))
+                        END AS excess_wait_Time,
                        estimated
                 FROM Timetable_Agg;',
                  tablename,
