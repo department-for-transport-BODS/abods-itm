@@ -20,6 +20,9 @@ BEGIN
         RAISE NOTICE '% ----------------Calling summary_by_stops----------------', clock_timestamp();
         CALL public.summary_by_stops(partition_date);
 
+        RAISE NOTICE '%----------------Calling frequent_summary_services----------------', clock_timestamp();
+        CALL public.frequent_summary_services(partition_date);
+
         RAISE NOTICE '% ----------------Calling summary_by_services----------------', clock_timestamp();
         CALL public.summary_by_services(partition_date);
 
