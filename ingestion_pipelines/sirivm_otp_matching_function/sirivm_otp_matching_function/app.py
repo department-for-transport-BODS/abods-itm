@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from datetime import datetime
 from functools import lru_cache
 from typing import Any, NotRequired, TypedDict
 
@@ -137,7 +136,6 @@ def historic_record_handler(rec: SQSRecord) -> None:
         s3_client.export_stop_history(
             stop_history,
             control_info,
-            avl_datetime,
             shard_identifier,
         )
 
@@ -174,7 +172,6 @@ def live_record_handler(
         avl_datetime = parse(str(avl_time_val))
         logger.append_keys(avl_time=avl_time_val, avl_datetime=avl_datetime)
 
-        current_date = datetime.today()  # noqa: DTZ002 - Stop using today() later
         shard_stop_history, control_info = s3_client.get_stop_history(
             shard_identifier,
             avl_time_val,
@@ -197,7 +194,6 @@ def live_record_handler(
         s3_client.export_stop_history(
             stop_history,
             control_info,
-            current_date,
             shard_identifier,
         )
 
