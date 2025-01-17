@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS public.timetable_frequent_summary_services
     expected_headway             numeric,
     actual_headway               numeric,
     excess_wait_time             numeric,
+	headway_stop_count			 numeric,
     estimated                    boolean DEFAULT false,
     CONSTRAINT timetable_frequent_summary_services_pkey PRIMARY KEY (service_code, operator_noc, date_of_journey,
                                                                      day_of_week, departure_hour, departure_hour_only,

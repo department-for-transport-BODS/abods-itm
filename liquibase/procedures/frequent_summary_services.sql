@@ -51,7 +51,8 @@ BEGIN
                                    expected_headway,
                                    actual_headway,
                                    excess_wait_Time,
-                                   estimated)
+                                   estimated,
+                                   headway_stop_count)
                 WITH Timetable_CTE AS
                          (SELECT sub.operator_noc,
                                  sub.service_code,
@@ -197,18 +198,19 @@ BEGIN
                        max_late,
                        avg_time_difference,
                        CASE 
-                            WHEN stop_count = 0 THEN 0
+                            WHEN headway_stop_count = 0 THEN 0
                             ELSE (expected_headway / (headway_stop_count * 60))
                         END AS expected_headway,
                         CASE 
-                            WHEN stop_count = 0 THEN 0
+                            WHEN headway_stop_count = 0 THEN 0
                             ELSE (actual_headway / (headway_stop_count * 60))
                         END AS actual_headway,
                         CASE 
-                            WHEN stop_count = 0 THEN 0
+                            WHEN headway_stop_count = 0 THEN 0
                             ELSE (excess_wait_Time / (headway_stop_count * 60))
                         END AS excess_wait_Time,
-                       estimated
+                       estimated,
+                       headway_stop_count
                 FROM Timetable_Agg;',
                  tablename,
                  partition_date,
