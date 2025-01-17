@@ -1527,4 +1527,4 @@ matches = [
 
 
 def test_historic_match() -> None:
-    run_historic_matching_test(__file__, matches)
+    assert run_historic_matching_test(__file__) == matches

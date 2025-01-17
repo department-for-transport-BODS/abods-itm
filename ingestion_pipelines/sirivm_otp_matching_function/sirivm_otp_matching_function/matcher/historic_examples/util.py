@@ -39,8 +39,7 @@ def parse_live_avl_data(stream: Iterable[str]) -> Sequence[LiveAVLRecord]:
 
 def run_historic_matching_test(
     test_file_path: str,
-    expected_matches: Sequence[RecordToAdd],
-) -> None:
+) -> Sequence[RecordToAdd]:
     directory = pathlib.Path(test_file_path).parent
 
     with open(directory / "timetable.json") as f:
@@ -51,4 +50,4 @@ def run_historic_matching_test(
     with mock.patch.dict(os.environ, {"ENABLE_ESTIMATED_MATCHING": "true"}):
         to_set, _, __ = match_group_id_avls(LiveTimetableStore(timetable), avl_list)
 
-    assert to_set == expected_matches
+    return to_set
