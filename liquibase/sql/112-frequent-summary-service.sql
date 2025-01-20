@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.timetable_frequent_summary_services
     actual_headway               numeric				  NOT NULL,
     excess_wait_time             numeric				  NOT NULL,
 	headway_stops_count			 numeric				  NOT NULL,
-    estimated                    boolean    
+    estimated                    boolean    			  NOT NULL,
 )
 
 ALTER TABLE IF EXISTS public.timetable_frequent_summary_services
