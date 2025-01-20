@@ -335,7 +335,6 @@
     <changeSet id="107" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/historic_matching_summary_generation.sql" splitStatements="false"/>
     </changeSet>
-
     <changeSet id="108" author="abodsuser">
         <sqlFile path="sql/108-token-expiry.sql" splitStatements="false" />
     </changeSet>

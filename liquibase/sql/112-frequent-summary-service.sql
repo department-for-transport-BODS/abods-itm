@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS public.timetable_frequent_summary_services
     estimated                    boolean                  NOT NULL,
     CONSTRAINT timetable_frequent_summary_services_unique UNIQUE (service_code, operator_noc, date_of_journey,
                                                                      day_of_week, departure_hour, departure_hour_only,
-                                                                     max_early, max_late, noc_and_line_and_servicecode)
-) PARTITION BY RANGE (date_of_journey);
+                                                                     max_early, max_late, noc_and_line_and_servicecode, estimated)
+)
 
 ALTER TABLE IF EXISTS public.timetable_frequent_summary_services
     OWNER to abods_proxy_rw;
