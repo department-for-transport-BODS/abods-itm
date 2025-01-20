@@ -351,7 +351,6 @@
     <changeSet id="112" author="abodsuser">
         <sqlFile path="sql/112-frequent-summary-service.sql" splitStatements="false"/>
     </changeSet>
-
     <changeSet id="113" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/frequent_summary_services.sql" splitStatements="false"/>
     </changeSet>
