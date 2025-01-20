@@ -16,10 +16,7 @@ CREATE TABLE IF NOT EXISTS public.timetable_frequent_summary_services
     actual_headway               numeric				  NOT NULL,
     excess_wait_time             numeric				  NOT NULL,
 	headway_stops_count			 numeric				  NOT NULL,
-    estimated                    boolean                  NOT NULL,
-    CONSTRAINT timetable_frequent_summary_services_unique UNIQUE (service_code, operator_noc, date_of_journey,
-                                                                     day_of_week, departure_hour, departure_hour_only,
-                                                                     max_early, max_late, noc_and_line_and_servicecode, estimated)
+    estimated                    boolean    
 )
 
 ALTER TABLE IF EXISTS public.timetable_frequent_summary_services
