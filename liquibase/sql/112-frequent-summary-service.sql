@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS public.timetable_frequent_summary_services
 (
-    timetable_id                 bigserial,
+    timetable_id                 bigserial 				  PRIMARY KEY,
     operator_noc                 text                     NOT NULL,
     service_code                 text                     NOT NULL,
     noc_and_line_and_servicecode text                     NOT NULL,
@@ -11,13 +11,13 @@ CREATE TABLE IF NOT EXISTS public.timetable_frequent_summary_services
     day_of_week                  integer                  NOT NULL,
     max_early                    integer                  NOT NULL,
     max_late                     integer                  NOT NULL,
-    avg_time_difference          numeric,
-    expected_headway             numeric,
-    actual_headway               numeric,
-    excess_wait_time             numeric,
-	headway_stops_count			 numeric,
-    estimated                    boolean DEFAULT false,
-    CONSTRAINT timetable_frequent_summary_services_pkey PRIMARY KEY (service_code, operator_noc, date_of_journey,
+    avg_time_difference          numeric				  NOT NULL,
+    expected_headway             numeric				  NOT NULL,
+    actual_headway               numeric				  NOT NULL,
+    excess_wait_time             numeric				  NOT NULL,
+	headway_stops_count			 numeric				  NOT NULL,
+    estimated                    boolean                  NOT NULL,
+    CONSTRAINT timetable_frequent_summary_services_unique UNIQUE (service_code, operator_noc, date_of_journey,
                                                                      day_of_week, departure_hour, departure_hour_only,
                                                                      max_early, max_late, noc_and_line_and_servicecode)
 ) PARTITION BY RANGE (date_of_journey);

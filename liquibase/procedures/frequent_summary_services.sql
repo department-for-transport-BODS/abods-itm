@@ -10,8 +10,7 @@ BEGIN
 
     RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
 
-    EXECUTE format
-            ('INSERT INTO public.%I(
+    INSERT INTO public.timetable_frequent_summary_services(
                                 operator_noc,
                                 service_code,
                                 noc_and_line_and_servicecode,
@@ -34,13 +33,13 @@ BEGIN
                                 sub.noc_and_line_and_servicecode,
                                 sub.line_name,
                                 sub.date_of_journey,
-                                date_trunc(''hour'', sub.expected_departure_time::timestamptz) AS departure_hour,
+                                date_trunc('hour', sub.expected_departure_time::timestamptz) AS departure_hour,
                                 (
                                     EXTRACT(HOUR
-                                            FROM sub.expected_departure_time)::text || '':00:00'' || CASE
-                                                                                                    WHEN RIGHT(sub.expected_departure_time::text, 6) ~ ''^[+-]''
+                                            FROM sub.expected_departure_time)::text || ':00:00' || CASE
+                                                                                                    WHEN RIGHT(sub.expected_departure_time::text, 6) ~ '^[+-]'
                                                                                                         THEN RIGHT(sub.expected_departure_time::text, 6)
-                                                                                                    ELSE ''+00'' END
+                                                                                                    ELSE '+00' END
                                 )::timetz AS departure_hour_only,
                                 sub.day_of_week,
                                 sub.max_early,
@@ -64,45 +63,45 @@ BEGIN
                                     COALESCE(ttb.actual_departure_time, ttb.timestamp_after_estimate) AS actual_departure_time,
                                     ttb.time_difference,
                                     CASE
-                                        WHEN otp_state = ''Early''
+                                        WHEN otp_state = 'Early'
                                             AND time_difference >= -600 THEN 10
-                                        WHEN otp_state = ''Early''
+                                        WHEN otp_state = 'Early'
                                             AND time_difference < -600
                                             AND time_difference >= -1200 THEN 20
-                                        WHEN otp_state = ''Early''
+                                        WHEN otp_state = 'Early'
                                             AND time_difference < -1200
                                             AND time_difference >= -1800 THEN 30
-                                        WHEN otp_state = ''Early''
+                                        WHEN otp_state = 'Early'
                                             AND time_difference < -1800
                                             AND time_difference >= -2400 THEN 40
-                                        WHEN otp_state = ''Early''
+                                        WHEN otp_state = 'Early'
                                             AND time_difference < -2400
                                             AND time_difference >= -3000 THEN 50
-                                        WHEN otp_state = ''Early''
+                                        WHEN otp_state = 'Early'
                                             AND time_difference < -3000
                                             AND time_difference >= -3600 THEN 60
-                                        WHEN otp_state = ''Early''
+                                        WHEN otp_state = 'Early'
                                             AND time_difference < -3600 THEN 70
                                         ELSE 0 END                                         AS max_early,
                                     CASE
-                                        WHEN otp_state = ''Late''
+                                        WHEN otp_state = 'Late'
                                             AND time_difference <= 600 THEN 10
-                                        WHEN otp_state = ''Late''
+                                        WHEN otp_state = 'Late'
                                             AND time_difference > 600
                                             AND time_difference <= 1200 THEN 20
-                                        WHEN otp_state = ''Late''
+                                        WHEN otp_state = 'Late'
                                             AND time_difference > 1200
                                             AND time_difference <= 1800 THEN 30
-                                        WHEN otp_state = ''Late''
+                                        WHEN otp_state = 'Late'
                                             AND time_difference > 1800
                                             AND time_difference <= 2400 THEN 40
-                                        WHEN otp_state = ''Late''
+                                        WHEN otp_state = 'Late'
                                             AND time_difference > 2400
                                             AND time_difference <= 3000 THEN 50
-                                        WHEN otp_state = ''Late''
+                                        WHEN otp_state = 'Late'
                                             AND time_difference > 3000
                                             AND time_difference <= 3600 THEN 60
-                                        WHEN otp_state = ''Late''
+                                        WHEN otp_state = 'Late'
                                             AND time_difference > 3600 THEN 70
                                         ELSE 0 END                                         AS max_late,
                                     ttb.time_difference                                    AS avg_time_difference,
@@ -116,10 +115,10 @@ BEGIN
                                     ttb.date_of_journey = es.date_of_journey
                                 AND ttb.operator_noc = es.operator_noc
                                 AND ttb.line_name = es.line_name
-                                AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, ''-'', -1)
-                            WHERE ttb.date_of_journey = % L
+                                AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, '-', -1)
+                            WHERE ttb.date_of_journey = partition_date
                                 AND ttb.previous_group_id IS NOT NULL) AS sub
-                        WHERE date_of_journey = % L
+                        WHERE date_of_journey = partition_date
                         GROUP BY operator_noc,
                                 service_code,
                                 noc_and_line_and_servicecode,
@@ -186,10 +185,7 @@ BEGIN
                     END AS excess_wait_Time,
                     estimated,
                     headway_stops_count
-            FROM Timetable_Agg;',
-                tablename,
-                partition_date,
-                partition_date);
+            FROM Timetable_Agg;
 
     RAISE NOTICE '% frequent_summary_services complete', clock_timestamp();
 END;
