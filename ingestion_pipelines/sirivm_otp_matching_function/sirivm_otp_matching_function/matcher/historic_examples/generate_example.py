@@ -172,9 +172,8 @@ matches = {to_set}
 
 
 def test_historic_match() -> None:
-    run_historic_matching_test(__file__, matches)
-
-        ''')
+    assert run_historic_matching_test(__file__) == matches
+''')
 
 
 if __name__ == "__main__":
