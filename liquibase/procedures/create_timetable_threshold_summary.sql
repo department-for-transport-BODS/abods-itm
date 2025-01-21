@@ -1,7 +1,6 @@
-create or replace procedure create_timetable_threshold_summary(IN pt_date date)
-    language plpgsql
-as
-$$
+CREATE OR REPLACE PROCEDURE public.create_timetable_threshold_summary(IN pt_date date)
+ LANGUAGE plpgsql
+AS $procedure$
 
 DECLARE
     partition_date date := pt_date;
@@ -73,7 +72,7 @@ BEGIN
                       date_trunc(''hour'', ttb.expected_departure_time) AS departure_hour,
                       ttb.day_of_week,
                       count(*) AS otp_count,
-                      estimated
+                      estimated			
                FROM
                  (SELECT operator_noc,
                          line_name,
@@ -90,15 +89,17 @@ BEGIN
                          day_of_week,
                          admin_area_id,
                          stop_index,
-                         (timestamp_after_estimate IS NOT NULL) AS estimated
+                         (timestamp_after_estimate IS NOT NULL) AS estimated,
+						(previous_group_id IS NOT NULL) AS frequent_service, 
+						(time_difference IS NULL) AS no_recorded
                   FROM public."Timetable"
-                  WHERE date_of_journey = %L
-                    AND time_difference IS NOT NULL
-                    AND previous_group_id IS NULL) ttb
+                  WHERE date_of_journey = %L) ttb
                INNER JOIN public.expected_services es ON ttb.date_of_journey = es.date_of_journey
                AND ttb.operator_noc = es.operator_noc
                AND ttb.line_name = es.line_name
-               AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, ''-'', -1)
+               AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, ''-'', -1)      
+            AND ttb.frequent_service = FALSE
+			AND ttb.no_recorded = FALSE
                GROUP BY ttb.operator_noc,
                         ttb.line_name,
                         es.noc_and_line_and_servicecode,
@@ -109,13 +110,12 @@ BEGIN
                         floor(ttb.time_difference::float/60),
                         DATE_TRUNC(''hour'', ttb.expected_departure_time),
                         ttb.day_of_week,
-                        estimated) x;',
+						ttb.estimated) x;',
                 tablename,
                 partition_date);
     END IF;
 
     RAISE NOTICE '% create_timetable_threshold_summary complete', clock_timestamp();
 END;
-$$;
-
-alter procedure create_timetable_threshold_summary owner to abods_proxy_rw;
+$procedure$
+;
