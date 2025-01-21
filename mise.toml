@@ -47,3 +47,6 @@ run = "assume --exec -- ./scripts/db-connect.sh test"
 
 [tasks."db:uat"]
 run = "assume --exec -- ./scripts/db-connect.sh uat"
+
+[tasks."db:prod"]
+run = "assume --exec -- ./scripts/db-connect.sh prod"
