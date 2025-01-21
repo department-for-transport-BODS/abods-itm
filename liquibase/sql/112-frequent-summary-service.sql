@@ -64,3 +64,5 @@ CREATE INDEX IF NOT EXISTS operator_noc_stopstz
 CREATE INDEX IF NOT EXISTS service_code_stopstz
     ON public.timetable_frequent_summary_services USING btree
         (service_code ASC NULLS LAST);
+
+SELECT cron.schedule('frequent_summary_services', '0 2 * * *', $$CALL public.frequent_summary_services();$$);
