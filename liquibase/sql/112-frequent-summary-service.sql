@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.timetable_frequent_summary_services
     excess_wait_time             numeric				  NOT NULL,
 	headway_stops_count			 numeric				  NOT NULL,
     estimated                    boolean    			  NOT NULL
-)
+);
 
 ALTER TABLE IF EXISTS public.timetable_frequent_summary_services
     OWNER to abods_proxy_rw;
