@@ -58,13 +58,8 @@ BEGIN
                    date_of_journey,
                    is_timing_point,
                    ARRAY(SELECT DISTINCT UNNEST (array_admin)) AS array_admin_area,
-                   date_trunc(''hour'', expected_departure_time::timestamptz) AS departure_hour,
-                   (EXTRACT(HOUR FROM expected_departure_time)::text || '':00:00'' ||
-                       CASE
-                           WHEN RIGHT(expected_departure_time::text, 6)~ ''^[+-]'' THEN RIGHT(expected_departure_time::text, 6)
-                           ELSE ''+00''
-                       END
-                   )::timetz AS departure_hour_only,
+                   departure_hour,
+                   departure_hour_only,
                    otp_count,
                    day_of_week,
                    estimated
@@ -77,7 +72,8 @@ BEGIN
                       ttb.date_of_journey,
                       ttb.is_timing_point,
                       ARRAY_AGG(ttb.admin_area_id) OVER (PARTITION BY ttb.operator_noc, ttb.line_name, ttb.date_of_journey, ttb.is_timing_point) array_admin,
-                      ttb.expected_departure_time,
+                      date_trunc(''hour'', ttb.expected_departure_time::timestamptz) AS departure_hour,
+                      date_trunc(''hour'', ttb.expected_departure_time::timestamptz) AS departure_hour_only,
                       ttb.day_of_week,
                       count(*) AS otp_count,
                       estimated
