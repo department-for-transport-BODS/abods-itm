@@ -335,6 +335,7 @@
     <changeSet id="107" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/historic_matching_summary_generation.sql" splitStatements="false"/>
     </changeSet>
+
     <changeSet id="108" author="abodsuser">
         <sqlFile path="sql/108-token-expiry.sql" splitStatements="false" />
     </changeSet>
@@ -350,7 +351,12 @@
     <changeSet id="112" author="abodsuser">
         <sqlFile path="sql/112-frequent-summary-service.sql" splitStatements="false"/>
     </changeSet>
+
     <changeSet id="113" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/frequent_summary_services.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="114" author="abodsuser">
+        <sqlFile path="sql/114-thresholds-departure-hour-only.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
