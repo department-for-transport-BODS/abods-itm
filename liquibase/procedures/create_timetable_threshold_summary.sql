@@ -1,6 +1,6 @@
 CREATE OR REPLACE PROCEDURE public.create_timetable_threshold_summary(IN pt_date date)
  LANGUAGE plpgsql
-AS $procedure$
+AS $$
 
 DECLARE
     partition_date date := pt_date;
@@ -117,5 +117,5 @@ BEGIN
 
     RAISE NOTICE '% create_timetable_threshold_summary complete', clock_timestamp();
 END;
-$procedure$
+$$
 ;
