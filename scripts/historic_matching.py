@@ -3,6 +3,7 @@ from datetime import datetime
 import subprocess
 from datetime import date, timedelta
 from getpass import getpass
+from subprocess import CalledProcessError
 from time import sleep
 
 import boto3
@@ -96,6 +97,25 @@ def look_for_existing_tasks(environment: str):
         }
 
 
+def summary_generation(db_password: str, process_date: str):
+    subprocess.run(
+        [
+            # This is where it's installed on the bastion, doesn't seem to be on PATH when called by subprocess
+            "/usr/bin/psql",
+            "--echo-queries",
+            "--dbname=abods",
+            "-h",
+            db_host,
+            "-U",
+            db_user,
+            "-c",
+            f"CALL historic_matching_summary_generation('{process_date}');",
+        ],
+        env={"PGPASSWORD": db_password},
+        check=True,
+    )
+
+
 def wait_for_tasks(environment: str, db_password: str, max_tasks: int):
     while True:
         if len(task_status) < max_tasks:
@@ -111,22 +131,11 @@ def wait_for_tasks(environment: str, db_password: str, max_tasks: int):
             process_date = task_status[arn]["process_date"]
             if status in ("STOPPED", "DELETED"):
                 del task_status[arn]
-                subprocess.run(
-                    [
-                        # This is where it's installed on the bastion, doesn't seem to be on PATH when called by subprocess
-                        "/usr/bin/psql",
-                        "--echo-queries",
-                        "--dbname=abods",
-                        "-h",
-                        db_host,
-                        "-U",
-                        db_user,
-                        "-c",
-                        f"CALL historic_matching_summary_generation('{process_date}');",
-                    ],
-                    env={"PGPASSWORD": db_password},
-                    check=True,
-                )
+                try:
+                    summary_generation(db_password, process_date)
+                except CalledProcessError as e:
+                    print(e)
+                    summary_generation(db_password, process_date)
                 continue
         sleep(60)
 
