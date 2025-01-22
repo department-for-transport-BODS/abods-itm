@@ -57,7 +57,8 @@ BEGIN
 				max_early,
 				max_late,
 				avg_time_difference,
-				estimated
+				estimated,
+				incomplete_reason
 			)
 			SELECT
 				sub.operator_noc,
@@ -87,7 +88,8 @@ BEGIN
 				sub.max_early,
 				sub.max_late,
 				COALESCE(AVG(sub.avg_time_difference/60.0), 0.0) AS avg_time_difference,
-				sub.estimated
+				sub.estimated,
+				sub.incomplete_reason
 			FROM
 				(
 					SELECT
@@ -128,7 +130,8 @@ BEGIN
 						ELSE 0
 					END AS max_late,
 					ttb.time_difference AS avg_time_difference,
-					(ttb.timestamp_after_estimate is not null) AS estimated
+					(ttb.timestamp_after_estimate is not null) AS estimated,
+					ttb.incomplete_reason AS incomplete_reason
 				FROM
 					public."Timetable" ttb
 					INNER JOIN public.expected_services es
@@ -162,7 +165,8 @@ BEGIN
 					is_timing_point,
 					max_early,
 					max_late,
-					estimated',
+					estimated,
+					incomplete_reason',
                 tablename,
                 partition_date,
                 partition_date);

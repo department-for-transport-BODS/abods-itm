@@ -52,7 +52,12 @@ BEGIN
 				max_late,
 				avg_time_difference,
 				admin_areas,
-				estimated
+				estimated,
+				incomplete_reason_1_count,
+				incomplete_reason_2_count,
+				incomplete_reason_3_count,
+				incomplete_reason_4_count,
+				incomplete_reason_5_count
 			)
 			SELECT
 				sub.operator_noc,
@@ -77,7 +82,12 @@ BEGIN
 				sub.max_late,
 				COALESCE(AVG(sub.avg_time_difference/60.0), 0.0) AS avg_time_difference,
 				sub.admin_area_id AS admin_areas,
-				sub.estimated
+				sub.estimated,
+				COUNT(CASE WHEN sub.incomplete_reason = 1 THEN 1 END) AS incomplete_reason_1_count,
+				COUNT(CASE WHEN sub.incomplete_reason = 2 THEN 1 END) AS incomplete_reason_2_count,
+				COUNT(CASE WHEN sub.incomplete_reason = 3 THEN 1 END) AS incomplete_reason_3_count,
+				COUNT(CASE WHEN sub.incomplete_reason = 4 THEN 1 END) AS incomplete_reason_4_count,
+				COUNT(CASE WHEN sub.incomplete_reason = 5 THEN 1 END) AS incomplete_reason_5_count
 			FROM
 				(
 					SELECT
@@ -119,7 +129,8 @@ BEGIN
 						time_difference AS avg_time_difference,
 						es.admin_area_id,
 						(ttb.timestamp_after_estimate is not null) AS estimated,
-						ttb.timestamp_after_estimate
+						ttb.timestamp_after_estimate,
+						ttb.incomplete_reason
 					FROM
 						public."Timetable" ttb
 					INNER JOIN public.expected_services es

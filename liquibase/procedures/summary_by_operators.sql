@@ -47,7 +47,12 @@ BEGIN
         max_late,
         avg_time_difference,
         admin_areas,
-		estimated
+		estimated,
+        incomplete_reason_1_count,
+        incomplete_reason_2_count,
+        incomplete_reason_3_count,
+        incomplete_reason_4_count,
+        incomplete_reason_5_count
     )
     SELECT
         sub.operator_noc,
@@ -65,7 +70,12 @@ BEGIN
         sub.max_late,
         sub.avg_time_difference,
         sub.admin_areas,
-		sub.estimated
+		sub.estimated,
+        SUM(sub.incomplete_reason_1_count) AS incomplete_reason_1_count,
+        SUM(sub.incomplete_reason_2_count) AS incomplete_reason_2_count,
+        SUM(sub.incomplete_reason_3_count) AS incomplete_reason_3_count,
+        SUM(sub.incomplete_reason_4_count) AS incomplete_reason_4_count,
+        SUM(sub.incomplete_reason_5_count) AS incomplete_reason_5_count
     FROM
         (
             SELECT
@@ -84,7 +94,12 @@ BEGIN
                 max_late,
                 avg_time_difference,
                 admin_areas,
-				estimated
+				estimated,
+                incomplete_reason_1_count,
+                incomplete_reason_2_count,
+                incomplete_reason_3_count,
+                incomplete_reason_4_count,
+                incomplete_reason_5_count
             FROM
                 public.timetable_summary_service_tz
             WHERE
