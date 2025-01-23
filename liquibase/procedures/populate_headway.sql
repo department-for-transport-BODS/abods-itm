@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE public.populate_headway(IN pt_date date)
- LANGUAGE plpgsql
-AS $$
+create or replace procedure populate_headway(IN pt_date date)
+    language plpgsql
+as
+$$
 DECLARE
     partition_date DATE := pt_date;
 BEGIN
@@ -48,5 +49,6 @@ BEGIN
 
     RAISE NOTICE '% populate_headway complete', clock_timestamp();
 END;
-$$
-;
+$$;
+
+alter procedure populate_headway owner to abods_proxy_rw;
