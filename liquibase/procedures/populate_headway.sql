@@ -1,6 +1,6 @@
 CREATE OR REPLACE PROCEDURE public.populate_headway(IN pt_date date)
  LANGUAGE plpgsql
-AS $procedure$
+AS $$
 DECLARE
     partition_date DATE := pt_date;
 BEGIN
@@ -48,5 +48,5 @@ BEGIN
 
     RAISE NOTICE '% populate_headway complete', clock_timestamp();
 END;
-$procedure$
+$$
 ;
