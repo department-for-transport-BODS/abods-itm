@@ -56,10 +56,12 @@ def main():
             "avl_gz": (avl_gz_path in files),
             "avl_parquet": (avl_parquet_path in files),
         }
-        if data["timetable_csv"] and not data["timetable_parquet"]:
-            print(
-                f"assume abods-prod --exec -- ./historic-matching-data-conversion.sh {data['date']} prod"
-            )
+        if not data["avl_csv"] and not data["avl_gz"]:
+            print("CALL public.historic_avl_export('"+data["date"]+"');", end="")
+        # if data["timetable_csv"] and not data["timetable_parquet"]:
+        #     print(
+        #         f"assume abods-prod --exec -- ./historic-matching-data-conversion.sh {data['date']} prod"
+        #     )
         # if data["avl_csv"] and not data["avl_parquet"]:
         #     print(
         #         f"assume abods-prod --exec -- ./historic-matching-data-conversion.sh {data['date']} prod"
