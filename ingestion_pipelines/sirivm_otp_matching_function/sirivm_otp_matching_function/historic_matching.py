@@ -24,8 +24,6 @@ if TYPE_CHECKING:
 
 logger = Logger()
 
-initial_level = logger.log_level
-
 
 def operator_worker_task(  # noqa: PLR0915, C901 Complexity not much of an issue here
     date_str: str,
@@ -189,16 +187,9 @@ def operator_worker_task(  # noqa: PLR0915, C901 Complexity not much of an issue
                     operator_timetables=len(timetable),
                     operator_ref=operator_ref,
                 ):
-                    for group_id, group_avls in avls_by_group_id.items():
+                    for _, group_avls in avls_by_group_id.items():
                         # sort just in case duckdb returns in the wrong order
                         group_avls.sort(key=lambda x: x["recorded_at_time"])
-                        if (
-                            group_id == "fbri|m4|0640|2024-09-30"
-                            or group_id == "fbri|m4|0640|24-09-30"
-                        ):
-                            logger.setLevel("DEBUG")
-                        else:
-                            logger.setLevel(initial_level)
 
                         journey_matches, processed_routes, match_count = (
                             match_group_id_avls(
