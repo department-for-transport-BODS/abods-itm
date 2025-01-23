@@ -61,6 +61,8 @@ class TimetableStore(Protocol):
 
 logger = Logger()
 
+initial_level = logger.log_level
+
 distance_threshold = config.get("distance_threshold")
 saved_matches_limit = config.get("saved_matches_limit")
 journey_stops_min_threshold = config.get("journey_stops_min_threshold")
@@ -950,6 +952,14 @@ def match_avl(
         group_id,
         avl_direction,
     )
+    if (
+        group_id == "fbri|m4|0640|2024-09-30"
+        or group_id == "fbri|m4|0640|24-09-30"
+    ):
+        logger.setLevel("DEBUG")
+    else:
+        logger.setLevel(initial_level)
+        
     logger.append_keys(
         avl=avl,
         group_id=group_id,
