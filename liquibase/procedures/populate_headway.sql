@@ -40,51 +40,11 @@ BEGIN
             partition_date
             );
 
-    RAISE NOTICE '% Creating temp_timetable_max_siri_vm_positions_id', clock_timestamp();
-
-    EXECUTE format(
-            'drop table if exists  public.temp_timetable_max_siri_vm_positions_id;'
-            );
-
-
-    EXECUTE format(
-            'create table public.temp_timetable_max_siri_vm_positions_id
-         as
-         select t.timetable_id ,max(sv.siri_vm_positions_id) as max_siri_vm_positions_id  from  public."Timetable" t
-         join public."SiriVMPositions" sv
-         on t.operator_noc = sv.operator_ref
-         and t.line_name = sv.line_name
-         and t.journey_code = sv.journey_ref
-         and t.date_of_journey = sv.date_of_journey
-         and t.actual_departure_time = sv.recorded_at_time
-
-         where t.date_of_journey = %L
-         and sv.date_of_journey  = %L
-         group by t.timetable_id;',
-            partition_date,
-            partition_date
-            );
-
-    RAISE NOTICE '% Updating timetable table with siri_vm_position_id data', clock_timestamp();
-
-    EXECUTE format(
-            'update public."Timetable" y
-        set siri_vm_position_id = x.max_siri_vm_positions_id
-        from public.temp_timetable_max_siri_vm_positions_id x
-        where x.timetable_id = y.timetable_id
-        and y.date_of_journey = %L;'
-        , partition_date
-            );
-
 
     RAISE NOTICE '% Dropping temp tables', clock_timestamp();
 
     EXECUTE format(
             'drop table if exists public.temp_timetable_headway;'
-            );
-
-    EXECUTE format(
-            'drop table if exists  public.temp_timetable_max_siri_vm_positions_id;'
             );
 
     RAISE NOTICE '% populate_headway complete', clock_timestamp();
