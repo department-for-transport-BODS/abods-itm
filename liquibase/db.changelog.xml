@@ -359,4 +359,7 @@
     <changeSet id="114" author="abodsuser">
         <sqlFile path="sql/114-thresholds-departure-hour-only.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="115" author="abodsuser">
+        <sqlFile path="sql/115-drop_siri_vm_position_id.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
