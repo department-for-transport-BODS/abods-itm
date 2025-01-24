@@ -9,7 +9,6 @@ CREATE TABLE public.transmodel_tracks (
 	id bigint,
 	from_atco_code varchar(255) NOT NULL,
 	to_atco_code varchar(255) NOT NULL,
-	--geometry public.geometry(linestring, 4326) NULL,
     geometry text NULL,
 	distance int4 NULL,
 	CONSTRAINT transmodel_tracks_pkey PRIMARY KEY (id),
