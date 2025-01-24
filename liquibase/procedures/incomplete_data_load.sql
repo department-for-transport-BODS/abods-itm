@@ -193,4 +193,4 @@ RAISE NOTICE '% incomplete_data_load complete', clock_timestamp();
 end;
 $$;
 
-alter procedure generate_timetable owner to abods_proxy_rw;
+alter procedure incomplete_data_load owner to abods_proxy_rw;

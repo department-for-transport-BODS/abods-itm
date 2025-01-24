@@ -365,4 +365,7 @@
     <changeSet id="117" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/incomplete_data_load.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="118" author="abodsuser">
+        <sqlFile path="sql/116-add-incomplete-reason-column.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
