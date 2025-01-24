@@ -2,17 +2,26 @@ create or replace procedure public.sync_tracks()
  LANGUAGE plpgsql
 AS $procedure$
 begin
-    MERGE INTO public.transmodel_tracks AS target
-    USING bods.transmodel_tracks AS source
-    ON (target.from_atco_code = source.from_atco_code AND target.to_atco_code = source.to_atco_code)
-    WHEN MATCHED THEN
-        UPDATE SET
-            geometry = ST_AsGeoJSON(source.geometry),
-            distance = source.distance
-    WHEN NOT MATCHED THEN
-        INSERT (id, from_atco_code, to_atco_code, geometry, distance)
-        VALUES (source.id, source.from_atco_code, source.to_atco_code, ST_AsGeoJSON(source.geometry), source.distance)
-    
+    INSERT into public.transmodel_tracks(
+        id, 
+        from_atco_code, 
+        to_atco_code, 
+        geometry, 
+        distance
+    )
+    SELECT
+        id,
+        from_atco_code, 
+        to_atco_code, 
+        ST_AsGeoJSON(geometry) as geometry, 
+        distance
+    from 
+        bods.transmodel_tracks
+    on conflict(from_atco_code, to_atco_code)
+    DO UPDATE SET
+        geometry = ST_AsGeoJSON(EXCLUDED.geometry),
+        distance = EXCLUDED.distance
+
     DELETE FROM public.transmodel_tracks
     WHERE id NOT IN (SELECT id FROM bods.transmodel_tracks);
 
