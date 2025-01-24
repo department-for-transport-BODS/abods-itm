@@ -61,8 +61,6 @@ class TimetableStore(Protocol):
 
 logger = Logger()
 
-initial_level = logger.log_level
-
 distance_threshold = config.get("distance_threshold")
 saved_matches_limit = config.get("saved_matches_limit")
 journey_stops_min_threshold = config.get("journey_stops_min_threshold")
@@ -851,6 +849,7 @@ def match_avl_batch(
 def match_group_id_avls(
     timetable: TimetableStore,
     avls: Sequence[AVLRecord],
+    log_level: str,
 ) -> tuple[Sequence[RecordToAdd], int, int]:
     """
     Perform matching on all avls for a group_id.
@@ -859,12 +858,14 @@ def match_group_id_avls(
     ----
         timetable (Timetable): Timetable data
         avls (Sequence): A list of avl records for this group_id
+        log_level (str): log_level
 
     Returns:
     -------
         journey_matches (Sequence): The matched stops which require updates in the database
 
     """
+    logger.setLevel(log_level)
     journey_matches: list[RecordToAdd] = []
     stop_history: StopHistory = {}
     for avl in avls:
@@ -872,6 +873,12 @@ def match_group_id_avls(
             timetable,
             avl,
             stop_history,
+        )
+        logger.debug(
+            "Matched avl",
+            to_set=to_set,
+            to_remove=to_remove,
+            stop_history=stop_history,
         )
         # After initially matching a stop, a later avl might provide evidence that the match was incorrect.
         # Here we can remove the prior match before the calling code has a chance to update the db.
@@ -952,14 +959,7 @@ def match_avl(
         group_id,
         avl_direction,
     )
-    if (
-        group_id == "fbri|m4|0640|2024-09-30"
-        or group_id == "fbri|m4|0640|24-09-30"
-    ):
-        logger.setLevel("DEBUG")
-    else:
-        logger.setLevel(initial_level)
-        
+
     logger.append_keys(
         avl=avl,
         group_id=group_id,
