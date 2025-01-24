@@ -42,7 +42,7 @@ def pick_shard(stop_count):
 def process_input():
     client = boto3.client("secretsmanager")
     db_password = json.loads(
-        client.get_secret_value(SecretId="abods/sandbox/rds/user/abods_proxy_rw")[
+        client.get_secret_value(SecretId="abods/uat/rds/user/abods_proxy_rw")[
             "SecretString"
         ]
     )["password"]
