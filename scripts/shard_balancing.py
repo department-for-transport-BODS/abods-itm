@@ -6,6 +6,7 @@ import boto3
 import psycopg2
 
 shards: dict[str, dict[str, int]] = {
+    "0": {},
     "1": {},
     "2": {},
     "3": {},
