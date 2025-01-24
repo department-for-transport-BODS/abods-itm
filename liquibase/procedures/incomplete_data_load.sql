@@ -1,13 +1,14 @@
-create or replace procedure incomplete_data_load(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
-    language plpgsql
-as
-$$
+CREATE OR REPLACE PROCEDURE public.incomplete_data_load(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
+ LANGUAGE plpgsql
+AS $procedure$
 declare
     longdatestring text := to_char(partition_date, 'YYYY_MM_DD');
  
 begin
 
 RAISE NOTICE '% Start running incomplete_data_load ', clock_timestamp();
+
+RAISE NOTICE '% Creating existing operator nocs table', clock_timestamp();
 
 execute format('
             create table public.%I as
@@ -23,6 +24,8 @@ execute format('
             partition_date,
             partition_date);
 
+RAISE NOTICE '% Created existing operator nocs table', clock_timestamp();
+
 execute format('
             create table public.%I as
             select timetable_id
@@ -37,6 +40,8 @@ execute format('
             partition_date,
             partition_date);
 
+RAISE NOTICE '% Created existing line name table', clock_timestamp();
+
 execute format('
             create table public.%I as
             select timetable_id
@@ -49,8 +54,11 @@ execute format('
         ', 
             concat('existing_journey_code_', longdatestring),
             partition_date,
-            partition_date);         
+            partition_date);
 
+RAISE NOTICE '% Created existing journey code table', clock_timestamp();
+
+RAISE NOTICE '% Creating stops without operator nocs table', clock_timestamp();
  
 execute format('
             create table public.%I as
@@ -69,6 +77,10 @@ execute format('
             concat('existing_line_name_', longdatestring)
             );
 
+RAISE NOTICE '% Created stops without operator nocs table', clock_timestamp();
+
+RAISE NOTICE '% Creating stops without service table', clock_timestamp();
+
 execute format('
             create table public.%I as
             select distinct timetable_id
@@ -86,6 +98,10 @@ execute format('
             concat('existing_journey_code_', longdatestring)
             );
 
+RAISE NOTICE '% Created stops without service table', clock_timestamp();
+
+RAISE NOTICE '% Creating stops without journey code table', clock_timestamp();
+
 execute format('
             create table public.%I as
             select distinct timetable_id
@@ -102,6 +118,10 @@ execute format('
             concat('existing_line_name_', longdatestring),
             concat('existing_operator_nocs_', longdatestring)
             );
+
+RAISE NOTICE '% Created stops without journey code table', clock_timestamp();
+
+RAISE NOTICE '% Creating stops without gps in zone table', clock_timestamp();
 
 execute format('
             create table public.%I as
@@ -123,6 +143,9 @@ execute format('
             partition_date,
             partition_date);
 
+RAISE NOTICE '% Created stops without gps in zone table', clock_timestamp();
+
+RAISE NOTICE '% Creating stops with invalid gps in zone table', clock_timestamp();
 
 execute format('
             create table public.%I as
@@ -139,6 +162,10 @@ execute format('
             concat('stops_w_invalid_gps_in_zone', longdatestring),
             partition_date,
             partition_date);
+
+RAISE NOTICE '% Created stops with invalid gps in zone table', clock_timestamp();
+
+RAISE NOTICE '% Populating incomplete reason column in timetable', clock_timestamp();
 
 execute format('
             UPDATE public."Timetable"
@@ -180,6 +207,8 @@ execute format('
             concat('stops_w_invalid_gps_in_zone', longdatestring),
             partition_date);
 
+RAISE NOTICE '% Dropping temp tables', clock_timestamp();
+
 execute format('drop table if exists public.%I', concat('existing_line_name_', longdatestring));
 execute format('drop table if exists public.%I', concat('existing_journey_code_', longdatestring));
 execute format('drop table if exists public.%I', concat('existing_operator_nocs_', longdatestring));
@@ -191,6 +220,5 @@ execute format('drop table if exists public.%I', concat('stops_w_invalid_gps_in_
 
 RAISE NOTICE '% incomplete_data_load complete', clock_timestamp();
 end;
-$$;
-
-alter procedure incomplete_data_load owner to abods_proxy_rw;
+$procedure$
+;
