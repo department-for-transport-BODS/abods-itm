@@ -16,3 +16,5 @@ CREATE TABLE public.transmodel_tracks (
 );
 alter table public.transmodel_tracks owner to abods_rw;
 CREATE INDEX transmodel_tracks_geometry_idx ON public.transmodel_tracks USING btree (from_atco_code, to_atco_code);
+
+SELECT cron.schedule('sync_tracks', '05 15 * * *', $$CALL public.sync_tracks();$$);
