@@ -146,7 +146,7 @@ execute format('
             where timetable_id IN (select timetable_id from %I)
             and date_of_journey = %L',
             concat('stops_wo_nocs_', longdatestring),
-            partition_date)
+            partition_date);
 
 execute format('
             UPDATE public."Timetable"
@@ -154,7 +154,7 @@ execute format('
             where timetable_id IN (select timetable_id from %I)
             and date_of_journey = %L',
             concat('stops_wo_service_', longdatestring),
-            partition_date)
+            partition_date);
 
 execute format('
             UPDATE public."Timetable"
@@ -162,7 +162,7 @@ execute format('
             where timetable_id IN (select timetable_id from %I)
             and date_of_journey = %L',
             concat('stops_wo_journey_code_', longdatestring),
-            partition_date)
+            partition_date);
 
 execute format('
             UPDATE public."Timetable"
@@ -170,7 +170,7 @@ execute format('
             where timetable_id IN (select timetable_id from %I)
             and date_of_journey = %L',
             concat('stops_wo_gps_in_zone_', longdatestring),
-            partition_date)
+            partition_date);
 
 execute format('
             UPDATE public."Timetable"
@@ -178,16 +178,16 @@ execute format('
             where timetable_id IN (select timetable_id from %I)
             and date_of_journey = %L',
             concat('stops_w_invalid_gps_in_zone', longdatestring),
-            partition_date)
+            partition_date);
 
-execute format('drop table if exists public.%I', concat('existing_line_name_', longdatestring))
-execute format('drop table if exists public.%I', concat('existing_journey_code_', longdatestring))
-execute format('drop table if exists public.%I', concat('existing_operator_nocs_', longdatestring))
-execute format('drop table if exists public.%I', concat('stops_wo_nocs_', longdatestring))
-execute format('drop table if exists public.%I', concat('stops_wo_service_', longdatestring))
-execute format('drop table if exists public.%I', concat('stops_wo_journey_code_', longdatestring))
-execute format('drop table if exists public.%I', concat('stops_wo_gps_in_zone_', longdatestring))
-execute format('drop table if exists public.%I', concat('stops_w_invalid_gps_in_zone', longdatestring))
+execute format('drop table if exists public.%I', concat('existing_line_name_', longdatestring));
+execute format('drop table if exists public.%I', concat('existing_journey_code_', longdatestring));
+execute format('drop table if exists public.%I', concat('existing_operator_nocs_', longdatestring));
+execute format('drop table if exists public.%I', concat('stops_wo_nocs_', longdatestring));
+execute format('drop table if exists public.%I', concat('stops_wo_service_', longdatestring));
+execute format('drop table if exists public.%I', concat('stops_wo_journey_code_', longdatestring));
+execute format('drop table if exists public.%I', concat('stops_wo_gps_in_zone_', longdatestring));
+execute format('drop table if exists public.%I', concat('stops_w_invalid_gps_in_zone', longdatestring));
 
 RAISE NOTICE '% incomplete_data_load complete', clock_timestamp();
 end;
