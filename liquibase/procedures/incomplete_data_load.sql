@@ -13,12 +13,11 @@ RAISE NOTICE '% Creating existing operator nocs table', clock_timestamp();
 execute format('
             create table public.%I as
             select timetable_id
-            from (select timetable_id
             from public."Timetable" t
             join public."SiriVMPositions" s
             on t.operator_noc = s.operator_ref
             where t.date_of_journey = %L
-            and s.date_of_journey = %L)
+            and s.date_of_journey = %L
         ', 
             concat('existing_operator_nocs_', longdatestring),
             partition_date,
@@ -29,12 +28,11 @@ RAISE NOTICE '% Created existing operator nocs table', clock_timestamp();
 execute format('
             create table public.%I as
             select timetable_id
-            from (select timetable_id
             from public."Timetable" t
             join public."SiriVMPositions" s
             on t.line_name = s.line_name
             where t.date_of_journey = %L
-            and s.date_of_journey = %L)
+            and s.date_of_journey = %L
         ', 
             concat('existing_line_name_', longdatestring),
             partition_date,
@@ -45,12 +43,11 @@ RAISE NOTICE '% Created existing line name table', clock_timestamp();
 execute format('
             create table public.%I as
             select timetable_id
-            from (select timetable_id
             from public."Timetable" t
             join public."SiriVMPositions" s
             on t.journey_code = s.journey_ref
             where t.date_of_journey = %L
-            and s.date_of_journey = %L)
+            and s.date_of_journey = %L
         ', 
             concat('existing_journey_code_', longdatestring),
             partition_date,
