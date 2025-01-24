@@ -24,6 +24,7 @@ if TYPE_CHECKING:
 
 logger = Logger()
 initial_level = logger.log_level
+group_ids_to_debug = [group_id for group_id in os.getenv("DEBUG_GROUP_IDS", "").split(",") if group_id]
 
 
 def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of an issue here
@@ -141,10 +142,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         )
 
                     for group_id, stops in by_group_id.items():
-                        if group_id in [
-                            "fbri|m4|0640|2024-09-30",
-                            "fbri|m4|0640|24-09-30",
-                        ]:
+                        if group_id in group_ids_to_debug:
                             level = "DEBUG"
                         else:
                             level = initial_level
@@ -206,10 +204,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         # sort just in case duckdb returns in the wrong order
                         group_avls.sort(key=lambda x: x["recorded_at_time"])
 
-                        if group_id in [
-                            "fbri|m4|0640|2024-09-30",
-                            "fbri|m4|0640|24-09-30",
-                        ]:
+                        if group_id in group_ids_to_debug:
                             level = "DEBUG"
                         else:
                             level = initial_level
@@ -307,10 +302,10 @@ if __name__ == "__main__":
             with log_execution_time(logger, "get_operators"):
                 for row in conn.query(
                     """
-                                SELECT DISTINCT a.operator_ref
-                                FROM timetable t
-                                INNER JOIN avl a ON lower(concat_ws('|', a.operator_ref, a.line_name, a.journey_ref, a.date_of_journey)) = t.group_id
-                                """,
+                                    SELECT DISTINCT a.operator_ref
+                                    FROM timetable t
+                                    INNER JOIN avl a ON lower(concat_ws('|', a.operator_ref, a.line_name, a.journey_ref, a.date_of_journey)) = t.group_id
+                                    """,
                 ).fetchall():
                     operator_queue.put(row[0])
 
