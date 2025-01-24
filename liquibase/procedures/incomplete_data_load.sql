@@ -8,70 +8,32 @@ begin
 
 RAISE NOTICE '% Start running incomplete_data_load ', clock_timestamp();
 
-RAISE NOTICE '% Creating existing operator nocs table', clock_timestamp();
-
-execute format('
-            create table public.%I as
-            select timetable_id
-            from public."Timetable" t
-            join public."SiriVMPositions" s
-            on t.operator_noc = s.operator_ref
-            where t.date_of_journey = %L
-            and s.date_of_journey = %L
-        ', 
-            concat('existing_operator_nocs_', longdatestring),
-            partition_date,
-            partition_date);
-
-RAISE NOTICE '% Created existing operator nocs table', clock_timestamp();
-
-execute format('
-            create table public.%I as
-            select timetable_id
-            from public."Timetable" t
-            join public."SiriVMPositions" s
-            on t.line_name = s.line_name
-            where t.date_of_journey = %L
-            and s.date_of_journey = %L
-        ', 
-            concat('existing_line_name_', longdatestring),
-            partition_date,
-            partition_date);
-
-RAISE NOTICE '% Created existing line name table', clock_timestamp();
-
-execute format('
-            create table public.%I as
-            select timetable_id
-            from public."Timetable" t
-            join public."SiriVMPositions" s
-            on t.journey_code = s.journey_ref
-            where t.date_of_journey = %L
-            and s.date_of_journey = %L
-        ', 
-            concat('existing_journey_code_', longdatestring),
-            partition_date,
-            partition_date);
-
-RAISE NOTICE '% Created existing journey code table', clock_timestamp();
-
 RAISE NOTICE '% Creating stops without operator nocs table', clock_timestamp();
  
 execute format('
             create table public.%I as
-            select distinct timetable_id
+            select timetable_id
             from public."Timetable"
             where date_of_journey = %L
             and actual_departure_time IS NULL
             and time_difference IS NULL
-            and timetable_id not in (select timetable_id from public.%I)
-            and timetable_id in (select timetable_id from public.%I)
-            and timetable_id in (select timetable_id from public.%I)',
+            and timetable_id not in (select distinct timetable_id
+						            from public."Timetable" t
+						            join public."SiriVMPositions" s
+						            on t.operator_noc = s.operator_ref
+						            where t.date_of_journey = %L
+						            and s.date_of_journey = %L)
+            and timetable_id in (select distinct timetable_id
+					            from public."Timetable" t, public."SiriVMPositions" s
+					            where (t.line_name = s.line_name or t.journey_code = s.journey_ref)
+					            and t.date_of_journey = %L
+					            and s.date_of_journey = %L)',
             concat('stops_wo_nocs_', longdatestring),
             partition_date,
-            concat('existing_operator_nocs_', longdatestring),
-            concat('existing_journey_code_', longdatestring),
-            concat('existing_line_name_', longdatestring)
+            partition_date,
+			partition_date,
+			partition_date,
+			partition_date,
             );
 
 RAISE NOTICE '% Created stops without operator nocs table', clock_timestamp();
@@ -80,19 +42,28 @@ RAISE NOTICE '% Creating stops without service table', clock_timestamp();
 
 execute format('
             create table public.%I as
-            select distinct timetable_id
+            select timetable_id
             from public."Timetable"
             where date_of_journey = %L
             and actual_departure_time IS NULL
             and time_difference IS NULL
-            and timetable_id not in (select timetable_id from public.%I)
-            and timetable_id in (select timetable_id from public.%I)
-            and timetable_id in (select timetable_id from public.%I)',
+            and timetable_id not in (select timetable_id
+						            from public."Timetable" t
+						            join public."SiriVMPositions" s
+						            on t.line_name = s.line_name
+						            where t.date_of_journey = %L
+						            and s.date_of_journey = %L)
+            and timetable_id in (select timetable_id
+					            from public."Timetable" t, public."SiriVMPositions" s
+					            where (t.operator_noc = s.operator_ref or t.journey_code = s.journey_ref)
+					            where t.date_of_journey = %L
+					            and s.date_of_journey = %L)',
             concat('stops_wo_service_', longdatestring),
             partition_date,
-            concat('existing_line_name_', longdatestring),
-            concat('existing_operator_nocs_', longdatestring),
-            concat('existing_journey_code_', longdatestring)
+            partition_date,
+			partition_date,
+			partition_date,
+			partition_date
             );
 
 RAISE NOTICE '% Created stops without service table', clock_timestamp();
@@ -101,19 +72,28 @@ RAISE NOTICE '% Creating stops without journey code table', clock_timestamp();
 
 execute format('
             create table public.%I as
-            select distinct timetable_id
+            select timetable_id
             from public."Timetable"
             where date_of_journey = %L
             and actual_departure_time IS NULL
             and time_difference IS NULL
-            and timetable_id not in (select timetable_id from public.%I)
-            and timetable_id in (select timetable_id from public.%I)
-            and timetable_id in (select timetable_id from public.%I)',
+            and timetable_id not in (select timetable_id
+						            from public."Timetable" t
+						            join public."SiriVMPositions" s
+						            on t.journey_code = s.journey_ref
+						            where t.date_of_journey = %L
+						            and s.date_of_journey = %L)
+            and timetable_id in (select timetable_id
+					            from public."Timetable" t, public."SiriVMPositions" s
+					            where (t.line_name = s.line_name or t.operator_noc = s.operator_ref)
+					            where t.date_of_journey = %L
+					            and s.date_of_journey = %L)',
             concat('stops_wo_journey_code_', longdatestring),
             partition_date,
-            concat('existing_journey_code_', longdatestring),
-            concat('existing_line_name_', longdatestring),
-            concat('existing_operator_nocs_', longdatestring)
+            partition_date,
+			partition_date,
+			partition_date,
+			partition_date
             );
 
 RAISE NOTICE '% Created stops without journey code table', clock_timestamp();
@@ -122,7 +102,7 @@ RAISE NOTICE '% Creating stops without gps in zone table', clock_timestamp();
 
 execute format('
             create table public.%I as
-            select distinct timetable_id
+            select timetable_id
             from public."Timetable"
             where timetable_id not in
             (select distinct t.timetable_id
@@ -206,9 +186,6 @@ execute format('
 
 RAISE NOTICE '% Dropping temp tables', clock_timestamp();
 
-execute format('drop table if exists public.%I', concat('existing_line_name_', longdatestring));
-execute format('drop table if exists public.%I', concat('existing_journey_code_', longdatestring));
-execute format('drop table if exists public.%I', concat('existing_operator_nocs_', longdatestring));
 execute format('drop table if exists public.%I', concat('stops_wo_nocs_', longdatestring));
 execute format('drop table if exists public.%I', concat('stops_wo_service_', longdatestring));
 execute format('drop table if exists public.%I', concat('stops_wo_journey_code_', longdatestring));
