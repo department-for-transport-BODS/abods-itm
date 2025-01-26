@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
+import json
 from datetime import datetime
 import subprocess
 from datetime import date, timedelta
-from getpass import getpass
 from subprocess import CalledProcessError
 from time import sleep
 
@@ -23,8 +23,11 @@ def parse_task_output(output: dict):
             continue
         status = containers[0]["lastStatus"]
         arn = containers[0]["taskArn"]
-        process_date = [var["value"] for var in task["overrides"]["containerOverrides"][0]["environment"] if
-                      var["name"] == "PROCESS_DATE"][0]
+        process_date = [
+            var["value"]
+            for var in task["overrides"]["containerOverrides"][0]["environment"]
+            if var["name"] == "PROCESS_DATE"
+        ][0]
         yield arn, status, process_date
 
 
@@ -83,14 +86,17 @@ def start_task(current: date, environment: str):
         }
         cloudwatch = f"https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#logsV2:log-groups/log-group/$252Faws$252Fecs$252Fabods-{environment}/log-events/historic-matching$252Fmatcher$252F{task_arn.split('/')[-1]}"
         print(
-            f"{datetime.now().isoformat()}: {process_date} started. You can read the logs at {cloudwatch}")
+            f"{datetime.now().isoformat()}: {process_date} started. You can read the logs at {cloudwatch}"
+        )
 
 
 def look_for_existing_tasks(environment: str):
     arns = boto3.client("ecs").list_tasks(cluster=f"abods-{environment}")["taskArns"]
     status_output = get_task_status(environment, arns)
     for task_arn, status, process_date in parse_task_output(status_output):
-        print(f"{datetime.now().isoformat()}: {task_arn} for date {process_date} is {status}")
+        print(
+            f"{datetime.now().isoformat()}: {task_arn} for date {process_date} is {status}"
+        )
         task_status[task_arn] = {
             "status": status,
             "process_date": process_date,
@@ -123,7 +129,9 @@ def wait_for_tasks(environment: str, db_password: str, max_tasks: int):
         status_output = get_task_status(environment, list(task_status))
         for task_arn, status, process_date in parse_task_output(status_output):
             if task_status[task_arn]["status"] != status:
-                print(f"{datetime.now().isoformat()}: {task_arn} for date {process_date} is {status}")
+                print(
+                    f"{datetime.now().isoformat()}: {task_arn} for date {process_date} is {status}"
+                )
             task_status[task_arn]["status"] = status
 
         for arn in list(task_status):
@@ -138,6 +146,14 @@ def wait_for_tasks(environment: str, db_password: str, max_tasks: int):
                     summary_generation(db_password, process_date)
                 continue
         sleep(60)
+
+
+def get_db_password(environment: str):
+    return json.loads(
+        boto3.client("secretsmanager").get_secret_value(
+            SecretId=f"abods/{environment}/rds/user/{db_user}",
+        )["SecretString"],
+    )["password"]
 
 
 def main():
@@ -162,7 +178,7 @@ def main():
         if environment == "prod":
             break
 
-    db_password = getpass(f"Enter password for database user {db_user}: ")
+    db_password = get_db_password(environment)
 
     look_for_existing_tasks(environment)
     for arn in list(task_status):

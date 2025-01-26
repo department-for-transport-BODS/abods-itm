@@ -1,12 +1,51 @@
+import json
 import subprocess
 import time
 from datetime import datetime, timedelta
-from getpass import getpass
 import sys
 import select
 
+import boto3
+
 db_host = "abods-prod-db.cluster-cpwu8ksu6zyo.eu-west-2.rds.amazonaws.com"
 db_user = "root"
+max_queue_length = 6
+
+
+def get_db_password():
+    return json.loads(
+        boto3.client("secretsmanager").get_secret_value(
+            SecretId=f"abods/prod/rds/user/{db_user}",
+        )["SecretString"],
+    )["password"]
+
+
+def wait_for_queues():
+    while True:
+        longest_queue = 0
+        sqs = boto3.client("sqs")
+        for shard in range(7, 0, -1):
+            queue_length = int(
+                sqs.get_queue_attributes(
+                    QueueUrl=f"https://sqs.eu-west-2.amazonaws.com/637423206165/abods-prod-sirivm-otp-queue{7}.fifo",
+                    AttributeNames=["ApproximateNumberOfMessages"],
+                )["Attributes"]["ApproximateNumberOfMessages"]
+            )
+            if queue_length > longest_queue:
+                longest_queue = queue_length
+
+            if queue_length > max_queue_length:
+                print(
+                    f"{datetime.now().isoformat()}: Queue {shard} has {queue_length} messages"
+                )
+                break
+        else:
+            print(
+                f"{datetime.now().isoformat()}: All queues have {longest_queue} messages or less"
+            )
+            return
+
+        time.sleep(60)
 
 
 def run_query(query: str, password: str):
@@ -29,6 +68,7 @@ def run_query(query: str, password: str):
 
 
 def main():
+    db_password = get_db_password()
     while True:
         try:
             start = datetime.fromisoformat(
@@ -45,8 +85,6 @@ def main():
             break
         except ValueError:
             print("Incorrect data format, should be YYYY-MM-DD")
-    # TODO: get from secrets manager
-    db_password = getpass(f"Enter password for database user {db_user}: ")
     while current >= start:
         dstr = current.strftime("%Y-%m-%d")
         print(f"{datetime.now()} Generating {dstr} timetable")
@@ -58,10 +96,7 @@ def main():
         run_query(
             f"CALL public.historic_timetable_export('{dstr}');", password=db_password
         )
-        time.sleep(
-            10 * 60
-        )  # Give live matching time to catch up after DOSing it by hogging the Timetable table
-        # TODO: Convert the timetable data and start historic matching
+        wait_for_queues()
 
         print(f"{datetime.now()} Generated {dstr} timetable")
 
