@@ -95,7 +95,7 @@ def operator_worker_task(  # noqa: PLR0915, C901 Complexity not much of an issue
                                 group_id
                             FROM avl
                             WHERE operator_ref = '{operator_ref}'
-                        """,
+                        """,  # noqa: S608 Not really sql injection
                     ).fetchall():
                         avls_by_group_id.setdefault(group_id, []).append(
                             {
@@ -132,7 +132,7 @@ def operator_worker_task(  # noqa: PLR0915, C901 Complexity not much of an issue
                                 stop_index
                             FROM timetable
                             WHERE operator_noc = '{operator_ref}'
-                        """,
+                        """,  # noqa: S608 Not really sql injection
                     ).fetchall()
                     # Initially bucket by group_id, since we need to do something different if there are multiple directions within each
                     by_group_id = {}
