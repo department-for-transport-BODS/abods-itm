@@ -15,7 +15,6 @@ from pandas import DataFrame
 
 from .matcher.models import (
     LiveAVLRecord,
-    OperatorShards,
     StopHistory,
     Timetable,
     live_avl_file_columns,
@@ -56,24 +55,36 @@ class TimetableS3Client:
         """Construct a client"""
         self.client = boto3.client("s3")
         self.bucket = os.environ["SIRIVM_BUCKET"]
+        self.cache: dict[str, tuple[str, Any]] = {}
         logger.append_keys(s3_bucket=self.bucket)
 
-    def _get_from_s3(self, key: str) -> Any:  # noqa: ANN401 - Any is correct here, callers should determine actual type
-        """Get data from S3"""
+    def _get_from_s3(self, key: str, cache_result: bool = True) -> Any:  # noqa: ANN401, FBT001,FBT002 - Any is correct here, callers should determine actual type, boolean argument is also reasonable
+        """Get data from S3, caching result (optional)"""
+        cached = self.cache.get(key)
         try:
             logger.info("Fetching data from S3", s3_key=key)
-            content = (
-                self.client.get_object(Bucket=self.bucket, Key=key).get("Body").read()
+            response = self.client.get_object(
+                Bucket=self.bucket,
+                Key=key,
+                IfNoneMatch=cached[0] if cached else None,
             )
-            size = round(len(content) / (1024), 2)
+            content = response["Body"].read()
+            size = round(len(content) / 1024, 2)
             logger.info(
                 "Successfully fetched data from S3",
                 s3_key=key,
                 size_kb=size,
             )
-            return json.loads(content)
+            data = json.loads(content)
+            if cache_result:
+                self.cache[key] = (response["ETag"], data)
         except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_code = e.response["Error"]["Code"]
+
+            not_modified = 304
+            if error_code == not_modified and cached:
+                return cached[1]
+
             logger.exception(
                 "Failed to fetch data from S3",
                 s3_key=key,
@@ -81,12 +92,18 @@ class TimetableS3Client:
             )
             raise
 
-    def _write_to_s3(self, data_dict: dict[str, Any], path: str) -> None:
-        """Write dict as JSON file to S3"""
+    def _write_to_s3(self, data_dict: dict[str, Any], path: str) -> str:
+        """Write dict as JSON file to S3, returns the object Etag as calculated by S3"""
         try:
             data_string = json.dumps(data_dict, default=str)
-            self.client.put_object(Bucket=self.bucket, Key=path, Body=data_string)
+            result = self.client.put_object(
+                Bucket=self.bucket,
+                Key=path,
+                Body=data_string,
+            )
+            self.cache[path] = (result["ETag"], data_dict)
             logger.info("S3 upload successful", path=path)
+            return result["ETag"]
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "Unknown")
             logger.exception(
@@ -98,12 +115,7 @@ class TimetableS3Client:
 
     def download_main_timetable(self) -> Timetable:
         """Download Main Timetable Data"""
-        return self._get_from_s3("timetable/timetable.json")
-
-    @timer(logger)
-    def get_shards(self) -> OperatorShards:
-        """Get Shard Data from S3 and return Shards Model"""
-        return self._get_from_s3("shards.json")["shards"]
+        return self._get_from_s3("timetable/timetable.json", cache_result=False)
 
     @timer(logger)
     def get_stop_history(self, shard_no: str) -> StopHistory:
