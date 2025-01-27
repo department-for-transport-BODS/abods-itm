@@ -1,4 +1,4 @@
-create or replace procedure public.sync_tracks()
+create or replace procedure public.update_transmodel_tracks()
  LANGUAGE plpgsql
 AS $procedure$
 begin
