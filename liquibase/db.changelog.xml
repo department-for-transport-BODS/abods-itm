@@ -360,7 +360,11 @@
         <sqlFile path="sql/114-thresholds-departure-hour-only.sql" splitStatements="false"/>
     </changeSet>
 
-    <changeSet id="115" author="abodsuser">
-        <sqlFile path="sql/115-import-tracks-and-update-corridor-index.sql" splitStatements="false"/>
+    <changeSet id="115" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/update_transmodel_tracks.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="116" author="abodsuser">
+        <sqlFile path="sql/116-import-tracks-and-update-corridor-index.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
