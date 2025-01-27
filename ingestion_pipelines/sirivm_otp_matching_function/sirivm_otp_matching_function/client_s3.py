@@ -41,8 +41,9 @@ def filter_avl_list(
     for avl in avl_list:
         operator_ref = avl["operator_ref"]
         if operator_ref not in shard_lookup:
-            sha1_hash = hashlib.sha1(operator_ref.encode("utf-8")).hexdigest()  # noqa: S324 - no security implication, just need a fast consistent hash with reasonable distribution
-            shard_lookup[operator_ref] = str(int(sha1_hash, 16) % len(shards))
+            # Hashing to consistently pick a shard, not for security
+            hashed = hashlib.sha224(operator_ref.encode("utf-8")).hexdigest()
+            shard_lookup[operator_ref] = str(int(hashed, 16) % len(shards))
 
         if shard_lookup[operator_ref] != shard_identifier:
             continue

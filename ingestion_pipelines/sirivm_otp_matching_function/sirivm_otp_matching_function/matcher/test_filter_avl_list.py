@@ -9,19 +9,19 @@ shard_1_operator_id = shards["1"][0]
 avl_list = [
     {"operator_ref": shard_0_operator_id},
     {"operator_ref": shard_1_operator_id},
-    {"operator_ref": "TEST"},  # TEST hashes to 4
-    {"operator_ref": "XXXX"},  # XXXX hashes to 0
+    {"operator_ref": "TEST"},  # TEST hashes to 0
+    {"operator_ref": "XXXX"},  # XXXX hashes to 4
 ]
 
 
 @pytest.mark.parametrize(
     ("shard_id", "expected_result"),
     [
-        pytest.param("0", [avl_list[0], avl_list[3]]),
+        pytest.param("0", [avl_list[0], avl_list[2]]),
         pytest.param("1", [avl_list[1]]),
         pytest.param("2", []),
         pytest.param("3", []),
-        pytest.param("4", [avl_list[2]]),
+        pytest.param("4", [avl_list[3]]),
         pytest.param("5", []),
         pytest.param("6", []),
     ],
