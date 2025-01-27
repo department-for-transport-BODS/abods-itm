@@ -90,8 +90,6 @@ class TimetableS3Client:
 
     def _write_to_s3(self, data_dict: dict[str, Any], path: str) -> None:
         """Write dict as JSON file to S3"""
-        data_string = json.dumps(data_dict, default=str)
-        self.client.put_object(Bucket=self.bucket, Key=path, Body=data_string)
         try:
             data_string = json.dumps(data_dict, default=str)
             self.client.put_object(Bucket=self.bucket, Key=path, Body=data_string)
