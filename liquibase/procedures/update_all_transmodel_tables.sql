@@ -31,6 +31,8 @@ begin
     call public.update_organisation_dataset();
     raise notice 'Running update_transmodel_servicepattern_admin_areas at %', current_timestamp;
     call public.update_transmodel_servicepattern_admin_areas();
+    raise notice 'Running update_transmodel_tracks at %', current_timestamp;
+    call public.update_transmodel_tracks();
 end;
 $$;
 
