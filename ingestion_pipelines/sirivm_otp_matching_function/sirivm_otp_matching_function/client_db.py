@@ -105,6 +105,7 @@ class TimetableDBClient:
         batch_id: int,
         entries_to_update: Sequence[NewDbMatch],
         entries_to_remove: Sequence[BadDbMatch],
+        date_of_journey: str,
     ) -> None:
         """Update database to reflect successful live matching"""
         with self.connection.cursor() as cursor:
@@ -128,6 +129,7 @@ class TimetableDBClient:
                         record["last_time_in_zone"],
                         record["otp_state"],
                         record["timestamp_after_estimate"],
+                        date_of_journey,
                     )
                     for record in entries_to_update
                 ],
