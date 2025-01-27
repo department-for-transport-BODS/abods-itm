@@ -16,4 +16,4 @@ def read_timetable(file_name: str) -> Timetable:
 
 def read_avl(file_name: str) -> Sequence[AVLRecord]:
     with open(test_data_dir / "avl" / file_name) as csvfile:
-        return parse_live_avl_data(csvfile, has_header=True)
+        return list(parse_live_avl_data(csvfile, has_header=True))
