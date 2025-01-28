@@ -1,5 +1,5 @@
 import os
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -988,9 +988,27 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                 ],
                 id="Write final stop to db",
             ),
+            pytest.param(
+                False,
+                timetable,
+                [],
+                "1",
+                last_time_in_zone_non_final - timedelta(seconds=7234),
+                [],
+                id="The match has a time difference more than 2 hours early, it shouldn't be added to the stop_pos_distances",
+            ),
+            pytest.param(
+                False,
+                timetable,
+                [],
+                "1",
+                last_time_in_zone_non_final + timedelta(seconds=4000),
+                [],
+                id="The match has a time difference more than 1 hour late, it shouldn't be added to the stop_pos_distances",
+            ),
         ],
     )
-    def test_write_matched_final_stop_to_db(  # noqa: D102 - BODS-7131
+    def test_write_matched_stop_to_db(  # noqa: D102 - BODS-7131
         self,
         is_final_stop: bool,  # noqa: FBT001 - BODS-7131
         timetable_dict: dict,
