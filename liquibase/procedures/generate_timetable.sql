@@ -37,8 +37,9 @@ begin
     ELSE
         execute format(
                 '
-                CREATE TABLE public.%I AS WITH --get list of all potential timetable dataset ids (od2.dataset_type = 1)
-                potential_datasets AS (
+                CREATE TABLE public.%I AS
+                WITH potential_datasets AS (
+                  --get list of all potential timetable dataset ids (od2.dataset_type = 1)
                   SELECT
                     od2.id dataset_table_id,
                     od2.dataset_type
@@ -47,8 +48,8 @@ begin
                   WHERE
                     od2.dataset_type = 1
                 ),
-                -- get all potentially live revisions where published before the date we are interested in
                 potential_revisions AS (
+                  -- get all potentially live revisions where published before the date we are interested in
                   SELECT
                     (%L)::timestamptz AS query_date,
                     od.*,
@@ -65,8 +66,8 @@ begin
                       ''expired''
                     )
                 ),
-                -- get all potentially live revisions where published before the date we are interested in
                 inactive_at_date_prequery AS (
+                  -- get all potentially live revisions where published before the date we are interested in
                   SELECT
                     *,
                     rank() OVER (
@@ -77,8 +78,8 @@ begin
                   FROM
                     potential_revisions
                 ),
-                --get all potential revision grouped by dataset_id ranked by highest modified date
                 inactive_at_date AS (
+                  --get all potential revision grouped by dataset_id ranked by highest modified date
                   SELECT
                     DISTINCT dataset_id
                   FROM
@@ -88,8 +89,8 @@ begin
                     AND modified < query_date
                     AND status IN (''inactive'', ''expired'')
                 ),
-                -- list dataset ids at latest revision where modified before query date
                 ranked_revisions AS (
+                  -- list dataset ids at latest revision where modified before query date
                   SELECT
                     pr.*,
                     rank() OVER (
@@ -104,8 +105,8 @@ begin
                   WHERE
                     iad.dataset_id IS NULL
                 ),
-                -- rank revisions which are not inactive at date by most modified
                 highest_revisions AS (
+                  -- rank revisions which are not inactive at date by most modified
                   SELECT
                     rr.*
                   FROM
