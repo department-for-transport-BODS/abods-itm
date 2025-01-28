@@ -24,7 +24,9 @@ if TYPE_CHECKING:
 
 logger = Logger()
 initial_level = logger.log_level
-group_ids_to_debug = [group_id for group_id in os.getenv("DEBUG_GROUP_IDS", "").split(",") if group_id]
+group_ids_to_debug = [
+    group_id for group_id in os.getenv("DEBUG_GROUP_IDS", "").split(",") if group_id
+]
 
 
 def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of an issue here
