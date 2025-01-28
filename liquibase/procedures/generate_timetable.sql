@@ -1017,6 +1017,7 @@ begin
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_rank_1', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_no_last_stops', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_prev_group_id', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('potential_revisions', timetable_suffix));
     END IF;
 
     RAISE NOTICE '% generate_timetable complete', clock_timestamp();
