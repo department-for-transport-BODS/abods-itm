@@ -6,7 +6,6 @@ from typing import Protocol
 
 from aws_lambda_powertools import Logger
 
-from .matcher_config import config
 from .models import (
     AVLRecord,
     GroupStopHistory,
@@ -26,7 +25,6 @@ from .models import (
 )
 from .utils import (
     get_otp_state,
-    get_time_difference,
     log_execution_time,
     timer,
     transform_coordinates_and_calculate_intersections,
@@ -61,15 +59,13 @@ class TimetableStore(Protocol):
 
 logger = Logger()
 
-distance_threshold = config.get("distance_threshold")
-saved_matches_limit = config.get("saved_matches_limit")
-journey_stops_min_threshold = config.get("journey_stops_min_threshold")
-estimated_matching_time_upper_limit_in_seconds = config.get(
-    "estimated_matching_time_upper_limit_in_seconds",
-)
-estimated_matching_distance_upper_limit_in_metres = config.get(
-    "estimated_matching_distance_upper_limit_in_metres",
-)
+DISTANCE_THRESHOLD = 70
+SAVED_MATCHES_LIMIT = 2
+JOURNEY_STOPS_MIN_THRESHOLD = 3
+ESTIMATED_MATCHING_TIME_UPPER_LIMIT_IN_SECONDS = 60
+ESTIMATED_MATCHING_DISTANCE_UPPER_LIMIT_IN_METRES = 2000
+MATCHING_TIME_LOWER_LIMIT_IN_SECONDS = -2 * 60 * 60
+MATCHING_TIME_UPPER_LIMIT_IN_SECONDS = 1 * 60 * 60
 
 
 def create_matched_stop(last_time_in_zone: datetime, is_estimate: bool) -> MatchedStop:  # noqa: FBT001
@@ -169,18 +165,18 @@ def check_estimated_match(
 
     time_diff = (avl_recorded_at_time_utc(avl) - previous_avl_time).total_seconds()
 
-    if time_diff > estimated_matching_time_upper_limit_in_seconds:
+    if time_diff > ESTIMATED_MATCHING_TIME_UPPER_LIMIT_IN_SECONDS:
         return None
 
     stop_intersection_ratios = transform_coordinates_and_calculate_intersections(
         (stop_longitude(stop), stop_latitude(stop)),
-        distance_threshold,
+        DISTANCE_THRESHOLD,
         (
             group_stop_history["last_avl_longitude"],
             group_stop_history["last_avl_latitude"],
         ),
         (avl["longitude"], avl["latitude"]),
-        estimated_matching_distance_upper_limit_in_metres,
+        ESTIMATED_MATCHING_DISTANCE_UPPER_LIMIT_IN_METRES,
     )
 
     # check if the line intersects the circle twice
@@ -227,7 +223,7 @@ def find_potential_matches(
         # 12.3 Is this index less than 3/4*last stop index?
         if (
             num_of_matched_stops <= 1
-            and final_stop_index > journey_stops_min_threshold
+            and final_stop_index > JOURNEY_STOPS_MIN_THRESHOLD
             and i > int(final_stop_index * 3 / 4)
         ):
             logger.debug(
@@ -245,9 +241,9 @@ def find_potential_matches(
         next_stop_details = route_details[str(i)]
         avl_next_stop_distance = haversine(avl, next_stop_details)
         # 13. If avl and the next stop distance < threshold
-        if avl_next_stop_distance < distance_threshold:
+        if avl_next_stop_distance < DISTANCE_THRESHOLD:
             logger.debug(
-                f"12. avl is {avl_next_stop_distance}m from stop {i}, less than {distance_threshold}m",
+                f"12. avl is {avl_next_stop_distance}m from stop {i}, less than {DISTANCE_THRESHOLD}m",
             )
             # 14. create potential match
             group_stop_history["potential_matches"][str(i)] = create_potential_match(
@@ -308,9 +304,9 @@ def check_update_first_stop(
         ms_details = group_stop_history["matched_stops"][ms_index]
         ms_last_match_time = validate_date(ms_details["last_match_time"])
         avl_ms_distance = haversine(avl, matched_stop_details)
-        if avl_ms_distance < distance_threshold:
+        if avl_ms_distance < DISTANCE_THRESHOLD:
             logger.debug(
-                f"6+7. avl is {avl_ms_distance}m, within {distance_threshold}m",
+                f"6+7. avl is {avl_ms_distance}m, within {DISTANCE_THRESHOLD}m",
             )
             difference = avl_recorded_at_time_utc(avl) - ms_last_match_time
             within_5_minutes = difference < timedelta(minutes=5)
@@ -383,9 +379,9 @@ def find_matches_in_potential_matches(
         last_distance = pm_details["last_distance"]
         is_final_stop = int(pm_index) == final_stop_index
         # 15. If the distance between avl and potential match is less than threshold
-        if avl_pm_distance < distance_threshold:
+        if avl_pm_distance < DISTANCE_THRESHOLD:
             logger.debug(
-                f"15. avl is {avl_pm_distance}m from stop {pm_index}, less than {distance_threshold}m",
+                f"15. avl is {avl_pm_distance}m from stop {pm_index}, less than {DISTANCE_THRESHOLD}m",
             )
             # 16. check if the potential match is the final stop of the route
             if is_final_stop:
@@ -422,11 +418,11 @@ def find_matches_in_potential_matches(
             # Find one more row of avl that is away from the stop
             # 19. Check if pm last distance > distance threshold, 20. check if the avl potential distance > last distance
             logger.debug(
-                f"15. avl is {avl_pm_distance}m from stop {pm_index}, greater than {distance_threshold}m",
+                f"15. avl is {avl_pm_distance}m from stop {pm_index}, greater than {DISTANCE_THRESHOLD}m",
             )
-            if last_distance > distance_threshold and avl_pm_distance > last_distance:
+            if last_distance > DISTANCE_THRESHOLD and avl_pm_distance > last_distance:
                 logger.debug(
-                    f"19. Last distance {last_distance}m > {distance_threshold}m, 20. avl potential distance {avl_pm_distance}m > Last distance {last_distance}m",
+                    f"19. Last distance {last_distance}m > {DISTANCE_THRESHOLD}m, 20. avl potential distance {avl_pm_distance}m > Last distance {last_distance}m",
                 )
                 # avl is confirmed to be getting away from the stop with last distance > 70m
                 # 31-32. check if there is more than 1 match being created with the same recordedattime
@@ -534,8 +530,25 @@ def map_matched_stop_to_db(
 
     """
     timetable_departure_time = stop_departure_time(route_details[pm_index])
-    time_difference = get_time_difference(last_time_in_zone, timetable_departure_time)
+    time_difference = (last_time_in_zone - timetable_departure_time).total_seconds()
 
+    if time_difference < MATCHING_TIME_LOWER_LIMIT_IN_SECONDS:
+        logger.warning(
+            "This match is more than 2 hours early",
+            timetable_id=stop_timetable_id(route_details[pm_index]),
+            time_difference=time_difference,
+            last_time_in_zone=last_time_in_zone,
+            timetable_departure_time=validate_date(timetable_departure_time),
+        )
+        return
+    if time_difference > MATCHING_TIME_UPPER_LIMIT_IN_SECONDS:
+        logger.warning(
+            "This match is more than 1 hour late",
+            timetable_id=stop_timetable_id(route_details[pm_index]),
+            time_difference=time_difference,
+            last_time_in_zone=last_time_in_zone,
+            timetable_departure_time=validate_date(timetable_departure_time),
+        )
     # 23. update db with potential match details
     stop_pos_distances.append(
         {
@@ -701,7 +714,7 @@ def move_potential_match_to_match(
         if (
             int(pm_index) > highest_matched_stop_index
             and int(pm_index) == stop_index_with_latest_match_timestamp
-            and len(matched_stops) == saved_matches_limit
+            and len(matched_stops) == SAVED_MATCHES_LIMIT
         ):
             logger.debug(
                 f"{pm_index} higher than highest_matched_stop_index {highest_matched_stop_index}, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
@@ -721,7 +734,7 @@ def move_potential_match_to_match(
         if (
             int(pm_index) <= lowest_matched_stop_index
             and (
-                len(matched_stops) == saved_matches_limit
+                len(matched_stops) == SAVED_MATCHES_LIMIT
                 or highest_matched_stop_index - lowest_matched_stop_index == 1
             )
         ) or (
