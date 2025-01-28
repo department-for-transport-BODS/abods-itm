@@ -638,7 +638,7 @@ begin
               departure_day_shift
             FROM
               public.%I tvw
-              JOIN public.transmodel_servicepatternstop STOP
+              JOIN public.transmodel_servicepatternstop stop
                 ON tvw.transmodel_vehiclejourney_id = stop.vehicle_journey_id
 	        ',
             concat('timetable_journey', timetable_suffix),

@@ -180,7 +180,7 @@ begin
                       LEFT JOIN bods.otc_inactiveservice ois
                         ON  os.registration_number = ois.registration_number
                         AND ois.registration_status = ''Registered''
-                        AND ois.effective_date = CURRENT_DATE + 1
+                        AND ois.effective_date = %L::date + 1
                     WHERE
                          os.registration_status = ''Registered''
                       OR os.registration_status = ''''
@@ -188,7 +188,7 @@ begin
                       OR (
                             os.registration_status != ''Registered''
                         AND os.registration_status != ''''
-                        AND os.effective_date > CURRENT_DATE + 1
+                        AND os.effective_date > %L::date + 1
                       )
                   ) osn ON ot.service_code = osn.otc_service_code
                 UNION
@@ -201,6 +201,8 @@ begin
             concat('filtered_registered_organisation_timetable', timetable_suffix),
             concat('organisation_timetable', timetable_suffix),
             concat('organisation_timetable', timetable_suffix),
+            CURRENT_DATE,
+            CURRENT_DATE
             );
 
     RAISE NOTICE '% (Re)Creating timetable_vehiclejourney temp table', clock_timestamp();
@@ -546,10 +548,8 @@ begin
               departure_day_shift
             FROM
               public.%I tvw
-              JOIN public.transmodel_servicepatternstop STOP
+              JOIN public.transmodel_servicepatternstop stop
                 ON tvw.transmodel_vehiclejourney_id = stop.vehicle_journey_id
-            WHERE
-              trim(tvw.journey_code) <> '''';
 	        ',
             concat('timetable_journey', timetable_suffix),
             concat('timetable_vj_per_groupid', timetable_suffix)
@@ -608,9 +608,9 @@ begin
             concat('timetable_journey', timetable_suffix)
             );
 
--------------------------------
--- Selecting ranked 1 files --
--------------------------------
+    -------------------------------
+    -- Selecting ranked 1 files --
+    -------------------------------
 
     RAISE NOTICE '% Selecting rank 1 files', clock_timestamp();
 
@@ -665,9 +665,9 @@ begin
             concat('timetable_stop', timetable_suffix)
             );
 
-----------------------------
---Removing last stop --
-----------------------------
+    ----------------------------
+    --Removing last stop --
+    ----------------------------
 
     RAISE NOTICE '% Removing last stop', clock_timestamp();
 
@@ -695,9 +695,9 @@ begin
             concat('timetable_stop_rank_1', timetable_suffix)
             );
 
--------------------------------------------------------------
--- Add previous group id for frequent services no last stop--
--------------------------------------------------------------
+    -------------------------------------------------------------
+    -- Add previous group id for frequent services no last stop--
+    -------------------------------------------------------------
 
     RAISE NOTICE '% Adding previous_group_id', clock_timestamp();
 
@@ -739,15 +739,15 @@ begin
             concat('timetable_stop_no_last_stops', timetable_suffix)
             );
 
-----------------------------
--- Create dated partition --
-----------------------------
+    ----------------------------
+    -- Create dated partition --
+    ----------------------------
 
-    RAISE NOTICE '% (Re)Creating partition public.%', tablename, clock_timestamp();
+    RAISE NOTICE '% (Re)Creating partition public.%', clock_timestamp(), tablename;
 
 
     execute format(
-            'CREATE TABLE if not exists public.%I partition of public.%I FOR VALUES FROM (%L) TO (%L)',
+            'CREATE TABLE if not exists public.%I partition of public.%I FOR VALUES FROM (%L) TO (%L);',
             concat(tablename, '_p', longdatestring),
             tablename,
             partition_date,
@@ -755,19 +755,19 @@ begin
 
     execute format('ALTER TABLE public.%I OWNER to abods_rw', concat(tablename, '_p', longdatestring));
 
-------------------------------
--- Deleting from partition --
-------------------------------
+    ------------------------------
+    -- Deleting from partition --
+    ------------------------------
 
-    RAISE NOTICE '% Deleting from %', tablename, clock_timestamp();
+    RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
 
     execute format('DELETE FROM public.%I', concat(tablename, '_p', longdatestring));
 
---------------------------
---Importing to partition --
---------------------------
+    --------------------------
+    --Importing to partition --
+    --------------------------
 
-    RAISE NOTICE '% Inserting into %', tablename, clock_timestamp();
+    RAISE NOTICE '% Inserting into %', clock_timestamp(), tablename;
 
     execute format(
             '
