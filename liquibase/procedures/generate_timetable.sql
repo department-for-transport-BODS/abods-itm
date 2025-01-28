@@ -201,8 +201,8 @@ begin
             concat('filtered_registered_organisation_timetable', timetable_suffix),
             concat('organisation_timetable', timetable_suffix),
             concat('organisation_timetable', timetable_suffix),
-            CURRENT_DATE,
-            CURRENT_DATE
+            partition_date,
+            partition_date
             );
 
     RAISE NOTICE '% (Re)Creating timetable_vehiclejourney temp table', clock_timestamp();
