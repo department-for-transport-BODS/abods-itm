@@ -53,11 +53,7 @@ BEGIN
 				avg_time_difference,
 				admin_areas,
 				estimated,
-				incomplete_reason_1_count,
-				incomplete_reason_2_count,
-				incomplete_reason_3_count,
-				incomplete_reason_4_count,
-				incomplete_reason_5_count
+				incomplete_reason
 			)
 			SELECT
 				sub.operator_noc,
@@ -83,11 +79,7 @@ BEGIN
 				COALESCE(AVG(sub.avg_time_difference/60.0), 0.0) AS avg_time_difference,
 				sub.admin_area_id AS admin_areas,
 				sub.estimated,
-				COUNT(CASE WHEN sub.incomplete_reason = 1 THEN 1 END) AS incomplete_reason_1_count,
-				COUNT(CASE WHEN sub.incomplete_reason = 2 THEN 1 END) AS incomplete_reason_2_count,
-				COUNT(CASE WHEN sub.incomplete_reason = 3 THEN 1 END) AS incomplete_reason_3_count,
-				COUNT(CASE WHEN sub.incomplete_reason = 4 THEN 1 END) AS incomplete_reason_4_count,
-				COUNT(CASE WHEN sub.incomplete_reason = 5 THEN 1 END) AS incomplete_reason_5_count
+				sub.incomplete_reason
 			FROM
 				(
 					SELECT
@@ -159,7 +151,8 @@ BEGIN
 				max_early,
 				admin_area_id,
 				max_late,
-				estimated',
+				estimated,
+				incomplete_reason',
                 tablename,
                 partition_date,
                 partition_date);

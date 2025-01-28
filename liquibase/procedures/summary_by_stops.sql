@@ -58,11 +58,7 @@ BEGIN
 				max_late,
 				avg_time_difference,
 				estimated,
-				incomplete_reason_1_count,
-				incomplete_reason_2_count,
-				incomplete_reason_3_count,
-				incomplete_reason_4_count,
-				incomplete_reason_5_count,
+				incomplete_reason
 			)
 			SELECT
 				sub.operator_noc,
@@ -93,11 +89,7 @@ BEGIN
 				sub.max_late,
 				COALESCE(AVG(sub.avg_time_difference/60.0), 0.0) AS avg_time_difference,
 				sub.estimated,
-				COUNT(CASE WHEN sub.incomplete_reason = 1 THEN 1 END) AS incomplete_reason_1_count,
-				COUNT(CASE WHEN sub.incomplete_reason = 2 THEN 1 END) AS incomplete_reason_2_count,
-				COUNT(CASE WHEN sub.incomplete_reason = 3 THEN 1 END) AS incomplete_reason_3_count,
-				COUNT(CASE WHEN sub.incomplete_reason = 4 THEN 1 END) AS incomplete_reason_4_count,
-				COUNT(CASE WHEN sub.incomplete_reason = 5 THEN 1 END) AS incomplete_reason_5_count
+				sub.incomplete_reason
 			FROM
 				(
 					SELECT
@@ -173,7 +165,8 @@ BEGIN
 					is_timing_point,
 					max_early,
 					max_late,
-					estimated',
+					estimated,
+					incomplete_reason',
                 tablename,
                 partition_date,
                 partition_date);
