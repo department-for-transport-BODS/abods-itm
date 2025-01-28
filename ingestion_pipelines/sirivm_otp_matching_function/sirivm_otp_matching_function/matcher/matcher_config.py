@@ -6,4 +6,5 @@ config = {
     "journey_stops_min_threshold": 3,
     "estimated_matching_time_upper_limit_in_seconds": 60,
     "estimated_matching_distance_upper_limit_in_metres": 2000,
+    "matching_time_lower_limit_in_seconds": -7200,
 }

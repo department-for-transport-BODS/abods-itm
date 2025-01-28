@@ -70,6 +70,7 @@ estimated_matching_time_upper_limit_in_seconds = config.get(
 estimated_matching_distance_upper_limit_in_metres = config.get(
     "estimated_matching_distance_upper_limit_in_metres",
 )
+matching_time_lower_limit_in_seconds = config.get("matching_time_lower_limit_in_seconds", 0)
 
 
 def create_matched_stop(last_time_in_zone: datetime, is_estimate: bool) -> MatchedStop:  # noqa: FBT001
@@ -878,6 +879,7 @@ def match_group_id_avls(
             rec
             for rec in journey_matches
             if rec["timetable_id"] not in remove_timetable_ids
+            and rec["time_difference"] > matching_time_lower_limit_in_seconds
         ]
         journey_matches.extend(to_set)
         logger.remove_keys(["avl", "group_id", "stop_history_index"])
