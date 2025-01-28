@@ -15,7 +15,6 @@ execute format('
             SELECT timetable_id
             FROM public."Timetable" t
             WHERE date_of_journey = %L
-                AND actual_departure_time IS NULL
                 AND time_difference IS NULL
                 AND NOT EXISTS (
                     SELECT 1
@@ -41,7 +40,6 @@ execute format('
             SELECT timetable_id
             FROM public."Timetable" t
             WHERE date_of_journey = %L
-                AND actual_departure_time IS NULL
                 AND time_difference IS NULL
                 AND NOT EXISTS (
                     SELECT 1
@@ -76,7 +74,6 @@ execute format('
             SELECT timetable_id
             FROM public."Timetable" t
             WHERE date_of_journey = %L
-                AND actual_departure_time IS NULL
                 AND time_difference IS NULL
                 AND NOT EXISTS (
                     SELECT 1
@@ -120,7 +117,6 @@ execute format('
             on t.group_id = s.group_id
             where t.date_of_journey = %L
             and s.date_of_journey = %L
-            and t.actual_departure_time IS NULL
             and t.time_difference IS NULL
             and (2 * ASIN(SQRT(POWER(SIN((RADIANS(t.stop_latitude) - RADIANS(s.latitude)) / 2), 2) + COS(RADIANS(s.latitude)) * COS(RADIANS(t.stop_latitude)) * POWER(SIN((RADIANS(s.longitude) - RADIANS(t.stop_longitude)) / 2), 2))) * 6371) * 1000 <= 70
         )',
@@ -140,7 +136,6 @@ execute format('
             on t.group_id = s.group_id
             WHERE t.date_of_journey = %L
             AND s.date_of_journey = %L
-            AND t.actual_departure_time IS NULL
             AND t.time_difference IS NULL
             AND NOT EXISTS (
                 SELECT 1
