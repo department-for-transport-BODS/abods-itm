@@ -1,4 +1,4 @@
-create or replace procedure public.update_transmodel_tracks()
+create or replace procedure update_transmodel_tracks()
  LANGUAGE plpgsql
 AS $procedure$
 begin
@@ -20,7 +20,7 @@ begin
     on conflict(from_atco_code, to_atco_code)
     DO UPDATE SET
         geometry = ST_AsGeoJSON(EXCLUDED.geometry),
-        distance = EXCLUDED.distance
+        distance = EXCLUDED.distance;
 
     DELETE FROM public.transmodel_tracks
     WHERE id NOT IN (SELECT id FROM bods.transmodel_tracks);
@@ -28,4 +28,4 @@ begin
 end; $procedure$
 ;
 
-alter procedure public.transmodel_tracks owner to abods_rw;
+alter procedure update_transmodel_tracks owner to abods_rw;
