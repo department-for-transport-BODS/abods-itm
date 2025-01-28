@@ -304,10 +304,10 @@ if __name__ == "__main__":
             with log_execution_time(logger, "get_operators"):
                 for row in conn.query(
                     """
-                                    SELECT DISTINCT a.operator_ref
-                                    FROM timetable t
-                                    INNER JOIN avl a ON lower(concat_ws('|', a.operator_ref, a.line_name, a.journey_ref, a.date_of_journey)) = t.group_id
-                                    """,
+                        SELECT DISTINCT a.operator_ref
+                        FROM timetable t
+                        INNER JOIN avl a ON lower(concat_ws('|', a.operator_ref, a.line_name, a.journey_ref, a.date_of_journey)) = t.group_id
+                        """,
                 ).fetchall():
                     operator_queue.put(row[0])
 

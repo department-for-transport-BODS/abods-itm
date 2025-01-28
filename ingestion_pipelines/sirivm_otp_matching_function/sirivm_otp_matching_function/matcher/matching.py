@@ -973,7 +973,6 @@ def match_avl(
         group_id,
         avl_direction,
     )
-
     logger.append_keys(
         avl=avl,
         group_id=group_id,
