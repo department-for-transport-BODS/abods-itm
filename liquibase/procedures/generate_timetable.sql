@@ -12,10 +12,7 @@ begin
 
     RAISE NOTICE '% (Re)Creating organisation_timetable temp table', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('organisation_timetable', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('organisation_timetable', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -125,10 +122,7 @@ MaxStartDates as (
 
     RAISE NOTICE '% (Re)Creating filtered_registered_organisation_timetable table', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('filtered_registered_organisation_timetable', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_registered_organisation_timetable', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -165,10 +159,7 @@ MaxStartDates as (
 
     RAISE NOTICE '% (Re)Creating timetable_vehiclejourney temp table', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_vehiclejourney', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -198,10 +189,7 @@ MaxStartDates as (
 
     RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_workingdays temp table', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_vehiclejourney_workingdays', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_workingdays', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -243,10 +231,7 @@ MaxStartDates as (
 
     RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_exclusions temp table', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_vehiclejourney_exclusions', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_exclusions', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -301,10 +286,7 @@ MaxStartDates as (
 
     RAISE NOTICE '% (Re)Creating timetable_journey_workingdays_with_exclusions temp table', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_journey_workingdays_with_exclusions', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_journey_workingdays_with_exclusions', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -321,10 +303,7 @@ where b.id is null
 
     RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_servicecode_dupes temp table', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_vehiclejourney_servicecode_dupes', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_servicecode_dupes', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -339,10 +318,7 @@ having count(distinct service_code) > 1
 
     RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_nodupes temp table', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_vehiclejourney_nodupes', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_nodupes', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -361,10 +337,7 @@ where drv.journey_code is null
 
     RAISE NOTICE '% (Re)Creating timetable_vj_per_groupid temp table', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_vj_per_groupid', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vj_per_groupid', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -418,10 +391,7 @@ where drv.journey_code is null
 
     RAISE NOTICE '% (Re)Creating timetable_journey temp table', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_journey', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_journey', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -454,10 +424,7 @@ where drv.journey_code is null
 
     RAISE NOTICE '% (Re)Creating timetable_stop temp table', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_stop', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -501,10 +468,7 @@ where drv.journey_code is null
 
     RAISE NOTICE '% Selecting rank 1 files', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_stop_rank_1', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_rank_1', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -556,10 +520,7 @@ where drv.journey_code is null
 
     RAISE NOTICE '% Removing last stop', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_stop_no_last_stops', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_no_last_stops', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -585,10 +546,7 @@ where drv.journey_code is null
 
     RAISE NOTICE '% Adding previous_group_id', clock_timestamp();
 
-    execute format(
-            'drop table if exists public.%I',
-            concat('timetable_stop_prev_group_id', timetable_suffix)
-            );
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_prev_group_id', timetable_suffix));
 
     execute format(
             'create table public.%I as
@@ -741,75 +699,20 @@ where drv.journey_code is null
     ELSE
         RAISE NOTICE '% Cleaning Up', clock_timestamp();
 
-        execute format(
-                'drop table if exists public.%I',
-                concat('organisation_timetable', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('filtered_registered_organisation_timetable', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_vehiclejourney', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_vehiclejourney_workingdays', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_vehiclejourney_exclusions', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_journey_workingdays_with_exclusions', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_vehiclejourney_servicecode_dupes', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_vehiclejourney_nodupes', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_journey', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_stop', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_vj_per_groupid', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_stop_rank_1', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_stop_no_last_stops', timetable_suffix)
-                );
-
-        execute format(
-                'drop table if exists public.%I',
-                concat('timetable_stop_prev_group_id', timetable_suffix)
-                );
+        execute format('DROP TABLE IF EXISTS public.%I', concat('organisation_timetable', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_registered_organisation_timetable', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_workingdays', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_exclusions', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_journey_workingdays_with_exclusions', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_servicecode_dupes', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_nodupes', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_journey', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vj_per_groupid', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_rank_1', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_no_last_stops', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_prev_group_id', timetable_suffix));
     END IF;
 
     RAISE NOTICE '% generate_timetable complete', clock_timestamp();
