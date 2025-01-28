@@ -86,33 +86,6 @@ def validate_date(date_input: datetime | str) -> datetime:
     return datetime.strptime(date_input_wo_tz, date_format).replace(tzinfo=UTC)
 
 
-def get_time_difference(
-    last_time_in_zone: datetime,
-    timetable_departure_time: datetime,
-) -> float:
-    """
-    Calculate the time difference between the last time in zone and the expected departure time
-
-    Args:
-        last_time_in_zone (datetime): Last time in zone
-        timetable_departure_time (datetime): Expected departure time
-
-    Returns:
-        float: The time difference between the last time in zone and the expected departure time
-
-    """
-    hour = 3600
-    time_difference = (last_time_in_zone - timetable_departure_time).total_seconds()
-    if time_difference < -(hour * 2) or time_difference > hour:
-        logger.warning(
-            "time difference is outside expected range",
-            time_difference=time_difference,
-            last_time_in_zone=last_time_in_zone,
-            timetable_departure_time=validate_date(timetable_departure_time),
-        )
-    return time_difference
-
-
 def get_otp_state(
     is_final_stop: bool,  # noqa: FBT001 - Can be split up later
     time_difference: float,

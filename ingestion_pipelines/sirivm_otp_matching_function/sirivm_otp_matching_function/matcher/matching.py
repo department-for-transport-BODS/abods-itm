@@ -26,7 +26,6 @@ from .models import (
 )
 from .utils import (
     get_otp_state,
-    get_time_difference,
     log_execution_time,
     timer,
     transform_coordinates_and_calculate_intersections,
@@ -70,7 +69,12 @@ estimated_matching_time_upper_limit_in_seconds = config.get(
 estimated_matching_distance_upper_limit_in_metres = config.get(
     "estimated_matching_distance_upper_limit_in_metres",
 )
-matching_time_lower_limit_in_seconds = config.get("matching_time_lower_limit_in_seconds", 0)
+matching_time_lower_limit_in_seconds = config.get(
+    "matching_time_lower_limit_in_seconds",
+)
+matching_time_upper_limit_in_seconds = config.get(
+    "matching_time_upper_limit_in_seconds",
+)
 
 
 def create_matched_stop(last_time_in_zone: datetime, is_estimate: bool) -> MatchedStop:  # noqa: FBT001
@@ -535,24 +539,44 @@ def map_matched_stop_to_db(
 
     """
     timetable_departure_time = stop_departure_time(route_details[pm_index])
-    time_difference = get_time_difference(last_time_in_zone, timetable_departure_time)
+    time_difference = (last_time_in_zone - timetable_departure_time).total_seconds()
 
-    # 23. update db with potential match details
-    stop_pos_distances.append(
-        {
-            "group_id": avl_group_id(avl),
-            "stop_index": pm_index,
-            "time_difference": time_difference,
-            "last_time_in_zone_str": str(last_time_in_zone.strftime("%H:%M:%S"))
-            if not is_estimate
-            else None,
-            "timetable_id": stop_timetable_id(route_details[pm_index]),
-            "last_time_in_zone": last_time_in_zone if not is_estimate else None,
-            "timestamp_after_estimate": last_time_in_zone if is_estimate else None,
-            "otp_state": get_otp_state(is_final_stop, time_difference),
-            "stop_type": "final" if is_final_stop else "Non-final",
-        },
-    )
+    if time_difference < matching_time_lower_limit_in_seconds:
+        logger.warning(
+            "This match is more than 2 hours early",
+            timetable_id=stop_timetable_id(route_details[pm_index]),
+            time_difference=time_difference,
+            last_time_in_zone=last_time_in_zone,
+            timetable_departure_time=validate_date(timetable_departure_time),
+        )
+    if time_difference > matching_time_upper_limit_in_seconds:
+        logger.warning(
+            "This match is more than 1 hour late",
+            timetable_id=stop_timetable_id(route_details[pm_index]),
+            time_difference=time_difference,
+            last_time_in_zone=last_time_in_zone,
+            timetable_departure_time=validate_date(timetable_departure_time),
+        )
+    if (
+        time_difference < matching_time_upper_limit_in_seconds
+        and time_difference > matching_time_lower_limit_in_seconds
+    ):
+        # 23. update db with potential match details
+        stop_pos_distances.append(
+            {
+                "group_id": avl_group_id(avl),
+                "stop_index": pm_index,
+                "time_difference": time_difference,
+                "last_time_in_zone_str": str(last_time_in_zone.strftime("%H:%M:%S"))
+                if not is_estimate
+                else None,
+                "timetable_id": stop_timetable_id(route_details[pm_index]),
+                "last_time_in_zone": last_time_in_zone if not is_estimate else None,
+                "timestamp_after_estimate": last_time_in_zone if is_estimate else None,
+                "otp_state": get_otp_state(is_final_stop, time_difference),
+                "stop_type": "final" if is_final_stop else "Non-final",
+            },
+        )
 
 
 def update_potential_match_without_recorded_at_time(
@@ -879,7 +903,6 @@ def match_group_id_avls(
             rec
             for rec in journey_matches
             if rec["timetable_id"] not in remove_timetable_ids
-            and rec["time_difference"] > matching_time_lower_limit_in_seconds
         ]
         journey_matches.extend(to_set)
         logger.remove_keys(["avl", "group_id", "stop_history_index"])
