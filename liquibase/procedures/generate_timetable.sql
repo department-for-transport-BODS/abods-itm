@@ -10,6 +10,121 @@ declare
 
 begin
 
+    RAISE NOTICE '% (Re)Creating potential_revisions temp table', clock_timestamp();
+
+    execute format('DROP TABLE IF EXISTS public.%I', concat('potential_revisions', timetable_suffix));
+
+    IF partition_date > now() THEN
+        execute format(
+                '
+                CREATE TABLE public.%I AS WITH
+                SELECT
+                  revision_id,
+                  dataset_id
+                FROM
+                  public.organisation_datasetrevision p
+                  INNER JOIN public.organisation_dataset d
+                    ON d.live_revision_id = a.revision_id
+                WHERE
+                      p.is_published IS TRUE
+                  AND p.status = ''live''
+                  AND d.dataset_type = 1;
+                ',
+                concat('potential_revisions', timetable_suffix),
+                partition_date,
+                partition_date
+                );
+    ELSE
+        execute format(
+                '
+                CREATE TABLE public.%I AS WITH --get list of all potential timetable dataset ids (od2.dataset_type = 1)
+                potential_datasets AS (
+                  SELECT
+                    od2.id dataset_table_id,
+                    od2.dataset_type
+                  FROM
+                    organisation_dataset od2
+                  WHERE
+                    od2.dataset_type = 1
+                ),
+                -- get all potentially live revisions where published before the date we are interested in
+                potential_revisions AS (
+                  SELECT
+                    (%L)::timestamptz AS query_date,
+                    od.*,
+                    pd.*
+                  FROM
+                    organisation_datasetrevision od
+                    INNER JOIN potential_datasets pd
+                      ON pd.dataset_table_id = od.dataset_id
+                  WHERE
+                        od.published_at <= (%L)::timestamptz
+                    AND od.status IN (
+                      ''live'',
+                      ''inactive'',
+                      ''expired''
+                    )
+                ),
+                -- get all potentially live revisions where published before the date we are interested in
+                inactive_at_date_prequery AS (
+                  SELECT
+                    *,
+                    rank() OVER (
+                      PARTITION BY dataset_id
+                      ORDER BY
+                        id DESC
+                    ) AS id_rank
+                  FROM
+                    potential_revisions
+                ),
+                --get all potential revision grouped by dataset_id ranked by highest modified date
+                inactive_at_date AS (
+                  SELECT
+                    DISTINCT dataset_id
+                  FROM
+                    inactive_at_date_prequery
+                  WHERE
+                        id_rank = 1
+                    AND modified < query_date
+                    AND status IN (''inactive'', ''expired'')
+                ),
+                -- list dataset ids at latest revision where modified before query date
+                ranked_revisions AS (
+                  SELECT
+                    pr.*,
+                    rank() OVER (
+                      PARTITION BY pr.dataset_id
+                      ORDER BY
+                        id DESC
+                    ) AS id_rank
+                  FROM
+                    potential_revisions pr
+                    LEFT JOIN inactive_at_date iad
+                      ON pr.dataset_id = iad.dataset_id
+                  WHERE
+                    iad.dataset_id IS NULL
+                ),
+                -- rank revisions which are not inactive at date by most modified
+                highest_revisions AS (
+                  SELECT
+                    rr.*
+                  FROM
+                    ranked_revisions rr
+                  WHERE
+                    rr.id_rank = 1
+                )
+                SELECT
+                  DISTINCT id AS revision_id,
+                  dataset_id
+                FROM
+                  highest_revisions;
+                ',
+                concat('potential_revisions', timetable_suffix),
+                partition_date,
+                partition_date
+                );
+    END IF;
+
     RAISE NOTICE '% (Re)Creating organisation_timetable temp table', clock_timestamp();
 
     execute format('DROP TABLE IF EXISTS public.%I', concat('organisation_timetable', timetable_suffix));
@@ -19,7 +134,7 @@ begin
             CREATE TABLE public.%I AS
             WITH filtered_files AS (
               SELECT
-                od.dataset_id,
+                p.dataset_id,
                 a.id AS txcfileattributes_id,
                 a.national_operator_code,
                 a.service_code,
@@ -30,15 +145,11 @@ begin
                 a.operating_period_start_date,
                 a.operating_period_end_date
               FROM
-                public.organisation_txcfileattributes a
-                JOIN public.organisation_datasetrevision od
-                  ON od.id = a.revision_id
-                INNER JOIN public.organisation_dataset d
-                  ON d.live_revision_id = a.revision_id
+                public.%I p
+                LEFT JOIN public.organisation_txcfileattributes a
+                  ON p.revision_id = a.revision_id
               WHERE
-                    od.is_published IS TRUE
-                AND od.status = ''live''
-                AND d.dataset_type = 1
+                a.id IS NOT NULL
             ),
             query_date_dataset_revision AS (
               SELECT
@@ -122,6 +233,7 @@ begin
               drv.line_name;
 	        ',
             concat('organisation_timetable', timetable_suffix),
+            concat('potential_revisions', timetable_suffix),
             partition_date,
             partition_date
             );
