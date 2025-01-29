@@ -1,9 +1,10 @@
 """Fetching and Uploading Data into S3"""
 
+import hashlib
 import json
 import os
 import time
-from collections.abc import Sequence
+from collections.abc import Generator, Sequence
 from datetime import datetime
 from typing import Any
 
@@ -22,31 +23,32 @@ from .matcher.models import (
     live_avl_file_columns,
 )
 from .matcher.utils import timer
+from .shards import shards
 
 logger = Logger()
 client = boto3.client("s3")
+shard_lookup: dict[str, str] = {}
+for shard, operators in shards.items():
+    for operator in operators:
+        shard_lookup[operator] = shard
 
 
 def filter_avl_list(
     shard_identifier: str,
-    sharded_operators: OperatorShards,
     avl_list: Sequence[LiveAVLRecord],
-) -> Sequence[LiveAVLRecord]:
+) -> Generator[LiveAVLRecord]:
     """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
-    if shard_identifier == "0":
-        # Allow all operators that aren't in a shard
-        all_sharded_operators = [
-            x for id_no, operators in sharded_operators.items() for x in operators
-        ]
-        return [
-            avl for avl in avl_list if avl["operator_ref"] not in all_sharded_operators
-        ]
+    for avl in avl_list:
+        operator_ref = avl["operator_ref"]
+        if operator_ref not in shard_lookup:
+            # Hashing to consistently pick a shard, not for security
+            hashed = hashlib.sha224(operator_ref.encode("utf-8")).hexdigest()
+            shard_lookup[operator_ref] = str(int(hashed, 16) % len(shards))
 
-    return [
-        avl
-        for avl in avl_list
-        if avl["operator_ref"] in sharded_operators.get(shard_identifier, [])
-    ]
+        if shard_lookup[operator_ref] != shard_identifier:
+            continue
+
+        yield avl
 
 
 def _new_control_info(avl_time: int) -> ControlInfo:
