@@ -120,11 +120,12 @@ class TimetableS3Client:
     @timer(logger)
     def get_stop_history(
         self,
+        prefix: str,
         shard_no: str,
         avl_time: int,
     ) -> tuple[StopHistory, ControlInfo]:
         """Get Stop History"""
-        key = f"timetable_avl/timetable_avl_stop_history_shard{shard_no}.json"
+        key = stop_history_key(prefix, shard_no)
         logger.info("Fetching Stop History", s3_key=key)
         try:
             stop_history = self._get_from_s3(key)
@@ -201,10 +202,11 @@ class TimetableS3Client:
         self,
         stop_history: StopHistory,
         control_info: ControlInfo,
+        prefix: str,
         shard_no: str,
     ) -> None:
         """Export JourneyStopHistory data to S3"""
-        s3_key = f"timetable_avl/timetable_avl_stop_history_shard{shard_no}.json"
+        s3_key = stop_history_key(prefix, shard_no)
         logger.info(
             "S3 Upload: Storing Stop history",
             s3_key=s3_key,
@@ -214,3 +216,7 @@ class TimetableS3Client:
             {**stop_history, "control_info": control_info},
             s3_key,
         )
+
+
+def stop_history_key(prefix: str, shard_no: str) -> str:
+    return f"timetable_avl/{prefix}/timetable_avl_stop_history_shard{shard_no}.json"

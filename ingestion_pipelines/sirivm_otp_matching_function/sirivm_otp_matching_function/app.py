@@ -80,12 +80,15 @@ def historic_record_handler(rec: SQSRecord) -> None:
     fname = rec.message_attributes["key"].string_value
     shard_identifier = rec.message_attributes["shard"].string_value
 
+    avl_time = fname[fname.index("avl_") + 4 : -3]
+    avl_datetime = parse(avl_time)
+    stop_history_prefix = avl_datetime.strftime("%Y-%m-%d")
+
     try:
-        avl_time = fname[fname.index("avl_") + 4 : -3]
-        avl_datetime = parse(avl_time)
         logger.append_keys(avl_time=avl_time, avl_datetime=avl_datetime)
 
         shard_stop_history, control_info = s3_client.get_stop_history(
+            stop_history_prefix,
             shard_identifier,
             int(avl_time),
         )
@@ -136,6 +139,7 @@ def historic_record_handler(rec: SQSRecord) -> None:
         s3_client.export_stop_history(
             stop_history,
             control_info,
+            stop_history_prefix,
             shard_identifier,
         )
 
@@ -173,6 +177,7 @@ def live_record_handler(
         logger.append_keys(avl_time=avl_time_val, avl_datetime=avl_datetime)
 
         shard_stop_history, control_info = s3_client.get_stop_history(
+            "live",
             shard_identifier,
             avl_time_val,
         )
@@ -194,6 +199,7 @@ def live_record_handler(
         s3_client.export_stop_history(
             stop_history,
             control_info,
+            "live",
             shard_identifier,
         )
 
