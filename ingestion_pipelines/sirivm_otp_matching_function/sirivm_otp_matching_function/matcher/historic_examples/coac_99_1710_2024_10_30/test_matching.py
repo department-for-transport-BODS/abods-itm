@@ -23,6 +23,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -42,6 +43,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -60,6 +62,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -79,6 +82,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -98,6 +102,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -117,6 +122,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -136,6 +142,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -155,6 +162,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -174,6 +182,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -193,6 +202,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -212,6 +222,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -231,6 +242,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -250,6 +262,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -269,6 +282,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -288,6 +302,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -307,6 +322,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -326,6 +342,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -345,6 +362,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -364,6 +382,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -383,6 +402,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -402,6 +422,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -421,6 +442,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -440,6 +462,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Early",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -459,6 +482,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -478,6 +502,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -497,6 +522,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -516,6 +542,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -535,6 +562,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -554,6 +582,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -573,6 +602,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -592,6 +622,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -611,6 +642,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -630,6 +662,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -649,6 +682,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -668,6 +702,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -687,6 +722,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -706,6 +742,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -725,6 +762,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -744,6 +782,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -763,6 +802,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -782,6 +822,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -800,6 +841,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -819,6 +861,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -838,6 +881,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -857,6 +901,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -876,6 +921,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -895,6 +941,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -914,6 +961,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -933,6 +981,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -952,6 +1001,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -971,6 +1021,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -990,6 +1041,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1009,6 +1061,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1028,6 +1081,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1047,6 +1101,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1065,6 +1120,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1083,6 +1139,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1102,6 +1159,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1121,6 +1179,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1140,6 +1199,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1158,6 +1218,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1177,6 +1238,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1196,6 +1258,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1215,6 +1278,7 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1234,6 +1298,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
     {
         "group_id": "coac|99|1710|2024-10-30",
@@ -1253,6 +1318,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-30",
     },
 ]
 

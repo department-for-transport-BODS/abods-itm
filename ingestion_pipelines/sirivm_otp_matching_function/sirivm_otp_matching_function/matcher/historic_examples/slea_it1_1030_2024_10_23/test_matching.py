@@ -23,6 +23,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -42,6 +43,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -61,6 +63,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -80,6 +83,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -99,6 +103,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Early",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -118,6 +123,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Early",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -137,6 +143,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Early",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -156,6 +163,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -175,6 +183,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -194,6 +203,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -213,6 +223,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -232,6 +243,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -251,6 +263,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -270,6 +283,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -289,6 +303,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -308,6 +323,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -327,6 +343,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -346,6 +363,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -365,6 +383,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -384,6 +403,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -403,6 +423,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -422,6 +443,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -441,6 +463,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -460,6 +483,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -479,6 +503,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -498,6 +523,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -517,6 +543,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -536,6 +563,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -555,6 +583,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -574,6 +603,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -593,6 +623,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -612,6 +643,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "final",
+        "date_of_journey": "2024-10-23",
     },
     {
         "group_id": "slea|it1|1030|2024-10-23",
@@ -631,6 +663,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-10-23",
     },
 ]
 

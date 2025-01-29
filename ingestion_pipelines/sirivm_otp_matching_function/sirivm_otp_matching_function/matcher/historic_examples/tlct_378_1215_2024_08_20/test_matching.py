@@ -23,6 +23,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -42,6 +43,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -61,6 +63,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -80,6 +83,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -99,6 +103,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -118,6 +123,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -137,6 +143,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -156,6 +163,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -175,6 +183,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -194,6 +203,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -213,6 +223,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -232,6 +243,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -251,6 +263,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -270,6 +283,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -289,6 +303,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -308,6 +323,7 @@ matches = [
         ),
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -327,6 +343,7 @@ matches = [
         ),
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -346,6 +363,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -365,6 +383,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -384,6 +403,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -403,6 +423,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -422,6 +443,7 @@ matches = [
         ),
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -441,6 +463,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -460,6 +483,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -479,6 +503,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -498,6 +523,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -517,6 +543,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -536,6 +563,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -555,6 +583,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -574,6 +603,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -593,6 +623,7 @@ matches = [
         ),
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -612,6 +643,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -631,6 +663,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -650,6 +683,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -669,6 +703,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -688,6 +723,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -707,6 +743,7 @@ matches = [
         ),
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -726,6 +763,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -745,6 +783,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -764,6 +803,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -783,6 +823,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -802,6 +843,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -821,6 +863,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "final",
+        "date_of_journey": "2024-08-20",
     },
     {
         "group_id": "tlct|378|1215|2024-08-20",
@@ -840,6 +883,7 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
+        "date_of_journey": "2024-08-20",
     },
 ]
 
