@@ -1,9 +1,10 @@
 """Fetching and Uploading Data into S3"""
 
+import hashlib
 import json
 import os
 import time
-from collections.abc import Sequence
+from collections.abc import Generator, Sequence
 from datetime import datetime
 from typing import Any
 
@@ -22,31 +23,32 @@ from .matcher.models import (
     live_avl_file_columns,
 )
 from .matcher.utils import timer
+from .shards import shards
 
 logger = Logger()
 client = boto3.client("s3")
+shard_lookup: dict[str, str] = {}
+for shard, operators in shards.items():
+    for operator in operators:
+        shard_lookup[operator] = shard
 
 
 def filter_avl_list(
     shard_identifier: str,
-    sharded_operators: OperatorShards,
     avl_list: Sequence[LiveAVLRecord],
-) -> Sequence[LiveAVLRecord]:
+) -> Generator[LiveAVLRecord]:
     """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
-    if shard_identifier == "0":
-        # Allow all operators that aren't in a shard
-        all_sharded_operators = [
-            x for id_no, operators in sharded_operators.items() for x in operators
-        ]
-        return [
-            avl for avl in avl_list if avl["operator_ref"] not in all_sharded_operators
-        ]
+    for avl in avl_list:
+        operator_ref = avl["operator_ref"]
+        if operator_ref not in shard_lookup:
+            # Hashing to consistently pick a shard, not for security
+            hashed = hashlib.sha224(operator_ref.encode("utf-8")).hexdigest()
+            shard_lookup[operator_ref] = str(int(hashed, 16) % len(shards))
 
-    return [
-        avl
-        for avl in avl_list
-        if avl["operator_ref"] in sharded_operators.get(shard_identifier, [])
-    ]
+        if shard_lookup[operator_ref] != shard_identifier:
+            continue
+
+        yield avl
 
 
 def _new_control_info(avl_time: int) -> ControlInfo:
@@ -120,15 +122,12 @@ class TimetableS3Client:
     @timer(logger)
     def get_stop_history(
         self,
-        query_date: datetime,
+        prefix: str,
         shard_no: str,
         avl_time: int,
     ) -> tuple[StopHistory, ControlInfo]:
         """Get Stop History"""
-        date_str = query_date.strftime("%Y-%m-%d")
-        key = (
-            f"timetable_avl/{date_str}/timetable_avl_stop_history_shard{shard_no}.json"
-        )
+        key = stop_history_key(prefix, shard_no)
         logger.info("Fetching Stop History", s3_key=key)
         try:
             stop_history = self._get_from_s3(key)
@@ -205,14 +204,11 @@ class TimetableS3Client:
         self,
         stop_history: StopHistory,
         control_info: ControlInfo,
-        current_date: datetime,
+        prefix: str,
         shard_no: str,
     ) -> None:
         """Export JourneyStopHistory data to S3"""
-        date_str = current_date.strftime("%Y-%m-%d")
-        s3_key = (
-            f"timetable_avl/{date_str}/timetable_avl_stop_history_shard{shard_no}.json"
-        )
+        s3_key = stop_history_key(prefix, shard_no)
         logger.info(
             "S3 Upload: Storing Stop history",
             s3_key=s3_key,
@@ -222,3 +218,7 @@ class TimetableS3Client:
             {**stop_history, "control_info": control_info},
             s3_key,
         )
+
+
+def stop_history_key(prefix: str, shard_no: str) -> str:
+    return f"stop_history/{prefix}/shard_{shard_no}.json"
