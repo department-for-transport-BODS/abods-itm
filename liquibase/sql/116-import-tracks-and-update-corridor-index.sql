@@ -21,3 +21,9 @@ CREATE INDEX transmodel_tracks_geometry_idx ON public.transmodel_tracks USING bt
 
 ALTER TABLE public.corridor_stops
 ALTER COLUMN corridor_index TYPE INT;
+
+ALTER TABLE corridor_stops 
+DROP COLUMN route_to_next_stop;
+
+ALTER TABLE corridor_stops 
+DROP COLUMN distance_to_next_stop;
