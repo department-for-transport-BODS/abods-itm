@@ -169,8 +169,8 @@ class TimetableDBClient:
                     record["time_difference"],
                     record["last_time_in_zone"],
                     record["stop_type"],
-                    avl_date_str,
                     record["timestamp_after_estimate"],
+                    avl_date_str,
                 )
                 for record in entries_to_update
             ]
