@@ -4,7 +4,7 @@ import hashlib
 import json
 import os
 import time
-from collections.abc import Sequence
+from collections.abc import Generator, Sequence
 from datetime import datetime
 from typing import Any
 
@@ -36,7 +36,7 @@ for shard, operators in shards.items():
 def filter_avl_list(
     shard_identifier: str,
     avl_list: Sequence[LiveAVLRecord],
-) -> Sequence[LiveAVLRecord]:
+) -> Generator[LiveAVLRecord]:
     """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
     for avl in avl_list:
         operator_ref = avl["operator_ref"]

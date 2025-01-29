@@ -113,7 +113,7 @@ def historic_record_handler(rec: SQSRecord) -> None:
         timetable = read_timetable(timetable_key)
 
         avl_list = s3_client.get_avl_data(fname)
-        avl_list = filter_avl_list(shard_identifier, avl_list)
+        avl_list = list(filter_avl_list(shard_identifier, avl_list))
         batch_id = avl_list[0]["batch_id"]  # assuming we have at least one AVL
     except Exception:
         logger.exception("An error occurred when processing historic record")
@@ -184,7 +184,7 @@ def live_record_handler(
         clean_shard_stop_history = clean_stop_history(shard_stop_history, avl_datetime)
 
         avl_list = s3_client.get_avl_data(fname)
-        avl_list = filter_avl_list(shard_identifier, avl_list)
+        avl_list = list(filter_avl_list(shard_identifier, avl_list))
         validate_avl_list(avl_list, batch_id)
 
         to_set, to_remove, stop_history = match_avl_batch(
