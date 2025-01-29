@@ -219,4 +219,4 @@ class TimetableS3Client:
 
 
 def stop_history_key(prefix: str, shard_no: str) -> str:
-    return f"timetable_avl/{prefix}/timetable_avl_stop_history_shard{shard_no}.json"
+    return f"stop_history/{prefix}/shard_{shard_no}.json"
