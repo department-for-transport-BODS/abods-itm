@@ -579,6 +579,7 @@ def map_matched_stop_to_db(
         "timestamp_after_estimate": last_time_in_zone if is_estimate else None,
         "otp_state": get_otp_state(is_final_stop, time_difference),
         "stop_type": "final" if is_final_stop else "Non-final",
+        "date_of_journey": timetable_departure_time.strftime("%Y-%m-%d"),
     }
     new_matches.append(new_match)
 

@@ -99,6 +99,7 @@ class NewDbMatch(TypedDict):
     timestamp_after_estimate: datetime | None
     otp_state: Literal["Early", "OnTime", "Late"]
     stop_type: Literal["final", "Non-final"]
+    date_of_journey: str
 
 
 class MatchedStop(TypedDict):

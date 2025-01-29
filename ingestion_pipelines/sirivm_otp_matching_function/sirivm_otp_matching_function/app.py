@@ -85,12 +85,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
                 clean_shard_stop_history,
             )
 
-            db_client.live_update_success(
-                batch_id,
-                to_set,
-                to_remove,
-                avl_datetime.strftime("%Y-%m-%d"),
-            )
+            db_client.live_update_success(batch_id, to_set, to_remove)
 
             s3_client.export_stop_history(stop_history, shard_no)
 
