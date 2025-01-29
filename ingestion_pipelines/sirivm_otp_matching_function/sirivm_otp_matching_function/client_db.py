@@ -1,6 +1,6 @@
 """Database Functions"""
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -107,7 +107,6 @@ class TimetableDBClient:
         entries_to_remove: Sequence[RecordToRemove],
     ) -> None:
         """Update database to reflect successful live matching"""
-        grouped = _prepare_new_entries(entries_to_update)
         with self.connection.cursor() as cursor:
             if len(entries_to_remove) > 0:
                 execute_values_amended(
@@ -119,21 +118,20 @@ class TimetableDBClient:
                     ],
                 )
 
-            for records in grouped.values():
-                execute_values_amended(
-                    cur=cursor,
-                    sql=self.sql_queries.set_live_matching,
-                    values=[
-                        (
-                            record["timetable_id"],
-                            record["time_difference"],
-                            record["last_time_in_zone"],
-                            record["otp_state"],
-                            record["timestamp_after_estimate"],
-                        )
-                        for record in records
-                    ],
-                )
+            execute_values_amended(
+                cur=cursor,
+                sql=self.sql_queries.set_live_matching,
+                values=[
+                    (
+                        record["timetable_id"],
+                        record["time_difference"],
+                        record["last_time_in_zone"],
+                        record["otp_state"],
+                        record["timestamp_after_estimate"],
+                    )
+                    for record in entries_to_update
+                ],
+            )
 
             _update_batch_status(cursor, batch_id, "Success")
 
@@ -146,7 +144,6 @@ class TimetableDBClient:
         avl_date_str: str,
     ) -> None:
         """Update database to reflect successful historic matching"""
-        grouped = _prepare_new_entries(entries_to_update)
         with self.connection.cursor() as cursor:
             if len(entries_to_remove) > 0:
                 execute_values_amended(
@@ -162,44 +159,27 @@ class TimetableDBClient:
                     ],
                 )
 
-            for records in grouped.values():
-                values = [
-                    (
-                        record["timetable_id"],
-                        record["time_difference"],
-                        record["last_time_in_zone"],
-                        record["stop_type"],
-                        avl_date_str,
-                        record["timestamp_after_estimate"],
-                    )
-                    for record in records
-                ]
-                execute_values_amended(
-                    cur=cursor,
-                    sql=self.sql_queries.set_historic_matching,
-                    values=values,
+            values = [
+                (
+                    record["timetable_id"],
+                    record["time_difference"],
+                    record["last_time_in_zone"],
+                    record["stop_type"],
+                    avl_date_str,
+                    record["timestamp_after_estimate"],
                 )
-                # Update otp state again as the otp calculation is not taking the updated time difference value
-                execute_values_amended(
-                    cur=cursor,
-                    sql=self.sql_queries.update_otp_state,
-                    values=values,
-                )
+                for record in entries_to_update
+            ]
+            execute_values_amended(
+                cur=cursor,
+                sql=self.sql_queries.set_historic_matching,
+                values=values,
+            )
+            # Update otp state again as the otp calculation is not taking the updated time difference value
+            execute_values_amended(
+                cur=cursor,
+                sql=self.sql_queries.update_otp_state,
+                values=values,
+            )
             if batch_id:
                 _update_batch_status(cursor, batch_id, "Success")
-
-
-def _prepare_new_entries(
-    entries_to_update: Sequence[RecordToAdd],
-) -> Mapping[str, Sequence[RecordToAdd]]:
-    # deduplicate any stop_index entries for the same group
-    grouped: dict[str, dict[str, RecordToAdd]] = {}
-    for entry in entries_to_update:
-        grouped.setdefault(entry["group_id"], {})[entry["stop_index"]] = entry
-
-    # flatten by group id
-    by_group_id = {}
-    for group_id, match_index_dict in grouped.items():
-        by_group_id[group_id] = list(match_index_dict.values())
-
-    return by_group_id
