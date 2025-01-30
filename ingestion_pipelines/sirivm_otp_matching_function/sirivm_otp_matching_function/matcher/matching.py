@@ -699,14 +699,15 @@ def move_potential_match_to_match(
     """
     stop = route[stop_index]
     final_stop_index = get_final_stop_index(route)
-    is_final_stop = int(stop_index) == final_stop_index
+    stop_index_int = int(stop_index)
+    is_final_stop = stop_index_int == final_stop_index
     matched_stops = route_history["matched_stops"]
     delete_potential_match = False
     last_time_in_zone = validate_date(potential_match["last_time_in_zone"])
 
     # 33. is this potential match the first match?
     if len(matched_stops) != 0:
-        matched_stops_with_new_match = {
+        matched_stops_with_new_match: dict[str, MatchedStop] = {
             **matched_stops,
             stop_index: create_matched_stop(
                 last_time_in_zone,
@@ -714,89 +715,82 @@ def move_potential_match_to_match(
             ),
         }
         # 20. order saved matches by recorded_at_time
-        ordered_matched_stops_with_new_match = dict(
+        ordered_matches: dict[str, MatchedStop] = dict(
             sorted(
                 matched_stops_with_new_match.items(),
                 key=lambda t: validate_date(t[1]["last_match_time"]).timestamp(),
             ),
         )
-        stop_index_with_latest_match_timestamp = int(
-            list(ordered_matched_stops_with_new_match.keys())[-1],
-        )
-        highest_matched_stop_index = int(max(matched_stops, key=lambda x: int(x)))
-        lowest_matched_stop_index = int(min(matched_stops, key=lambda x: int(x)))
+        latest_index_int = int(list(ordered_matches.keys())[-1])
+        highest_index_int = max(int(index) for index in matched_stops)
+        lowest_index_int = min(int(index) for index in matched_stops)
+        highest_index = str(highest_index_int)
+        lowest_index = str(lowest_index_int)
         # check if the new match index is higher than or equal to the highest index saved
         # 21-22. is the new match index higher than the highest index saved and Will this new match be the (saved match limit + 1) actual match saved
         if (
-            int(stop_index) > highest_matched_stop_index
-            and int(stop_index) == stop_index_with_latest_match_timestamp
+            stop_index_int > highest_index_int
+            and stop_index_int == latest_index_int
             and len(matched_stops) == SAVED_MATCHES_LIMIT
         ):
             logger.debug(
-                f"{stop_index} higher than highest_matched_stop_index {highest_matched_stop_index}, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
+                f"{stop_index} higher than highest_matched_stop_index {highest_index}, remove lowest matched stop from matched stops {lowest_index}",
             )
             logger.debug(
                 "Matched stop identified for removal",
-                stop_index=str(highest_matched_stop_index),
-                matched_stop=route_history["matched_stops"][
-                    str(lowest_matched_stop_index)
-                ],
+                stop_index=highest_index,
+                matched_stop=route_history["matched_stops"][lowest_index],
             )
             # 23. Delete the lowest saved index from matched stops
-            del route_history["matched_stops"][str(lowest_matched_stop_index)]
+            del route_history["matched_stops"][lowest_index]
         # 20. when the new match index is lower than the highest index saved
         # 28,29. Will this new match be the (saved match limit + 1) actual match saved and Is this new match the lowest index
         # 29.1 Do the two actual match index's saved have a difference of 1
         if (
-            int(stop_index) <= lowest_matched_stop_index
+            stop_index_int <= lowest_index_int
             and (
                 len(matched_stops) == SAVED_MATCHES_LIMIT
-                or highest_matched_stop_index - lowest_matched_stop_index == 1
+                or highest_index_int - lowest_index_int == 1
             )
         ) or (
-            int(stop_index) > highest_matched_stop_index
-            and int(stop_index) != stop_index_with_latest_match_timestamp
+            stop_index_int > highest_index_int and stop_index_int != latest_index_int
         ):
             logger.debug(
-                f"{stop_index} lower than lowest_matched_stop_index {lowest_matched_stop_index}, remove it from potential matches",
+                f"{stop_index} lower than lowest_matched_stop_index {lowest_index}, remove it from potential matches",
             )
             # 30.Delete this new potential match
             potential_matches_to_delete.append(stop_index)
             delete_potential_match = True
         #  29. It's in the middle of the matched stop sequence or there's only one matched stop
-        if int(stop_index) < highest_matched_stop_index and (
-            int(stop_index) > lowest_matched_stop_index or len(matched_stops) == 1
+        if stop_index_int < highest_index_int and (
+            stop_index_int > lowest_index_int or len(matched_stops) == 1
         ):
             # 29.2 is the last stop in the matched stops ordered by recorded_at_time the final stop of the journey?
-            if stop_index_with_latest_match_timestamp == final_stop_index:
+            if latest_index_int == final_stop_index:
                 logger.debug(
-                    f"last matched stop in new match sequence {stop_index_with_latest_match_timestamp} is final stop, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
+                    f"last matched stop in new match sequence {latest_index_int} is final stop, remove lowest matched stop from matched stops {lowest_index_int}",
                 )
                 logger.debug(
                     "Matched stop identified for removal",
-                    stop_index=str(highest_matched_stop_index),
-                    matched_stop=route_history["matched_stops"][
-                        str(lowest_matched_stop_index)
-                    ],
+                    stop_index=highest_index,
+                    matched_stop=route_history["matched_stops"][lowest_index],
                 )
-                del route_history["matched_stops"][str(lowest_matched_stop_index)]
+                del route_history["matched_stops"][lowest_index]
             else:
                 # 31.Delete the higher index stored from the db and json
                 logger.debug(
-                    f"{stop_index} lower than highest_matched_stop_index {highest_matched_stop_index}, remove matched stop index {highest_matched_stop_index} higher than {stop_index}",
+                    f"{stop_index} lower than highest_matched_stop_index {highest_index}, remove matched stop index {highest_index} higher than {stop_index}",
                 )
                 logger.debug(
                     "Matched stop identified for removal",
-                    stop_index=str(highest_matched_stop_index),
-                    matched_stop=route_history["matched_stops"][
-                        str(highest_matched_stop_index)
-                    ],
+                    stop_index=highest_index,
+                    matched_stop=route_history["matched_stops"][highest_index],
                 )
-                del route_history["matched_stops"][str(highest_matched_stop_index)]
-                stop_details = route.get(str(highest_matched_stop_index))
+                del route_history["matched_stops"][highest_index]
+                stop_details = route.get(highest_index)
                 if not stop_details:
                     logger.warning(
-                        f"index {highest_matched_stop_index} doesn't exist in timetable, group_id: {avl_group_id(avl)}",
+                        f"index {highest_index} doesn't exist in timetable, group_id: {avl_group_id(avl)}",
                     )
                 else:
                     bad_matches.append(
