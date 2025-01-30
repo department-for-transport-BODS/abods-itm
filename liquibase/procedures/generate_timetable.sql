@@ -677,7 +677,6 @@ begin
               public.%I tvw
               JOIN public.transmodel_servicepatternstop stop
                 ON tvw.transmodel_vehiclejourney_id = stop.vehicle_journey_id
-				WHERE trim(tvw.journey_code) <> ''''
 	        ',
             concat('timetable_journey', timetable_suffix),
             concat('timetable_vj_per_groupid', timetable_suffix)
