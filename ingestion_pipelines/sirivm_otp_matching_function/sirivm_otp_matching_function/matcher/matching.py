@@ -443,7 +443,10 @@ def find_matches_in_potential_matches(
         logger.debug(
             f"15. avl is {avl_pm_distance_in_meters}m from stop {pm_index}, greater than {MATCH_ZONE_RADIUS_IN_METERS}m",
         )
-        if last_distance <= MATCH_ZONE_RADIUS_IN_METERS or avl_pm_distance_in_meters <= last_distance:
+        if (
+            last_distance <= MATCH_ZONE_RADIUS_IN_METERS
+            or avl_pm_distance_in_meters <= last_distance
+        ):
             # 19. pm last distance < distance threshold / 20. the avl potential distance < last distance, Avl is moving backwards
             # 34. update potential match with current avl index and distance between potential match stop and avl location
             update_potential_match_without_recorded_at_time(
