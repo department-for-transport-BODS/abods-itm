@@ -695,14 +695,18 @@ begin
               line_name,
               journey_code,
               date_of_journey AS date_of_journey,
-              (
-				CASE WHEN departure_day_shift IS TRUE 
-				AND departure_time::TIME >= ''00:00:00''
-				AND departure_time::TIME <= ''12:00:00'' 
-				THEN CAST(CONCAT(date_of_journey::TEXT, '' '', departure_time::TEXT) AS TIMESTAMP) AT TIME ZONE ''Europe/London'' + INTERVAL ''1'' DAY 
-				ELSE CAST(CONCAT(date_of_journey::TEXT, '' '', departure_time::TEXT) AS TIMESTAMP) AT TIME ZONE ''Europe/London'' 
-				END
-			  ) AS departure_time,
+              CAST(
+                CONCAT(
+                  (
+                    CASE WHEN departure_day_shift IS TRUE
+                          AND departure_time::TIME <= ''12:00:00''
+                      THEN date_of_journey + INTERVAL ''1'' DAY
+                      ELSE date_of_journey
+                    END
+                  )::TEXT,
+                  '' '',
+                  departure_time::TEXT
+                ) AS TIMESTAMP
               stop_id,
               ST_Y(b.location)::real lt,
               ST_X(b.location)::real AS lon,
