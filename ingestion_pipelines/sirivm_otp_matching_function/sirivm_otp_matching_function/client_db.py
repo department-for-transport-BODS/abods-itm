@@ -9,7 +9,7 @@ import psycopg2.extras
 from aws_lambda_powertools import Logger
 from psycopg2.extras import execute_values
 
-from .matcher.models import RecordToAdd, RecordToRemove
+from .matcher.models import BadDbMatch, NewDbMatch
 from .matcher.utils import timer
 from .shared.db import setup_db
 
@@ -103,8 +103,8 @@ class TimetableDBClient:
     def live_update_success(
         self,
         batch_id: int,
-        entries_to_update: Sequence[RecordToAdd],
-        entries_to_remove: Sequence[RecordToRemove],
+        entries_to_update: Sequence[NewDbMatch],
+        entries_to_remove: Sequence[BadDbMatch],
     ) -> None:
         """Update database to reflect successful live matching"""
         with self.connection.cursor() as cursor:
@@ -139,8 +139,8 @@ class TimetableDBClient:
     def historic_update_success(
         self,
         batch_id: int | None,
-        entries_to_update: Sequence[RecordToAdd],
-        entries_to_remove: Sequence[RecordToRemove],
+        entries_to_update: Sequence[NewDbMatch],
+        entries_to_remove: Sequence[BadDbMatch],
         avl_date_str: str,
         log_level: str | None = None,
     ) -> None:

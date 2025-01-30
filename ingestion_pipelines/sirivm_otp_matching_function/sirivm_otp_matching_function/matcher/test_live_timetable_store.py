@@ -1,7 +1,7 @@
 import pytest
 
 from .live_timetable_store import LiveTimetableStore
-from .models import RouteDetails, Timetable
+from .models import Route, Timetable
 
 group_id = "test|10|20|2024-12-25"
 
@@ -81,7 +81,7 @@ def test_live_timetable_store(
     timetable: Timetable,
     direction_ref: str,
     expected_index: str,
-    expected_route: RouteDetails,
+    expected_route: Route,
 ) -> None:
     store = LiveTimetableStore(timetable)
 

@@ -4,33 +4,33 @@ from typing import Literal, NotRequired, TypedDict
 
 from .utils import validate_date
 
-StopDetails = tuple[tuple[float, float], str, int, str]
-RouteDetails = Mapping[str, StopDetails]
-Timetable = Mapping[str, RouteDetails]
+Stop = tuple[tuple[float, float], str, int, str]
+Route = Mapping[str, Stop]
+Timetable = Mapping[str, Route]
 OperatorShards = Mapping[str, Sequence[str]]
 
 
-def stop_latitude(stop: StopDetails) -> float:
+def stop_latitude(stop: Stop) -> float:
     return stop[0][0]
 
 
-def stop_longitude(stop: StopDetails) -> float:
+def stop_longitude(stop: Stop) -> float:
     return stop[0][1]
 
 
-def stop_expected_time(stop: StopDetails) -> str:
+def stop_expected_time(stop: Stop) -> str:
     return stop[1]
 
 
-def stop_timetable_id(stop: StopDetails) -> int:
+def stop_timetable_id(stop: Stop) -> int:
     return stop[2]
 
 
-def stop_date(stop: StopDetails) -> str:
+def stop_date(stop: Stop) -> str:
     return stop[3]
 
 
-def stop_departure_time(stop: StopDetails) -> datetime:
+def stop_departure_time(stop: Stop) -> datetime:
     """Datetime of the expected stop departure"""
     return validate_date(f"{stop_date(stop)} {stop_expected_time(stop)}")
 
@@ -80,14 +80,14 @@ def avl_recorded_at_time_utc(avl: AVLRecord) -> datetime:
     return validate_date(avl["recorded_at_time"][:19])
 
 
-class RecordToRemove(TypedDict):
+class BadDbMatch(TypedDict):
     """Represents a record to be removed from the DB after matching"""
 
     timetable_id: int
     group_id: str
 
 
-class RecordToAdd(TypedDict):
+class NewDbMatch(TypedDict):
     """Represents a record to be added to the DB after matching"""
 
     stop_index: str
@@ -116,7 +116,7 @@ class PotentialMatch(TypedDict):
     is_estimate: NotRequired[bool]
 
 
-class GroupStopHistory(TypedDict):
+class RouteHistory(TypedDict):
     """Stored stop details for current journey matching"""
 
     last_avl_time: str
@@ -126,4 +126,4 @@ class GroupStopHistory(TypedDict):
     potential_matches: dict[str, PotentialMatch]
 
 
-StopHistory = dict[str, GroupStopHistory]
+StopHistory = dict[str, RouteHistory]

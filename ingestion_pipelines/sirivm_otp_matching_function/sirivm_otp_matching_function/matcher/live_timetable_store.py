@@ -1,4 +1,4 @@
-from .models import RouteDetails, Timetable
+from .models import Route, Timetable
 
 
 class LiveTimetableStore:
@@ -12,7 +12,7 @@ class LiveTimetableStore:
         self,
         group_id: str,
         direction_ref: str,
-    ) -> tuple[str, RouteDetails | None]:
+    ) -> tuple[str, Route | None]:
         """
         Get the route data for a given group id and direction
 
@@ -24,7 +24,7 @@ class LiveTimetableStore:
         Returns:
         -------
             str: The last index used to find the route in the timetable
-            RouteDetails | None: The matched route data if any
+            Route | None: The matched route data if any
 
         """
         route = self._timetable.get(group_id)

@@ -18,10 +18,10 @@ from .matching import (
 )
 from .models import (
     AVLRecord,
-    GroupStopHistory,
     PotentialMatch,
-    RouteDetails,
-    StopDetails,
+    Route,
+    RouteHistory,
+    Stop,
     avl_group_id,
     avl_recorded_at_time_utc,
     stop_departure_time,
@@ -263,8 +263,8 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
     def test_find_potential_matches(  # noqa: D102 - BODS-7131
         self,
         avl: AVLRecord,
-        route: RouteDetails,
-        route_history: GroupStopHistory,
+        route: Route,
+        route_history: RouteHistory,
         expected_potential_matches: dict[str, PotentialMatch],
     ) -> None:
         find_potential_matches(
@@ -2018,8 +2018,8 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
     def test_find_estimated_matches(  # noqa: D102 - BODS-7131
         self,
         avl: AVLRecord,
-        route_history: GroupStopHistory,
-        stop: StopDetails,
+        route_history: RouteHistory,
+        stop: Stop,
         expected_estimated_match: str,
     ) -> None:
         estimated_match = check_estimated_match(avl, route_history, stop)
