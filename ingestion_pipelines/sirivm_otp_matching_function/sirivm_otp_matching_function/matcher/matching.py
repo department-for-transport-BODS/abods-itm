@@ -862,6 +862,7 @@ def match_avl_batch(
 def match_group_id_avls(
     timetable: TimetableStore,
     avls: Sequence[AVLRecord],
+    log_level: str | None = None,
 ) -> tuple[Sequence[RecordToAdd], int, int]:
     """
     Perform matching on all avls for a group_id.
@@ -870,12 +871,15 @@ def match_group_id_avls(
     ----
         timetable (Timetable): Timetable data
         avls (Sequence): A list of avl records for this group_id
+        log_level (str): log_level
 
     Returns:
     -------
         journey_matches (Sequence): The matched stops which require updates in the database
 
     """
+    if log_level:
+        logger.setLevel(log_level)
     journey_matches: list[RecordToAdd] = []
     stop_history: StopHistory = {}
     for avl in avls:
@@ -883,6 +887,12 @@ def match_group_id_avls(
             timetable,
             avl,
             stop_history,
+        )
+        logger.debug(
+            "Matched avl",
+            to_set=to_set,
+            to_remove=to_remove,
+            stop_history=stop_history,
         )
         # After initially matching a stop, a later avl might provide evidence that the match was incorrect.
         # Here we can remove the prior match before the calling code has a chance to update the db.
