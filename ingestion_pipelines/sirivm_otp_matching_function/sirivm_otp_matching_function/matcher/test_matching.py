@@ -162,8 +162,8 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
     avl_record_scem = read_avl("scem9132024-10-31.csv")[5]
     timetable = read_timetable("FSRV9509052024-10-10.json")
     timetable_scem = read_timetable("scem9132024-10-31.json")
-    route_details = timetable[avl_group_id(avl_record)]
-    route_details_scem = timetable_scem[avl_group_id(avl_record_scem)]
+    route = timetable[avl_group_id(avl_record)]
+    route_scem = timetable_scem[avl_group_id(avl_record_scem)]
     group_stop_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC)),
         "last_avl_longitude": None,
@@ -209,21 +209,21 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
     @pytest.mark.parametrize(
         (
             "avl",
-            "route_details",
+            "route",
             "group_stop_history",
             "expected_potential_matches",
         ),
         [
             pytest.param(
                 avl_record,
-                route_details,
+                route,
                 group_stop_history,
                 {},
                 id="Drivers changing journey code early, reaching stop 15, no potential matches should be created",
             ),
             pytest.param(
                 avl_record_2,
-                route_details,
+                route,
                 group_stop_history_2,
                 {
                     "15": {
@@ -238,7 +238,7 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
             ),
             pytest.param(
                 avl_record_scem,
-                route_details_scem,
+                route_scem,
                 group_stop_history_scem,
                 {
                     "2": {
@@ -263,13 +263,13 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
     def test_find_potential_matches(  # noqa: D102 - BODS-7131
         self,
         avl: AVLRecord,
-        route_details: RouteDetails,
+        route: RouteDetails,
         group_stop_history: GroupStopHistory,
         expected_potential_matches: dict[str, PotentialMatch],
     ) -> None:
         find_potential_matches(
             avl,
-            route_details,
+            route,
             group_stop_history,
         )
         assert group_stop_history["potential_matches"] == expected_potential_matches

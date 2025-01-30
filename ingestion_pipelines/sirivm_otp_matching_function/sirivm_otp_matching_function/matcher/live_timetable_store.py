@@ -8,7 +8,7 @@ class LiveTimetableStore:
         """Construct a live timetable store"""
         self._timetable = timetable
 
-    def get_route_details(
+    def get_route(
         self,
         group_id: str,
         direction_ref: str,
@@ -27,9 +27,9 @@ class LiveTimetableStore:
             RouteDetails | None: The matched route data if any
 
         """
-        route_details = self._timetable.get(group_id)
-        if route_details:
-            return group_id, route_details
+        route = self._timetable.get(group_id)
+        if route:
+            return group_id, route
 
         # In some cases, there can be multiple journeys with different directions using the same group id.
         # When that happens, sirivm_timetable_s3_generation_function will add the direction ref to the group id.

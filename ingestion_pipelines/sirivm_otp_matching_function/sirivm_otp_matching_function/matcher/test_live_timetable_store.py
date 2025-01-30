@@ -85,7 +85,7 @@ def test_live_timetable_store(
 ) -> None:
     store = LiveTimetableStore(timetable)
 
-    actual_index, actual_timetable = store.get_route_details(
+    actual_index, actual_timetable = store.get_route(
         group_id=group_id,
         direction_ref=direction_ref,
     )

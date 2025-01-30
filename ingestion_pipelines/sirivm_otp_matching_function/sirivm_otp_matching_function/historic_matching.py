@@ -177,9 +177,9 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                                 stop_direction = str(direction)
                                 index += f"|{stop_direction}"
 
-                            route_details = timetable.setdefault(index, {})
-                            normalised_stop_index = str(len(route_details) + 1)
-                            route_details[normalised_stop_index] = (
+                            route = timetable.setdefault(index, {})
+                            normalised_stop_index = str(len(route) + 1)
+                            route[normalised_stop_index] = (
                                 (
                                     float(stop_latitude),
                                     float(stop_longitude),
