@@ -16,8 +16,8 @@ begin
 
     execute format(
             '
-            CREATE TABLE public.%I AS WITH --get list of all potential timetable dataset ids (od2.dataset_type = 1)
-            potential_datasets AS (
+            CREATE TABLE public.%I AS
+            WITH potential_datasets AS ( --get list of all potential timetable dataset ids (od2.dataset_type = 1)
               SELECT
                 od2.id dataset_table_id,
                 od2.dataset_type
@@ -109,7 +109,8 @@ begin
 
     execute format(
             '
-            CREATE TABLE public.%I AS WITH filtered_files AS (
+            CREATE TABLE public.%I AS
+            WITH filtered_files AS (
               SELECT
                 p.dataset_id,
                 a.id AS txcfileattributes_id,
@@ -548,7 +549,8 @@ begin
 
     execute format(
             '
-            CREATE TABLE public.%I AS WITH ranked_directional_journeys AS (
+            CREATE TABLE public.%I AS
+            WITH ranked_directional_journeys AS (
               SELECT
                 row_number() OVER w AS rank,
                 count(1) OVER w AS window_size,
