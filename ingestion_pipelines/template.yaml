@@ -72,8 +72,6 @@ Resources:
               - 'sqs:GetQueueUrl'
             Resource: !GetAtt SiriVmProcessQueue.Arn
         - SQSSendMessagePolicy:
-            QueueName: !GetAtt SiriVmOtpMatchingQueue.QueueName
-        - SQSSendMessagePolicy:
             QueueName: !GetAtt SiriVmOtpMatchingQueue1.QueueName
         - SQSSendMessagePolicy:
             QueueName: !GetAtt SiriVmOtpMatchingQueue2.QueueName
@@ -94,7 +92,6 @@ Resources:
               - 'sqs:GetQueueUrl'
               - 'sqs:SendMessage*'
             Resource: 
-              - !GetAtt SiriVmOtpMatchingQueue.Arn
               - !GetAtt SiriVmOtpMatchingQueue1.Arn
               - !GetAtt SiriVmOtpMatchingQueue2.Arn
               - !GetAtt SiriVmOtpMatchingQueue3.Arn
@@ -141,10 +138,6 @@ Resources:
           SIRIVM_PROCESS_QUEUE: !If
             - IsNotLocal
             - !GetAtt SiriVmProcessQueue.QueueName
-            - []
-          SIRIVM_OTP_QUEUE: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue.QueueName
             - []
           SIRIVM_OTP_QUEUE1: !If
             - IsNotLocal
@@ -318,8 +311,6 @@ Resources:
               - logs:PutLogEvents
             Resource: !GetAtt SiriVmTimetableS3GenerationFunctionLogGroup.Arn
         - SQSSendMessagePolicy:
-            QueueName: !GetAtt SiriVmOtpMatchingQueue.QueueName
-        - SQSSendMessagePolicy:
             QueueName: !GetAtt SiriVmOtpMatchingQueue1.QueueName
         - SQSSendMessagePolicy:
             QueueName: !GetAtt SiriVmOtpMatchingQueue2.QueueName
@@ -340,7 +331,6 @@ Resources:
               - 'sqs:GetQueueUrl'
               - 'sqs:SendMessage*'
             Resource: 
-              - !GetAtt SiriVmOtpMatchingQueue.Arn
               - !GetAtt SiriVmOtpMatchingQueue1.Arn
               - !GetAtt SiriVmOtpMatchingQueue2.Arn
               - !GetAtt SiriVmOtpMatchingQueue3.Arn
@@ -375,10 +365,6 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
-          SIRIVM_OTP_QUEUE: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue.QueueName
-            - []
           SIRIVM_OTP_QUEUE1: !If
             - IsNotLocal
             - !GetAtt SiriVmOtpMatchingQueue1.QueueName
@@ -504,99 +490,6 @@ Resources:
     Condition: IsNotLocal
     Properties:
       LogGroupName: !Sub '/aws/lambda/${ProjectName}-${Environment}-traveline-db-ingestion-function'
-      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
-      RetentionInDays: 30
-
-  ##########################################################
-  #### SIRIVM OTP MATCHING FUNCTION (& ASSC. RESOURCES) ####
-  ##########################################################
-  SiriVmOtpMatchingFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function'
-      CodeUri: ./sirivm_otp_matching_function
-      Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
-      MemorySize: 5000
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-          - "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python311:12"
-        - []
-      Policies:
-        - 'AWSLambdaVPCAccessExecutionRole'
-        - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
-        - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/sirivm_access_policy/arn}}'
-        - S3CrudPolicy:
-            BucketName: !Ref ProcessBucket
-        - SQSPollerPolicy:
-            QueueName: !GetAtt SiriVmOtpMatchingQueue.QueueName
-        - Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action:
-              - 'sqs:GetQueueUrl'
-            Resource: !GetAtt SiriVmOtpMatchingQueue.Arn
-        - Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action:
-              - logs:CreateLogGroup
-              - logs:CreateLogStream
-              - logs:PutLogEvents
-            Resource: !GetAtt SiriVmOtpMatchingFunctionLogGroup.Arn
-      Events:
-        SQSTemplateTriggerEvent:
-          Type: SQS
-          Properties:
-            Queue: !GetAtt SiriVmOtpMatchingQueue.Arn
-            BatchSize: 1
-            ScalingConfig:
-              MaximumConcurrency: 4
-      VpcConfig:
-        SubnetIds: !Ref VpcSubnets
-        SecurityGroupIds:
-          - !GetAtt SiriVmOtpMatchingFunctionSecurityGroup.GroupId
-          - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
-      Environment:
-        Variables:
-          POWERTOOLS_SERVICE_NAME: sirivm_otp_matching_function
-          POWERTOOLS_LOG_LEVEL: INFO
-          PROJECT_ENV: !Ref Environment
-          PROJECT_NAME: !Ref ProjectName
-          POSTGRES_HOST: !If
-            - IsNotLocal
-            - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rdsproxy/endpoint}}'
-            - !Ref RdsDbHostAddr
-          POSTGRES_PORT: !Ref RdsDbPort
-          POSTGRES_DB: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
-          POSTGRES_USER: !Sub '${ProjectName}_proxy_rw'
-          SIRIVM_BUCKET: !If
-            - IsNotLocal
-            - !Ref ProcessBucket
-            - !Ref AWS::NoValue
-          ENABLE_ESTIMATED_MATCHING: "true"
-      LoggingConfig:
-        LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
-
-  SiriVmOtpMatchingFunctionSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Sub 'Security group for ${ProjectName}-${Environment}-sirivm-otp-matching-function'
-      GroupName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function'
-      SecurityGroupEgress: 
-        - IpProtocol: '-1'
-          CidrIp: '0.0.0.0/0'
-      VpcId: !Ref VpcId
-      Tags:
-        - Key: Name
-          Value: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function'
-
-  SiriVmOtpMatchingFunctionLogGroup:
-    Type: AWS::Logs::LogGroup
-    Condition: IsNotLocal
-    Properties:
-      LogGroupName: !Sub '/aws/lambda/${ProjectName}-${Environment}-sirivm-otp-matching-function'
       KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
       RetentionInDays: 30
 
@@ -751,12 +644,6 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-process-queue'
-      VisibilityTimeout: 430
-
-  SiriVmOtpMatchingQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue'
       VisibilityTimeout: 430
 
   ####################################################################
