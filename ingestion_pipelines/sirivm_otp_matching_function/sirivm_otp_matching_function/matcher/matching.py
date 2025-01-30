@@ -186,9 +186,7 @@ def check_estimated_match(  # noqa: PLR0911 - it's not that many returns
     )
 
     # check if the line intersects the circle twice
-    if (
-        len(stop_intersection_ratios) != 2  # noqa: PLR2004
-    ):
+    if len(stop_intersection_ratios) != 2:  # noqa: PLR2004
         return None
 
     exit_time_factor = stop_intersection_ratios[1]
@@ -222,69 +220,70 @@ def find_potential_matches(
     num_of_matched_stops = len(group_stop_history["matched_stops"])
 
     final_stop_index = get_final_stop_index(route)
-    for i in range(lowest_matched_stop_index, final_stop_index + 1):
+    for stop_index_int in range(lowest_matched_stop_index, final_stop_index + 1):
+        stop_index = str(stop_index_int)
+
         # 12.1 Is there 1 actual match saved?
         # 12.2 Is the last stop index < 3 stops?
         # 12.3 Is this index less than 3/4*last stop index?
         if (
             num_of_matched_stops <= 1
             and final_stop_index > JOURNEY_STOPS_MIN_THRESHOLD
-            and i > int(final_stop_index * 3 / 4)
+            and stop_index_int > int(final_stop_index * 3 / 4)
         ):
             logger.debug(
-                f"12.1/2/3 Number of matched stops is {num_of_matched_stops}, the final stop index {final_stop_index} > 3 and stop index {i} is greater than {int(final_stop_index * 3 / 4)} 3/4 of the final stop index. Skip stop {i} from being a potential match",
+                f"12.1/2/3 Number of matched stops is {num_of_matched_stops}, the final stop index {final_stop_index} > 3 and stop index {stop_index} is greater than {int(final_stop_index * 3 / 4)} 3/4 of the final stop index. Skip stop {stop_index} from being a potential match",
             )
             continue
 
         # final stop has already been matched, don't need to check for potentials
         if (
-            i == final_stop_index
+            stop_index_int == final_stop_index
             and str(final_stop_index) in group_stop_history["matched_stops"]
         ):
             continue
 
-        next_stop_details = route[str(i)]
-        avl_next_stop_distance_in_meters = distance_from_stop(avl, next_stop_details)
+        stop = route[stop_index]
+        stop_distance_in_meters = distance_from_stop(avl, stop)
         # 13. If avl and the next stop distance < threshold
-        if avl_next_stop_distance_in_meters < MATCH_ZONE_RADIUS_IN_METERS:
+        if stop_distance_in_meters < MATCH_ZONE_RADIUS_IN_METERS:
             logger.debug(
-                f"12. avl is {avl_next_stop_distance_in_meters}m from stop {i}, less than {MATCH_ZONE_RADIUS_IN_METERS}m",
+                f"12. avl is {stop_distance_in_meters}m from stop {stop_index}, less than {MATCH_ZONE_RADIUS_IN_METERS}m",
             )
             # 14. create potential match
-            group_stop_history["potential_matches"][str(i)] = create_potential_match(
-                avl,
-                avl_next_stop_distance_in_meters,
-            )
+            potential_match = create_potential_match(avl, stop_distance_in_meters)
+            group_stop_history["potential_matches"][stop_index] = potential_match
             logger.debug(
                 "13. potential match found",
-                stop_index=i,
-                potential_match=group_stop_history["potential_matches"][str(i)],
+                stop_index=stop_index,
+                potential_match=potential_match,
             )
             continue
 
-        if i == final_stop_index:
+        if stop_index_int == final_stop_index:
             continue
 
-        if str(i) in group_stop_history["potential_matches"]:
+        if stop_index in group_stop_history["potential_matches"]:
             continue
 
-        if str(i) in group_stop_history["matched_stops"]:
+        if stop_index in group_stop_history["matched_stops"]:
             continue
 
         timestamp_after_estimate = check_estimated_match(
             avl,
             group_stop_history,
-            next_stop_details,
+            stop,
         )
 
         if not timestamp_after_estimate:
             continue
 
-        group_stop_history["potential_matches"][str(i)] = {
-            "last_distance": avl_next_stop_distance_in_meters,
+        potential_match: PotentialMatch = {
+            "last_distance": stop_distance_in_meters,
             "last_time_in_zone": timestamp_after_estimate,
             "is_estimate": True,
         }
+        group_stop_history["potential_matches"][stop_index] = potential_match
 
 
 def check_update_first_stop(
@@ -307,59 +306,52 @@ def check_update_first_stop(
     logger.debug("check and update first stop")
 
     # Is the first stop matched?
-    ms_index = "1"
-    if ms_index not in group_stop_history["matched_stops"]:
+    stop_index = "1"
+    if stop_index not in group_stop_history["matched_stops"]:
         return
 
-    if ms_index not in route:
+    if stop_index not in route:
         return
 
-    matched_stop_details = route[ms_index]
-    avl_ms_distance_in_meters = distance_from_stop(avl, matched_stop_details)
+    stop = route[stop_index]
+    stop_distance_in_meters = distance_from_stop(avl, stop)
 
-    if avl_ms_distance_in_meters >= MATCH_ZONE_RADIUS_IN_METERS:
+    if stop_distance_in_meters >= MATCH_ZONE_RADIUS_IN_METERS:
         return
 
-    ms_details = group_stop_history["matched_stops"][ms_index]
-    ms_last_match_time = validate_date(ms_details["last_match_time"])
+    matched_stop = group_stop_history["matched_stops"][stop_index]
+    matched_stop_time = validate_date(matched_stop["last_match_time"])
 
     logger.debug(
-        f"6+7. avl is {avl_ms_distance_in_meters}m, within {MATCH_ZONE_RADIUS_IN_METERS}m",
+        f"6+7. avl is {stop_distance_in_meters}m, within {MATCH_ZONE_RADIUS_IN_METERS}m",
     )
-    difference = avl_recorded_at_time_utc(avl) - ms_last_match_time
-    within_5_minutes = difference < timedelta(minutes=5)
+    time_since_match = avl_recorded_at_time_utc(avl) - matched_stop_time
+    within_5_minutes = time_since_match < timedelta(minutes=5)
     logger.debug(
-        f"time diff = {difference}, {avl_recorded_at_time_utc(avl)}, {ms_last_match_time}, {within_5_minutes}",
+        f"time diff = {time_since_match}, {avl_recorded_at_time_utc(avl)}, {matched_stop_time}, {within_5_minutes}",
     )
 
     # 8. if avl is within 5 mins after the last first stop matching time
     if not within_5_minutes:
         return
 
-    logger.debug(
-        "8. Last match time is within 5 mins after recorded at time",
-    )
+    logger.debug("8. Last match time is within 5 mins after recorded at time")
     # 9.1 delete matched first stop
-    del group_stop_history["matched_stops"][ms_index]
+    del group_stop_history["matched_stops"][stop_index]
     # 9.2 set this match as a potential match
-    group_stop_history["potential_matches"][ms_index] = create_potential_match(
-        avl,
-        avl_ms_distance_in_meters,
-    )
-    logger.debug(
-        f"updated stop 1 potential match: {group_stop_history['potential_matches'][ms_index]}",
-    )
+    potential_match = create_potential_match(avl, stop_distance_in_meters)
+    group_stop_history["potential_matches"][stop_index] = potential_match
+    logger.debug(f"updated stop 1 potential match: {potential_match}")
     # 10. remove db matched details
-    bad_matches.append(
-        {
-            "timetable_id": stop_timetable_id(matched_stop_details),
-            "group_id": avl_group_id(avl),
-        },
-    )
+    bad_match: RecordToRemove = {
+        "timetable_id": stop_timetable_id(stop),
+        "group_id": avl_group_id(avl),
+    }
+    bad_matches.append(bad_match)
     logger.debug(
         "Removed matched first stop, and created new potential match",
-        stop_index=ms_index,
-        potential_match=group_stop_history["potential_matches"][ms_index],
+        stop_index=stop_index,
+        potential_match=potential_match,
     )
 
 
@@ -387,34 +379,32 @@ def find_matches_in_potential_matches(
     logger.debug("14. iterating through potential matches")
 
     # Order potential matches by stop index to make sure stops are matched in order
-    for pm_index in sorted(group_stop_history["potential_matches"].keys(), key=int):
-        pm_details = group_stop_history["potential_matches"][pm_index]
-
-        if pm_index not in route:
+    for stop_index in sorted(group_stop_history["potential_matches"].keys(), key=int):
+        if stop_index not in route:
             return
 
-        stop_details = route[pm_index]
+        stop_details = route[stop_index]
+        potential_match = group_stop_history["potential_matches"][stop_index]
         # calculate distance between avl and potential match stops
         avl_pm_distance_in_meters = distance_from_stop(avl, stop_details)
-        last_distance = pm_details["last_distance"]
-        is_final_stop = int(pm_index) == get_final_stop_index(route)
+        is_final_stop = int(stop_index) == get_final_stop_index(route)
         # 15. If the distance between avl and potential match is less than threshold
         if avl_pm_distance_in_meters < MATCH_ZONE_RADIUS_IN_METERS:
             logger.debug(
-                f"15. avl is {avl_pm_distance_in_meters}m from stop {pm_index}, less than {MATCH_ZONE_RADIUS_IN_METERS}m",
+                f"15. avl is {avl_pm_distance_in_meters}m from stop {stop_index}, less than {MATCH_ZONE_RADIUS_IN_METERS}m",
             )
             # 16. check if the potential match is the final stop of the route
             if not is_final_stop:
                 # 17.Update potential match with last_distance of as last distance from stop and last_time_in_zone of AVL time
                 update_potential_match_with_recorded_at_time(
                     avl,
-                    pm_index,
-                    pm_details,
+                    stop_index,
+                    potential_match,
                     avl_pm_distance_in_meters,
                 )
                 continue
 
-            if pm_index in group_stop_history["matched_stops"]:
+            if stop_index in group_stop_history["matched_stops"]:
                 continue
 
             if len(group_stop_history["matched_stops"]) <= 0:
@@ -422,14 +412,14 @@ def find_matches_in_potential_matches(
 
             # 18-19. the final stop has not been matched yet and there is at least one match
             logger.debug(
-                f"16. {pm_index} is final stop and has not been matched",
+                f"16. {stop_index} is final stop and has not been matched",
             )
 
             move_potential_match_to_match(
                 route,
                 avl,
-                pm_index,
-                pm_details,
+                stop_index,
+                potential_match,
                 group_stop_history,
                 potential_matches_to_delete,
                 new_matches,
@@ -441,8 +431,9 @@ def find_matches_in_potential_matches(
         # Find one more row of avl that is away from the stop
         # 19. Check if pm last distance > distance threshold, 20. check if the avl potential distance > last distance
         logger.debug(
-            f"15. avl is {avl_pm_distance_in_meters}m from stop {pm_index}, greater than {MATCH_ZONE_RADIUS_IN_METERS}m",
+            f"15. avl is {avl_pm_distance_in_meters}m from stop {stop_index}, greater than {MATCH_ZONE_RADIUS_IN_METERS}m",
         )
+        last_distance = potential_match["last_distance"]
         if (
             last_distance <= MATCH_ZONE_RADIUS_IN_METERS
             or avl_pm_distance_in_meters <= last_distance
@@ -450,8 +441,8 @@ def find_matches_in_potential_matches(
             # 19. pm last distance < distance threshold / 20. the avl potential distance < last distance, Avl is moving backwards
             # 34. update potential match with current avl index and distance between potential match stop and avl location
             update_potential_match_without_recorded_at_time(
-                pm_index,
-                pm_details,
+                stop_index,
+                potential_match,
                 avl_pm_distance_in_meters,
             )
             continue
@@ -462,7 +453,7 @@ def find_matches_in_potential_matches(
         # avl is confirmed to be getting away from the stop with last distance > 70m
         # 31-32. check if there is more than 1 match being created with the same recordedattime
         selected_index = select_potential_match_with_same_recordedattime(
-            pm_index,
+            stop_index,
             group_stop_history,
             potential_matches_to_delete,
         )
@@ -475,7 +466,7 @@ def find_matches_in_potential_matches(
             route,
             avl,
             selected_index,
-            pm_details,
+            potential_match,
             group_stop_history,
             potential_matches_to_delete,
             new_matches,
@@ -493,7 +484,6 @@ def remove_matched_stops(
     Args:
     ----
         group_stop_history (GroupStopHistory): Stop history of the current group id
-        delete_from (str): The name of the list to delete the matches from
         matches_to_delete (list): The list of matched stops to be removed
 
     """
@@ -502,12 +492,12 @@ def remove_matched_stops(
         return
 
     matches_to_delete = set(matches_to_delete)
-    for pm_index in matches_to_delete:
-        del stops_list[pm_index]
+    for stop_index in matches_to_delete:
+        del stops_list[stop_index]
 
 
 def update_matched_stop(
-    pm_index: str,
+    stop_index: str,
     last_time_in_zone: datetime,
     group_stop_history: GroupStopHistory,
     potential_matches_to_delete: list[str],
@@ -518,21 +508,18 @@ def update_matched_stop(
 
     Args:
     ----
-        avl (AVLRecord): Avl record
-        pm_index (str): Potential match stop index which has become a match
+        stop_index (str): Potential match stop index which has become a match
         last_time_in_zone (datetime): Potential match last time in zone
         group_stop_history (GroupStopHistory): Stop history of the current group id
         potential_matches_to_delete (list): The list of matched stops to be removed from the potential match list
         is_estimate (bool): Whether the match is an estimate
 
     """
-    potential_matches_to_delete.append(pm_index)
-    group_stop_history["matched_stops"][pm_index] = create_matched_stop(
-        last_time_in_zone,
-        is_estimate,
-    )
+    potential_matches_to_delete.append(stop_index)
+    matched_stop = create_matched_stop(last_time_in_zone, is_estimate)
+    group_stop_history["matched_stops"][stop_index] = matched_stop
     logger.debug(
-        f"24. moved {pm_index} to matched stops, updated matched stop stop {pm_index}: {group_stop_history['matched_stops'][pm_index]}",
+        f"24. moved {stop_index} to matched stops, updated matched stop stop {stop_index}: {matched_stop}",
     )
 
 
@@ -541,7 +528,7 @@ def map_matched_stop_to_db(
     route: RouteDetails,
     new_matches: list[RecordToAdd],
     avl: AVLRecord,
-    pm_index: str,
+    stop_index: str,
     last_time_in_zone: datetime | None,
     is_estimate: bool,  # noqa: FBT001 - boolean argument is fine for now
 ) -> None:
@@ -554,19 +541,19 @@ def map_matched_stop_to_db(
         route (RouteDetails): Route stop info
         new_matches (list): The matched records that is going to be written into the database
         avl (AVLRecord): The avl that caused the match
-        pm_index (str): Potential match stop index which has become a match
+        stop_index (str): Potential match stop index which has become a match
         last_time_in_zone (datetime | None): Potential match last time in zone
         timestamp_after_estimate (datetime | None): Estimated match time
         is_estimate (bool): Whether the match is an estimate
 
     """
-    timetable_departure_time = stop_departure_time(route[pm_index])
+    timetable_departure_time = stop_departure_time(route[stop_index])
     time_difference = (last_time_in_zone - timetable_departure_time).total_seconds()
 
     if time_difference < MATCHING_TIME_LOWER_LIMIT_IN_SECONDS:
         logger.warning(
             "This match is more than 2 hours early",
-            timetable_id=stop_timetable_id(route[pm_index]),
+            timetable_id=stop_timetable_id(route[stop_index]),
             time_difference=time_difference,
             last_time_in_zone=last_time_in_zone,
             timetable_departure_time=validate_date(timetable_departure_time),
@@ -575,58 +562,56 @@ def map_matched_stop_to_db(
     if time_difference > MATCHING_TIME_UPPER_LIMIT_IN_SECONDS:
         logger.warning(
             "This match is more than 1 hour late",
-            timetable_id=stop_timetable_id(route[pm_index]),
+            timetable_id=stop_timetable_id(route[stop_index]),
             time_difference=time_difference,
             last_time_in_zone=last_time_in_zone,
             timetable_departure_time=validate_date(timetable_departure_time),
         )
     # 23. update db with potential match details
-    new_matches.append(
-        {
-            "group_id": avl_group_id(avl),
-            "stop_index": pm_index,
-            "time_difference": time_difference,
-            "last_time_in_zone_str": str(last_time_in_zone.strftime("%H:%M:%S"))
-            if not is_estimate
-            else None,
-            "timetable_id": stop_timetable_id(route[pm_index]),
-            "last_time_in_zone": last_time_in_zone if not is_estimate else None,
-            "timestamp_after_estimate": last_time_in_zone if is_estimate else None,
-            "otp_state": get_otp_state(is_final_stop, time_difference),
-            "stop_type": "final" if is_final_stop else "Non-final",
-        },
-    )
+    new_match = {
+        "group_id": avl_group_id(avl),
+        "stop_index": stop_index,
+        "time_difference": time_difference,
+        "last_time_in_zone_str": str(last_time_in_zone.strftime("%H:%M:%S"))
+        if not is_estimate
+        else None,
+        "timetable_id": stop_timetable_id(route[stop_index]),
+        "last_time_in_zone": last_time_in_zone if not is_estimate else None,
+        "timestamp_after_estimate": last_time_in_zone if is_estimate else None,
+        "otp_state": get_otp_state(is_final_stop, time_difference),
+        "stop_type": "final" if is_final_stop else "Non-final",
+    }
+    new_matches.append(new_match)
 
 
 def update_potential_match_without_recorded_at_time(
-    pm_index: str,
-    pm_details: PotentialMatch,
-    avl_pm_distance: float,
+    stop_index: str,
+    potential_match: PotentialMatch,
+    stop_distance_in_meters: float,
 ) -> None:
     """
     Update potential match with last avl index, last distance and recorded at time if the current avl is outside the zone
 
     Args:
     ----
-        avl (AVLRecord): Avl record
-        pm_index (str): Potential match stop that needs to be updated
-        pm_details (PotentialMatch): Potential match information stored in stop history
-        avl_pm_distance (float): The distance between the avl record and the stop
+        stop_index (str): Potential match stop that needs to be updated
+        potential_match (PotentialMatch): Potential match information stored in stop history
+        stop_distance_in_meters (float): The distance between the avl record and the stop
 
     """
-    pm_details["last_distance"] = avl_pm_distance
+    potential_match["last_distance"] = stop_distance_in_meters
     logger.debug(
         "18. updated potential match",
-        stop_index=pm_index,
-        potential_match=pm_details,
+        stop_index=stop_index,
+        potential_match=potential_match,
     )
 
 
 def update_potential_match_with_recorded_at_time(
     avl: AVLRecord,
-    pm_index: str,
-    pm_details: PotentialMatch,
-    avl_pm_distance: float,
+    stop_index: str,
+    potential_match: PotentialMatch,
+    stop_distance_in_meters: float,
 ) -> None:
     """
     Update potential match with last avl index, last distance and recorded at time if the current avl is within the zone
@@ -634,31 +619,31 @@ def update_potential_match_with_recorded_at_time(
     Args:
     ----
         avl (AVLRecord): Avl record
-        pm_index (str): Potential match stop that needs to be updated
-        pm_details (PotentialMatch): Potential match information stored in stop history
-        avl_pm_distance (float): The distance between the avl record and the stop
+        stop_index (str): Potential match stop that needs to be updated
+        potential_match (PotentialMatch): Potential match information stored in stop history
+        stop_distance_in_meters (float): The distance between the avl record and the stop
 
     """
-    pm_details["last_time_in_zone"] = str(avl_recorded_at_time_utc(avl))
+    potential_match["last_time_in_zone"] = str(avl_recorded_at_time_utc(avl))
     update_potential_match_without_recorded_at_time(
-        pm_index,
-        pm_details,
-        avl_pm_distance,
+        stop_index,
+        potential_match,
+        stop_distance_in_meters,
     )
 
 
 def select_potential_match_with_same_recordedattime(
-    pm_index: str,
+    stop_index: str,
     group_stop_history: GroupStopHistory,
     potential_matches_to_delete: list[str],
 ) -> str:
-    selected_index = pm_index
-    if pm_index in potential_matches_to_delete:
-        return pm_index
+    selected_index = stop_index
+    if stop_index in potential_matches_to_delete:
+        return stop_index
     int_keys = (int(key) for key in group_stop_history["matched_stops"])
     first_matched_stop = next(iter(sorted(int_keys)), 0)
     potential_matches = group_stop_history["potential_matches"]
-    current_recordedattime = potential_matches[pm_index]["last_time_in_zone"]
+    current_recordedattime = potential_matches[stop_index]["last_time_in_zone"]
     index_with_same_recordedattime = [
         ind
         for ind, pm in potential_matches.items()
@@ -671,7 +656,7 @@ def select_potential_match_with_same_recordedattime(
         return selected_index
 
     logger.debug(
-        f"{pm_index} index_with_same_recordedattime: {index_with_same_recordedattime}",
+        f"{stop_index} index_with_same_recordedattime: {index_with_same_recordedattime}",
     )
     lowest_index_diff = None
     # 32. Select the stop closest to the first actual in the sequence
@@ -683,9 +668,9 @@ def select_potential_match_with_same_recordedattime(
             selected_index = index
             continue
 
-        if abs(int(index) - int(pm_index)) != 1:
+        if abs(int(index) - int(stop_index)) != 1:
             logger.debug(
-                f"32. {pm_index} and {index} have the same recorded at time, remove {index} from potential matches",
+                f"32. {stop_index} and {index} have the same recorded at time, remove {index} from potential matches",
             )
             # remove the potential match(es) that are not the closest to the first actual matched
             potential_matches_to_delete.append(index)
@@ -695,8 +680,8 @@ def select_potential_match_with_same_recordedattime(
 def move_potential_match_to_match(
     route: RouteDetails,
     avl: AVLRecord,
-    pm_index: str,
-    pm_details: PotentialMatch,
+    stop_index: str,
+    potential_match: PotentialMatch,
     group_stop_history: GroupStopHistory,
     potential_matches_to_delete: list[str],
     new_matches: list[RecordToAdd],
@@ -709,27 +694,27 @@ def move_potential_match_to_match(
     ----
         route (RouteDetails): Route stop info
         avl (AVLRecord): Avl record
-        pm_index (str): Potential match stop index which has become a match
-        pm_details (PotentialMatch): Potential match information stored in stop history
-        group_stop_history (GroupStopHistory): Stop history of the current group id
+        stop_index (str): Potential match stop index which has become a match
+        potential_match (PotentialMatch): Potential match information stored in stop history
+        route_history (GroupStopHistory): Stop history of the current group id
         potential_matches_to_delete (list): The list of matched stops to be removed from the potential match list
         new_matches (list): The matched records that is going to be written into the database
         bad_matches (list): The list of stops that needs to have matched records removed from database
 
     """
     final_stop_index = get_final_stop_index(route)
-    is_final_stop = int(pm_index) == final_stop_index
+    is_final_stop = int(stop_index) == final_stop_index
     matched_stops = group_stop_history["matched_stops"]
     delete_potential_match = False
-    last_time_in_zone = validate_date(pm_details["last_time_in_zone"])
+    last_time_in_zone = validate_date(potential_match["last_time_in_zone"])
 
     # 33. is this potential match the first match?
     if len(matched_stops) != 0:
         matched_stops_with_new_match = {
             **matched_stops,
-            pm_index: create_matched_stop(
+            stop_index: create_matched_stop(
                 last_time_in_zone,
-                pm_details.get("is_estimate", False),
+                potential_match.get("is_estimate", False),
             ),
         }
         # 20. order saved matches by recorded_at_time
@@ -747,12 +732,12 @@ def move_potential_match_to_match(
         # check if the new match index is higher than or equal to the highest index saved
         # 21-22. is the new match index higher than the highest index saved and Will this new match be the (saved match limit + 1) actual match saved
         if (
-            int(pm_index) > highest_matched_stop_index
-            and int(pm_index) == stop_index_with_latest_match_timestamp
+            int(stop_index) > highest_matched_stop_index
+            and int(stop_index) == stop_index_with_latest_match_timestamp
             and len(matched_stops) == SAVED_MATCHES_LIMIT
         ):
             logger.debug(
-                f"{pm_index} higher than highest_matched_stop_index {highest_matched_stop_index}, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
+                f"{stop_index} higher than highest_matched_stop_index {highest_matched_stop_index}, remove lowest matched stop from matched stops {lowest_matched_stop_index}",
             )
             logger.debug(
                 "Matched stop identified for removal",
@@ -767,24 +752,24 @@ def move_potential_match_to_match(
         # 28,29. Will this new match be the (saved match limit + 1) actual match saved and Is this new match the lowest index
         # 29.1 Do the two actual match index's saved have a difference of 1
         if (
-            int(pm_index) <= lowest_matched_stop_index
+            int(stop_index) <= lowest_matched_stop_index
             and (
                 len(matched_stops) == SAVED_MATCHES_LIMIT
                 or highest_matched_stop_index - lowest_matched_stop_index == 1
             )
         ) or (
-            int(pm_index) > highest_matched_stop_index
-            and int(pm_index) != stop_index_with_latest_match_timestamp
+            int(stop_index) > highest_matched_stop_index
+            and int(stop_index) != stop_index_with_latest_match_timestamp
         ):
             logger.debug(
-                f"{pm_index} lower than lowest_matched_stop_index {lowest_matched_stop_index}, remove it from potential matches",
+                f"{stop_index} lower than lowest_matched_stop_index {lowest_matched_stop_index}, remove it from potential matches",
             )
             # 30.Delete this new potential match
-            potential_matches_to_delete.append(pm_index)
+            potential_matches_to_delete.append(stop_index)
             delete_potential_match = True
         #  29. It's in the middle of the matched stop sequence or there's only one matched stop
-        if int(pm_index) < highest_matched_stop_index and (
-            int(pm_index) > lowest_matched_stop_index or len(matched_stops) == 1
+        if int(stop_index) < highest_matched_stop_index and (
+            int(stop_index) > lowest_matched_stop_index or len(matched_stops) == 1
         ):
             # 29.2 is the last stop in the matched stops ordered by recorded_at_time the final stop of the journey?
             if stop_index_with_latest_match_timestamp == final_stop_index:
@@ -802,7 +787,7 @@ def move_potential_match_to_match(
             else:
                 # 31.Delete the higher index stored from the db and json
                 logger.debug(
-                    f"{pm_index} lower than highest_matched_stop_index {highest_matched_stop_index}, remove matched stop index {highest_matched_stop_index} higher than {pm_index}",
+                    f"{stop_index} lower than highest_matched_stop_index {highest_matched_stop_index}, remove matched stop index {highest_matched_stop_index} higher than {stop_index}",
                 )
                 logger.debug(
                     "Matched stop identified for removal",
@@ -828,9 +813,9 @@ def move_potential_match_to_match(
         return
 
     # 24. move potential match to be a match
-    is_estimate = pm_details.get("is_estimate", False)
+    is_estimate = potential_match.get("is_estimate", False)
     update_matched_stop(
-        pm_index,
+        stop_index,
         last_time_in_zone,
         group_stop_history,
         potential_matches_to_delete,
@@ -841,15 +826,15 @@ def move_potential_match_to_match(
         route,
         new_matches,
         avl,
-        pm_index,
+        stop_index,
         last_time_in_zone,
         is_estimate,
     )
     logger.debug(
         "Created matched stop from potential match",
-        stop_index=pm_index,
-        potential_match=pm_details,
-        matched_stop=group_stop_history["matched_stops"][pm_index],
+        stop_index=stop_index,
+        potential_match=potential_match,
+        matched_stop=group_stop_history["matched_stops"][stop_index],
     )
 
 
