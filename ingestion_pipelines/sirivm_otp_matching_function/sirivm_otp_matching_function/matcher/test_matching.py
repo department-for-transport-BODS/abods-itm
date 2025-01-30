@@ -34,7 +34,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
     avl_record_5_mins = read_avl("check_update_first_stop.csv")[0]
     timetable = read_timetable("TLCT37812152024-08-20.json")
     group_id = "tlct|378|1215|2024-08-20"
-    stop_pos_distances_remove_5_mins = []  # noqa: RUF012 - BODS-7131
+    bad_matches_5_mins = []  # noqa: RUF012 - BODS-7131
     group_stop_history_5_mins = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 20, 11, 24, 58, tzinfo=UTC)),
         "matched_stops": {
@@ -64,7 +64,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
             "is_estimate": False,
         },
     }
-    expected_stop_pos_distances_remove_5_mins = [  # noqa: RUF012 - BODS-7131
+    expected_bad_matches_5_mins = [  # noqa: RUF012 - BODS-7131
         {
             "timetable_id": 893823336,
             "group_id": "tlct|378|1215|2024-08-20",
@@ -86,7 +86,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
             },
         },
     }
-    stop_pos_distances_remove = []  # noqa: RUF012 - BODS-7131
+    bad_matches = []  # noqa: RUF012 - BODS-7131
     expected_matched_stops = {  # noqa: RUF012 - BODS-7131
         "1": {
             "last_match_time": str(datetime(2024, 8, 20, 11, 32, 5, tzinfo=UTC)),
@@ -100,37 +100,37 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
             "is_estimate": False,
         },
     }
-    expected_stop_pos_distances_remove = []  # noqa: RUF012 - BODS-7131
+    expected_bad_matches = []  # noqa: RUF012 - BODS-7131
 
     @pytest.mark.parametrize(
         (
             "rec",
             "timetable_dict",
             "group_stop_history",
-            "stop_pos_distances_remove",
+            "bad_matches",
             "expected_matched_stops",
             "expected_potential_matches",
-            "expected_stop_pos_distances_remove",
+            "expected_bad_matches",
         ),
         [
             pytest.param(
                 avl_record_5_mins,
                 timetable,
                 group_stop_history_5_mins,
-                stop_pos_distances_remove_5_mins,
+                bad_matches_5_mins,
                 expected_matched_stops_5_mins,
                 expected_potential_matches_5_mins,
-                expected_stop_pos_distances_remove_5_mins,
+                expected_bad_matches_5_mins,
                 id="Revisiting stop 1 within 5 mins",
             ),
             pytest.param(
                 avl_record,
                 timetable,
                 group_stop_history,
-                stop_pos_distances_remove,
+                bad_matches,
                 expected_matched_stops,
                 expected_potential_matches,
-                expected_stop_pos_distances_remove,
+                expected_bad_matches,
                 id="Revisiting stop 1 after 5 mins",
             ),
         ],
@@ -140,20 +140,20 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
         rec: AVLRecord,
         timetable_dict: dict,
         group_stop_history: dict,
-        stop_pos_distances_remove: list,
+        bad_matches: list,
         expected_matched_stops: dict,
         expected_potential_matches: dict,
-        expected_stop_pos_distances_remove: list,
+        expected_bad_matches: list,
     ) -> None:
         check_update_first_stop(
             rec,
             timetable_dict[avl_group_id(rec)],
             group_stop_history,
-            stop_pos_distances_remove,
+            bad_matches,
         )
         assert group_stop_history["matched_stops"] == expected_matched_stops
         assert group_stop_history["potential_matches"] == expected_potential_matches
-        assert stop_pos_distances_remove == expected_stop_pos_distances_remove
+        assert bad_matches == expected_bad_matches
 
 
 class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
@@ -409,9 +409,9 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             "avl",
             "timetable_dict",
             "group_stop_history",
-            "stop_pos_distances",
+            "new_matches",
             "potential_matches_to_delete",
-            "stop_pos_distances_remove",
+            "bad_matches",
             "expected_group_stop_history",
             "expected_potential_matches_to_delete",
         ),
@@ -422,7 +422,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 group_stop_history,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
-                [],  # stop_pos_distances_remove,
+                [],  # bad_matches,
                 {
                     "last_avl_time": str(datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC)),
                     "matched_stops": {
@@ -482,7 +482,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 group_stop_history_2,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
-                [],  # stop_pos_distances_remove,
+                [],  # bad_matches,
                 {
                     "last_avl_time": str(datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC)),
                     "matched_stops": {
@@ -557,7 +557,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 group_stop_history_3,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
-                [],  # stop_pos_distances_remove,
+                [],  # bad_matches,
                 {
                     "last_avl_time": str(datetime(2024, 8, 20, 12, 00, 5, tzinfo=UTC)),
                     "matched_stops": {
@@ -617,7 +617,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 group_stop_history_4,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
-                [],  # stop_pos_distances_remove,
+                [],  # bad_matches,
                 {
                     "last_avl_time": str(datetime(2024, 8, 20, 11, 54, 9, tzinfo=UTC)),
                     "matched_stops": {
@@ -677,7 +677,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 group_stop_history_5,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
-                [],  # stop_pos_distances_remove,
+                [],  # bad_matches,
                 {
                     "last_avl_time": str(datetime(2024, 8, 21, 7, 1, 3, tzinfo=UTC)),
                     "matched_stops": {},
@@ -723,7 +723,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                 group_stop_history_6,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
-                [],  # stop_pos_distances_remove,
+                [],  # bad_matches,
                 {
                     "last_avl_time": str(datetime(2024, 8, 21, 7, 43, 25, tzinfo=UTC)),
                     "matched_stops": {
@@ -784,9 +784,9 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         avl: AVLRecord,
         timetable_dict: dict,
         group_stop_history: dict,
-        stop_pos_distances: list,
+        new_matches: list,
         potential_matches_to_delete: list,
-        stop_pos_distances_remove: list,
+        bad_matches: list,
         expected_group_stop_history: dict,
         expected_potential_matches_to_delete: list,
     ) -> None:
@@ -794,9 +794,9 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             avl,
             timetable_dict[avl_group_id(avl)],
             group_stop_history,
-            stop_pos_distances,
+            new_matches,
             potential_matches_to_delete,
-            stop_pos_distances_remove,
+            bad_matches,
         )
         assert group_stop_history == expected_group_stop_history
         assert potential_matches_to_delete == expected_potential_matches_to_delete
@@ -909,8 +909,8 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
 
 class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
     timetable = read_timetable("TLCT37812152024-08-20.json")
-    stop_pos_distances_non_final = []  # noqa: RUF012 - BODS-7131
-    stop_pos_distances_final = []  # noqa: RUF012 - BODS-7131
+    new_matches_non_final = []  # noqa: RUF012 - BODS-7131
+    new_matches_final = []  # noqa: RUF012 - BODS-7131
     operator_ref = "TLCT"
     line_name = "378"
     journey_ref = "1215"
@@ -923,16 +923,16 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
         (
             "is_final_stop",
             "timetable_dict",
-            "stop_pos_distances",
+            "new_matches",
             "pm_index",
             "last_time_in_zone",
-            "expected_stop_pos_distances",
+            "expected_new_matches",
         ),
         [
             pytest.param(
                 False,
                 timetable,
-                stop_pos_distances_non_final,
+                new_matches_non_final,
                 "1",
                 last_time_in_zone_non_final,
                 [
@@ -953,7 +953,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
             pytest.param(
                 True,
                 timetable,
-                stop_pos_distances_final,
+                new_matches_final,
                 "45",
                 last_time_in_zone_final,
                 [
@@ -978,7 +978,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                 "1",
                 last_time_in_zone_non_final - timedelta(seconds=7234),
                 [],
-                id="The match has a time difference more than 2 hours early, it shouldn't be added to the stop_pos_distances",
+                id="The match has a time difference more than 2 hours early, it shouldn't be added to the new_matches",
             ),
             pytest.param(
                 False,
@@ -1007,7 +1007,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                         "timetable_id": 893823336,
                     },
                 ],
-                id="The match has a time difference more than 1 hour late, it should still be added to the stop_pos_distances",
+                id="The match has a time difference more than 1 hour late, it should still be added to the new_matches",
             ),
         ],
     )
@@ -1015,15 +1015,15 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
         self,
         is_final_stop: bool,  # noqa: FBT001 - BODS-7131
         timetable_dict: dict,
-        stop_pos_distances: list,
+        new_matches: list,
         pm_index: str,
         last_time_in_zone: datetime,
-        expected_stop_pos_distances: list,  # noqa: ANN401 - BODS-7131
+        expected_new_matches: list,  # noqa: ANN401 - BODS-7131
     ) -> None:
         map_matched_stop_to_db(
             is_final_stop,
             timetable_dict[self.group_id],
-            stop_pos_distances,
+            new_matches,
             {
                 "operator_ref": self.operator_ref,
                 "line_name": self.line_name,
@@ -1038,7 +1038,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
             last_time_in_zone,
             is_estimate=False,
         )
-        assert stop_pos_distances == expected_stop_pos_distances
+        assert new_matches == expected_new_matches
 
 
 class TestGetTimetableDepartureTime:  # noqa: D101 - BODS-7131
@@ -1505,12 +1505,12 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
             "pm_details",
             "group_stop_history",
             "potential_matches_to_delete",
-            "stop_pos_distances",
-            "stop_pos_distances_remove",
+            "new_matches",
+            "bad_matches",
             "expected_potential_matches_to_delete",
-            "expected_stop_pos_distances_remove",
+            "expected_bad_matches",
             "expected_matched_stops",
-            "expected_stop_pos_distances",
+            "expected_new_matches",
         ),
         [
             pytest.param(
@@ -1571,9 +1571,9 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 group_stop_history_2,
                 [],
                 [],
-                [],  # stop_pos_distances_remove
+                [],  # bad_matches
                 ["3"],  # expected_potential_matches_to_delete
-                [],  # expected_stop_pos_distances_remove
+                [],  # expected_bad_matches
                 {
                     "2": {
                         "last_match_time": str(
@@ -1655,11 +1655,11 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 group_stop_history_4,
                 [],
                 [],
-                [],  # stop_pos_distances_remove
+                [],  # bad_matches
                 ["23"],  # expected_potential_matches_to_delete
                 [
                     {"timetable_id": 893823127, "group_id": group_id},
-                ],  # expected_stop_pos_distances_remove
+                ],  # expected_bad_matches
                 {
                     "21": {
                         "last_match_time": str(
@@ -1721,11 +1721,11 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 group_stop_history_5,
                 [],
                 [],
-                [],  # stop_pos_distances_remove
+                [],  # bad_matches
                 ["7"],  # expected_potential_matches_to_delete
                 [
                     {"timetable_id": 1091293465, "group_id": "coac|41|1630|2024-10-17"},
-                ],  # expected_stop_pos_distances_remove
+                ],  # expected_bad_matches
                 {
                     "7": {
                         "last_match_time": str(
@@ -1765,9 +1765,9 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 group_stop_history_6,
                 [],
                 [],
-                [],  # stop_pos_distances_remove
+                [],  # bad_matches
                 ["11"],  # expected_potential_matches_to_delete
-                [],  # expected_stop_pos_distances_remove
+                [],  # expected_bad_matches
                 {
                     "12": {
                         "last_match_time": str(
@@ -1793,11 +1793,11 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 group_stop_history_7,
                 [],
                 [],
-                [],  # stop_pos_distances_remove
+                [],  # bad_matches
                 ["70"],  # expected_potential_matches_to_delete
                 [
                     {"timetable_id": 1231325785, "group_id": "scem|9|13|2024-10-31"},
-                ],  # expected_stop_pos_distances_remove
+                ],  # expected_bad_matches
                 {
                     "3": {
                         "last_match_time": str(
@@ -1845,12 +1845,12 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         pm_details: dict,
         group_stop_history: dict,
         potential_matches_to_delete: list,
-        stop_pos_distances: list,
-        stop_pos_distances_remove: list,
+        new_matches: list,
+        bad_matches: list,
         expected_potential_matches_to_delete: list,
-        expected_stop_pos_distances_remove: list,
+        expected_bad_matches: list,
         expected_matched_stops: dict,
-        expected_stop_pos_distances: list,
+        expected_new_matches: list,
     ) -> None:
         move_potential_match_to_match(
             timetable_dict[avl_group_id(avl)],
@@ -1859,13 +1859,13 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
             pm_details,
             group_stop_history,
             potential_matches_to_delete,
-            stop_pos_distances,
-            stop_pos_distances_remove,
+            new_matches,
+            bad_matches,
         )
         assert potential_matches_to_delete == expected_potential_matches_to_delete
-        assert stop_pos_distances_remove == expected_stop_pos_distances_remove
+        assert bad_matches == expected_bad_matches
         assert group_stop_history["matched_stops"] == expected_matched_stops
-        assert stop_pos_distances == expected_stop_pos_distances
+        assert new_matches == expected_new_matches
 
 
 class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131

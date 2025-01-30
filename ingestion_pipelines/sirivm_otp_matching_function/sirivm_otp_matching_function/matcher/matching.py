@@ -291,7 +291,7 @@ def check_update_first_stop(
     avl: AVLRecord,
     route: RouteDetails,
     group_stop_history: GroupStopHistory,
-    stop_pos_distances_remove: list[RecordToRemove],
+    bad_matches: list[RecordToRemove],
 ) -> None:
     """
     Check if the bus is going in and out from the first stop zone within 5 mins and update the record if it does
@@ -301,7 +301,7 @@ def check_update_first_stop(
         avl (AVLRecord): Avl record
         route (RouteDetails): Route stop info
         group_stop_history (GroupStopHistory): Stop history of the current group id
-        stop_pos_distances_remove (list): The list of stops that needs to have matched records removed from database
+        bad_matches (list): The list of stops that needs to have matched records removed from database
 
     """
     logger.debug("check and update first stop")
@@ -350,7 +350,7 @@ def check_update_first_stop(
         f"updated stop 1 potential match: {group_stop_history['potential_matches'][ms_index]}",
     )
     # 10. remove db matched details
-    stop_pos_distances_remove.append(
+    bad_matches.append(
         {
             "timetable_id": stop_timetable_id(matched_stop_details),
             "group_id": avl_group_id(avl),
@@ -367,9 +367,9 @@ def find_matches_in_potential_matches(
     avl: AVLRecord,
     route: RouteDetails,
     group_stop_history: GroupStopHistory,
-    stop_pos_distances: list[RecordToAdd],
+    new_matches: list[RecordToAdd],
     potential_matches_to_delete: list[str],
-    stop_pos_distances_remove: list[RecordToRemove],
+    bad_matches: list[RecordToRemove],
 ) -> None:
     """
     Find matches within the potential match list
@@ -379,9 +379,9 @@ def find_matches_in_potential_matches(
         avl (AVLRecord): Avl record
         route (RouteDetails): Route stop info
         group_stop_history (GroupStopHistory): Stop history of the current group id
-        stop_pos_distances (list): The matched records that is going to be written into the database
+        new_matches (list): The matched records that is going to be written into the database
         potential_matches_to_delete (list): The list of matched stops to be removed from the potential match list
-        stop_pos_distances_remove (list): The list of stops that needs to have matched records removed from database
+        bad_matches (list): The list of stops that needs to have matched records removed from database
 
     """
     logger.debug("14. iterating through potential matches")
@@ -432,8 +432,8 @@ def find_matches_in_potential_matches(
                 pm_details,
                 group_stop_history,
                 potential_matches_to_delete,
-                stop_pos_distances,
-                stop_pos_distances_remove,
+                new_matches,
+                bad_matches,
             )
             continue
 
@@ -478,8 +478,8 @@ def find_matches_in_potential_matches(
             pm_details,
             group_stop_history,
             potential_matches_to_delete,
-            stop_pos_distances,
-            stop_pos_distances_remove,
+            new_matches,
+            bad_matches,
         )
 
 
@@ -539,20 +539,20 @@ def update_matched_stop(
 def map_matched_stop_to_db(
     is_final_stop: bool,  # noqa: FBT001 - boolean argument is fine for now
     route: RouteDetails,
-    stop_pos_distances: list[RecordToAdd],
+    new_matches: list[RecordToAdd],
     avl: AVLRecord,
     pm_index: str,
     last_time_in_zone: datetime | None,
     is_estimate: bool,  # noqa: FBT001 - boolean argument is fine for now
 ) -> None:
     """
-    Update stop_pos_distances with the newly matched stop which will be written to the database
+    Update new_matches with the newly matched stop which will be written to the database
 
     Args:
     ----
         is_final_stop (bool): Current stop is a final stop
         route (RouteDetails): Route stop info
-        stop_pos_distances (list): The matched records that is going to be written into the database
+        new_matches (list): The matched records that is going to be written into the database
         avl (AVLRecord): The avl that caused the match
         pm_index (str): Potential match stop index which has become a match
         last_time_in_zone (datetime | None): Potential match last time in zone
@@ -581,7 +581,7 @@ def map_matched_stop_to_db(
             timetable_departure_time=validate_date(timetable_departure_time),
         )
     # 23. update db with potential match details
-    stop_pos_distances.append(
+    new_matches.append(
         {
             "group_id": avl_group_id(avl),
             "stop_index": pm_index,
@@ -699,8 +699,8 @@ def move_potential_match_to_match(
     pm_details: PotentialMatch,
     group_stop_history: GroupStopHistory,
     potential_matches_to_delete: list[str],
-    stop_pos_distances: list[RecordToAdd],
-    stop_pos_distances_remove: list[RecordToRemove],
+    new_matches: list[RecordToAdd],
+    bad_matches: list[RecordToRemove],
 ) -> None:
     """
     Move the current potential match to be a match
@@ -713,8 +713,8 @@ def move_potential_match_to_match(
         pm_details (PotentialMatch): Potential match information stored in stop history
         group_stop_history (GroupStopHistory): Stop history of the current group id
         potential_matches_to_delete (list): The list of matched stops to be removed from the potential match list
-        stop_pos_distances (list): The matched records that is going to be written into the database
-        stop_pos_distances_remove (list): The list of stops that needs to have matched records removed from database
+        new_matches (list): The matched records that is going to be written into the database
+        bad_matches (list): The list of stops that needs to have matched records removed from database
 
     """
     final_stop_index = get_final_stop_index(route)
@@ -818,7 +818,7 @@ def move_potential_match_to_match(
                         f"index {highest_matched_stop_index} doesn't exist in timetable, group_id: {avl_group_id(avl)}",
                     )
                 else:
-                    stop_pos_distances_remove.append(
+                    bad_matches.append(
                         {
                             "timetable_id": stop_timetable_id(stop_details),
                             "group_id": (avl_group_id(avl)),
@@ -839,7 +839,7 @@ def move_potential_match_to_match(
     map_matched_stop_to_db(
         is_final_stop,
         route,
-        stop_pos_distances,
+        new_matches,
         avl,
         pm_index,
         last_time_in_zone,
@@ -997,8 +997,8 @@ def match_avl(
 
     Returns:
     -------
-        stop_pos_distances (Sequence): The matched stops which require updates in the database
-        stop_pos_distances_remove (Sequence): The matched stops that need to have matched records removed from database
+        new_matches (Sequence): The matched stops which require updates in the database
+        bad_matches (Sequence): The matched stops that need to have matched records removed from database
         stop_history (StopHistory): The updated full stop history
 
     """
@@ -1050,7 +1050,7 @@ def match_avl(
         )
         return [], [], stop_history
 
-    stop_pos_distances_remove: list[RecordToRemove] = []
+    bad_matches: list[RecordToRemove] = []
     # 4. update the time
     if len(group_stop_history["matched_stops"]) > 0:
         # 6-10. Check if the bus is revisiting stop 1
@@ -1058,7 +1058,7 @@ def match_avl(
             avl,
             route,
             group_stop_history,
-            stop_pos_distances_remove,
+            bad_matches,
         )
 
     # 11-14. Find potential matches
@@ -1078,17 +1078,17 @@ def match_avl(
     # Check if avl is anywhere within the zone of a potential match
     # 14-34. Find matches
     if len(group_stop_history.get("potential_matches")) <= 0:
-        return [], stop_pos_distances_remove, stop_history
+        return [], bad_matches, stop_history
 
-    stop_pos_distances: list[RecordToAdd] = []
+    new_matches: list[RecordToAdd] = []
     potential_matches_to_remove = []
     find_matches_in_potential_matches(
         avl,
         route,
         group_stop_history,
-        stop_pos_distances,
+        new_matches,
         potential_matches_to_remove,
-        stop_pos_distances_remove,
+        bad_matches,
     )
     # 22.1 remove matched stops from potential matches
     remove_matched_stops(
@@ -1096,4 +1096,4 @@ def match_avl(
         potential_matches_to_remove,
     )
 
-    return stop_pos_distances, stop_pos_distances_remove, stop_history
+    return new_matches, bad_matches, stop_history
