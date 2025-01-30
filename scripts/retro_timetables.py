@@ -90,7 +90,7 @@ def main():
         print(f"{datetime.now()} Generating {dstr} timetable")
         print("hit q then enter to exit after completion")
         run_query(
-            f"CALL public.generate_retrospective_timetable('{dstr}');",
+            f"CALL public.generate_timetable('{dstr}');",
             password=db_password,
         )
         run_query(

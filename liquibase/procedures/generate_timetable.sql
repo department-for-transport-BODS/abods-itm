@@ -10,6 +10,151 @@ declare
 
 begin
 
+    RAISE NOTICE '% (Re)Creating filtered_files temp table', clock_timestamp();
+
+    execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
+
+    IF partition_date > now() THEN
+        execute format(
+                '
+                CREATE TABLE public.%I AS
+                SELECT
+                  od.dataset_id,
+                  a.id AS txcfileattributes_id,
+                  a.national_operator_code,
+                  a.service_code,
+                  a.line_names AS line_name,
+                  a.filename,
+                  a.revision_number,
+                  a.revision_id,
+                  a.operating_period_start_date,
+                  a.operating_period_end_date
+                FROM
+                  public.organisation_txcfileattributes a
+                  JOIN public.organisation_datasetrevision od
+                    ON od.id = a.revision_id
+                  INNER JOIN public.organisation_dataset d
+                    ON d.live_revision_id = a.revision_id
+                WHERE
+                      od.is_published IS TRUE
+                  AND od.status = ''live''
+                  AND d.dataset_type = 1
+                ',
+                concat('filtered_files', timetable_suffix),
+                partition_date,
+                partition_date
+                );
+    ELSE
+        execute format(
+                '
+                CREATE TABLE public.%I AS
+                WITH potential_datasets AS (
+                  --get list of all potential timetable dataset ids (od2.dataset_type = 1)
+                  SELECT
+                    od2.id dataset_table_id,
+                    od2.dataset_type
+                  FROM
+                    organisation_dataset od2
+                  WHERE
+                    od2.dataset_type = 1
+                ),
+                potential_revisions AS (
+                  -- get all potentially live revisions where published before the date we are interested in
+                  SELECT
+                    (%L)::timestamptz AS query_date,
+                    od.*,
+                    pd.*
+                  FROM
+                    organisation_datasetrevision od
+                    INNER JOIN potential_datasets pd
+                      ON pd.dataset_table_id = od.dataset_id
+                  WHERE
+                        od.published_at <= (%L)::timestamptz
+                    AND od.status IN (
+                      ''live'',
+                      ''inactive'',
+                      ''expired''
+                    )
+                ),
+                inactive_at_date_prequery AS (
+                  -- get all potentially live revisions where published before the date we are interested in
+                  SELECT
+                    *,
+                    rank() OVER (
+                      PARTITION BY dataset_id
+                      ORDER BY
+                        id DESC
+                    ) AS id_rank
+                  FROM
+                    potential_revisions
+                ),
+                inactive_at_date AS (
+                  --get all potential revision grouped by dataset_id ranked by highest modified date
+                  SELECT
+                    DISTINCT dataset_id
+                  FROM
+                    inactive_at_date_prequery
+                  WHERE
+                        id_rank = 1
+                    AND modified < query_date
+                    AND status IN (''inactive'', ''expired'')
+                ),
+                ranked_revisions AS (
+                  -- list dataset ids at latest revision where modified before query date
+                  SELECT
+                    pr.*,
+                    rank() OVER (
+                      PARTITION BY pr.dataset_id
+                      ORDER BY
+                        id DESC
+                    ) AS id_rank
+                  FROM
+                    potential_revisions pr
+                    LEFT JOIN inactive_at_date iad
+                      ON pr.dataset_id = iad.dataset_id
+                  WHERE
+                    iad.dataset_id IS NULL
+                ),
+                highest_revisions AS (
+                  -- rank revisions which are not inactive at date by most modified
+                  SELECT
+                    rr.*
+                  FROM
+                    ranked_revisions rr
+                  WHERE
+                    rr.id_rank = 1
+                ),
+                selected_revisions AS (
+                  SELECT
+                    DISTINCT id AS revision_id,
+                    dataset_id
+                  FROM
+                    highest_revisions
+                )
+                SELECT
+                  p.dataset_id,
+                  a.id AS txcfileattributes_id,
+                  a.national_operator_code,
+                  a.service_code,
+                  a.line_names AS line_name,
+                  a.filename,
+                  a.revision_number,
+                  a.revision_id,
+                  a.operating_period_start_date,
+                  a.operating_period_end_date
+                FROM
+                  selected_revisions p
+                  LEFT JOIN public.organisation_txcfileattributes a
+                    ON p.revision_id = a.revision_id
+                WHERE
+                  a.id IS NOT NULL
+                ',
+                concat('filtered_files', timetable_suffix),
+                partition_date,
+                partition_date
+                );
+    END IF;
+
     RAISE NOTICE '% (Re)Creating organisation_timetable temp table', clock_timestamp();
 
     execute format('DROP TABLE IF EXISTS public.%I', concat('organisation_timetable', timetable_suffix));
@@ -17,30 +162,7 @@ begin
     execute format(
             '
             CREATE TABLE public.%I AS
-            WITH filtered_files AS (
-              SELECT
-                od.dataset_id,
-                a.id AS txcfileattributes_id,
-                a.national_operator_code,
-                a.service_code,
-                a.line_names AS line_name,
-                a.filename,
-                a.revision_number,
-                a.revision_id,
-                a.operating_period_start_date,
-                a.operating_period_end_date
-              FROM
-                public.organisation_txcfileattributes a
-                JOIN public.organisation_datasetrevision od
-                  ON od.id = a.revision_id
-                INNER JOIN public.organisation_dataset d
-                  ON d.live_revision_id = a.revision_id
-              WHERE
-                    od.is_published IS TRUE
-                AND od.status = ''live''
-                AND d.dataset_type = 1
-            ),
-            query_date_dataset_revision AS (
+            WITH query_date_dataset_revision AS (
               SELECT
                 f.dataset_id,
                 f.txcfileattributes_id,
@@ -53,7 +175,7 @@ begin
                 f.operating_period_start_date,
                 f.operating_period_end_date
               FROM
-                filtered_files f
+                public.%I f
               WHERE
                     %L BETWEEN f.operating_period_start_date
                 AND COALESCE (
@@ -78,7 +200,7 @@ begin
                 x.service_code,
                 max(x.revision_number) AS max_revision_number
               FROM
-                filtered_files x
+                public.%I x
               WHERE
                 x.operating_period_end_date < %L
               GROUP BY
@@ -122,7 +244,9 @@ begin
               drv.line_name;
 	        ',
             concat('organisation_timetable', timetable_suffix),
+            concat('filtered_files', timetable_suffix),
             partition_date,
+            concat('filtered_files', timetable_suffix),
             partition_date
             );
 
@@ -904,6 +1028,7 @@ begin
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_rank_1', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_no_last_stops', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_prev_group_id', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
     END IF;
 
     RAISE NOTICE '% generate_timetable complete', clock_timestamp();
