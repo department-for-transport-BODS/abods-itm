@@ -87,9 +87,9 @@ def create_potential_match(
     }
 
 
-def haversine(avl: AVLRecord, stop: StopDetails) -> float:
+def distance_from_stop(avl: AVLRecord, stop: StopDetails) -> float:
     """
-    Calculate the great circle distance in kilometers between two points on the earth (specified in decimal degrees)
+    Calculate the great circle distance in kilometers between an avl and a stop (specified in decimal degrees)
 
     Args:
     ----
@@ -244,7 +244,7 @@ def find_potential_matches(
             continue
 
         next_stop_details = route_details[str(i)]
-        avl_next_stop_distance_in_meters = haversine(avl, next_stop_details)
+        avl_next_stop_distance_in_meters = distance_from_stop(avl, next_stop_details)
         # 13. If avl and the next stop distance < threshold
         if avl_next_stop_distance_in_meters < MATCH_ZONE_RADIUS_IN_METERS:
             logger.debug(
@@ -315,7 +315,7 @@ def check_update_first_stop(
         return
 
     matched_stop_details = route_details[ms_index]
-    avl_ms_distance_in_meters = haversine(avl, matched_stop_details)
+    avl_ms_distance_in_meters = distance_from_stop(avl, matched_stop_details)
 
     if avl_ms_distance_in_meters >= MATCH_ZONE_RADIUS_IN_METERS:
         return
@@ -395,7 +395,7 @@ def find_matches_in_potential_matches(
 
         stop_details = route_details[pm_index]
         # calculate distance between avl and potential match stops
-        avl_pm_distance_in_meters = haversine(avl, stop_details)
+        avl_pm_distance_in_meters = distance_from_stop(avl, stop_details)
         last_distance = pm_details["last_distance"]
         is_final_stop = int(pm_index) == get_final_stop_index(route_details)
         # 15. If the distance between avl and potential match is less than threshold
