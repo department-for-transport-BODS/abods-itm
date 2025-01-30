@@ -59,7 +59,7 @@ class TimetableStore(Protocol):
 
 logger = Logger()
 
-DISTANCE_THRESHOLD = 70
+MATCH_ZONE_RADIUS_IN_METERS = 70
 SAVED_MATCHES_LIMIT = 2
 JOURNEY_STOPS_MIN_THRESHOLD = 3
 ESTIMATED_MATCHING_TIME_UPPER_LIMIT_IN_SECONDS = 60
@@ -176,7 +176,7 @@ def check_estimated_match(  # noqa: PLR0911 - it's not that many returns
 
     stop_intersection_ratios = transform_coordinates_and_calculate_intersections(
         (stop_longitude(stop), stop_latitude(stop)),
-        DISTANCE_THRESHOLD,
+        MATCH_ZONE_RADIUS_IN_METERS,
         (
             group_stop_history["last_avl_longitude"],
             group_stop_history["last_avl_latitude"],
@@ -244,16 +244,16 @@ def find_potential_matches(
             continue
 
         next_stop_details = route_details[str(i)]
-        avl_next_stop_distance = haversine(avl, next_stop_details)
+        avl_next_stop_distance_in_meters = haversine(avl, next_stop_details)
         # 13. If avl and the next stop distance < threshold
-        if avl_next_stop_distance < DISTANCE_THRESHOLD:
+        if avl_next_stop_distance_in_meters < MATCH_ZONE_RADIUS_IN_METERS:
             logger.debug(
-                f"12. avl is {avl_next_stop_distance}m from stop {i}, less than {DISTANCE_THRESHOLD}m",
+                f"12. avl is {avl_next_stop_distance_in_meters}m from stop {i}, less than {MATCH_ZONE_RADIUS_IN_METERS}m",
             )
             # 14. create potential match
             group_stop_history["potential_matches"][str(i)] = create_potential_match(
                 avl,
-                avl_next_stop_distance,
+                avl_next_stop_distance_in_meters,
             )
             logger.debug(
                 "13. potential match found",
@@ -281,7 +281,7 @@ def find_potential_matches(
             continue
 
         group_stop_history["potential_matches"][str(i)] = {
-            "last_distance": avl_next_stop_distance,
+            "last_distance": avl_next_stop_distance_in_meters,
             "last_time_in_zone": timestamp_after_estimate,
             "is_estimate": True,
         }
@@ -315,16 +315,16 @@ def check_update_first_stop(
         return
 
     matched_stop_details = route_details[ms_index]
-    avl_ms_distance = haversine(avl, matched_stop_details)
+    avl_ms_distance_in_meters = haversine(avl, matched_stop_details)
 
-    if avl_ms_distance >= DISTANCE_THRESHOLD:
+    if avl_ms_distance_in_meters >= MATCH_ZONE_RADIUS_IN_METERS:
         return
 
     ms_details = group_stop_history["matched_stops"][ms_index]
     ms_last_match_time = validate_date(ms_details["last_match_time"])
 
     logger.debug(
-        f"6+7. avl is {avl_ms_distance}m, within {DISTANCE_THRESHOLD}m",
+        f"6+7. avl is {avl_ms_distance_in_meters}m, within {MATCH_ZONE_RADIUS_IN_METERS}m",
     )
     difference = avl_recorded_at_time_utc(avl) - ms_last_match_time
     within_5_minutes = difference < timedelta(minutes=5)
@@ -344,7 +344,7 @@ def check_update_first_stop(
     # 9.2 set this match as a potential match
     group_stop_history["potential_matches"][ms_index] = create_potential_match(
         avl,
-        avl_ms_distance,
+        avl_ms_distance_in_meters,
     )
     logger.debug(
         f"updated stop 1 potential match: {group_stop_history['potential_matches'][ms_index]}",
@@ -395,13 +395,13 @@ def find_matches_in_potential_matches(
 
         stop_details = route_details[pm_index]
         # calculate distance between avl and potential match stops
-        avl_pm_distance = haversine(avl, stop_details)
+        avl_pm_distance_in_meters = haversine(avl, stop_details)
         last_distance = pm_details["last_distance"]
         is_final_stop = int(pm_index) == get_final_stop_index(route_details)
         # 15. If the distance between avl and potential match is less than threshold
-        if avl_pm_distance < DISTANCE_THRESHOLD:
+        if avl_pm_distance_in_meters < MATCH_ZONE_RADIUS_IN_METERS:
             logger.debug(
-                f"15. avl is {avl_pm_distance}m from stop {pm_index}, less than {DISTANCE_THRESHOLD}m",
+                f"15. avl is {avl_pm_distance_in_meters}m from stop {pm_index}, less than {MATCH_ZONE_RADIUS_IN_METERS}m",
             )
             # 16. check if the potential match is the final stop of the route
             if not is_final_stop:
@@ -410,7 +410,7 @@ def find_matches_in_potential_matches(
                     avl,
                     pm_index,
                     pm_details,
-                    avl_pm_distance,
+                    avl_pm_distance_in_meters,
                 )
                 continue
 
@@ -441,20 +441,20 @@ def find_matches_in_potential_matches(
         # Find one more row of avl that is away from the stop
         # 19. Check if pm last distance > distance threshold, 20. check if the avl potential distance > last distance
         logger.debug(
-            f"15. avl is {avl_pm_distance}m from stop {pm_index}, greater than {DISTANCE_THRESHOLD}m",
+            f"15. avl is {avl_pm_distance_in_meters}m from stop {pm_index}, greater than {MATCH_ZONE_RADIUS_IN_METERS}m",
         )
-        if last_distance <= DISTANCE_THRESHOLD or avl_pm_distance <= last_distance:
+        if last_distance <= MATCH_ZONE_RADIUS_IN_METERS or avl_pm_distance_in_meters <= last_distance:
             # 19. pm last distance < distance threshold / 20. the avl potential distance < last distance, Avl is moving backwards
             # 34. update potential match with current avl index and distance between potential match stop and avl location
             update_potential_match_without_recorded_at_time(
                 pm_index,
                 pm_details,
-                avl_pm_distance,
+                avl_pm_distance_in_meters,
             )
             continue
 
         logger.debug(
-            f"19. Last distance {last_distance}m > {DISTANCE_THRESHOLD}m, 20. avl potential distance {avl_pm_distance}m > Last distance {last_distance}m",
+            f"19. Last distance {last_distance}m > {MATCH_ZONE_RADIUS_IN_METERS}m, 20. avl potential distance {avl_pm_distance_in_meters}m > Last distance {last_distance}m",
         )
         # avl is confirmed to be getting away from the stop with last distance > 70m
         # 31-32. check if there is more than 1 match being created with the same recordedattime
