@@ -17,7 +17,7 @@ begin
     IF partition_date > now() THEN
         execute format(
                 '
-                CREATE TABLE public.%I AS WITH
+                CREATE TABLE public.%I AS
                 SELECT
                   revision_id,
                   dataset_id
