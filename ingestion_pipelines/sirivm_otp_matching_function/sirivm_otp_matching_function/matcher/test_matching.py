@@ -35,7 +35,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
     timetable = read_timetable("TLCT37812152024-08-20.json")
     group_id = "tlct|378|1215|2024-08-20"
     bad_matches_5_mins = []  # noqa: RUF012 - BODS-7131
-    group_stop_history_5_mins = {  # noqa: RUF012 - BODS-7131
+    route_history_5_mins = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 20, 11, 24, 58, tzinfo=UTC)),
         "matched_stops": {
             "1": {
@@ -70,7 +70,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
             "group_id": "tlct|378|1215|2024-08-20",
         },
     ]
-    group_stop_history = {  # noqa: RUF012 - BODS-7131
+    route_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 20, 11, 34, 37, tzinfo=UTC)),
         "matched_stops": {
             "1": {
@@ -106,7 +106,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
         (
             "rec",
             "timetable_dict",
-            "group_stop_history",
+            "route_history",
             "bad_matches",
             "expected_matched_stops",
             "expected_potential_matches",
@@ -116,7 +116,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
             pytest.param(
                 avl_record_5_mins,
                 timetable,
-                group_stop_history_5_mins,
+                route_history_5_mins,
                 bad_matches_5_mins,
                 expected_matched_stops_5_mins,
                 expected_potential_matches_5_mins,
@@ -126,7 +126,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
             pytest.param(
                 avl_record,
                 timetable,
-                group_stop_history,
+                route_history,
                 bad_matches,
                 expected_matched_stops,
                 expected_potential_matches,
@@ -139,7 +139,7 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
         self,
         rec: AVLRecord,
         timetable_dict: dict,
-        group_stop_history: dict,
+        route_history: dict,
         bad_matches: list,
         expected_matched_stops: dict,
         expected_potential_matches: dict,
@@ -148,11 +148,11 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
         check_update_first_stop(
             rec,
             timetable_dict[avl_group_id(rec)],
-            group_stop_history,
+            route_history,
             bad_matches,
         )
-        assert group_stop_history["matched_stops"] == expected_matched_stops
-        assert group_stop_history["potential_matches"] == expected_potential_matches
+        assert route_history["matched_stops"] == expected_matched_stops
+        assert route_history["potential_matches"] == expected_potential_matches
         assert bad_matches == expected_bad_matches
 
 
@@ -164,14 +164,14 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
     timetable_scem = read_timetable("scem9132024-10-31.json")
     route = timetable[avl_group_id(avl_record)]
     route_scem = timetable_scem[avl_group_id(avl_record_scem)]
-    group_stop_history = {  # noqa: RUF012 - BODS-7131
+    route_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC)),
         "last_avl_longitude": None,
         "last_avl_latitude": None,
         "matched_stops": {},
         "potential_matches": {},
     }
-    group_stop_history_2 = {  # noqa: RUF012 - BODS-7131
+    route_history_2 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 10, 10, 8, 25, 56, tzinfo=UTC)),
         "last_avl_longitude": None,
         "last_avl_latitude": None,
@@ -187,7 +187,7 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         },
         "potential_matches": {},
     }
-    group_stop_history_scem = {  # noqa: RUF012 - BODS-7131
+    route_history_scem = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 10, 31, 8, 8, 16, tzinfo=UTC)),
         "last_avl_latitude": 51.565052,
         "last_avl_longitude": -1.784906,
@@ -210,21 +210,21 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         (
             "avl",
             "route",
-            "group_stop_history",
+            "route_history",
             "expected_potential_matches",
         ),
         [
             pytest.param(
                 avl_record,
                 route,
-                group_stop_history,
+                route_history,
                 {},
                 id="Drivers changing journey code early, reaching stop 15, no potential matches should be created",
             ),
             pytest.param(
                 avl_record_2,
                 route,
-                group_stop_history_2,
+                route_history_2,
                 {
                     "15": {
                         "last_distance": 13.738176401886017,
@@ -239,7 +239,7 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
             pytest.param(
                 avl_record_scem,
                 route_scem,
-                group_stop_history_scem,
+                route_history_scem,
                 {
                     "2": {
                         "last_distance": 48.83984813250945,
@@ -264,15 +264,15 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
         self,
         avl: AVLRecord,
         route: RouteDetails,
-        group_stop_history: GroupStopHistory,
+        route_history: GroupStopHistory,
         expected_potential_matches: dict[str, PotentialMatch],
     ) -> None:
         find_potential_matches(
             avl,
             route,
-            group_stop_history,
+            route_history,
         )
-        assert group_stop_history["potential_matches"] == expected_potential_matches
+        assert route_history["potential_matches"] == expected_potential_matches
 
 
 class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
@@ -286,7 +286,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
     timetable_5 = read_timetable("FSMR3507042024-08-21.json")
     group_id = "tlct|378|1215|2024-08-20"
     group_id_5 = "fsmr|35|0704|2024-08-21"
-    group_stop_history = {  # noqa: RUF012 - BODS-7131
+    route_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 20, 11, 35, 25, tzinfo=UTC)),
         "matched_stops": {
             "4": {
@@ -306,7 +306,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             },
         },
     }
-    group_stop_history_2 = {  # noqa: RUF012 - BODS-7131
+    route_history_2 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 20, 11, 59, 57, tzinfo=UTC)),
         "matched_stops": {
             "42": {
@@ -331,7 +331,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             },
         },
     }
-    group_stop_history_3 = {  # noqa: RUF012 - BODS-7131
+    route_history_3 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 20, 12, 00, 5, tzinfo=UTC)),
         "matched_stops": {
             "43": {
@@ -351,7 +351,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             },
         },
     }
-    group_stop_history_4 = {  # noqa: RUF012 - BODS-7131
+    route_history_4 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 20, 11, 54, 9, tzinfo=UTC)),
         "matched_stops": {
             "34": {
@@ -371,7 +371,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             },
         },
     }
-    group_stop_history_5 = {  # noqa: RUF012 - BODS-7131
+    route_history_5 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 21, 7, 1, 3, tzinfo=UTC)),
         "matched_stops": {},
         "potential_matches": {
@@ -387,7 +387,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             },
         },
     }
-    group_stop_history_6 = {  # noqa: RUF012 - BODS-7131
+    route_history_6 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 21, 7, 43, 25, tzinfo=UTC)),
         "matched_stops": {
             "40": {
@@ -408,18 +408,18 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         (
             "avl",
             "timetable_dict",
-            "group_stop_history",
+            "route_history",
             "new_matches",
             "potential_matches_to_delete",
             "bad_matches",
-            "expected_group_stop_history",
+            "expected_route_history",
             "expected_potential_matches_to_delete",
         ),
         [
             pytest.param(
                 avl_record,
                 timetable,
-                group_stop_history,
+                route_history,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 [],  # bad_matches,
@@ -479,7 +479,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             pytest.param(
                 avl_record_2,
                 timetable,
-                group_stop_history_2,
+                route_history_2,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 [],  # bad_matches,
@@ -554,7 +554,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             pytest.param(
                 avl_record_3,
                 timetable,
-                group_stop_history_3,
+                route_history_3,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 [],  # bad_matches,
@@ -614,7 +614,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             pytest.param(
                 avl_record_4,
                 timetable,
-                group_stop_history_4,
+                route_history_4,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 [],  # bad_matches,
@@ -674,7 +674,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             pytest.param(
                 avl_record_5,
                 timetable_5,
-                group_stop_history_5,
+                route_history_5,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 [],  # bad_matches,
@@ -720,7 +720,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
             pytest.param(
                 avl_record_6,
                 timetable_5,
-                group_stop_history_6,
+                route_history_6,
                 [],  # stop pos dist
                 [],  # potential_matches_to_delete
                 [],  # bad_matches,
@@ -783,22 +783,22 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
         self,
         avl: AVLRecord,
         timetable_dict: dict,
-        group_stop_history: dict,
+        route_history: dict,
         new_matches: list,
         potential_matches_to_delete: list,
         bad_matches: list,
-        expected_group_stop_history: dict,
+        expected_route_history: dict,
         expected_potential_matches_to_delete: list,
     ) -> None:
         find_matches_in_potential_matches(
             avl,
             timetable_dict[avl_group_id(avl)],
-            group_stop_history,
+            route_history,
             new_matches,
             potential_matches_to_delete,
             bad_matches,
         )
-        assert group_stop_history == expected_group_stop_history
+        assert route_history == expected_route_history
         assert potential_matches_to_delete == expected_potential_matches_to_delete
 
 
@@ -807,7 +807,7 @@ class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
     matches_to_delete = ["2"]  # noqa: RUF012 - BODS-7131
 
     def test_remove_matched_stops(self) -> None:  # noqa: D102 - BODS-7131
-        group_stop_history = {
+        route_history = {
             "last_avl_time": str(
                 datetime(2024, 9, 1, 11, 34, 37, tzinfo=UTC),
             ),
@@ -828,7 +828,7 @@ class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
             "last_avl_latitude": None,
             "last_avl_longitude": None,
         }
-        expected_group_stop_history = {
+        expected_route_history = {
             "last_avl_time": str(
                 datetime(2024, 9, 1, 11, 34, 37, tzinfo=UTC),
             ),
@@ -843,17 +843,17 @@ class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
             "last_avl_longitude": None,
         }
         remove_matched_stops(
-            group_stop_history,
+            route_history,
             self.matches_to_delete,
         )
-        assert group_stop_history == expected_group_stop_history
+        assert route_history == expected_route_history
 
 
 class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
     avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
     pm_index = "1"
     last_time_in_zone = datetime(2024, 9, 1, 11, 32, 5, tzinfo=UTC)
-    group_stop_history = {  # noqa: RUF012 - BODS-7131
+    route_history = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(
             datetime(2024, 9, 1, 11, 30, 57, tzinfo=UTC),
         ),
@@ -876,11 +876,11 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
         update_matched_stop(
             self.pm_index,
             self.last_time_in_zone,
-            self.group_stop_history,
+            self.route_history,
             self.potential_matches_to_delete,
             False,  # noqa: FBT003
         )
-        expected_group_stop_history = {
+        expected_route_history = {
             "last_avl_time": str(
                 datetime(2024, 9, 1, 11, 30, 57, tzinfo=UTC),
             ),
@@ -903,7 +903,7 @@ class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
             "last_avl_longitude": None,
         }
         expected_potential_matches_to_delete = ["1"]
-        assert self.group_stop_history == expected_group_stop_history
+        assert self.route_history == expected_route_history
         assert self.potential_matches_to_delete == expected_potential_matches_to_delete
 
 
@@ -1099,7 +1099,7 @@ class TestUpdatePotentialMatch:  # noqa: D101 - BODS-7131
 
 
 class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
-    group_stop_history_same_recordedattime = {  # noqa: RUF012 - BODS-7131
+    route_history_same_recordedattime = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(
             datetime(2024, 8, 23, 11, 16, 14, tzinfo=UTC),
         ),
@@ -1138,7 +1138,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
             },
         },
     }
-    group_stop_history_same_recordedattime_2 = {  # noqa: RUF012 - BODS-7131
+    route_history_same_recordedattime_2 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(
             datetime(2024, 8, 23, 11, 16, 14, tzinfo=UTC),
         ),
@@ -1171,7 +1171,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
             },
         },
     }
-    group_stop_history_wo_same_recordedattime = {  # noqa: RUF012 - BODS-7131
+    route_history_wo_same_recordedattime = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(
             datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
         ),
@@ -1185,7 +1185,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
         },
         "matched_stops": {},
     }
-    group_stop_history_consecutive_index_same_recordedattime = {  # noqa: RUF012 - BODS-7131
+    route_history_consecutive_index_same_recordedattime = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(
             datetime(2024, 8, 23, 10, 57, 48, tzinfo=UTC),
         ),
@@ -1209,7 +1209,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
     @pytest.mark.parametrize(
         (
             "pm_index",
-            "group_stop_history",
+            "route_history",
             "potential_matches_to_delete",
             "expected_selected_index",
             "expected_potential_matches_to_delete",
@@ -1217,7 +1217,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
         [
             pytest.param(
                 "4",
-                group_stop_history_same_recordedattime,
+                route_history_same_recordedattime,
                 [],
                 "4",
                 ["38"],
@@ -1225,7 +1225,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
             ),
             pytest.param(
                 "38",
-                group_stop_history_same_recordedattime,
+                route_history_same_recordedattime,
                 ["4"],
                 "38",
                 ["4"],
@@ -1233,7 +1233,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
             ),
             pytest.param(
                 "38",
-                group_stop_history_same_recordedattime_2,
+                route_history_same_recordedattime_2,
                 ["38"],
                 "38",
                 ["38"],
@@ -1241,7 +1241,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
             ),
             pytest.param(
                 "1",
-                group_stop_history_wo_same_recordedattime,
+                route_history_wo_same_recordedattime,
                 [],
                 "1",
                 [],
@@ -1249,7 +1249,7 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
             ),
             pytest.param(
                 "2",
-                group_stop_history_consecutive_index_same_recordedattime,
+                route_history_consecutive_index_same_recordedattime,
                 [],
                 "2",
                 [],
@@ -1260,14 +1260,14 @@ class TestSelectPotentialMatchWithSameRecordedattime:  # noqa: D101 - BODS-7131
     def test_select_potential_match_with_same_recordedattime(  # noqa: D102 - BODS-7131
         self,
         pm_index: str,
-        group_stop_history: dict,
+        route_history: dict,
         potential_matches_to_delete: list,
         expected_selected_index: str,
         expected_potential_matches_to_delete: list,
     ) -> None:
         selected_index = select_potential_match_with_same_recordedattime(
             pm_index,
-            group_stop_history,
+            route_history,
             potential_matches_to_delete,
         )
         assert selected_index == expected_selected_index
@@ -1289,7 +1289,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_time_in_zone": str(datetime(2024, 8, 20, 11, 15, 48, tzinfo=UTC)),
         "is_estimate": False,
     }
-    group_stop_history_1 = {  # noqa: RUF012 - BODS-7131
+    route_history_1 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 20, 11, 15, 48, tzinfo=UTC)),
         "potential_matches": {
             "1": {
@@ -1305,7 +1305,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_time_in_zone": str(datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC)),
         "is_estimate": False,
     }
-    group_stop_history_2 = {  # noqa: RUF012 - BODS-7131
+    route_history_2 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 20, 11, 20, 4, tzinfo=UTC)),
         "potential_matches": {
             "3": {
@@ -1330,7 +1330,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_time_in_zone": str(datetime(2024, 8, 20, 11, 39, 54, tzinfo=UTC)),
         "is_estimate": False,
     }
-    group_stop_history_3 = {  # noqa: RUF012 - BODS-7131
+    route_history_3 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 20, 11, 39, 54, tzinfo=UTC)),
         "potential_matches": {
             "15": {
@@ -1361,7 +1361,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_time_in_zone": str(datetime(2024, 8, 20, 11, 36, 54, tzinfo=UTC)),
         "is_estimate": False,
     }
-    group_stop_history_4 = {  # noqa: RUF012 - BODS-7131
+    route_history_4 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 8, 20, 11, 39, 54, tzinfo=UTC)),
         "potential_matches": {
             "23": {
@@ -1389,7 +1389,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         ),
         "is_estimate": False,
     }
-    group_stop_history_5 = {  # noqa: RUF012 - BODS-7131
+    route_history_5 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": datetime(2024, 10, 17, 16, 15, 41, tzinfo=UTC),
         "matched_stops": {
             "10": {
@@ -1424,7 +1424,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         ),
         "is_estimate": False,
     }
-    group_stop_history_6 = {  # noqa: RUF012 - BODS-7131
+    route_history_6 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": datetime(2024, 10, 23, 15, 39, 33, tzinfo=UTC),
         "matched_stops": {
             "12": {
@@ -1476,7 +1476,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         "last_time_in_zone": str(datetime(2024, 10, 31, 8, 39, 3, tzinfo=UTC)),
         "is_estimate": False,
     }
-    group_stop_history_7 = {  # noqa: RUF012 - BODS-7131
+    route_history_7 = {  # noqa: RUF012 - BODS-7131
         "last_avl_time": str(datetime(2024, 10, 31, 8, 39, 43, tzinfo=UTC)),
         "matched_stops": {
             "3": {
@@ -1503,7 +1503,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
             "avl",
             "pm_index",
             "pm_details",
-            "group_stop_history",
+            "route_history",
             "potential_matches_to_delete",
             "new_matches",
             "bad_matches",
@@ -1518,7 +1518,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 avl_record,
                 "1",
                 pm_details_1,
-                group_stop_history_1,
+                route_history_1,
                 [],
                 [],
                 [],  # stop pos distances remove
@@ -1568,7 +1568,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 avl_record,
                 "3",
                 pm_details_2,
-                group_stop_history_2,
+                route_history_2,
                 [],
                 [],
                 [],  # bad_matches
@@ -1616,7 +1616,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 avl_record,
                 "15",
                 pm_details_3,
-                group_stop_history_3,
+                route_history_3,
                 [],
                 [],
                 [],
@@ -1652,7 +1652,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 avl_record,
                 "23",
                 pm_details_4,
-                group_stop_history_4,
+                route_history_4,
                 [],
                 [],
                 [],  # bad_matches
@@ -1718,7 +1718,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 avl_record_2,
                 "7",
                 pm_details_5,
-                group_stop_history_5,
+                route_history_5,
                 [],
                 [],
                 [],  # bad_matches
@@ -1762,7 +1762,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 avl_record_3,
                 "11",
                 pm_details_6,
-                group_stop_history_6,
+                route_history_6,
                 [],
                 [],
                 [],  # bad_matches
@@ -1790,7 +1790,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 avl_record_4,
                 "70",
                 pm_details_7,
-                group_stop_history_7,
+                route_history_7,
                 [],
                 [],
                 [],  # bad_matches
@@ -1843,7 +1843,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
         avl: AVLRecord,
         pm_index: str,
         pm_details: dict,
-        group_stop_history: dict,
+        route_history: dict,
         potential_matches_to_delete: list,
         new_matches: list,
         bad_matches: list,
@@ -1857,14 +1857,14 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
             avl,
             pm_index,
             pm_details,
-            group_stop_history,
+            route_history,
             potential_matches_to_delete,
             new_matches,
             bad_matches,
         )
         assert potential_matches_to_delete == expected_potential_matches_to_delete
         assert bad_matches == expected_bad_matches
-        assert group_stop_history["matched_stops"] == expected_matched_stops
+        assert route_history["matched_stops"] == expected_matched_stops
         assert new_matches == expected_new_matches
 
 
@@ -1874,7 +1874,7 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
     @pytest.mark.parametrize(
         (
             "avl",
-            "group_stop_history",
+            "route_history",
             "stop",
             "expected_estimated_match",
         ),
@@ -2018,9 +2018,9 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
     def test_find_estimated_matches(  # noqa: D102 - BODS-7131
         self,
         avl: AVLRecord,
-        group_stop_history: GroupStopHistory,
+        route_history: GroupStopHistory,
         stop: StopDetails,
         expected_estimated_match: str,
     ) -> None:
-        estimated_match = check_estimated_match(avl, group_stop_history, stop)
+        estimated_match = check_estimated_match(avl, route_history, stop)
         assert estimated_match == expected_estimated_match
