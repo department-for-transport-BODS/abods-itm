@@ -10,27 +10,37 @@ declare
 
 begin
 
-    RAISE NOTICE '% (Re)Creating potential_revisions temp table', clock_timestamp();
+    RAISE NOTICE '% (Re)Creating filtered_files temp table', clock_timestamp();
 
-    execute format('DROP TABLE IF EXISTS public.%I', concat('potential_revisions', timetable_suffix));
+    execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
 
     IF partition_date > now() THEN
         execute format(
                 '
                 CREATE TABLE public.%I AS
                 SELECT
-                  revision_id,
-                  dataset_id
+                  od.dataset_id,
+                  a.id AS txcfileattributes_id,
+                  a.national_operator_code,
+                  a.service_code,
+                  a.line_names AS line_name,
+                  a.filename,
+                  a.revision_number,
+                  a.revision_id,
+                  a.operating_period_start_date,
+                  a.operating_period_end_date
                 FROM
-                  public.organisation_datasetrevision p
+                  public.organisation_txcfileattributes a
+                  JOIN public.organisation_datasetrevision od
+                    ON od.id = a.revision_id
                   INNER JOIN public.organisation_dataset d
-                    ON d.live_revision_id = p.revision_id
+                    ON d.live_revision_id = a.revision_id
                 WHERE
-                      p.is_published IS TRUE
-                  AND p.status = ''live''
-                  AND d.dataset_type = 1;
+                      od.is_published IS TRUE
+                  AND od.status = ''live''
+                  AND d.dataset_type = 1
                 ',
-                concat('potential_revisions', timetable_suffix),
+                concat('filtered_files', timetable_suffix),
                 partition_date,
                 partition_date
                 );
@@ -113,14 +123,33 @@ begin
                     ranked_revisions rr
                   WHERE
                     rr.id_rank = 1
+                ),
+                selected_revisions AS (
+                  SELECT
+                    DISTINCT id AS revision_id,
+                    dataset_id
+                  FROM
+                    highest_revisions
                 )
                 SELECT
-                  DISTINCT id AS revision_id,
-                  dataset_id
+                  p.dataset_id,
+                  a.id AS txcfileattributes_id,
+                  a.national_operator_code,
+                  a.service_code,
+                  a.line_names AS line_name,
+                  a.filename,
+                  a.revision_number,
+                  a.revision_id,
+                  a.operating_period_start_date,
+                  a.operating_period_end_date
                 FROM
-                  highest_revisions;
+                  selected_revisions p
+                  LEFT JOIN public.organisation_txcfileattributes a
+                    ON p.revision_id = a.revision_id
+                WHERE
+                  a.id IS NOT NULL
                 ',
-                concat('potential_revisions', timetable_suffix),
+                concat('filtered_files', timetable_suffix),
                 partition_date,
                 partition_date
                 );
@@ -133,26 +162,7 @@ begin
     execute format(
             '
             CREATE TABLE public.%I AS
-            WITH filtered_files AS (
-              SELECT
-                p.dataset_id,
-                a.id AS txcfileattributes_id,
-                a.national_operator_code,
-                a.service_code,
-                a.line_names AS line_name,
-                a.filename,
-                a.revision_number,
-                a.revision_id,
-                a.operating_period_start_date,
-                a.operating_period_end_date
-              FROM
-                public.%I p
-                LEFT JOIN public.organisation_txcfileattributes a
-                  ON p.revision_id = a.revision_id
-              WHERE
-                a.id IS NOT NULL
-            ),
-            query_date_dataset_revision AS (
+            WITH query_date_dataset_revision AS (
               SELECT
                 f.dataset_id,
                 f.txcfileattributes_id,
@@ -165,7 +175,7 @@ begin
                 f.operating_period_start_date,
                 f.operating_period_end_date
               FROM
-                filtered_files f
+                public.%I f
               WHERE
                     %L BETWEEN f.operating_period_start_date
                 AND COALESCE (
@@ -190,7 +200,7 @@ begin
                 x.service_code,
                 max(x.revision_number) AS max_revision_number
               FROM
-                filtered_files x
+                public.%I x
               WHERE
                 x.operating_period_end_date < %L
               GROUP BY
@@ -234,8 +244,9 @@ begin
               drv.line_name;
 	        ',
             concat('organisation_timetable', timetable_suffix),
-            concat('potential_revisions', timetable_suffix),
+            concat('filtered_files', timetable_suffix),
             partition_date,
+            concat('filtered_files', timetable_suffix),
             partition_date
             );
 
@@ -1017,7 +1028,7 @@ begin
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_rank_1', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_no_last_stops', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_prev_group_id', timetable_suffix));
-        execute format('DROP TABLE IF EXISTS public.%I', concat('potential_revisions', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
     END IF;
 
     RAISE NOTICE '% generate_timetable complete', clock_timestamp();
