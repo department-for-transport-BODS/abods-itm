@@ -267,11 +267,7 @@ def find_potential_matches(
         if stop_index in route_history["matched_stops"]:
             continue
 
-        timestamp_after_estimate = check_estimated_match(
-            avl,
-            route_history,
-            stop,
-        )
+        timestamp_after_estimate = check_estimated_match(avl, route_history, stop)
 
         if not timestamp_after_estimate:
             continue
@@ -566,7 +562,7 @@ def map_matched_stop_to_db(
             timetable_departure_time=validate_date(timetable_departure_time),
         )
     # 23. update db with potential match details
-    new_match = {
+    new_match: NewDbMatch = {
         "group_id": avl_group_id(avl),
         "stop_index": stop_index,
         "time_difference": time_difference,
@@ -902,11 +898,7 @@ def match_group_id_avls(
     journey_matches: list[NewDbMatch] = []
     stop_history: StopHistory = {}
     for avl in avls:
-        to_set, to_remove, stop_history = match_avl(
-            timetable,
-            avl,
-            stop_history,
-        )
+        to_set, to_remove, stop_history = match_avl(timetable, avl, stop_history)
         logger.debug(
             "Matched avl",
             to_set=to_set,
@@ -988,10 +980,7 @@ def match_avl(
     # 1. check if group id exists in timetable
     group_id = avl_group_id(avl)
     avl_direction = avl.get("direction_ref", "")
-    stop_history_index, route = timetable.get_route(
-        group_id,
-        avl_direction,
-    )
+    stop_history_index, route = timetable.get_route(group_id, avl_direction)
     logger.append_keys(
         avl=avl,
         group_id=group_id,
@@ -1037,21 +1026,12 @@ def match_avl(
     # 4. update the time
     if len(route_history["matched_stops"]) > 0:
         # 6-10. Check if the bus is revisiting stop 1
-        check_update_first_stop(
-            avl,
-            route,
-            route_history,
-            bad_matches,
-        )
+        check_update_first_stop(avl, route, route_history, bad_matches)
 
     # 11-14. Find potential matches
     logger.debug("11. find potential matches")
 
-    find_potential_matches(
-        avl,
-        route,
-        route_history,
-    )
+    find_potential_matches(avl, route, route_history)
 
     # update last avl time, longitude and latitude
     route_history["last_avl_time"] = str(avl_recorded_at_time_utc(avl))
