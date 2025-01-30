@@ -142,10 +142,11 @@ class TimetableDBClient:
         entries_to_update: Sequence[RecordToAdd],
         entries_to_remove: Sequence[RecordToRemove],
         avl_date_str: str,
-        log_level: str,
+        log_level: str | None = None,
     ) -> None:
         """Update database to reflect successful historic matching"""
-        logger.setLevel(log_level)
+        if log_level:
+            logger.setLevel(log_level)
         with self.connection.cursor() as cursor:
             if len(entries_to_remove) > 0:
                 execute_values_amended(
