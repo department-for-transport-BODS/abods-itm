@@ -356,7 +356,8 @@ begin
                         WHEN ts.operating_on_working_days IS FALSE
                          AND tsw.serviced_organisation_vehicle_journey_id IS NOT NULL
                           THEN ''no''
-                          ELSE ''yes'' END
+                          ELSE ''yes''
+                        END
                       )
                     END
                   ) AS flag
