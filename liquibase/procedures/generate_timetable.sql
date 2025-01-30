@@ -24,7 +24,7 @@ begin
                 FROM
                   public.organisation_datasetrevision p
                   INNER JOIN public.organisation_dataset d
-                    ON d.live_revision_id = a.revision_id
+                    ON d.live_revision_id = p.revision_id
                 WHERE
                       p.is_published IS TRUE
                   AND p.status = ''live''
