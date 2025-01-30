@@ -650,6 +650,27 @@ Resources:
   #### SIRIVM OTP PARALLEL MATCHING FUNCTIONS (& ASSC. RESOURCES) ####
   ####################################################################
 
+  SiriVmOtpMatchingFunctionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub 'Security group for ${ProjectName}-${Environment}-sirivm-otp-matching-function'
+      GroupName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function'
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          CidrIp: '0.0.0.0/0'
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function'
+
+  SiriVmOtpMatchingFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Condition: IsNotLocal
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ProjectName}-${Environment}-sirivm-otp-matching-function'
+      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
+      RetentionInDays: 30
+
   SiriVmOtpMatchingQueue1:
     Type: AWS::SQS::Queue
     Properties:
