@@ -1022,7 +1022,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
     ) -> None:
         map_matched_stop_to_db(
             is_final_stop,
-            timetable_dict[self.group_id],
+            timetable_dict[self.group_id][pm_index],
             new_matches,
             {
                 "operator_ref": self.operator_ref,

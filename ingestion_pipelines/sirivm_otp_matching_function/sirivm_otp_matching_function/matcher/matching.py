@@ -519,7 +519,7 @@ def update_matched_stop(
 
 def map_matched_stop_to_db(
     is_final_stop: bool,  # noqa: FBT001 - boolean argument is fine for now
-    route: Route,
+    stop: Stop,
     new_matches: list[NewDbMatch],
     avl: AVLRecord,
     stop_index: str,
@@ -532,7 +532,7 @@ def map_matched_stop_to_db(
     Args:
     ----
         is_final_stop (bool): Current stop is a final stop
-        route (Route): Route stop info
+        stop (Stop): Stop info
         new_matches (list): The matched records that is going to be written into the database
         avl (AVLRecord): The avl that caused the match
         stop_index (str): Potential match stop index which has become a match
@@ -541,25 +541,26 @@ def map_matched_stop_to_db(
         is_estimate (bool): Whether the match is an estimate
 
     """
-    timetable_departure_time = stop_departure_time(route[stop_index])
+    timetable_departure_time = stop_departure_time(stop)
+    timetable_id = stop_timetable_id(stop)
     time_difference = (last_time_in_zone - timetable_departure_time).total_seconds()
 
     if time_difference < MATCHING_TIME_LOWER_LIMIT_IN_SECONDS:
         logger.warning(
             "This match is more than 2 hours early",
-            timetable_id=stop_timetable_id(route[stop_index]),
+            timetable_id=timetable_id,
             time_difference=time_difference,
             last_time_in_zone=last_time_in_zone,
-            timetable_departure_time=validate_date(timetable_departure_time),
+            timetable_departure_time=timetable_departure_time,
         )
         return
     if time_difference > MATCHING_TIME_UPPER_LIMIT_IN_SECONDS:
         logger.warning(
             "This match is more than 1 hour late",
-            timetable_id=stop_timetable_id(route[stop_index]),
+            timetable_id=timetable_id,
             time_difference=time_difference,
             last_time_in_zone=last_time_in_zone,
-            timetable_departure_time=validate_date(timetable_departure_time),
+            timetable_departure_time=timetable_departure_time,
         )
     # 23. update db with potential match details
     new_match: NewDbMatch = {
@@ -569,7 +570,7 @@ def map_matched_stop_to_db(
         "last_time_in_zone_str": str(last_time_in_zone.strftime("%H:%M:%S"))
         if not is_estimate
         else None,
-        "timetable_id": stop_timetable_id(route[stop_index]),
+        "timetable_id": timetable_id,
         "last_time_in_zone": last_time_in_zone if not is_estimate else None,
         "timestamp_after_estimate": last_time_in_zone if is_estimate else None,
         "otp_state": get_otp_state(is_final_stop, time_difference),
@@ -696,6 +697,7 @@ def move_potential_match_to_match(
         bad_matches (list): The list of stops that needs to have matched records removed from database
 
     """
+    stop = route[stop_index]
     final_stop_index = get_final_stop_index(route)
     is_final_stop = int(stop_index) == final_stop_index
     matched_stops = route_history["matched_stops"]
@@ -817,7 +819,7 @@ def move_potential_match_to_match(
     )
     map_matched_stop_to_db(
         is_final_stop,
-        route,
+        stop,
         new_matches,
         avl,
         stop_index,
