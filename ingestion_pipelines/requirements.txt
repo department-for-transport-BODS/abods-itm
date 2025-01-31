@@ -27,7 +27,7 @@ gremlinpython==3.7.2
 idna==3.7
 isodate==0.6.1
 jmespath==1.0.1
-jsonpath-ng==1.6.1
+jsonpath-ng==1.7.0
 #lxml==5.2.1 conflict with a later version in sirivm_s3_ingestion_function
 multidict==6.0.5
 nest-asyncio==1.6.0
