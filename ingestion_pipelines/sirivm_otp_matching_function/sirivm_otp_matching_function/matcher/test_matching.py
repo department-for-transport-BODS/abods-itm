@@ -849,7 +849,7 @@ class TestRemoveMatchedStops:  # noqa: D101 - BODS-7131
         assert route_history == expected_route_history
 
 
-class TestUpdateMatchedStop:  # noqa: D101 - BODS-7131
+class TestMapMatchedStopToDb:  # noqa: D101 - BODS-7131
     avl_record = read_avl("TLCT37812152024-08-20.csv")[0]
     pm_index = "1"
     last_time_in_zone = datetime(2024, 9, 1, 11, 32, 5, tzinfo=UTC)
@@ -1011,7 +1011,7 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
             ),
         ],
     )
-    def test_write_matched_stop_to_db(  # noqa: D102 - BODS-7131
+    def test_map_matched_stop_to_db(  # noqa: D102 - BODS-7131
         self,
         is_final_stop: bool,  # noqa: FBT001 - BODS-7131
         timetable_dict: dict,
