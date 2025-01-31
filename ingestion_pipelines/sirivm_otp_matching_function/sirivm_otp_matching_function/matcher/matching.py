@@ -384,7 +384,9 @@ def find_matches_in_potential_matches(
         stop_distance_in_meters = distance_from_stop(avl, stop_details)
         is_final_stop = int(stop_index) == final_stop_index
         # 15. If the distance between avl and potential match is less than threshold
-        vehicle_within_stop_match_zone = stop_distance_in_meters < MATCH_ZONE_RADIUS_IN_METERS
+        vehicle_within_stop_match_zone = (
+            stop_distance_in_meters < MATCH_ZONE_RADIUS_IN_METERS
+        )
         if vehicle_within_stop_match_zone:
             logger.debug(
                 f"15. avl is {stop_distance_in_meters}m from stop {stop_index}, less than {MATCH_ZONE_RADIUS_IN_METERS}m",
@@ -798,12 +800,11 @@ def move_potential_match_to_match(
                         f"index {highest_index} doesn't exist in timetable, group_id: {avl_group_id(avl)}",
                     )
                 else:
-                    bad_matches.append(
-                        {
-                            "timetable_id": stop_timetable_id(stop_details),
-                            "group_id": (avl_group_id(avl)),
-                        },
-                    )
+                    bad_match: BadDbMatch = {
+                        "timetable_id": stop_timetable_id(stop_details),
+                        "group_id": avl_group_id(avl),
+                    }
+                    bad_matches.append(bad_match)
     if delete_potential_match:
         return
 
