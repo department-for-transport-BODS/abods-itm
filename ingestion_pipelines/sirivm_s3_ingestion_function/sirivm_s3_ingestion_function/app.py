@@ -26,7 +26,7 @@ db_user = environ.get("POSTGRES_USER")
 db_database = environ.get("POSTGRES_DB")
 sirivm_process_bucket = environ.get("SIRIVM_BUCKET")
 process_queue = environ.get("SIRIVM_PROCESS_QUEUE")
-otp_queue = environ.get("SIRIVM_OTP_QUEUE")
+otp_queue = environ.get("SIRIVM_OTP_QUEUE_PREFIX")
 output_csv_file = "/tmp/avl.csv"  # noqa: S108 - BODS-7131
 output_gzip_file = "/tmp/avl.gzip"  # noqa: S108 - BODS-7131
 logging.getLogger().setLevel("INFO")

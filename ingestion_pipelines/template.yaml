@@ -139,34 +139,7 @@ Resources:
             - IsNotLocal
             - !GetAtt SiriVmProcessQueue.QueueName
             - []
-          SIRIVM_OTP_QUEUE1: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue1.QueueName
-            - []
-          SIRIVM_OTP_QUEUE2: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue2.QueueName
-            - []
-          SIRIVM_OTP_QUEUE3: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue3.QueueName
-            - []
-          SIRIVM_OTP_QUEUE4: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue4.QueueName
-            - []
-          SIRIVM_OTP_QUEUE5: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue5.QueueName
-            - []
-          SIRIVM_OTP_QUEUE6: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue6.QueueName
-            - []
-          SIRIVM_OTP_QUEUE7: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue7.QueueName
-            - []
+          SIRIVM_OTP_QUEUE_PREFIX: !Sub "${ProjectName}-${Environment}-sirivm-otp-queue"
       LoggingConfig:
         LogGroup: !Ref SiriVmS3IngestionFunctionLogGroup
 
@@ -365,34 +338,7 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
-          SIRIVM_OTP_QUEUE1: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue1.QueueName
-            - []
-          SIRIVM_OTP_QUEUE2: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue2.QueueName
-            - []
-          SIRIVM_OTP_QUEUE3: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue3.QueueName
-            - []
-          SIRIVM_OTP_QUEUE4: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue4.QueueName
-            - []
-          SIRIVM_OTP_QUEUE5: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue5.QueueName
-            - []
-          SIRIVM_OTP_QUEUE6: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue6.QueueName
-            - []
-          SIRIVM_OTP_QUEUE7: !If
-            - IsNotLocal
-            - !GetAtt SiriVmOtpMatchingQueue7.QueueName
-            - []
+          SIRIVM_OTP_QUEUE_PREFIX: !Sub "${ProjectName}-${Environment}-sirivm-otp-queue"
       LoggingConfig:
         LogGroup: !Ref SiriVmTimetableS3GenerationFunctionLogGroup
 
