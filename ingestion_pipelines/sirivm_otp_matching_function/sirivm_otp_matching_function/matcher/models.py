@@ -126,11 +126,4 @@ class GroupStopHistory(TypedDict):
     potential_matches: dict[str, PotentialMatch]
 
 
-class ControlInfo(TypedDict):
-    """Control info from stop history"""
-
-    last_avl: int
-    last_avl_processed_time: str
-
-
 StopHistory = dict[str, GroupStopHistory]

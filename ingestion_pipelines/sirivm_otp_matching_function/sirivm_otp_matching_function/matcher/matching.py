@@ -999,7 +999,20 @@ def match_avl(
     current_avl_time = str(avl_recorded_at_time_utc(avl))
 
     # 3. check if current recorded_at_time is the same as the last avl time in group_stop_history
-    if group_stop_history.get("last_avl_time") == current_avl_time:
+    if group_stop_history["last_avl_time"] == current_avl_time:
+        logger.debug(
+            "Same avl time seen again. Skipping avl...",
+            last_avl_time=current_avl_time,
+            current_avl_time=current_avl_time,
+        )
+        return [], [], stop_history
+
+    if group_stop_history["last_avl_time"] > current_avl_time:
+        logger.error(
+            "Out of order avl matching. Skipping avl...",
+            last_avl_time=current_avl_time,
+            current_avl_time=current_avl_time,
+        )
         return [], [], stop_history
 
     stop_pos_distances_remove: list[RecordToRemove] = []
