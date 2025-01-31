@@ -2,6 +2,7 @@ import json
 import logging
 import uuid
 from collections import defaultdict
+from datetime import datetime
 from os import environ
 
 import boto3
@@ -44,6 +45,7 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
         conn.autocommit = True
         with conn.cursor() as cur:
             interval_time = TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES
+            now = datetime.now()
             cur.execute(
                 """
                     WITH my_groups AS
@@ -96,6 +98,20 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
         Key="timetable/timetable.json",
         Body=timetable_json,
     )
+    # Store a separate copy of the extract for matching debugging
+    client.put_object(
+        Bucket=sirivm_bucket,
+        Key=(
+            "timetable/"
+            "archive/"
+            f"YYYY={datetime.strftime(now, '%Y')}/"
+            f"MM={datetime.strftime(now, '%m')}/"
+            f"DD={datetime.strftime(now, '%d')}/"
+            f"timetable_{datetime.strftime(now, '%Y%m%d%H%M%S')}.json"
+        ),
+        Body=timetable_json,
+    )
+
     for shard_no in range(no_of_shards):
         group = f"{otp_queue}{shard_no + 1}"
         queue_name = f"{group}.fifo"
