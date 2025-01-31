@@ -50,7 +50,7 @@ setuptools==65.5.1
 six==1.16.0
 soupsieve==2.5
 typing-extensions==4.11.0
-tzdata==2024.1
+tzdata==2025.1
 yarl==1.9.4
 
 # Our custom layer that is used as a layer by most functions
