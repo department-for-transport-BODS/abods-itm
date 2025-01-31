@@ -373,6 +373,7 @@ def find_matches_in_potential_matches(
     logger.debug("14. iterating through potential matches")
 
     # Order potential matches by stop index to make sure stops are matched in order
+    final_stop_index = get_final_stop_index(route)
     for stop_index in sorted(route_history["potential_matches"].keys(), key=int):
         if stop_index not in route:
             return
@@ -381,9 +382,10 @@ def find_matches_in_potential_matches(
         potential_match = route_history["potential_matches"][stop_index]
         # calculate distance between avl and potential match stops
         stop_distance_in_meters = distance_from_stop(avl, stop_details)
-        is_final_stop = int(stop_index) == get_final_stop_index(route)
+        is_final_stop = int(stop_index) == final_stop_index
         # 15. If the distance between avl and potential match is less than threshold
-        if stop_distance_in_meters < MATCH_ZONE_RADIUS_IN_METERS:
+        vehicle_within_stop_match_zone = stop_distance_in_meters < MATCH_ZONE_RADIUS_IN_METERS
+        if vehicle_within_stop_match_zone:
             logger.debug(
                 f"15. avl is {stop_distance_in_meters}m from stop {stop_index}, less than {MATCH_ZONE_RADIUS_IN_METERS}m",
             )
@@ -428,10 +430,9 @@ def find_matches_in_potential_matches(
             f"15. avl is {stop_distance_in_meters}m from stop {stop_index}, greater than {MATCH_ZONE_RADIUS_IN_METERS}m",
         )
         last_distance = potential_match["last_distance"]
-        if (
-            last_distance <= MATCH_ZONE_RADIUS_IN_METERS
-            or stop_distance_in_meters <= last_distance
-        ):
+        vehicle_moving_toward_stop = stop_distance_in_meters <= last_distance
+        last_distance_in_stop_zone = last_distance <= MATCH_ZONE_RADIUS_IN_METERS
+        if last_distance_in_stop_zone or vehicle_moving_toward_stop:
             # 19. pm last distance < distance threshold / 20. the avl potential distance < last distance, Avl is moving backwards
             # 34. update potential match with current avl index and distance between potential match stop and avl location
             update_potential_match_without_recorded_at_time(
@@ -442,7 +443,8 @@ def find_matches_in_potential_matches(
             continue
 
         logger.debug(
-            f"19. Last distance {last_distance}m > {MATCH_ZONE_RADIUS_IN_METERS}m, 20. avl potential distance {stop_distance_in_meters}m > Last distance {last_distance}m",
+            f"19. Last distance {last_distance}m > {MATCH_ZONE_RADIUS_IN_METERS}m, "
+            f"20. avl potential distance {stop_distance_in_meters}m > Last distance {last_distance}m",
         )
         # avl is confirmed to be getting away from the stop with last distance > 70m
         # 31-32. check if there is more than 1 match being created with the same recordedattime
@@ -734,7 +736,8 @@ def move_potential_match_to_match(
             and len(matched_stops) == SAVED_MATCHES_LIMIT
         ):
             logger.debug(
-                f"{stop_index} higher than highest_matched_stop_index {highest_index}, remove lowest matched stop from matched stops {lowest_index}",
+                f"{stop_index} higher than highest_matched_stop_index {highest_index}, "
+                f"remove lowest matched stop from matched stops {lowest_index}",
             )
             logger.debug(
                 "Matched stop identified for removal",
@@ -768,7 +771,8 @@ def move_potential_match_to_match(
             # 29.2 is the last stop in the matched stops ordered by recorded_at_time the final stop of the journey?
             if latest_index_int == final_stop_index:
                 logger.debug(
-                    f"last matched stop in new match sequence {latest_index_int} is final stop, remove lowest matched stop from matched stops {lowest_index_int}",
+                    f"last matched stop in new match sequence {latest_index_int} is final stop, "
+                    f"remove lowest matched stop from matched stops {lowest_index_int}",
                 )
                 logger.debug(
                     "Matched stop identified for removal",
@@ -779,7 +783,8 @@ def move_potential_match_to_match(
             else:
                 # 31.Delete the higher index stored from the db and json
                 logger.debug(
-                    f"{stop_index} lower than highest_matched_stop_index {highest_index}, remove matched stop index {highest_index} higher than {stop_index}",
+                    f"{stop_index} lower than highest_matched_stop_index {highest_index}, "
+                    f"remove matched stop index {highest_index} higher than {stop_index}",
                 )
                 logger.debug(
                     "Matched stop identified for removal",
