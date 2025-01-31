@@ -48,7 +48,7 @@ requests==2.31.0
 scramp==1.4.5
 setuptools==65.5.1
 six==1.16.0
-soupsieve==2.5
+soupsieve==2.6
 typing-extensions==4.11.0
 tzdata==2024.1
 yarl==1.9.4
