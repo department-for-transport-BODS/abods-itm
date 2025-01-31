@@ -12,7 +12,7 @@ from .client_s3 import TimetableS3Client, filter_avl_list
 from .matcher.handle_stop_history import clean_stop_history
 from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import match_avl_batch
-from .matcher.models import LiveAVLRecord, Timetable, StopHistory
+from .matcher.models import LiveAVLRecord, StopHistory, Timetable
 from .matcher.utils import timer
 
 logger = Logger()
@@ -23,10 +23,10 @@ db_client = TimetableDBClient()
 
 class _Cache(TypedDict):
     main_timetable: NotRequired[Timetable]
-    stop_history: NotRequired[StopHistory]
+    stop_history: dict[str, StopHistory]
 
 
-_cache: _Cache = {}
+_cache: _Cache = {"stop_history": {}}
 
 
 @logger.inject_lambda_context(log_event=True)
@@ -65,17 +65,17 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
         shard_no = rec.message_attributes["shard"].string_value
 
         try:
-            if "stop_history" not in _cache:
+            if shard_no not in _cache["stop_history"]:
                 logger.info("Fetching main timetable")
-                _cache["stop_history"] = s3_client.get_stop_history()
+                _cache["stop_history"][shard_no] = s3_client.get_stop_history(shard_no)
 
             # Check if avl file coming in order
             avl_time_val = int(fname[-17:-3])
             avl_datetime = parse(str(avl_time_val))
             logger.append_keys(avl_time=avl_time_val, avl_datetime=avl_datetime)
 
-            _cache["stop_history"] = clean_stop_history(
-                _cache["stop_history"],
+            _cache["stop_history"][shard_no] = clean_stop_history(
+                _cache["stop_history"][shard_no],
                 avl_datetime,
             )
 
@@ -83,10 +83,10 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             avl_list = list(filter_avl_list(shard_no, avl_list))
             validate_avl_list(avl_list, batch_id)
 
-            to_set, to_remove, _cache["stop_history"] = match_avl_batch(
+            to_set, to_remove, _cache["stop_history"][shard_no] = match_avl_batch(
                 LiveTimetableStore(_cache["main_timetable"]),
                 avl_list,
-                _cache["stop_history"],
+                _cache["stop_history"][shard_no],
             )
 
             db_client.live_update_success(
@@ -96,7 +96,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
                 datetime.now(UTC).date(),
             )
 
-            s3_client.export_stop_history(_cache["stop_history"], shard_no)
+            s3_client.export_stop_history(_cache["stop_history"][shard_no], shard_no)
 
             logger.info("Processing complete")
         except Exception:
