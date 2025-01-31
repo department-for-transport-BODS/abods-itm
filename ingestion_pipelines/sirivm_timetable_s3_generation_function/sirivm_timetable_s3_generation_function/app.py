@@ -2,7 +2,6 @@ import json
 import logging
 import uuid
 from collections import defaultdict
-from datetime import datetime
 from os import environ
 
 import boto3
@@ -27,22 +26,7 @@ no_of_shards = 7
 sqs = boto3.resource("sqs")
 
 
-def write_to_s3(data_dict, path):  # noqa: ANN001, ANN201 - BODS-7131
-    data_string = json.dumps(data_dict, default=str)
-
-    client.put_object(Bucket=sirivm_bucket, Key=path, Body=data_string)
-
-
 def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
-    now = datetime.now()
-    year = datetime.strftime(now, "%Y")
-    mon = datetime.strftime(now, "%m")
-    day = datetime.strftime(now, "%d")
-    hour = datetime.strftime(now, "%H")
-    minute = datetime.strftime(now, "%M")
-    minute_standardised = "30" if int(minute) >= 30 else "00"  # noqa: PLR2004 - BODS-7131
-    fname = f"timetable_shreds/YYYY={year}/MM={mon}/DD={day}/timetable_{year}{mon}{day}_{hour}_{minute_standardised}.json"
-
     token = session.client("rds").generate_db_auth_token(
         DBHostname=db_host,
         Port=int(db_port),
@@ -105,8 +89,13 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
             i[5],
             i[6],
         ]
-    write_to_s3(timetable_dict, "timetable/timetable.json")
-    write_to_s3(timetable_dict, fname)
+
+    timetable_json = json.dumps(timetable_dict, default=str)
+    client.put_object(
+        Bucket=sirivm_bucket,
+        Key="timetable/timetable.json",
+        Body=timetable_json,
+    )
     for shard_no in range(no_of_shards):
         group = f"{otp_queue}{shard_no + 1}"
         queue_name = f"{group}.fifo"
