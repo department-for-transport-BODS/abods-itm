@@ -292,30 +292,46 @@ def live_lambda_handler(event: SQSEvent) -> None:  # noqa: PLR0915 - BODS-7131
                         # get 7 queues to trigger 7 otp matching lambdas
                         for shard_no in range(no_of_shards):
                             queue_name = f"{otp_queue}{shard_no + 1}.fifo"
-                            queue = getQueue(queue_name)
-                            queue.send_message(  # noqa: F841 - BODS-7131
-                                MessageBody="Put gzip file to S3",
-                                MessageDeduplicationId=str(uuid.uuid4()),
-                                MessageGroupId=f"{queue_name.split('.')[0]}-group",
-                                MessageAttributes={
-                                    "bucket": {
-                                        "StringValue": sirivm_process_bucket,
-                                        "DataType": "String",
+                            try:
+                                queue = sqs.get_queue_by_name(QueueName=queue_name)
+                                queue.send_message(  # noqa: F841 - BODS-7131
+                                    MessageBody="Put gzip file to S3",
+                                    MessageDeduplicationId=str(uuid.uuid4()),
+                                    MessageGroupId=f"{queue_name.split('.')[0]}-group",
+                                    MessageAttributes={
+                                        "bucket": {
+                                            "StringValue": sirivm_process_bucket,
+                                            "DataType": "String",
+                                        },
+                                        "key": {
+                                            "StringValue": fname,
+                                            "DataType": "String",
+                                        },
+                                        "batch_id": {
+                                            "StringValue": str(batch_id),
+                                            "DataType": "String",
+                                        },
+                                        "shard": {
+                                            "StringValue": str(shard_no),
+                                            "DataType": "String",
+                                        },
                                     },
-                                    "key": {"StringValue": fname, "DataType": "String"},
-                                    "batch_id": {
-                                        "StringValue": str(batch_id),
-                                        "DataType": "String",
-                                    },
-                                    "shard": {
-                                        "StringValue": str(shard_no),
-                                        "DataType": "String",
-                                    },
-                                },
-                            )
+                                )
+                            except Exception:
+                                logging.exception(
+                                    "Failed to write message to queue",
+                                    extra={"queue_name": queue_name},
+                                )
+                                raise
                             logging.info(
                                 f"Written to gzip file key to Queues {queue_name}",
                             )
+                        end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
+                        cur.execute(
+                            "Update public.batch set s3_ingestion_status = 'Success',s3_ingestion_end_prc_ts=%s,s3_avl_gip_key=%s where batch_id=%s  ;",
+                            [end_time, key, batch_id],
+                        )
+                        cur.close()
                     except Exception as e:
                         end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
                         logging.exception(

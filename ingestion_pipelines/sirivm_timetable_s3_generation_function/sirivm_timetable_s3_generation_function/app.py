@@ -52,12 +52,6 @@ def write_to_s3(data_dict, path):  # noqa: ANN001, ANN201 - BODS-7131
     client.put_object(Bucket=sirivm_bucket, Key=path, Body=data_string)
 
 
-def getQueue(queue):  # noqa: ANN001, ANN201, N802 - BODS-7131
-    """Retrieve the URL for the configured queue name"""
-    q = sqs.get_queue_by_name(QueueName=queue)
-    return q
-
-
 def read_historic_timetable(timetable_date):  # noqa: ANN001, ANN201 - BODS-7131
     """
     Read historic timetable in csv format
@@ -331,16 +325,24 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
         write_to_s3(timetable_dict, "timetable/timetable.json")
         write_to_s3(timetable_dict, fname)
         for shard_no in range(no_of_shards):
-            queue_name = f"{otp_queue}{shard_no + 1}.fifo"
-            queue = getQueue(queue_name)
-            resp = queue.send_message(  # noqa: F841 - BODS-7131
-                MessageBody="Put gzip file to S3",
-                MessageDeduplicationId=str(uuid.uuid4()),
-                MessageGroupId=f"{queue_name.split('.')[0]}-group",
-                MessageAttributes={
-                    "key": {"StringValue": "timetable", "DataType": "String"},
-                },
-            )
+            group = f"{otp_queue}{shard_no + 1}"
+            queue_name = f"{group}.fifo"
+            try:
+                queue = sqs.get_queue_by_name(QueueName=queue_name)
+                resp = queue.send_message(  # noqa: F841 - BODS-7131
+                    MessageBody="Put gzip file to S3",
+                    MessageDeduplicationId=str(uuid.uuid4()),
+                    MessageGroupId=f"{group}-group",
+                    MessageAttributes={
+                        "key": {"StringValue": "timetable", "DataType": "String"},
+                    },
+                )
+            except Exception:
+                logging.exception(
+                    "Failed to write message to queue",
+                    extra={"queue_name": queue_name},
+                )
+                raise
             logging.info(
                 f"Send message to  {otp_queue}{shard_no + 1} so timetable is refreshed.",
             )
