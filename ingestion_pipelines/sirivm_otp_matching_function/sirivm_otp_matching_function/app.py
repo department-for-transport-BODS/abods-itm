@@ -60,7 +60,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
 
         fname = rec.message_attributes["key"].string_value
         batch_id = int(rec.message_attributes["batch_id"].string_value)
-        shard_identifier = rec.message_attributes["shard"].string_value
+        shard_no = rec.message_attributes["shard"].string_value
 
         try:
             # Check if avl file coming in order
@@ -68,11 +68,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             avl_datetime = parse(str(avl_time_val))
             logger.append_keys(avl_time=avl_time_val, avl_datetime=avl_datetime)
 
-            shard_stop_history = s3_client.get_stop_history(
-                "live",
-                shard_identifier,
-                avl_time_val,
-            )
+            shard_stop_history = s3_client.get_stop_history(shard_no)
 
             clean_shard_stop_history = clean_stop_history(
                 shard_stop_history,
@@ -80,7 +76,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             )
 
             avl_list = s3_client.get_avl_data(fname)
-            avl_list = list(filter_avl_list(shard_identifier, avl_list))
+            avl_list = list(filter_avl_list(shard_no, avl_list))
             validate_avl_list(avl_list, batch_id)
 
             to_set, to_remove, stop_history = match_avl_batch(
@@ -91,11 +87,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
 
             db_client.live_update_success(batch_id, to_set, to_remove)
 
-            s3_client.export_stop_history(
-                stop_history,
-                "live",
-                shard_identifier,
-            )
+            s3_client.export_stop_history(stop_history, shard_no)
 
             logger.info("Processing complete")
         except Exception:

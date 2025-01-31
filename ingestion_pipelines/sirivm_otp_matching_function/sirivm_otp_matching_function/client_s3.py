@@ -32,7 +32,7 @@ for shard, operators in shards.items():
 
 
 def filter_avl_list(
-    shard_identifier: str,
+    shard_no: str,
     avl_list: Sequence[LiveAVLRecord],
 ) -> Generator[LiveAVLRecord]:
     """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
@@ -43,7 +43,7 @@ def filter_avl_list(
             hashed = hashlib.sha224(operator_ref.encode("utf-8")).hexdigest()
             shard_lookup[operator_ref] = str(int(hashed, 16) % len(shards))
 
-        if shard_lookup[operator_ref] != shard_identifier:
+        if shard_lookup[operator_ref] != shard_no:
             continue
 
         yield avl
@@ -106,13 +106,9 @@ class TimetableS3Client:
         return self._get_from_s3("shards.json")["shards"]
 
     @timer(logger)
-    def get_stop_history(
-        self,
-        prefix: str,
-        shard_no: str,
-    ) -> StopHistory:
+    def get_stop_history(self, shard_no: str) -> StopHistory:
         """Get Stop History"""
-        key = stop_history_key(prefix, shard_no)
+        key = stop_history_key(shard_no)
         logger.info("Fetching Stop History", s3_key=key)
         try:
             stop_history = self._get_from_s3(key)
@@ -169,14 +165,9 @@ class TimetableS3Client:
         return data.to_dict("records")
 
     @timer(logger)
-    def export_stop_history(
-        self,
-        stop_history: StopHistory,
-        prefix: str,
-        shard_no: str,
-    ) -> None:
+    def export_stop_history(self, stop_history: StopHistory, shard_no: str) -> None:
         """Export JourneyStopHistory data to S3"""
-        s3_key = stop_history_key(prefix, shard_no)
+        s3_key = stop_history_key(shard_no)
         logger.info(
             "S3 Upload: Storing Stop history",
             s3_key=s3_key,
@@ -188,5 +179,5 @@ class TimetableS3Client:
         )
 
 
-def stop_history_key(prefix: str, shard_no: str) -> str:
-    return f"stop_history/{prefix}/shard_{shard_no}.json"
+def stop_history_key(shard_no: str) -> str:
+    return f"stop_history/live/shard_{shard_no}.json"
