@@ -19,7 +19,7 @@ from .matcher.utils import log_execution_time
 
 if TYPE_CHECKING:
     from .matcher.models import (
-        StopDetails,
+        Stop,
     )
 
 logger = Logger()
@@ -115,7 +115,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                                 "date_of_journey": str(date_of_journey),
                             },
                         )
-                timetable: dict[str, dict[str, StopDetails]] = {}
+                timetable: dict[str, dict[str, Stop]] = {}
                 with log_execution_time(logger, "fetch_timetable"):
                     group_id_col_index = 0
                     direction_col_index = 2
@@ -177,9 +177,9 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                                 stop_direction = str(direction)
                                 index += f"|{stop_direction}"
 
-                            route_details = timetable.setdefault(index, {})
-                            normalised_stop_index = str(len(route_details) + 1)
-                            route_details[normalised_stop_index] = (
+                            route = timetable.setdefault(index, {})
+                            normalised_stop_index = str(len(route) + 1)
+                            route[normalised_stop_index] = (
                                 (
                                     float(stop_latitude),
                                     float(stop_longitude),
