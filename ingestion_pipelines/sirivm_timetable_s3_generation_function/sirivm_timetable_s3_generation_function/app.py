@@ -337,8 +337,8 @@ def live_lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-
                     "key": {"StringValue": "timetable", "DataType": "String"},
                 },
             )
-        except Exception as e:
-            logging.error(f"Failed to write to queue {queue_name}")
+        except Exception:
+            logging.exception(f"Failed to write to queue {queue_name}")
             raise
         logging.info(
             f"Send message to  {otp_queue}{shard_no + 1} so timetable is refreshed.",
