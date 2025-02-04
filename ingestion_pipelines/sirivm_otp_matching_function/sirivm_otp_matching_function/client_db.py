@@ -128,7 +128,6 @@ class TimetableDBClient:
                         record["last_time_in_zone"],
                         record["otp_state"],
                         record["timestamp_after_estimate"],
-                        record["date_of_journey"],
                     )
                     for record in entries_to_update
                 ],
@@ -139,30 +138,13 @@ class TimetableDBClient:
     @timer(logger)
     def historic_update_success(
         self,
-        batch_id: int | None,
         entries_to_update: Sequence[NewDbMatch],
-        entries_to_remove: Sequence[BadDbMatch],
-        avl_date_str: str,
         log_level: str | None = None,
     ) -> None:
         """Update database to reflect successful historic matching"""
         if log_level:
             logger.setLevel(log_level)
         with self.connection.cursor() as cursor:
-            if len(entries_to_remove) > 0:
-                execute_values_amended(
-                    cur=cursor,
-                    sql=self.sql_queries.remove_historic_matching,
-                    values=[
-                        (
-                            entry["timetable_id"],
-                            entry["group_id"],
-                            avl_date_str,
-                        )
-                        for entry in entries_to_remove
-                    ],
-                )
-
             values = [
                 (
                     record["timetable_id"],
@@ -170,7 +152,6 @@ class TimetableDBClient:
                     record["last_time_in_zone"],
                     record["stop_type"],
                     record["timestamp_after_estimate"],
-                    avl_date_str,
                 )
                 for record in entries_to_update
             ]
@@ -185,5 +166,3 @@ class TimetableDBClient:
                 sql=self.sql_queries.update_otp_state,
                 values=values,
             )
-            if batch_id:
-                _update_batch_status(cursor, batch_id, "Success")
