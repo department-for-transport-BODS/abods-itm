@@ -23,7 +23,6 @@ class SQLQueries:
     set_live_matching: str
     set_historic_matching: str
     remove_live_matching: str
-    remove_historic_matching: str
     update_otp_state: str
 
 
@@ -39,7 +38,6 @@ def _load_sql_queries() -> SQLQueries:
         set_live_matching=read_sql_file("set_live_matching.sql"),
         set_historic_matching=read_sql_file("set_historic_matching.sql"),
         remove_live_matching=read_sql_file("remove_live_matching.sql"),
-        remove_historic_matching=read_sql_file("remove_historic_matching.sql"),
         update_otp_state=read_sql_file("update_otp_state.sql"),
     )
 
