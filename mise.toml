@@ -4,7 +4,7 @@ asdf_compat = true
 
 [tasks.install]
 dir = "ingestion_pipelines"
-run = "pip install -r requirements.dev.txt"
+run = "pip install -r requirements.txt"
 
 [tasks.fmt]
 run = "ruff format"

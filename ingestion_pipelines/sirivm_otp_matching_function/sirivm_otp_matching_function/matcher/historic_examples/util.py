@@ -7,7 +7,7 @@ from unittest import mock
 
 from ..live_timetable_store import LiveTimetableStore
 from ..matching import match_group_id_avls
-from ..models import LiveAVLRecord, RecordToAdd
+from ..models import LiveAVLRecord, NewDbMatch
 
 # Live avl files contain more records than we need, and the ordering is important so defined here to be explicit
 live_avl_file_columns = {
@@ -39,7 +39,7 @@ def parse_live_avl_data(stream: Iterable[str]) -> Sequence[LiveAVLRecord]:
 
 def run_historic_matching_test(
     test_file_path: str,
-) -> Sequence[RecordToAdd]:
+) -> Sequence[NewDbMatch]:
     directory = pathlib.Path(test_file_path).parent
 
     with open(directory / "timetable.json") as f:

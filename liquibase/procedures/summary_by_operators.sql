@@ -47,7 +47,8 @@ BEGIN
         max_late,
         avg_time_difference,
         admin_areas,
-		estimated
+		estimated,
+        incomplete_reason
     )
     SELECT
         sub.operator_noc,
@@ -65,7 +66,8 @@ BEGIN
         sub.max_late,
         sub.avg_time_difference,
         sub.admin_areas,
-		sub.estimated
+		sub.estimated,
+        sub.incomplete_reason
     FROM
         (
             SELECT
@@ -84,7 +86,8 @@ BEGIN
                 max_late,
                 avg_time_difference,
                 admin_areas,
-				estimated
+				estimated,
+                incomplete_reason
             FROM
                 public.timetable_summary_service_tz
             WHERE
@@ -103,7 +106,8 @@ BEGIN
         max_late,
         avg_time_difference,
         admin_areas,
-		estimated',
+		estimated,
+        incomplete_reason',
             tablename,
             partition_date,
             partition_date
