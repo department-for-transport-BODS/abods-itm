@@ -5,7 +5,6 @@ import json
 import os
 import time
 from collections.abc import Generator, Sequence
-from datetime import datetime
 from typing import Any
 
 import awswrangler as wr
@@ -15,7 +14,6 @@ from botocore.exceptions import ClientError
 from pandas import DataFrame
 
 from .matcher.models import (
-    ControlInfo,
     LiveAVLRecord,
     OperatorShards,
     StopHistory,
@@ -34,7 +32,7 @@ for shard, operators in shards.items():
 
 
 def filter_avl_list(
-    shard_identifier: str,
+    shard_no: str,
     avl_list: Sequence[LiveAVLRecord],
 ) -> Generator[LiveAVLRecord]:
     """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
@@ -45,17 +43,10 @@ def filter_avl_list(
             hashed = hashlib.sha224(operator_ref.encode("utf-8")).hexdigest()
             shard_lookup[operator_ref] = str(int(hashed, 16) % len(shards))
 
-        if shard_lookup[operator_ref] != shard_identifier:
+        if shard_lookup[operator_ref] != shard_no:
             continue
 
         yield avl
-
-
-def _new_control_info(avl_time: int) -> ControlInfo:
-    return {
-        "last_avl": avl_time,
-        "last_avl_processed_time": str(datetime.now()),
-    }
 
 
 class TimetableS3Client:
@@ -107,12 +98,7 @@ class TimetableS3Client:
 
     def download_main_timetable(self) -> Timetable:
         """Download Main Timetable Data"""
-        return self.download_timetable("timetable/timetable.json")
-
-    @timer(logger)
-    def download_timetable(self, key: str) -> Timetable:
-        """Download Timetable Data"""
-        return self._get_from_s3(key)
+        return self._get_from_s3("timetable/timetable.json")
 
     @timer(logger)
     def get_shards(self) -> OperatorShards:
@@ -120,47 +106,26 @@ class TimetableS3Client:
         return self._get_from_s3("shards.json")["shards"]
 
     @timer(logger)
-    def get_stop_history(
-        self,
-        prefix: str,
-        shard_no: str,
-        avl_time: int,
-    ) -> tuple[StopHistory, ControlInfo]:
+    def get_stop_history(self, shard_no: str) -> StopHistory:
         """Get Stop History"""
-        key = stop_history_key(prefix, shard_no)
+        key = stop_history_key(shard_no)
         logger.info("Fetching Stop History", s3_key=key)
         try:
             stop_history = self._get_from_s3(key)
         except ClientError as ex:
             if ex.response.get("Error", {}).get("Code", None) == "NoSuchKey":
                 logger.info("Stop History Not Found, Returning Empty Dict", key=key)
-                return {}, _new_control_info(avl_time)
+                return {}
             raise
         logger.info(
             "Fetched and Parsed Stop History",
             group_ids_count=len(stop_history.keys()),
         )
 
-        if "control_info" not in stop_history:
-            return stop_history, _new_control_info(avl_time)
+        if "control_info" in stop_history:
+            del stop_history["control_info"]
 
-        control_info: ControlInfo = stop_history["control_info"]
-        del stop_history["control_info"]
-
-        last_file = control_info["last_avl"]
-        last_time = control_info.get(
-            "last_avl_processed_time",
-            "No record",
-        )
-        if int(last_file) > avl_time:
-            logger.warning(
-                f"AVL is not in order, last avl: {last_file}, current avl: {avl_time}",
-            )
-        elif int(last_file) == avl_time:
-            logger.warning(
-                f"Same AVL data coming in, last avl processed time: {last_time}, current last avl: {last_file}, current avl: {avl_time}",
-            )
-        return stop_history, _new_control_info(avl_time)
+        return stop_history
 
     def get_avl_data_df(self, filename: str | list[str]) -> DataFrame:
         """Get AVL Data Dataframe"""
@@ -200,25 +165,19 @@ class TimetableS3Client:
         return data.to_dict("records")
 
     @timer(logger)
-    def export_stop_history(
-        self,
-        stop_history: StopHistory,
-        control_info: ControlInfo,
-        prefix: str,
-        shard_no: str,
-    ) -> None:
+    def export_stop_history(self, stop_history: StopHistory, shard_no: str) -> None:
         """Export JourneyStopHistory data to S3"""
-        s3_key = stop_history_key(prefix, shard_no)
+        s3_key = stop_history_key(shard_no)
         logger.info(
             "S3 Upload: Storing Stop history",
             s3_key=s3_key,
             group_id_count=len(stop_history.keys()),
         )
         self._write_to_s3(
-            {**stop_history, "control_info": control_info},
+            stop_history,
             s3_key,
         )
 
 
-def stop_history_key(prefix: str, shard_no: str) -> str:
-    return f"stop_history/{prefix}/shard_{shard_no}.json"
+def stop_history_key(shard_no: str) -> str:
+    return f"stop_history/live/shard_{shard_no}.json"

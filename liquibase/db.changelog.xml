@@ -230,9 +230,7 @@
     <changeSet id="72" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/generate_feed_monitoring_data.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="73" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="procedures/generate_retrospective_timetable.sql" splitStatements="false"/>
-    </changeSet>
+    <!--73 - procedures/generate_retrospective_timetable.sql deleted from repo - to be cleaned up in db later-->
     <changeSet id="74" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/generate_timetable.sql" splitStatements="false"/>
     </changeSet>
@@ -366,5 +364,17 @@
 
     <changeSet id="116" author="abodsuser">
         <sqlFile path="sql/116-import-tracks-and-update-corridor-index.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="117" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/incomplete_data_load.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="118" author="abodsuser">
+        <sqlFile path="sql/118-add-incomplete-reason-column.sql" splitStatements="false"/>
+    </changeSet>
+        
+    <changeSet id="119" author="abodsuser">
+        <sqlFile path="sql/119-add-is_timing_point-frequent.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>

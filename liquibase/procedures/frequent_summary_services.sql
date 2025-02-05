@@ -7,6 +7,10 @@ DECLARE
 
 BEGIN
     tablename := 'timetable_frequent_summary_services';
+   
+    RAISE NOTICE '% Deleting from %', clock_timestamp(), (concat(tablename, ' for ', partition_date::date));
+
+    execute format('DELETE FROM public.%I WHERE date_of_journey = %L', tablename, partition_date::date);
 
     RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
 
@@ -26,7 +30,8 @@ BEGIN
                                 actual_headway,
                                 excess_wait_Time,
                                 estimated,
-                                headway_stops_count)
+                                headway_stops_count,
+                                is_timing_point)
             WITH Timetable_CTE AS
                         (SELECT sub.operator_noc,
                                 sub.service_code,
@@ -52,7 +57,8 @@ BEGIN
                                     WHERE sub.actual_headway IS NOT NULL)                    AS excess_wait_Time,
                                 sub.estimated,
                                 sub.stop_id,
-                                count(sub.actual_headway)                                    AS headway_stops_count
+                                count(sub.actual_headway)                                    AS headway_stops_count,
+                                sub.is_timing_point
                         FROM (SELECT ttb.operator_noc,
                                     ttb.service_code,
                                     es.noc_and_line_and_servicecode,
@@ -109,7 +115,8 @@ BEGIN
                                     ttb.actual_headway,
                                     ttb.headway_time_difference,
                                     (ttb.timestamp_after_estimate IS NOT NULL)             AS estimated,
-                                    ttb.stop_id
+                                    ttb.stop_id, 
+                                    ttb.is_timing_point
                             FROM public."Timetable" ttb
                                         INNER JOIN public.expected_services es ON
                                     ttb.date_of_journey = es.date_of_journey
@@ -130,7 +137,8 @@ BEGIN
                                 day_of_week,
                                 max_early,
                                 max_late,
-                                estimated),
+                                estimated,
+                                is_timing_point),
                     Timetable_Agg AS
                         (SELECT operator_noc,
                                 service_code,
@@ -147,7 +155,8 @@ BEGIN
                                 sum(actual_headway * headway_stops_count)   AS actual_headway,
                                 sum(excess_wait_Time * headway_stops_count) AS excess_wait_Time,
                                 sum(headway_stops_count)                    AS headway_stops_count,
-                                estimated
+                                estimated,
+                                is_timing_point
                         FROM Timetable_CTE
                         GROUP BY operator_noc,
                                 service_code,
@@ -159,7 +168,8 @@ BEGIN
                                 day_of_week,
                                 max_early,
                                 max_late,
-                                estimated)
+                                estimated,
+                                is_timing_point)
             SELECT operator_noc,
                     service_code,
                     noc_and_line_and_servicecode,
@@ -171,21 +181,23 @@ BEGIN
                     max_early,
                     max_late,
                     avg_time_difference,
-                    CASE 
+                    CASE
                         WHEN headway_stops_count = 0 THEN 0
                         ELSE (expected_headway / (headway_stops_count * 60))
                     END AS expected_headway,
-                    CASE 
+                    CASE
                         WHEN headway_stops_count = 0 THEN 0
                         ELSE (actual_headway / (headway_stops_count * 60))
                     END AS actual_headway,
-                    CASE 
+                    CASE
                         WHEN headway_stops_count = 0 THEN 0
                         ELSE (excess_wait_Time / (headway_stops_count * 60))
                     END AS excess_wait_Time,
                     estimated,
-                    headway_stops_count
+                    headway_stops_count,
+                    is_timing_point
             FROM Timetable_Agg;
+          
 
     RAISE NOTICE '% frequent_summary_services complete', clock_timestamp();
 END;

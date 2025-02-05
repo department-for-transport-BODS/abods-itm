@@ -19,15 +19,17 @@ from .matcher.utils import log_execution_time
 
 if TYPE_CHECKING:
     from .matcher.models import (
-        StopDetails,
+        Stop,
     )
 
 logger = Logger()
+initial_level = logger.log_level
+group_ids_to_debug = [
+    group_id for group_id in os.getenv("DEBUG_GROUP_IDS", "").split(",") if group_id
+]
 
-two_hours_secs = -7200
 
-
-def operator_worker_task(  # noqa: PLR0915, C901 Complexity not much of an issue here
+def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of an issue here
     date_str: str,
     task_count: int,
     task_queue: Queue,
@@ -113,7 +115,7 @@ def operator_worker_task(  # noqa: PLR0915, C901 Complexity not much of an issue
                                 "date_of_journey": str(date_of_journey),
                             },
                         )
-                timetable: dict[str, dict[str, StopDetails]] = {}
+                timetable: dict[str, dict[str, Stop]] = {}
                 with log_execution_time(logger, "fetch_timetable"):
                     group_id_col_index = 0
                     direction_col_index = 2
@@ -142,10 +144,21 @@ def operator_worker_task(  # noqa: PLR0915, C901 Complexity not much of an issue
                         )
 
                     for group_id, stops in by_group_id.items():
+                        if group_id in group_ids_to_debug:
+                            level = "DEBUG"
+                        else:
+                            level = initial_level
+
+                        logger.setLevel(level)
                         # sort just in case duckdb returns in the wrong order
                         stops.sort(key=lambda x: int(x[stop_index_col_index]))
 
                         directions = {rec[direction_col_index] for rec in stops}
+                        logger.debug(
+                            "Directions found for journey",
+                            directions=directions,
+                            group_id=group_id,
+                        )
                         for (
                             _group_id,
                             _operator_noc,
@@ -164,9 +177,9 @@ def operator_worker_task(  # noqa: PLR0915, C901 Complexity not much of an issue
                                 stop_direction = str(direction)
                                 index += f"|{stop_direction}"
 
-                            route_details = timetable.setdefault(index, {})
-                            normalised_stop_index = str(len(route_details) + 1)
-                            route_details[normalised_stop_index] = (
+                            route = timetable.setdefault(index, {})
+                            normalised_stop_index = str(len(route) + 1)
+                            route[normalised_stop_index] = (
                                 (
                                     float(stop_latitude),
                                     float(stop_longitude),
@@ -189,16 +202,25 @@ def operator_worker_task(  # noqa: PLR0915, C901 Complexity not much of an issue
                     operator_timetables=len(timetable),
                     operator_ref=operator_ref,
                 ):
-                    for group_avls in avls_by_group_id.values():
+                    for group_id, group_avls in avls_by_group_id.items():
                         # sort just in case duckdb returns in the wrong order
                         group_avls.sort(key=lambda x: x["recorded_at_time"])
+
+                        if group_id in group_ids_to_debug:
+                            level = "DEBUG"
+                        else:
+                            level = initial_level
+
+                        logger.setLevel(level)
 
                         journey_matches, processed_routes, match_count = (
                             match_group_id_avls(
                                 timetable_store,
                                 group_avls,
+                                level,
                             )
                         )
+                        logger.debug(journey_matches)
                         routes_processed += processed_routes
                         total_matches += match_count
 
@@ -207,6 +229,7 @@ def operator_worker_task(  # noqa: PLR0915, C901 Complexity not much of an issue
                             journey_matches,
                             [],
                             date_str,
+                            level,
                         )
                 logger.info(
                     "Processed operator data",
