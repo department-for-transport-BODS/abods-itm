@@ -77,7 +77,7 @@ BEGIN
 				sub.max_early,
 				sub.max_late,
 				COALESCE(AVG(sub.avg_time_difference/60.0), 0.0) AS avg_time_difference,
-				sub.admin_area_id AS admin_areas,
+				ARRAY_AGG(DISTINCT sub.admin_area_id) AS admin_areas,
 				sub.estimated,
 				sub.incomplete_reason
 			FROM
@@ -149,7 +149,6 @@ BEGIN
 				departure_hour_only,
 				is_timing_point,
 				max_early,
-				admin_area_id,
 				max_late,
 				estimated,
 				incomplete_reason',
