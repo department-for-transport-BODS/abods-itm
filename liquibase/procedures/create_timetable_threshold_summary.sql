@@ -72,8 +72,8 @@ BEGIN
                       ttb.date_of_journey,
                       ttb.is_timing_point,
                       es.admin_area_id,
-                      date_trunc(''hour'', expected_departure_time::timestamptz) AS departure_hour,
-                      date_trunc(''hour'', expected_departure_time::timestamptz) AS departure_hour_only,
+                      date_trunc(''hour'', ttb.expected_departure_time::timestamptz) AS departure_hour,
+                      date_trunc(''hour'', ttb.expected_departure_time::timestamptz) AS departure_hour_only,
                       ttb.day_of_week,
                       count(*) AS otp_count,
                       estimated
