@@ -106,7 +106,7 @@ BEGIN
                GROUP BY ttb.operator_noc,
                         ttb.line_name,
                         es.noc_and_line_and_servicecode,
-						es.admin_area_id,
+			es.admin_area_id,
                         es.service_name,
                         ttb.date_of_journey,
                         ttb.is_timing_point,
