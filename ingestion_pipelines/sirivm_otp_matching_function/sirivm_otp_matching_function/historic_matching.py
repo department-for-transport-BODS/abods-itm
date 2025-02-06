@@ -221,12 +221,27 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                                 level,
                             )
                         )
-                        logger.debug(journey_matches)
+                        logger.debug(
+                            "Got the following matches", journey_matches=journey_matches
+                        )
+
+                        deduplicated_matches = list(
+                            {
+                                match["timetable_id"]: match
+                                for match in journey_matches
+                            }.values()
+                        )
+                        if len(deduplicated_matches) < len(journey_matches):
+                            logger.debug(
+                                "Found some duplicate matches for the same timetable id. Removed earlier ones",
+                                deduplicated_matches=deduplicated_matches,
+                            )
+
                         routes_processed += processed_routes
                         total_matches += match_count
 
                         db_client.historic_update_success(
-                            journey_matches,
+                            deduplicated_matches,
                             process_date,
                             level,
                         )
