@@ -222,14 +222,15 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                             )
                         )
                         logger.debug(
-                            "Got the following matches", journey_matches=journey_matches
+                            "Got the following matches",
+                            journey_matches=journey_matches,
                         )
 
                         deduplicated_matches = list(
                             {
                                 match["timetable_id"]: match
                                 for match in journey_matches
-                            }.values()
+                            }.values(),
                         )
                         if len(deduplicated_matches) < len(journey_matches):
                             logger.debug(
