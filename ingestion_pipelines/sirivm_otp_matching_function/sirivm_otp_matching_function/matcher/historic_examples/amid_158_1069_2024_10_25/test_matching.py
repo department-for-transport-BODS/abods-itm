@@ -23,7 +23,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -43,7 +42,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -63,7 +61,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -83,7 +80,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -103,7 +99,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -123,7 +118,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -143,7 +137,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -163,7 +156,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -183,7 +175,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -203,7 +194,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -223,7 +213,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -243,7 +232,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -263,7 +251,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "Late",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-10-25",
     },
     {
         "group_id": "amid|158|1069|2024-10-25",
@@ -283,7 +270,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "final",
-        "date_of_journey": "2024-10-25",
     },
 ]
 

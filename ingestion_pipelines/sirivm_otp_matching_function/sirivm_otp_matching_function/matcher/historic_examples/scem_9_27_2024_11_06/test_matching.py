@@ -23,7 +23,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -43,7 +42,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -63,7 +61,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -83,7 +80,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -103,7 +99,6 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -123,7 +118,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -143,7 +137,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -163,7 +156,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -183,7 +175,6 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -203,7 +194,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -223,7 +213,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -243,7 +232,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -263,7 +251,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -283,7 +270,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -303,7 +289,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -323,7 +308,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -343,7 +327,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -363,7 +346,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -383,7 +365,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -403,7 +384,6 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -423,7 +403,6 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -443,7 +422,6 @@ matches = [
         ),
         "otp_state": "Early",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -463,7 +441,6 @@ matches = [
         ),
         "otp_state": "Early",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -483,7 +460,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -503,7 +479,6 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -523,7 +498,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -543,7 +517,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -563,7 +536,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -583,7 +555,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -603,7 +574,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -623,7 +593,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -643,7 +612,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -663,7 +631,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -683,7 +650,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -703,7 +669,6 @@ matches = [
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -723,7 +688,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -743,7 +707,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -763,7 +726,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2024-11-06",
     },
     {
         "group_id": "scem|9|27|2024-11-06",
@@ -783,7 +745,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "final",
-        "date_of_journey": "2024-11-06",
     },
 ]
 

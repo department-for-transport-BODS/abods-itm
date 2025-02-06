@@ -23,7 +23,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -43,7 +42,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -63,7 +61,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -83,7 +80,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -103,7 +99,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -123,7 +118,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -143,7 +137,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -163,7 +156,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -183,7 +175,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -203,7 +194,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -223,7 +213,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -243,7 +232,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -263,7 +251,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -283,7 +270,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -303,7 +289,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -323,7 +308,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -343,7 +327,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -363,7 +346,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -383,7 +365,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -403,7 +384,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -423,7 +403,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -443,7 +422,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -463,7 +441,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -483,7 +460,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -503,7 +479,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -523,7 +498,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -543,7 +517,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "Non-final",
-        "date_of_journey": "2025-01-10",
     },
     {
         "group_id": "fbri|m4|0740|2025-01-10",
@@ -563,7 +536,6 @@ matches = [
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
         "stop_type": "final",
-        "date_of_journey": "2025-01-10",
     },
 ]
 
