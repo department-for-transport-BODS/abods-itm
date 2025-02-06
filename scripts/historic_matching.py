@@ -97,7 +97,7 @@ def look_for_existing_tasks(environment: str):
     status_output = get_task_status(environment, arns)
     for task_arn, status, process_date in parse_task_output(status_output):
         print(
-            f"{datetime.now().isoformat()}: {task_arn} for date {process_date} is {status}"
+            f"{datetime.now().isoformat()}: {task_arn} for date {process_date.isoformat()} is {status}"
         )
         running_tasks[task_arn] = {
             "status": status,
@@ -141,7 +141,7 @@ def check_for_completed_tasks(environment: str):
     for task_arn, status, process_date in parse_task_output(status_output):
         if running_tasks[task_arn]["status"] != status:
             print(
-                f"{datetime.now().isoformat()}: {task_arn} for date {process_date} is {status}"
+                f"{datetime.now().isoformat()}: {task_arn} for date {process_date.isoformat()} is {status}"
             )
         running_tasks[task_arn]["status"] = status
 
@@ -154,7 +154,7 @@ def check_for_completed_tasks(environment: str):
             del running_tasks[arn]
             cloudwatch = cloudwatch_logs_link(arn, environment)
             print(
-                f"{datetime.now().isoformat()}: {process_date} finished. You can read the logs at {cloudwatch}"
+                f"{datetime.now().isoformat()}: {process_date.isoformat()} finished. You can read the logs at {cloudwatch}"
             )
             continue
     return completed_dates
@@ -216,7 +216,9 @@ def main():
             process_dates.remove(process_date)
         else:
             print(
-                f"Found a task for {process_date} in {running_tasks[arn]['status']} state, but it is not in the list of dates to run, be sure to run summary generation when it is finished with \"CALL historic_matching_summary_generation('{process_date}');\""
+                f"Found a task for {process_date.isoformat()} in {running_tasks[arn]['status']} state, "
+                f"but it is not in the list of dates to run, be sure to run summary generation when it is finished with "
+                f"\"CALL historic_matching_summary_generation('{process_date.isoformat()}');\""
             )
 
     print("Will run for the following dates")
