@@ -319,9 +319,14 @@ def main() -> None:
             with log_execution_time(logger, "get_operators"):
                 for row in conn.query(
                     """
-                        SELECT DISTINCT a.operator_ref
-                        FROM timetable t
-                        INNER JOIN avl a ON lower(concat_ws('|', a.operator_ref, a.line_name, a.journey_ref, a.date_of_journey)) = t.group_id
+                        SELECT sub.operator_ref
+                        FROM (
+                            SELECT a.operator_ref, (SELECT COUNT(*) from timetable t WHERE a.operator_ref = t.operator_noc) as count
+                            FROM avl a
+                            GROUP BY a.operator_ref
+                        ) sub
+                        WHERE sub.count > 0
+                        ORDER BY sub.count DESC
                         """,
                 ).fetchall():
                     operator_queue.put(row[0])
