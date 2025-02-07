@@ -243,13 +243,14 @@ def main():
     while dates_to_start or running_tasks or summaries_to_run:
         if dates_to_start and len(running_tasks) < max_tasks:
             start_task(dates_to_start.pop(0), environment)
-            dates_to_start_str = ";".join(d.isoformat() for d in dates_to_start)
-            print(
-                f"{datetime.now().isoformat()}: Dates still queued for matching: {dates_to_start_str}"
-            )
+            if dates_to_start:
+                dates_to_start_str = ";".join(d.isoformat() for d in dates_to_start)
+                print(
+                    f"{datetime.now().isoformat()}: Dates still queued for matching: {dates_to_start_str}"
+                )
 
-            # Keep starting tasks if there's more we can run
-            continue
+                # Keep starting tasks if there's more we can run
+                continue
 
         completed_dates = check_for_completed_tasks(environment)
         summaries_to_run = sorted({*summaries_to_run, *completed_dates})
@@ -269,10 +270,11 @@ def main():
             except CalledProcessError as e:
                 print(e)
                 summary_generation(db_password, process_date)
-            summaries_to_run_str = ";".join(d.isoformat() for d in summaries_to_run)
-            print(
-                f"{datetime.now().isoformat()}: Dates queued for summary generation: {summaries_to_run_str}"
-            )
+            if summaries_to_run:
+                summaries_to_run_str = ";".join(d.isoformat() for d in summaries_to_run)
+                print(
+                    f"{datetime.now().isoformat()}: Dates queued for summary generation: {summaries_to_run_str}"
+                )
             continue
 
         # If we got here then all we did was check status of tasks, and found none finished, so wait before going again
