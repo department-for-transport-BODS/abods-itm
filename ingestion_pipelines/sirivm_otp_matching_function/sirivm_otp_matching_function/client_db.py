@@ -1,8 +1,8 @@
 """Database Functions"""
 
-import datetime
 from collections.abc import Sequence
 from dataclasses import dataclass
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Literal
 
@@ -104,20 +104,27 @@ class TimetableDBClient:
         batch_id: int,
         entries_to_update: Sequence[NewDbMatch],
         entries_to_remove: Sequence[BadDbMatch],
+        process_date: date,
     ) -> None:
         """Update database to reflect successful live matching"""
         with self.connection.cursor() as cursor:
+            # In the time after midnight, we may have matched a stop where the date_of_journey is
+            # the previous day, so we should hint both values for the partition to the db
+            alternate_date = process_date - timedelta(days=1)
             if len(entries_to_remove) > 0:
                 execute_values_amended(
                     cur=cursor,
                     sql=self.sql_queries.remove_live_matching,
                     values=[
-                        (entry["timetable_id"], entry["group_id"])
+                        (
+                            entry["timetable_id"],
+                            process_date.isoformat(),
+                            alternate_date.isoformat(),
+                        )
                         for entry in entries_to_remove
                     ],
                 )
 
-            now = datetime.datetime.now()
             execute_values_amended(
                 cur=cursor,
                 sql=self.sql_queries.set_live_matching,
@@ -128,8 +135,8 @@ class TimetableDBClient:
                         record["last_time_in_zone"],
                         record["otp_state"],
                         record["timestamp_after_estimate"],
-                        now.date().isoformat(),
-                        (now - datetime.timedelta(days=1)).date().isoformat(),
+                        process_date.isoformat(),
+                        alternate_date.isoformat(),
                     )
                     for record in entries_to_update
                 ],
@@ -141,13 +148,16 @@ class TimetableDBClient:
     def historic_update_success(
         self,
         entries_to_update: Sequence[NewDbMatch],
-        avl_date_str: str,
+        process_date: date,
         log_level: str | None = None,
     ) -> None:
         """Update database to reflect successful historic matching"""
         if log_level:
             logger.setLevel(log_level)
         with self.connection.cursor() as cursor:
+            # In historic matching, we know that the date we're working with is always the right,
+            # but it doesn't hurt to align the code with live matching, so that we can deduplicate later
+            alternate_date = process_date - timedelta(days=1)
             values = [
                 (
                     record["timetable_id"],
@@ -155,8 +165,8 @@ class TimetableDBClient:
                     record["last_time_in_zone"],
                     record["stop_type"],
                     record["timestamp_after_estimate"],
-                    avl_date_str,
-                    avl_date_str,
+                    process_date.isoformat(),
+                    alternate_date.isoformat(),
                 )
                 for record in entries_to_update
             ]
