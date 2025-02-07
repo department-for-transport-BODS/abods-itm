@@ -117,6 +117,7 @@ class TimetableDBClient:
                     ],
                 )
 
+            now = datetime.datetime.now()
             execute_values_amended(
                 cur=cursor,
                 sql=self.sql_queries.set_live_matching,
@@ -127,7 +128,8 @@ class TimetableDBClient:
                         record["last_time_in_zone"],
                         record["otp_state"],
                         record["timestamp_after_estimate"],
-                        datetime.datetime.now().date().isoformat(),
+                        now.date().isoformat(),
+                        (now - datetime.timedelta(days=1)).date().isoformat(),
                     )
                     for record in entries_to_update
                 ],
@@ -153,6 +155,7 @@ class TimetableDBClient:
                     record["last_time_in_zone"],
                     record["stop_type"],
                     record["timestamp_after_estimate"],
+                    avl_date_str,
                     avl_date_str,
                 )
                 for record in entries_to_update
