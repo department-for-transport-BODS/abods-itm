@@ -30,6 +30,7 @@ group_ids_to_debug = [
 
 
 def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of an issue here
+    date_str: str,
     task_count: int,
     task_queue: Queue,
     worker_id: int,
@@ -225,6 +226,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
 
                         db_client.historic_update_success(
                             journey_matches,
+                            date_str,
                             level,
                         )
                 logger.info(
@@ -323,7 +325,7 @@ if __name__ == "__main__":
         for i in range(num_workers):
             worker = Process(
                 target=operator_worker_task,
-                args=(operator_count, operator_queue, i),
+                args=(process_date, operator_count, operator_queue, i),
             )
             worker.start()
             workers.append(worker)

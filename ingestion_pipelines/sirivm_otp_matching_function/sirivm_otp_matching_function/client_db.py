@@ -1,5 +1,6 @@
 """Database Functions"""
 
+import datetime
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -126,6 +127,7 @@ class TimetableDBClient:
                         record["last_time_in_zone"],
                         record["otp_state"],
                         record["timestamp_after_estimate"],
+                        datetime.datetime.now().date().isoformat(),
                     )
                     for record in entries_to_update
                 ],
@@ -137,6 +139,7 @@ class TimetableDBClient:
     def historic_update_success(
         self,
         entries_to_update: Sequence[NewDbMatch],
+        avl_date_str: str,
         log_level: str | None = None,
     ) -> None:
         """Update database to reflect successful historic matching"""
@@ -150,6 +153,7 @@ class TimetableDBClient:
                     record["last_time_in_zone"],
                     record["stop_type"],
                     record["timestamp_after_estimate"],
+                    avl_date_str,
                 )
                 for record in entries_to_update
             ]
