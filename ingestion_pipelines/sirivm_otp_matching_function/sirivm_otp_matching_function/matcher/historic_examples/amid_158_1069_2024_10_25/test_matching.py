@@ -6,7 +6,6 @@ from ..util import run_historic_matching_test
 
 matches = [
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "18",
         "time_difference": 243.0,
         "last_time_in_zone_str": "22:49:03",
@@ -25,7 +24,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "19",
         "time_difference": 316.0,
         "last_time_in_zone_str": "22:51:16",
@@ -44,7 +42,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "20",
         "time_difference": 290.0,
         "last_time_in_zone_str": "22:51:50",
@@ -63,7 +60,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "21",
         "time_difference": 354.0,
         "last_time_in_zone_str": "22:54:54",
@@ -82,7 +78,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "22",
         "time_difference": 361.0,
         "last_time_in_zone_str": "22:56:01",
@@ -101,7 +96,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "23",
         "time_difference": 334.0,
         "last_time_in_zone_str": "22:56:34",
@@ -120,7 +114,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "24",
         "time_difference": 350.0,
         "last_time_in_zone_str": "22:59:50",
@@ -139,7 +132,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "25",
         "time_difference": 376.0,
         "last_time_in_zone_str": "23:00:16",
@@ -158,7 +150,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "26",
         "time_difference": 338.0,
         "last_time_in_zone_str": "23:00:38",
@@ -177,7 +168,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "27",
         "time_difference": 355.0,
         "last_time_in_zone_str": "23:00:55",
@@ -196,7 +186,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "28",
         "time_difference": 318.0,
         "last_time_in_zone_str": "23:01:18",
@@ -215,7 +204,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "29",
         "time_difference": 325.0,
         "last_time_in_zone_str": "23:02:25",
@@ -234,7 +222,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "30",
         "time_difference": 367.0,
         "last_time_in_zone_str": "23:04:07",
@@ -253,7 +240,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "amid|158|1069|2024-10-25",
         "stop_index": "31",
         "time_difference": 347.0,
         "last_time_in_zone_str": "23:04:47",

@@ -337,10 +337,7 @@ def check_update_first_stop(
     route_history["potential_matches"][stop_index] = potential_match
     logger.debug(f"updated stop 1 potential match: {potential_match}")
     # 10. remove db matched details
-    bad_match: BadDbMatch = {
-        "timetable_id": stop_timetable_id(stop),
-        "group_id": avl_group_id(avl),
-    }
+    bad_match: BadDbMatch = {"timetable_id": stop_timetable_id(stop)}
     bad_matches.append(bad_match)
     logger.debug(
         "Removed matched first stop, and created new potential match",
@@ -525,7 +522,6 @@ def map_matched_stop_to_db(
     is_final_stop: bool,  # noqa: FBT001 - boolean argument is fine for now
     stop: Stop,
     new_matches: list[NewDbMatch],
-    avl: AVLRecord,
     stop_index: str,
     last_time_in_zone: datetime | None,
     is_estimate: bool,  # noqa: FBT001 - boolean argument is fine for now
@@ -568,7 +564,6 @@ def map_matched_stop_to_db(
         )
     # 23. update db with potential match details
     new_match: NewDbMatch = {
-        "group_id": avl_group_id(avl),
         "stop_index": stop_index,
         "time_difference": time_difference,
         "last_time_in_zone_str": str(last_time_in_zone.strftime("%H:%M:%S"))
@@ -802,7 +797,6 @@ def move_potential_match_to_match(
                 else:
                     bad_match: BadDbMatch = {
                         "timetable_id": stop_timetable_id(stop_details),
-                        "group_id": avl_group_id(avl),
                     }
                     bad_matches.append(bad_match)
     if delete_potential_match:
@@ -821,7 +815,6 @@ def move_potential_match_to_match(
         is_final_stop,
         stop,
         new_matches,
-        avl,
         stop_index,
         last_time_in_zone,
         is_estimate,
