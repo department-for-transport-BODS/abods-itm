@@ -1008,21 +1008,21 @@ def match_avl(
     current_avl_time = str(avl_recorded_at_time_utc(avl))
 
     # 3. check if current recorded_at_time is the same as the last avl time in route_history
-    if route_history["last_avl_time"] == current_avl_time:
+    last_avl_time = route_history["last_avl_time"]
+    if last_avl_time == current_avl_time:
         logger.debug(
             "Same avl time seen again. Skipping avl...",
-            last_avl_time=current_avl_time,
+            last_avl_time=last_avl_time,
             current_avl_time=current_avl_time,
         )
         return [], [], stop_history
 
-    if route_history["last_avl_time"] > current_avl_time:
-        logger.error(
-            "Out of order avl matching. Skipping avl...",
-            last_avl_time=current_avl_time,
+    if last_avl_time > current_avl_time:
+        logger.warning(
+            "Out of order avl matching. Probably from a second vehicle",
+            last_avl_time=last_avl_time,
             current_avl_time=current_avl_time,
         )
-        return [], [], stop_history
 
     bad_matches: list[BadDbMatch] = []
     # 4. update the time
