@@ -138,7 +138,9 @@ def cloudwatch_logs_link(arn: str, environment: str):
 
 def check_for_completed_tasks(environment: str):
     status_output = get_task_status(environment, list(running_tasks))
+    found_arns = []
     for task_arn, status, process_date in parse_task_output(status_output):
+        found_arns.append(task_arn)
         if running_tasks[task_arn]["status"] != status:
             print(
                 f"{datetime.now().isoformat()}: {task_arn} for date {process_date.isoformat()} is {status}"
@@ -149,12 +151,21 @@ def check_for_completed_tasks(environment: str):
     for arn in list(running_tasks):
         status = running_tasks[arn]["status"]
         process_date = running_tasks[arn]["process_date"]
+        cloudwatch = cloudwatch_logs_link(arn, environment)
+
         if status in ("STOPPED", "DELETED"):
             completed_dates.append(process_date)
             del running_tasks[arn]
-            cloudwatch = cloudwatch_logs_link(arn, environment)
             print(
                 f"{datetime.now().isoformat()}: {process_date.isoformat()} finished. You can read the logs at {cloudwatch}"
+            )
+            continue
+
+        if arn not in found_arns:
+            completed_dates.append(process_date)
+            del running_tasks[arn]
+            print(
+                f"{datetime.now().isoformat()}: {process_date.isoformat()} was not found in the list. You can read the logs at {cloudwatch}. Assuming it completed successfully"
             )
             continue
     return completed_dates
