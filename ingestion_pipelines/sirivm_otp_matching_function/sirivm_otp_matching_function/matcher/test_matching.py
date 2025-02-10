@@ -270,6 +270,7 @@ class TestFindPotentialMatches:  # noqa: D101 - BODS-7131
             avl,
             route,
             route_history,
+            True
         )
         assert route_history["potential_matches"] == expected_potential_matches
 
@@ -1849,7 +1850,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
 
 
 class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
-    os.environ["ENABLE_ESTIMATED_MATCHING"] = "true"
 
     @pytest.mark.parametrize(
         (
@@ -1943,38 +1943,6 @@ class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
                 ((53.820328, -1.654394), 0),
                 None,
                 id="Longer than threshold distance between AVL stops does not give estimated match",
-            ),
-            pytest.param(
-                {
-                    "longitude": -1.648382,
-                    "latitude": 53.817693,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                    "last_avl_longitude": None,
-                    "last_avl_latitude": None,
-                },
-                ((53.820328, -1.654394), 0),
-                None,
-                id="No previous AVL does not give estimated match",
-            ),
-            pytest.param(
-                {
-                    "longitude": -1.648382,
-                    "latitude": 53.817693,
-                    "recorded_at_time": str(
-                        datetime(2024, 10, 10, 7, 49, 40, tzinfo=UTC),
-                    ),
-                },
-                {
-                    "last_avl_time": str(datetime(2024, 10, 10, 7, 49, 10, tzinfo=UTC)),
-                },
-                ((53.820328, -1.654394), 0),
-                None,
-                id="Missing required keys does not give estimated match and does not throw error",
             ),
             pytest.param(
                 {

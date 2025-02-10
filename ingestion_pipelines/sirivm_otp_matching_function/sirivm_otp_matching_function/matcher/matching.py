@@ -155,17 +155,6 @@ def check_estimated_match(  # noqa: PLR0911 - it's not that many returns
         stop (Stop): Stop to check for match against
 
     """
-    if os.getenv("ENABLE_ESTIMATED_MATCHING") != "true":
-        return None
-
-    # Have we processed an avl for this journey yet?
-    if route_history.get("last_avl_longitude") is None:
-        return None
-    if route_history.get("last_avl_latitude") is None:
-        return None
-    if not bool(route_history.get("last_avl_time")):
-        return None
-
     previous_avl_time = validate_date(route_history["last_avl_time"][:19])
 
     time_diff = (avl_recorded_at_time_utc(avl) - previous_avl_time).total_seconds()
@@ -197,10 +186,11 @@ def check_estimated_match(  # noqa: PLR0911 - it's not that many returns
     return exit_time.isoformat()
 
 
-def find_potential_matches(
+def find_potential_matches(  # noqa:C901 - later
     avl: AVLRecord,
     route: Route,
     route_history: RouteHistory,
+    skip_estimated_match: bool,  # noqa:FBT001 - later
 ) -> None:
     """
     Find potential matches after the last match
@@ -210,6 +200,7 @@ def find_potential_matches(
         avl (AVLRecord): Avl record
         route (Route): Route stop info
         route_history (RouteHistory): Stop history of the current group id
+        skip_estimated_match (bool): If estimated matching should be skipped
 
     """
     # 11-12. get the stop index to start for finding potential matches
@@ -271,6 +262,9 @@ def find_potential_matches(
             continue
 
         if stop_index in route_history["matched_stops"]:
+            continue
+
+        if skip_estimated_match:
             continue
 
         timestamp_after_estimate = check_estimated_match(avl, route_history, stop)
@@ -716,7 +710,7 @@ def select_potential_match_with_same_recordedattime(
     return selected_index
 
 
-def move_potential_match_to_match(  # noqa:PLR0912, PLR0915 - later
+def move_potential_match_to_match(  # noqa:PLR0912, PLR0915, C901 - later
     route: Route,
     stop_index: str,
     potential_match: PotentialMatch,
@@ -1049,8 +1043,15 @@ def match_avl(
 
     logger.debug(f"stop_history_index {stop_history_index} in timetable")
 
+    skip_estimated_match = False
+
+    if os.getenv("ENABLE_ESTIMATED_MATCHING") != "true":
+        skip_estimated_match = True
+
     # 2. check if group id exists in stop_history, if not, create a blank group stop history
     if stop_history_index not in stop_history:
+        # Can only do estimates if we have data for a previous avl
+        skip_estimated_match = True
         default_route_history: RouteHistory = {
             "last_avl_time": "",
             "last_avl_longitude": None,
@@ -1088,7 +1089,7 @@ def match_avl(
     # 11-14. Find potential matches
     logger.debug("11. find potential matches")
 
-    find_potential_matches(avl, route, route_history)
+    find_potential_matches(avl, route, route_history, skip_estimated_match)
 
     # update last avl time, longitude and latitude
     route_history["last_avl_time"] = str(avl_recorded_at_time_utc(avl))
