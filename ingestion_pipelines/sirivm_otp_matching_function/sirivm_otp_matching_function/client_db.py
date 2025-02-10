@@ -2,6 +2,7 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Literal
 
@@ -23,7 +24,6 @@ class SQLQueries:
     set_live_matching: str
     set_historic_matching: str
     remove_live_matching: str
-    remove_historic_matching: str
     update_otp_state: str
 
 
@@ -39,7 +39,6 @@ def _load_sql_queries() -> SQLQueries:
         set_live_matching=read_sql_file("set_live_matching.sql"),
         set_historic_matching=read_sql_file("set_historic_matching.sql"),
         remove_live_matching=read_sql_file("remove_live_matching.sql"),
-        remove_historic_matching=read_sql_file("remove_historic_matching.sql"),
         update_otp_state=read_sql_file("update_otp_state.sql"),
     )
 
@@ -105,15 +104,23 @@ class TimetableDBClient:
         batch_id: int,
         entries_to_update: Sequence[NewDbMatch],
         entries_to_remove: Sequence[BadDbMatch],
+        process_date: date,
     ) -> None:
         """Update database to reflect successful live matching"""
         with self.connection.cursor() as cursor:
+            # In the time after midnight, we may have matched a stop where the date_of_journey is
+            # the previous day, so we should hint both values for the partition to the db
+            alternate_date = process_date - timedelta(days=1)
             if len(entries_to_remove) > 0:
                 execute_values_amended(
                     cur=cursor,
                     sql=self.sql_queries.remove_live_matching,
                     values=[
-                        (entry["timetable_id"], entry["group_id"])
+                        (
+                            entry["timetable_id"],
+                            process_date.isoformat(),
+                            alternate_date.isoformat(),
+                        )
                         for entry in entries_to_remove
                     ],
                 )
@@ -128,6 +135,8 @@ class TimetableDBClient:
                         record["last_time_in_zone"],
                         record["otp_state"],
                         record["timestamp_after_estimate"],
+                        process_date.isoformat(),
+                        alternate_date.isoformat(),
                     )
                     for record in entries_to_update
                 ],
@@ -138,38 +147,26 @@ class TimetableDBClient:
     @timer(logger)
     def historic_update_success(
         self,
-        batch_id: int | None,
         entries_to_update: Sequence[NewDbMatch],
-        entries_to_remove: Sequence[BadDbMatch],
-        avl_date_str: str,
+        process_date: date,
         log_level: str | None = None,
     ) -> None:
         """Update database to reflect successful historic matching"""
         if log_level:
             logger.setLevel(log_level)
         with self.connection.cursor() as cursor:
-            if len(entries_to_remove) > 0:
-                execute_values_amended(
-                    cur=cursor,
-                    sql=self.sql_queries.remove_historic_matching,
-                    values=[
-                        (
-                            entry["timetable_id"],
-                            entry["group_id"],
-                            avl_date_str,
-                        )
-                        for entry in entries_to_remove
-                    ],
-                )
-
+            # In historic matching, we know that the date we're working with is always the right,
+            # but it doesn't hurt to align the code with live matching, so that we can deduplicate later
+            alternate_date = process_date - timedelta(days=1)
             values = [
                 (
                     record["timetable_id"],
                     record["time_difference"],
                     record["last_time_in_zone"],
                     record["stop_type"],
-                    avl_date_str,
                     record["timestamp_after_estimate"],
+                    process_date.isoformat(),
+                    alternate_date.isoformat(),
                 )
                 for record in entries_to_update
             ]
@@ -184,5 +181,3 @@ class TimetableDBClient:
                 sql=self.sql_queries.update_otp_state,
                 values=values,
             )
-            if batch_id:
-                _update_batch_status(cursor, batch_id, "Success")

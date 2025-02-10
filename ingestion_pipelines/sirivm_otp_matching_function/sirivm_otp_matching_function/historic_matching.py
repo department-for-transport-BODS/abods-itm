@@ -3,7 +3,7 @@
 
 import os
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from multiprocessing import Process, Queue
 from queue import Empty
 from typing import TYPE_CHECKING
@@ -41,6 +41,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
         "avl_timetable.db",
         config={"access_mode": "READ_ONLY"},
     ) as process_conn:
+        process_date = date.fromisoformat(date_str)
         while True:
             try:
                 operator_ref = task_queue.get(timeout=10)
@@ -225,10 +226,8 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         total_matches += match_count
 
                         db_client.historic_update_success(
-                            None,  # We aren't using avl batches, so we need to skip the batch table update
                             journey_matches,
-                            [],
-                            date_str,
+                            process_date,
                             level,
                         )
                 logger.info(
@@ -243,7 +242,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                 logger.exception("An error occurred when processing historic record")
 
 
-if __name__ == "__main__":
+def main() -> None:
     try:
         process_date = os.getenv("PROCESS_DATE")
         if not process_date:
@@ -343,3 +342,7 @@ if __name__ == "__main__":
     except Exception:
         logger.exception("An error occurred")
         sys.exit(2)
+
+
+if __name__ == "__main__":
+    main()

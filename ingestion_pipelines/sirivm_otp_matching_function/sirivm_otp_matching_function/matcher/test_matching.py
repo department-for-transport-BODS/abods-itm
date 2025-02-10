@@ -67,7 +67,6 @@ class TestCheckUpdateFirstStop:  # noqa: D101 - BODS-7131
     expected_bad_matches_5_mins = [  # noqa: RUF012 - BODS-7131
         {
             "timetable_id": 893823336,
-            "group_id": "tlct|378|1215|2024-08-20",
         },
     ]
     route_history = {  # noqa: RUF012 - BODS-7131
@@ -937,7 +936,6 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                 last_time_in_zone_non_final,
                 [
                     {
-                        "group_id": group_id,
                         "stop_index": "1",
                         "time_difference": -355.0,
                         "last_time_in_zone_str": "11:09:05",
@@ -958,7 +956,6 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                 last_time_in_zone_final,
                 [
                     {
-                        "group_id": group_id,
                         "stop_index": "45",
                         "time_difference": -420.0,
                         "last_time_in_zone_str": "11:35:00",
@@ -988,7 +985,6 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
                 last_time_in_zone_non_final + timedelta(seconds=4000),
                 [
                     {
-                        "group_id": "tlct|378|1215|2024-08-20",
                         "last_time_in_zone": datetime(
                             2024,
                             8,
@@ -1024,16 +1020,6 @@ class TestWriteMatchedStopToDb:  # noqa: D101 - BODS-7131
             is_final_stop,
             timetable_dict[self.group_id][pm_index],
             new_matches,
-            {
-                "operator_ref": self.operator_ref,
-                "line_name": self.line_name,
-                "journey_ref": self.journey_ref,
-                "date_of_journey": self.date_of_journey,
-                "direction_ref": "inbound",
-                "latitude": 0,
-                "longitude": 0,
-                "recorded_at_time": "something random",
-            },
             pm_index,
             last_time_in_zone,
             is_estimate=False,
@@ -1542,7 +1528,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 },
                 [
                     {
-                        "group_id": group_id,
                         "stop_index": "1",
                         "time_difference": 48.0,
                         "last_time_in_zone_str": "11:15:48",
@@ -1590,7 +1575,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 },
                 [
                     {
-                        "group_id": group_id,
                         "stop_index": "3",
                         "time_difference": 184.0,
                         "last_time_in_zone_str": "11:20:04",
@@ -1658,7 +1642,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 [],  # bad_matches
                 ["23"],  # expected_potential_matches_to_delete
                 [
-                    {"timetable_id": 893823127, "group_id": group_id},
+                    {"timetable_id": 893823127},
                 ],  # expected_bad_matches
                 {
                     "21": {
@@ -1692,7 +1676,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 },
                 [
                     {
-                        "group_id": group_id,
                         "stop_index": "23",
                         "time_difference": 534.0,
                         "last_time_in_zone_str": "11:36:54",
@@ -1724,7 +1707,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 [],  # bad_matches
                 ["7"],  # expected_potential_matches_to_delete
                 [
-                    {"timetable_id": 1091293465, "group_id": "coac|41|1630|2024-10-17"},
+                    {"timetable_id": 1091293465},
                 ],  # expected_bad_matches
                 {
                     "7": {
@@ -1736,7 +1719,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 },
                 [
                     {
-                        "group_id": "coac|41|1630|2024-10-17",
                         "stop_index": "7",
                         "time_difference": -1375.0,
                         "last_time_in_zone_str": "16:12:18",
@@ -1796,7 +1778,7 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 [],  # bad_matches
                 ["70"],  # expected_potential_matches_to_delete
                 [
-                    {"timetable_id": 1231325785, "group_id": "scem|9|13|2024-10-31"},
+                    {"timetable_id": 1231325785},
                 ],  # expected_bad_matches
                 {
                     "3": {
@@ -1814,7 +1796,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
                 },
                 [
                     {
-                        "group_id": "scem|9|13|2024-10-31",
                         "last_time_in_zone": datetime(
                             2024,
                             10,

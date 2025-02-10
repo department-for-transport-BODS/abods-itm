@@ -6,7 +6,6 @@ from ..util import run_historic_matching_test
 
 matches = [
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "1",
         "time_difference": 93.0,
         "last_time_in_zone_str": "08:06:33",
@@ -25,7 +24,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "2",
         "time_difference": 94.0,
         "last_time_in_zone_str": "08:07:34",
@@ -44,7 +42,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "3",
         "time_difference": 76.0,
         "last_time_in_zone_str": "08:10:16",
@@ -63,7 +60,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "4",
         "time_difference": 37.0,
         "last_time_in_zone_str": "08:11:37",
@@ -82,7 +78,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "5",
         "time_difference": 18.0,
         "last_time_in_zone_str": "08:12:18",
@@ -101,7 +96,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "6",
         "time_difference": 78.0,
         "last_time_in_zone_str": "08:13:18",
@@ -120,7 +114,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "7",
         "time_difference": 160.0,
         "last_time_in_zone_str": "08:15:40",
@@ -139,7 +132,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "8",
         "time_difference": 243.0,
         "last_time_in_zone_str": "08:19:03",
@@ -158,7 +150,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "9",
         "time_difference": 283.0,
         "last_time_in_zone_str": "08:19:43",
@@ -177,7 +168,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "10",
         "time_difference": 243.0,
         "last_time_in_zone_str": "08:20:03",
@@ -196,7 +186,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "11",
         "time_difference": 282.0,
         "last_time_in_zone_str": None,
@@ -215,7 +204,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "12",
         "time_difference": 264.0,
         "last_time_in_zone_str": "08:21:24",
@@ -234,7 +222,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "13",
         "time_difference": 265.0,
         "last_time_in_zone_str": "08:22:25",
@@ -253,7 +240,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "14",
         "time_difference": 245.0,
         "last_time_in_zone_str": "08:23:05",
@@ -272,7 +258,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "15",
         "time_difference": 246.0,
         "last_time_in_zone_str": "08:24:06",
@@ -291,7 +276,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "16",
         "time_difference": 267.0,
         "last_time_in_zone_str": "08:25:27",
@@ -310,7 +294,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "17",
         "time_difference": 246.0,
         "last_time_in_zone_str": None,
@@ -329,7 +312,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "18",
         "time_difference": 228.0,
         "last_time_in_zone_str": "08:26:48",
@@ -348,7 +330,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "19",
         "time_difference": 229.0,
         "last_time_in_zone_str": "08:27:49",
@@ -367,7 +348,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "20",
         "time_difference": 269.0,
         "last_time_in_zone_str": "08:28:29",
@@ -386,7 +366,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "21",
         "time_difference": 269.0,
         "last_time_in_zone_str": "08:28:29",
@@ -405,7 +384,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "22",
         "time_difference": 250.0,
         "last_time_in_zone_str": "08:29:10",
@@ -424,7 +402,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "23",
         "time_difference": 150.0,
         "last_time_in_zone_str": "08:29:30",
@@ -443,7 +420,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "24",
         "time_difference": 433.0,
         "last_time_in_zone_str": None,
@@ -462,7 +438,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "25",
         "time_difference": 395.0,
         "last_time_in_zone_str": "08:35:35",
@@ -481,7 +456,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "26",
         "time_difference": 477.0,
         "last_time_in_zone_str": "08:38:57",
@@ -500,7 +474,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "27",
         "time_difference": 399.0,
         "last_time_in_zone_str": "08:40:39",
@@ -519,7 +492,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "28",
         "time_difference": 319.0,
         "last_time_in_zone_str": "08:41:19",
@@ -538,7 +510,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "29",
         "time_difference": 260.0,
         "last_time_in_zone_str": "08:42:20",
@@ -557,7 +528,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "30",
         "time_difference": 240.0,
         "last_time_in_zone_str": "08:43:00",
@@ -575,7 +545,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "31",
         "time_difference": 261.0,
         "last_time_in_zone_str": "08:44:21",
@@ -594,7 +563,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "32",
         "time_difference": 242.0,
         "last_time_in_zone_str": "08:45:02",
@@ -613,7 +581,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "33",
         "time_difference": 183.0,
         "last_time_in_zone_str": "08:46:03",
@@ -632,7 +599,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "34",
         "time_difference": 203.0,
         "last_time_in_zone_str": "08:46:23",
@@ -651,7 +617,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "35",
         "time_difference": 143.0,
         "last_time_in_zone_str": None,
@@ -670,7 +635,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "36",
         "time_difference": 102.0,
         "last_time_in_zone_str": None,
@@ -689,7 +653,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "37",
         "time_difference": 118.0,
         "last_time_in_zone_str": None,
@@ -708,7 +671,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "38",
         "time_difference": 64.0,
         "last_time_in_zone_str": "08:48:04",
@@ -727,7 +689,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "39",
         "time_difference": 45.0,
         "last_time_in_zone_str": "08:48:45",
@@ -746,7 +707,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "40",
         "time_difference": 26.0,
         "last_time_in_zone_str": "08:49:26",
@@ -765,7 +725,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "41",
         "time_difference": 1.0,
         "last_time_in_zone_str": None,
@@ -784,7 +743,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "42",
         "time_difference": -34.0,
         "last_time_in_zone_str": "08:50:26",
@@ -803,7 +761,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "43",
         "time_difference": -113.0,
         "last_time_in_zone_str": "08:51:07",
@@ -822,7 +779,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "44",
         "time_difference": 333.0,
         "last_time_in_zone_str": "09:00:33",
@@ -841,7 +797,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "45",
         "time_difference": 33.0,
         "last_time_in_zone_str": "09:00:33",
@@ -860,7 +815,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "46",
         "time_difference": 10.0,
         "last_time_in_zone_str": None,
@@ -879,7 +833,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "47",
         "time_difference": -66.0,
         "last_time_in_zone_str": "09:01:54",
@@ -898,7 +851,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "48",
         "time_difference": -95.0,
         "last_time_in_zone_str": None,
@@ -917,7 +869,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "49",
         "time_difference": -126.0,
         "last_time_in_zone_str": "09:02:54",
@@ -936,7 +887,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "50",
         "time_difference": -165.0,
         "last_time_in_zone_str": "09:03:15",
@@ -955,7 +905,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "51",
         "time_difference": -185.0,
         "last_time_in_zone_str": "09:03:55",
@@ -974,7 +923,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "52",
         "time_difference": 38.0,
         "last_time_in_zone_str": "09:09:38",
@@ -993,7 +941,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "53",
         "time_difference": -43.0,
         "last_time_in_zone_str": None,
@@ -1012,7 +959,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "54",
         "time_difference": -101.0,
         "last_time_in_zone_str": "09:11:19",
@@ -1031,7 +977,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "55",
         "time_difference": -120.0,
         "last_time_in_zone_str": "09:12:00",
@@ -1049,7 +994,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "56",
         "time_difference": -239.0,
         "last_time_in_zone_str": "09:13:01",
@@ -1068,7 +1012,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "57",
         "time_difference": -298.0,
         "last_time_in_zone_str": "09:15:02",
@@ -1087,7 +1030,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "58",
         "time_difference": -237.0,
         "last_time_in_zone_str": "09:18:03",
@@ -1106,7 +1048,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "59",
         "time_difference": -155.0,
         "last_time_in_zone_str": "09:20:25",
@@ -1125,7 +1066,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "60",
         "time_difference": -217.0,
         "last_time_in_zone_str": None,
@@ -1144,7 +1084,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "61",
         "time_difference": -31.0,
         "last_time_in_zone_str": "09:25:29",
@@ -1163,7 +1102,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "62",
         "time_difference": -91.0,
         "last_time_in_zone_str": "09:25:29",
@@ -1182,7 +1120,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "63",
         "time_difference": -71.0,
         "last_time_in_zone_str": "09:25:49",
@@ -1201,7 +1138,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "64",
         "time_difference": -70.0,
         "last_time_in_zone_str": "09:26:50",
@@ -1220,7 +1156,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "65",
         "time_difference": -70.0,
         "last_time_in_zone_str": "09:27:50",
@@ -1239,7 +1174,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "66",
         "time_difference": -109.0,
         "last_time_in_zone_str": "09:29:11",
@@ -1258,7 +1192,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "67",
         "time_difference": -69.0,
         "last_time_in_zone_str": "09:29:51",
@@ -1277,7 +1210,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "68",
         "time_difference": -148.0,
         "last_time_in_zone_str": "09:30:32",
@@ -1296,7 +1228,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "69",
         "time_difference": -107.0,
         "last_time_in_zone_str": "09:32:13",
@@ -1315,7 +1246,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "70",
         "time_difference": -147.0,
         "last_time_in_zone_str": "09:32:33",
@@ -1334,7 +1264,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "71",
         "time_difference": -114.0,
         "last_time_in_zone_str": None,
@@ -1353,7 +1282,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "72",
         "time_difference": -207.0,
         "last_time_in_zone_str": "09:33:33",
@@ -1372,7 +1300,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "73",
         "time_difference": -44.0,
         "last_time_in_zone_str": "09:36:16",
@@ -1391,7 +1318,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "74",
         "time_difference": -3.0,
         "last_time_in_zone_str": "09:37:57",
@@ -1410,7 +1336,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "75",
         "time_difference": -2.0,
         "last_time_in_zone_str": "09:39:58",
@@ -1429,7 +1354,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "76",
         "time_difference": 38.0,
         "last_time_in_zone_str": "09:40:38",
@@ -1448,7 +1372,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "77",
         "time_difference": -1.0,
         "last_time_in_zone_str": "09:40:59",
@@ -1467,7 +1390,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "78",
         "time_difference": -100.0,
         "last_time_in_zone_str": "09:42:20",
@@ -1486,7 +1408,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "79",
         "time_difference": -139.0,
         "last_time_in_zone_str": "09:43:41",
@@ -1505,7 +1426,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "scem|9|11|2024-10-31",
         "stop_index": "80",
         "time_difference": -358.0,
         "last_time_in_zone_str": "09:46:02",

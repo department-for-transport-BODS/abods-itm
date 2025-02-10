@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from datetime import UTC, datetime
 from typing import Any, NotRequired, TypedDict
 
 from aws_lambda_powertools import Logger
@@ -85,7 +86,12 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
                 clean_shard_stop_history,
             )
 
-            db_client.live_update_success(batch_id, to_set, to_remove)
+            db_client.live_update_success(
+                batch_id,
+                to_set,
+                to_remove,
+                datetime.now(UTC).date(),
+            )
 
             s3_client.export_stop_history(stop_history, shard_no)
 
