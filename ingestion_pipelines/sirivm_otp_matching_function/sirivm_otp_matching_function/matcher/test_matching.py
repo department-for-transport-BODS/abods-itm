@@ -1835,7 +1835,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
     ) -> None:
         move_potential_match_to_match(
             timetable_dict[avl_group_id(avl)],
-            avl,
             pm_index,
             pm_details,
             route_history,
