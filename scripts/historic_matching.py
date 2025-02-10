@@ -221,7 +221,7 @@ def main():
 
     look_for_existing_tasks(environment)
     for arn in list(running_tasks):
-        process_date = date.fromisoformat(running_tasks[arn]["process_date"])
+        process_date = running_tasks[arn]["process_date"]
 
         if process_date in process_dates:
             process_dates.remove(process_date)
