@@ -13,6 +13,7 @@ db_user = "root"
 s3 = boto3.client("s3")
 paginator = s3.get_paginator("list_objects_v2")
 base_prefix = "historic/"
+max_queue_length = 6
 
 
 def list_files(environment: str, prefix: str):
@@ -114,6 +115,34 @@ def look_for_existing_tasks(environment: str):
         }
 
 
+def wait_for_queues():
+    while True:
+        longest_queue = 0
+        sqs = boto3.client("sqs")
+        for shard in range(7, 0, -1):
+            queue_length = int(
+                sqs.get_queue_attributes(
+                    QueueUrl=f"https://sqs.eu-west-2.amazonaws.com/637423206165/abods-prod-sirivm-otp-queue{7}.fifo",
+                    AttributeNames=["ApproximateNumberOfMessages"],
+                )["Attributes"]["ApproximateNumberOfMessages"]
+            )
+            if queue_length > longest_queue:
+                longest_queue = queue_length
+
+            if queue_length > max_queue_length:
+                print(
+                    f"{datetime.now().isoformat()}: Queue {shard} has {queue_length} messages"
+                )
+                break
+        else:
+            print(
+                f"{datetime.now().isoformat()}: All queues have {longest_queue} messages or less"
+            )
+            return
+
+        sleep(60)
+
+
 def run_query(query: str, db_password: str):
     subprocess.run(
         [
@@ -138,6 +167,7 @@ def timetable_generation(db_password: str, process_date: date):
         f"CALL generate_timetable('{process_date.isoformat()}');",
         db_password,
     )
+    wait_for_queues()
 
 
 def timetable_export(db_password: str, process_date: date):
