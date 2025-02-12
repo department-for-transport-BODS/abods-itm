@@ -7,6 +7,7 @@ from subprocess import CalledProcessError
 from time import sleep
 
 import boto3
+from botocore.config import Config
 
 db_host = "abods-prod-db.cluster-cpwu8ksu6zyo.eu-west-2.rds.amazonaws.com"
 db_user = "root"
@@ -21,6 +22,7 @@ def list_files(environment: str, prefix: str):
     for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
         for item in page["Contents"]:
             yield item["Key"]
+
 
 def parse_task_output(output: dict):
     for task in output["tasks"]:
@@ -104,6 +106,8 @@ def start_historic_matching(current: date, environment: str):
 
 def look_for_existing_tasks(environment: str):
     arns = boto3.client("ecs").list_tasks(cluster=f"abods-{environment}")["taskArns"]
+    if not arns:
+        return
     status_output = get_task_status(environment, arns)
     for task_arn, status, process_date in parse_task_output(status_output):
         print(
@@ -185,7 +189,13 @@ def avl_export(db_password: str, process_date: date):
 
 
 def convert_to_parquet(process_date: date, environment: str):
-    response = boto3.client("lambda").invoke(
+    print("Converting avl and timetable csv data to parquet format")
+    response = boto3.client(
+        "lambda",
+        config=Config(
+            read_timeout=15 * 60,
+        ),
+    ).invoke(
         FunctionName=f"abods-{environment}-convert-to-parquet-function",
         Payload=json.dumps(
             {
@@ -212,6 +222,8 @@ def cloudwatch_logs_link(arn: str, environment: str):
 
 
 def check_for_completed_tasks(environment: str):
+    if not running_tasks:
+        return []
     status_output = get_task_status(environment, list(running_tasks))
     found_arns = []
     for task_arn, status, process_date in parse_task_output(status_output):
@@ -307,7 +319,11 @@ def main():
 
     if running_tasks:
         print("The following dates currently have an executing matching task:")
-        print(";".join(data["process_date"].isoformat() for arn, data in running_tasks.items()))
+        print(
+            ";".join(
+                data["process_date"].isoformat() for arn, data in running_tasks.items()
+            )
+        )
 
     files = list(list_files(environment, base_prefix))
 
@@ -353,16 +369,26 @@ def main():
     avl_export_needed = sorted(avl_export_needed)
     timetable_export_needed = sorted(timetable_export_needed)
 
-    print("Will run matching for the following dates")
-    print(";".join(d.isoformat() for d in ready_to_run))
+    if ready_to_run:
+        print("Will run matching for the following dates:")
+        print(";".join(d.isoformat() for d in ready_to_run))
 
-    print("Will export AVL data for the following dates before exporting timetable data as well")
-    print(";".join(d.isoformat() for d in avl_export_needed))
+    if avl_export_needed:
+        print(
+            "Will export AVL data for the following dates before exporting timetable data as well:"
+        )
+        print(";".join(d.isoformat() for d in avl_export_needed))
 
-    print("Will export timetable data")
-    print(";".join(d.isoformat() for d in timetable_export_needed))
+    if timetable_export_needed:
+        print("Will export timetable data for the following dates:")
+        print(";".join(d.isoformat() for d in timetable_export_needed))
 
-    regenerate_timetables = input("Should timetable data be re-generated before export? (yes/NO)").lower().strip() == "yes"
+    regenerate_timetables = (
+        input("Should timetable data be re-generated before export? (yes/NO)")
+        .lower()
+        .strip()
+        == "yes"
+    )
     if regenerate_timetables:
         print("Will regenerate timetables")
 
@@ -370,7 +396,13 @@ def main():
 
     max_tasks = 5
     summaries_to_run = []
-    while ready_to_run or running_tasks or summaries_to_run or avl_export_needed or timetable_export_needed:
+    while (
+        ready_to_run
+        or running_tasks
+        or summaries_to_run
+        or avl_export_needed
+        or timetable_export_needed
+    ):
         if ready_to_run and len(running_tasks) < max_tasks:
             start_historic_matching(ready_to_run.pop(0), environment)
             if ready_to_run:
@@ -408,7 +440,7 @@ def main():
             process_date = avl_export_needed.pop(0)
             avl_export(db_password, process_date)
             timetable_export_needed = sorted({*timetable_export_needed, process_date})
-        elif timetable_export_needed:
+        elif timetable_export_needed and not ready_to_run:
             process_date = timetable_export_needed.pop(0)
             if regenerate_timetables:
                 timetable_generation(db_password, process_date)
