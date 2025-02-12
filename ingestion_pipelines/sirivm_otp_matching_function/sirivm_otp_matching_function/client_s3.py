@@ -7,7 +7,7 @@ import hashlib
 import itertools
 import json
 import os
-from collections.abc import Generator, Sequence
+from collections.abc import Iterable, Sequence
 from typing import Any
 
 import boto3
@@ -36,8 +36,8 @@ for shard, operators in shards.items():
 
 def _filter_avl_list(
     shard_no: str,
-    avl_list: Generator[LiveAVLRecord],
-) -> Generator[LiveAVLRecord]:
+    avl_list: Iterable[LiveAVLRecord],
+) -> Iterable[LiveAVLRecord]:
     """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
     for avl in avl_list:
         operator_ref = avl["operator_ref"]
@@ -58,9 +58,9 @@ def _parse_avl_csv_row(row: Any) -> LiveAVLRecord:  # noqa: ANN401 - need to det
             avl_keys,
             itertools.starmap(
                 lambda f, x: f(x),
-                zip(avl_parsers, row, strict=True),
+                zip(avl_parsers, row, strict=False),
             ),
-            strict=True,
+            strict=False,
         ),
     )
 
@@ -121,7 +121,7 @@ class TimetableS3Client:
         avl_stream = self._get_all_avl_data(filename)
         return list(_filter_avl_list(shard_no, avl_stream))
 
-    def _get_all_avl_data(self, filename: str) -> Generator[LiveAVLRecord]:
+    def _get_all_avl_data(self, filename: str) -> Iterable[LiveAVLRecord]:
         logger.info("Getting AVL Data", path=filename)
         s3_data_stream = self._get_from_s3(filename)
         with (
