@@ -23,7 +23,6 @@ from .matcher.utils import timer
 from .shards import shards
 
 logger = Logger()
-client = boto3.client("s3")
 utf8_stream_reader = codecs.getreader("utf-8")
 avl_keys = list(live_avl_column_parsers.keys())
 avl_parsers = [live_avl_column_parsers[key] for key in avl_keys]
@@ -67,7 +66,6 @@ class TimetableS3Client:
             return self.client.get_object(Bucket=self.bucket, Key=key)["Body"]
         except ClientError as e:
             error_code = e.response["Error"]["Code"]
-
             logger.exception(
                 "Failed to fetch data from S3",
                 s3_key=key,
