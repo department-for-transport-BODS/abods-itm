@@ -2,7 +2,7 @@ import csv
 import json
 import os
 import pathlib
-from collections.abc import Generator, Iterable, Sequence
+from collections.abc import Iterable, Sequence
 from unittest import mock
 
 from ..live_timetable_store import LiveTimetableStore
@@ -13,7 +13,7 @@ from ..models import LiveAVLRecord, NewDbMatch, live_avl_column_parsers
 # Using a different function to the live workload, so that we can tolerate extra columns
 def parse_test_avl_file(
     stream: Iterable[str],
-) -> Generator[LiveAVLRecord]:
+) -> Iterable[LiveAVLRecord]:
     """Parse live avl csv data into LiveAVLRecord dicts"""
     for row in csv.DictReader(
         stream,

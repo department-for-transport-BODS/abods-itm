@@ -2,7 +2,7 @@
 
 import csv
 import json
-from collections.abc import Generator, Iterable, Sequence
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 
 from ..models import AVLRecord, LiveAVLRecord, Timetable, live_avl_column_parsers
@@ -13,7 +13,7 @@ test_data_dir = Path(__file__).parent
 # Using a different function to the live workload, so that we can tolerate extra columns
 def parse_test_avl_file(
     stream: Iterable[str],
-) -> Generator[LiveAVLRecord]:
+) -> Iterable[LiveAVLRecord]:
     """Parse live avl csv data into LiveAVLRecord dicts"""
     for row in csv.DictReader(
         stream,
