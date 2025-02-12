@@ -1,11 +1,12 @@
 """Fetching and Uploading Data into S3"""
 
 import codecs
+import csv
 import gzip
 import hashlib
 import json
 import os
-from collections.abc import Generator, Sequence
+from collections.abc import Generator
 
 import boto3
 from aws_lambda_powertools import Logger
@@ -16,7 +17,7 @@ from .matcher.models import (
     LiveAVLRecord,
     StopHistory,
     Timetable,
-    parse_live_avl_data,
+    live_avl_column_parsers,
 )
 from .matcher.utils import timer
 from .shards import shards
@@ -24,6 +25,8 @@ from .shards import shards
 logger = Logger()
 client = boto3.client("s3")
 utf8_stream_reader = codecs.getreader("utf-8")
+avl_keys = list(live_avl_column_parsers.keys())
+avl_parsers = [live_avl_column_parsers[key] for key in avl_keys]
 shard_lookup: dict[str, str] = {}
 for shard, operators in shards.items():
     for operator in operators:
@@ -32,7 +35,7 @@ for shard, operators in shards.items():
 
 def filter_avl_list(
     shard_no: str,
-    avl_list: Sequence[LiveAVLRecord],
+    avl_list: Generator[LiveAVLRecord],
 ) -> Generator[LiveAVLRecord]:
     """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
     for avl in avl_list:
@@ -100,7 +103,7 @@ class TimetableS3Client:
             return stop_history
 
     @timer(logger)
-    def get_avl_data(self, filename: str) -> Sequence[LiveAVLRecord]:
+    def get_avl_data(self, filename: str) -> Generator[LiveAVLRecord]:
         """Get AVL Data from S3 and return a list of AVLData models"""
         logger.info("Getting AVL Data", path=filename)
         s3_data_stream = self._get_from_s3(filename)
@@ -108,7 +111,14 @@ class TimetableS3Client:
             gzip.GzipFile(fileobj=s3_data_stream) as uncompressed_stream,
             utf8_stream_reader(uncompressed_stream) as decoded_stream,
         ):
-            return list(parse_live_avl_data(decoded_stream))
+            reader = csv.reader(decoded_stream)
+            for row in reader:
+                yield {
+                    key: parser(row[idx])
+                    for idx, (key, parser) in enumerate(
+                        zip(avl_keys, avl_parsers, strict=True),
+                    )
+                }
 
     @timer(logger)
     def export_stop_history(self, stop_history: StopHistory, shard_no: str) -> None:

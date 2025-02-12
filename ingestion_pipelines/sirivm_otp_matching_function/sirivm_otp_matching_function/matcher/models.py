@@ -1,5 +1,4 @@
-import csv
-from collections.abc import Generator, Iterable, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import Literal, NotRequired, TypedDict
 
@@ -58,7 +57,7 @@ class LiveAVLRecord(AVLRecord):
 
 
 # Live avl files contain more records than we need, and the ordering is important so defined here to be explicit
-live_avl_file_columns = {
+live_avl_column_parsers = {
     "recorded_at_time": str,
     "response_timestamp": str,
     "latitude": float,
@@ -71,20 +70,6 @@ live_avl_file_columns = {
     "date_of_journey": str,
     "batch_id": int,
 }
-
-
-def parse_live_avl_data(
-    stream: Iterable[str],
-    has_header: bool = False,  # noqa:FBT001,FBT002 boolean params are bad, but this isn't exactly complicating things a lot
-) -> Generator[LiveAVLRecord]:
-    """Parse live avl csv data into LiveAVLRecord dicts"""
-    for row in csv.DictReader(
-        stream,
-        fieldnames=list(live_avl_file_columns) if not has_header else None,
-    ):
-        for key, val in row.items():
-            row[key] = live_avl_file_columns.get(key, str)(val)
-        yield row
 
 
 def avl_group_id(avl: AVLRecord) -> str:
