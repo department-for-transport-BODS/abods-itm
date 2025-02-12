@@ -6,7 +6,7 @@ import gzip
 import hashlib
 import json
 import os
-from collections.abc import Generator
+from collections.abc import Generator, Sequence
 
 import boto3
 from aws_lambda_powertools import Logger
@@ -34,7 +34,7 @@ for shard, operators in shards.items():
 
 def filter_avl_list(
     shard_no: str,
-    avl_list: Generator[LiveAVLRecord],
+    avl_list: Sequence[LiveAVLRecord],
 ) -> Generator[LiveAVLRecord]:
     """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
     for avl in avl_list:
@@ -101,7 +101,7 @@ class TimetableS3Client:
             return stop_history
 
     @timer(logger)
-    def get_avl_data(self, filename: str) -> Generator[LiveAVLRecord]:
+    def get_avl_data(self, filename: str) -> Sequence[LiveAVLRecord]:
         """Get AVL Data from S3 and return a list of AVLData models"""
         logger.info("Getting AVL Data", path=filename)
         s3_data_stream = self._get_from_s3(filename)
@@ -110,13 +110,16 @@ class TimetableS3Client:
             utf8_stream_reader(uncompressed_stream) as decoded_stream,
         ):
             reader = csv.reader(decoded_stream)
+            rows = []
             for row in reader:
-                yield {
+                avl_record: LiveAVLRecord = {
                     key: parser(row[idx])
                     for idx, (key, parser) in enumerate(
                         zip(avl_keys, avl_parsers, strict=True),
                     )
                 }
+                rows.append(avl_record)
+            return rows
 
     @timer(logger)
     def export_stop_history(self, stop_history: StopHistory, shard_no: str) -> None:
