@@ -8,7 +8,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from dateutil.parser import parse
 
 from .client_db import TimetableDBClient
-from .client_s3 import TimetableS3Client, filter_avl_list
+from .client_s3 import TimetableS3Client
 from .matcher.handle_stop_history import clean_stop_history
 from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import match_avl_batch
@@ -59,14 +59,15 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
         logger.append_keys(historic=False)
         logger.info("Processing live record")
 
-        fname = rec.message_attributes["key"].string_value
+        # Keys look something like this AVL/Processed/YYYY=2025/MM=02/DD=12/HH=15/avl_20250212150603.gz
+        avl_file_key = rec.message_attributes["key"].string_value
         batch_id = int(rec.message_attributes["batch_id"].string_value)
         shard_no = rec.message_attributes["shard"].string_value
 
         try:
             # Check if avl file coming in order
-            avl_time_val = int(fname[-17:-3])
-            avl_datetime = parse(str(avl_time_val))
+            avl_time_val = avl_file_key[-17:-3]
+            avl_datetime = parse(avl_time_val)
             logger.append_keys(avl_time=avl_time_val, avl_datetime=avl_datetime)
 
             shard_stop_history = s3_client.get_stop_history(shard_no)
@@ -76,8 +77,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
                 avl_datetime,
             )
 
-            avl_list = s3_client.get_avl_data(fname)
-            avl_list = list(filter_avl_list(shard_no, avl_list))
+            avl_list = s3_client.get_avl_data(avl_file_key, shard_no)
             validate_avl_list(avl_list, batch_id)
 
             to_set, to_remove, stop_history = match_avl_batch(
