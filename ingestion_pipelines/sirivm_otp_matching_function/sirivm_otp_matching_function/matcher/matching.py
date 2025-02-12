@@ -67,17 +67,23 @@ def create_potential_match(
 def distance_from_stop(avl: AVLRecord, stop: Stop) -> float:
     """Calculate the distance in meters between an avl and a stop"""
     # convert decimal degrees to radians
-    lat1, lon1 = float(avl["latitude"]), float(avl["longitude"])
-    lat2, lon2 = stop_latitude(stop), stop_longitude(stop)
+    vehicle_lat, vehicle_lon = float(avl["latitude"]), float(avl["longitude"])
+    stop_lat, stop_lon = stop_latitude(stop), stop_longitude(stop)
 
-    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    vehicle_lon, vehicle_lat, stop_lon, stop_lat = map(
+        radians,
+        [vehicle_lon, vehicle_lat, stop_lon, stop_lat],
+    )
 
     # haversine formula
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-    c = 2 * asin(sqrt(a))
-    return c * RADIUS_OF_EARTH_IN_METERS
+    latitude_delta = stop_lat - vehicle_lat
+    longitude_delta = stop_lon - vehicle_lon
+    half_chord_squared = (
+        sin(latitude_delta / 2) ** 2
+        + cos(vehicle_lat) * cos(stop_lat) * sin(longitude_delta / 2) ** 2
+    )
+    angular_distance = 2 * asin(sqrt(half_chord_squared))
+    return angular_distance * RADIUS_OF_EARTH_IN_METERS
 
 
 def get_lowest_matched_stop_index(route_history: RouteHistory) -> int:
