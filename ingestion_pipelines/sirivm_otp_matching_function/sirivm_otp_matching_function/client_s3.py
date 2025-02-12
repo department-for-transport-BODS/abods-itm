@@ -4,9 +4,11 @@ import codecs
 import csv
 import gzip
 import hashlib
+import itertools
 import json
 import os
 from collections.abc import Generator, Sequence
+from typing import Any
 
 import boto3
 from aws_lambda_powertools import Logger
@@ -48,6 +50,19 @@ def _filter_avl_list(
             continue
 
         yield avl
+
+
+def _parse_avl_csv_row(row: Any) -> LiveAVLRecord:  # noqa: ANN401 - need to determine the actual type
+    return dict(
+        zip(
+            avl_keys,
+            itertools.starmap(
+                lambda f, x: f(x),
+                zip(avl_parsers, row, strict=True),
+            ),
+            strict=True,
+        ),
+    )
 
 
 class TimetableS3Client:
@@ -114,14 +129,7 @@ class TimetableS3Client:
             utf8_stream_reader(uncompressed_stream) as decoded_stream,
         ):
             reader = csv.reader(decoded_stream)
-            for row in reader:
-                avl_record: LiveAVLRecord = {
-                    key: parser(row[idx])
-                    for idx, (key, parser) in enumerate(
-                        zip(avl_keys, avl_parsers, strict=True),
-                    )
-                }
-                yield avl_record
+            yield from map(_parse_avl_csv_row, reader)
 
     @timer(logger)
     def export_stop_history(self, stop_history: StopHistory, shard_no: str) -> None:
