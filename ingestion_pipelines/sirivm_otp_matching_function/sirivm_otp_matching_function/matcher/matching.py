@@ -1011,7 +1011,7 @@ def match_avl(
         return [], [], stop_history
 
     if last_avl_time > current_avl_time:
-        logger.warning(
+        logger.debug(
             "Out of order avl matching. Probably from a second vehicle",
             last_avl_time=last_avl_time,
             current_avl_time=current_avl_time,
