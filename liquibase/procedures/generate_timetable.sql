@@ -694,19 +694,7 @@ begin
               line_name,
               journey_code,
               date_of_journey AS date_of_journey,
-              CAST(
-                CONCAT(
-                  (
-                    CASE WHEN departure_day_shift IS TRUE
-                          AND departure_time::TIME <= ''12:00:00''
-                      THEN (date_of_journey + INTERVAL ''1'' DAY)::DATE
-                      ELSE date_of_journey
-                    END
-                  )::TEXT,
-                  '' '',
-                  departure_time::TEXT
-                ) AS TIMESTAMP
-              ) AT TIME ZONE ''EUROPE/LONDON'' AS departure_time,
+			  departure_time,
               stop_id,
               ST_Y(b.location)::real lt,
               ST_X(b.location)::real AS lon,
@@ -735,11 +723,18 @@ begin
               transmodel_vehiclejourney_id AS vehiclejourney_id,
               b.admin_area_id,
               direction,
-              departure_day_shift
+              departure_day_shift,
+	      FIRST_VALUE(departure_time) OVER w AS first_departure,
+  	      LAST_VALUE(departure_time) OVER w AS last_departure
             FROM
               public.%I a
               JOIN public.naptan_stoppoint b
-                ON a.stop_id = b.id::text;
+                ON a.stop_id = b.id::text
+				WINDOW w AS (
+                	PARTITION BY transmodel_vehiclejourney_id
+                	ORDER BY
+                  	stop_index RANGE BETWEEN UNBOUNDED PRECEDING
+                  	AND UNBOUNDED following);
 	        ',
             concat('timetable_stop', timetable_suffix),
             concat('timetable_journey', timetable_suffix)
@@ -771,7 +766,24 @@ begin
               lt AS stop_latitude,
               lon AS stop_longitude,
               locality_id,
-              departure_time AS expected_departure_time,
+              CAST(
+                CONCAT(
+                  (
+                    CASE WHEN departure_day_shift IS TRUE
+                          AND departure_time::TIME <= ''12:00:00''
+                      THEN (date_of_journey + INTERVAL ''1'' DAY)::DATE
+                    	 WHEN last_departure::TIME < first_departure::TIME
+                    	AND departure_time::TIME <= ''12:00:00''
+			AND last_departure::TIME <= ''02:00:00''
+			AND first_departure::TIME >= ''22:00:00''
+                      THEN (date_of_journey + INTERVAL ''1'' DAY)::DATE
+                      ELSE date_of_journey
+                    END
+                  )::TEXT,
+                  '' '',
+                  departure_time::TEXT
+                ) AS TIMESTAMP
+              ) AT TIME ZONE ''EUROPE/LONDON'' AS expected_departure_time,
               is_timing_point,
               LOWER(group_id) AS group_id,
               NULL AS otp_state,
