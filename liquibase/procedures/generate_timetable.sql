@@ -694,7 +694,7 @@ begin
               line_name,
               journey_code,
               date_of_journey AS date_of_journey,
-			  departure_time,
+              departure_time,
               stop_id,
               ST_Y(b.location)::real lt,
               ST_X(b.location)::real AS lon,
@@ -724,17 +724,19 @@ begin
               b.admin_area_id,
               direction,
               departure_day_shift,
-	      FIRST_VALUE(departure_time) OVER w AS first_departure,
-  	      LAST_VALUE(departure_time) OVER w AS last_departure
+              -- We use these in the next query to help calculate the right date to put in the expected_departure_time
+              -- because the raw data only sets departure_day_shift to true if the first stop departure is after midnight
+              FIRST_VALUE(departure_time) OVER w AS first_departure,
+              LAST_VALUE(departure_time) OVER w AS last_departure
             FROM
               public.%I a
               JOIN public.naptan_stoppoint b
                 ON a.stop_id = b.id::text
-				WINDOW w AS (
-                	PARTITION BY transmodel_vehiclejourney_id
-                	ORDER BY
-                  	stop_index RANGE BETWEEN UNBOUNDED PRECEDING
-                  	AND UNBOUNDED following);
+              WINDOW w AS (
+                PARTITION BY transmodel_vehiclejourney_id
+                ORDER BY
+                  stop_index RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+              );
 	        ',
             concat('timetable_stop', timetable_suffix),
             concat('timetable_journey', timetable_suffix)
@@ -772,13 +774,12 @@ begin
                     CASE WHEN departure_day_shift IS TRUE
                           AND departure_time::TIME <= ''12:00:00''
                       THEN (date_of_journey + INTERVAL ''1'' DAY)::DATE
-                    	 WHEN last_departure::TIME < first_departure::TIME
-                    	AND departure_time::TIME <= ''12:00:00''
-			AND last_departure::TIME <= ''02:00:00''
-			AND first_departure::TIME >= ''22:00:00''
+                    WHEN last_departure::TIME < first_departure::TIME
+                     AND departure_time::TIME <= ''12:00:00''
+                     AND last_departure::TIME <= ''02:00:00''
+                     AND first_departure::TIME >= ''22:00:00''
                       THEN (date_of_journey + INTERVAL ''1'' DAY)::DATE
-                      ELSE date_of_journey
-                    END
+                      ELSE date_of_journey END
                   )::TEXT,
                   '' '',
                   departure_time::TEXT
