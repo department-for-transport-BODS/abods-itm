@@ -377,6 +377,6 @@
         <sqlFile path="sql/119-add-is_timing_point-frequent.sql" splitStatements="false"/>
     </changeSet>
     <changeSet id="120" author="abodsuser">
-        <sqlFile path="sql/120-incomplete-estimated-and-add-cron.sql" splitStatements="false"/>
+        <sqlFile path="sql/120-update-cron-job-to-include-incomplete-data-load.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
