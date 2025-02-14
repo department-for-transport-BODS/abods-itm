@@ -383,14 +383,16 @@ def main():
         print("Will export timetable data for the following dates:")
         print(";".join(d.isoformat() for d in timetable_export_needed))
 
-    regenerate_timetables = (
-        input("Should timetable data be re-generated before export? (yes/NO)")
-        .lower()
-        .strip()
-        == "yes"
-    )
-    if regenerate_timetables:
-        print("Will regenerate timetables")
+    regenerate_timetables = False
+    if timetable_export_needed or avl_export_needed:
+        regenerate_timetables = (
+            input("Should timetable data be re-generated before export? (yes/NO)")
+            .lower()
+            .strip()
+            == "yes"
+        )
+        if regenerate_timetables:
+            print("Will regenerate timetables")
 
     db_password = get_db_password(environment)
 
