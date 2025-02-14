@@ -379,4 +379,7 @@
     <changeSet id="120" author="abodsuser">
         <sqlFile path="sql/120-update-cron-job-to-include-incomplete-data-load.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="121" author="abodsuser">
+        <sqlFile path="sql/121-remove-unused-corridors-columns.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
