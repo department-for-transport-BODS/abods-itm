@@ -373,8 +373,10 @@
     <changeSet id="118" author="abodsuser">
         <sqlFile path="sql/118-add-incomplete-reason-column.sql" splitStatements="false"/>
     </changeSet>
-        
     <changeSet id="119" author="abodsuser">
         <sqlFile path="sql/119-add-is_timing_point-frequent.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="120" author="abodsuser">
+        <sqlFile path="sql/120-update-cron-job-to-include-incomplete-data-load.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
