@@ -774,8 +774,12 @@ begin
                     CASE WHEN departure_day_shift IS TRUE
                           AND departure_time::TIME <= ''12:00:00''
                       THEN (date_of_journey + INTERVAL ''1'' DAY)::DATE
+                    -- Handling journeys that run over midnight
                     WHEN last_departure::TIME < first_departure::TIME
-                     AND departure_time::TIME <= ''12:00:00''
+                     -- There are some dq issues that get caught up in the first clause.
+                     -- We can minimise that with the assumption that no journey:
+                     -- a. starts before 22:00 and continues past midnight
+                     -- b. starts before midnight and ends after 02:00
                      AND last_departure::TIME <= ''02:00:00''
                      AND first_departure::TIME >= ''22:00:00''
                       THEN (date_of_journey + INTERVAL ''1'' DAY)::DATE
