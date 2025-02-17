@@ -30,23 +30,17 @@ for shard, operators in shards.items():
         shard_lookup[operator] = shard
 
 
-def to_str_or_empty(obj: Any) -> str:  # noqa:ANN401 - sometimes any is valid
-    if not obj:
-        return ""
-    return str(obj)
-
-
 # Live avl files contain more records than we need, and the ordering is important so defined here to be explicit
 live_avl_column_parsers = {
     "recorded_at_time": str,
     "response_timestamp": str,
     "latitude": float,
     "longitude": float,
-    "line_name": to_str_or_empty,
+    "line_name": str,
     "operator_ref": str,
     "vehicle_ref": str,
     "journey_ref": str,
-    "direction_ref": to_str_or_empty,
+    "direction_ref": str,
     "date_of_journey": str,
     "batch_id": int,
 }
