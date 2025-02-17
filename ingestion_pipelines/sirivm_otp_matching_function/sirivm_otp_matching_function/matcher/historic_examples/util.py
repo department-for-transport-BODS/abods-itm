@@ -5,7 +5,7 @@ import pathlib
 from collections.abc import Iterable, Sequence
 from unittest import mock
 
-from ...client_s3 import live_avl_column_parsers, parse_live_avl_row
+from ...client_s3 import parse_live_avl_row
 from ..live_timetable_store import LiveTimetableStore
 from ..matching import match_group_id_avls
 from ..models import LiveAVLRecord, NewDbMatch

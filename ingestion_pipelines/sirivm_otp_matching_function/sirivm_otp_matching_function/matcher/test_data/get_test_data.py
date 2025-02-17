@@ -5,7 +5,7 @@ import json
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 
-from ...client_s3 import live_avl_column_parsers, parse_live_avl_row
+from ...client_s3 import parse_live_avl_row
 from ..models import AVLRecord, LiveAVLRecord, Timetable
 
 test_data_dir = Path(__file__).parent

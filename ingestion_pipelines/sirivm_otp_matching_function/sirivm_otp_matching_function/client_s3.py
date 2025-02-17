@@ -48,10 +48,11 @@ avl_file_transforms = [
     GzipTransform(),
     CsvTransform(fieldnames=list(live_avl_column_parsers)),
 ]
-def parse_live_avl_row(row: dict[str, str]):
+
+
+def parse_live_avl_row(row: dict[str, str]) -> LiveAVLRecord:
     return {
-        key: live_avl_column_parsers[key](row[key])
-        for key in live_avl_column_parsers
+        key: live_avl_column_parsers[key](row[key]) for key in live_avl_column_parsers
     }
 
 
