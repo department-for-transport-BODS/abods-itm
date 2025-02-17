@@ -6,7 +6,6 @@ from ..util import run_historic_matching_test
 
 matches = [
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "1",
         "time_difference": 47.0,
         "last_time_in_zone_str": "15:30:47",
@@ -25,7 +24,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "2",
         "time_difference": 113.0,
         "last_time_in_zone_str": "15:33:37",
@@ -44,7 +42,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "3",
         "time_difference": 142.0,
         "last_time_in_zone_str": "15:35:22",
@@ -63,7 +60,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "4",
         "time_difference": 129.0,
         "last_time_in_zone_str": None,
@@ -82,7 +78,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "5",
         "time_difference": 111.0,
         "last_time_in_zone_str": "15:35:57",
@@ -101,7 +96,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "6",
         "time_difference": 111.0,
         "last_time_in_zone_str": None,
@@ -120,7 +114,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "7",
         "time_difference": 130.0,
         "last_time_in_zone_str": "15:37:23",
@@ -139,7 +132,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "8",
         "time_difference": 137.0,
         "last_time_in_zone_str": None,
@@ -158,7 +150,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "10",
         "time_difference": 137.0,
         "last_time_in_zone_str": None,
@@ -177,7 +168,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "11",
         "time_difference": 171.0,
         "last_time_in_zone_str": None,
@@ -196,7 +186,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "12",
         "time_difference": 128.0,
         "last_time_in_zone_str": None,
@@ -215,7 +204,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "13",
         "time_difference": 101.0,
         "last_time_in_zone_str": None,
@@ -234,7 +222,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "14",
         "time_difference": 102.0,
         "last_time_in_zone_str": None,
@@ -253,7 +240,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "15",
         "time_difference": 114.0,
         "last_time_in_zone_str": None,
@@ -272,7 +258,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "16",
         "time_difference": 119.0,
         "last_time_in_zone_str": None,
@@ -291,7 +276,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "17",
         "time_difference": 41.0,
         "last_time_in_zone_str": None,
@@ -310,7 +294,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "18",
         "time_difference": -17.0,
         "last_time_in_zone_str": "15:48:43",
@@ -329,7 +312,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "19",
         "time_difference": 22.0,
         "last_time_in_zone_str": "15:49:43",
@@ -348,7 +330,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "24",
         "time_difference": -65.0,
         "last_time_in_zone_str": "15:59:01",
@@ -367,7 +348,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "25",
         "time_difference": -41.0,
         "last_time_in_zone_str": "16:00:39",
@@ -386,7 +366,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "26",
         "time_difference": 22.0,
         "last_time_in_zone_str": "16:02:22",
@@ -405,7 +384,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "27",
         "time_difference": 26.0,
         "last_time_in_zone_str": None,
@@ -424,7 +402,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "28",
         "time_difference": 16.0,
         "last_time_in_zone_str": None,
@@ -443,7 +420,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "29",
         "time_difference": 1.0,
         "last_time_in_zone_str": "16:04:06",
@@ -462,7 +438,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "coac|41|1630|2024-10-17",
         "stop_index": "34",
         "time_difference": -99.0,
         "last_time_in_zone_str": "16:07:21",

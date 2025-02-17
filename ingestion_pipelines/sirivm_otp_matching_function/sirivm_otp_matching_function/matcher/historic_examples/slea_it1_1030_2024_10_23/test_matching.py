@@ -6,7 +6,6 @@ from ..util import run_historic_matching_test
 
 matches = [
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "1",
         "time_difference": -55.0,
         "last_time_in_zone_str": "09:29:05",
@@ -25,7 +24,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "2",
         "time_difference": -13.0,
         "last_time_in_zone_str": "09:31:47",
@@ -44,7 +42,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "3",
         "time_difference": -59.0,
         "last_time_in_zone_str": "09:32:01",
@@ -63,7 +60,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "4",
         "time_difference": -3.0,
         "last_time_in_zone_str": "09:32:57",
@@ -82,7 +78,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "5",
         "time_difference": -95.0,
         "last_time_in_zone_str": "09:33:25",
@@ -101,7 +96,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "6",
         "time_difference": -63.0,
         "last_time_in_zone_str": "09:33:57",
@@ -120,7 +114,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "7",
         "time_difference": -67.0,
         "last_time_in_zone_str": "09:34:53",
@@ -139,7 +132,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "8",
         "time_difference": 57.0,
         "last_time_in_zone_str": "09:37:57",
@@ -158,7 +150,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "9",
         "time_difference": 4.0,
         "last_time_in_zone_str": "09:38:04",
@@ -177,7 +168,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "10",
         "time_difference": 7.0,
         "last_time_in_zone_str": "09:39:07",
@@ -196,7 +186,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "11",
         "time_difference": 67.0,
         "last_time_in_zone_str": "09:40:07",
@@ -215,7 +204,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "12",
         "time_difference": 35.0,
         "last_time_in_zone_str": "09:40:35",
@@ -234,7 +222,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "13",
         "time_difference": 77.0,
         "last_time_in_zone_str": "09:41:17",
@@ -253,7 +240,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "14",
         "time_difference": 67.0,
         "last_time_in_zone_str": "09:42:07",
@@ -272,7 +258,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "15",
         "time_difference": 75.0,
         "last_time_in_zone_str": "09:42:15",
@@ -291,7 +276,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "16",
         "time_difference": -1.0,
         "last_time_in_zone_str": "09:42:59",
@@ -310,7 +294,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "17",
         "time_difference": 115.0,
         "last_time_in_zone_str": "09:44:55",
@@ -329,7 +312,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "18",
         "time_difference": 87.0,
         "last_time_in_zone_str": "09:45:27",
@@ -348,7 +330,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "19",
         "time_difference": 103.0,
         "last_time_in_zone_str": "09:46:43",
@@ -367,7 +348,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "20",
         "time_difference": 123.0,
         "last_time_in_zone_str": "09:48:03",
@@ -386,7 +366,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "21",
         "time_difference": 135.0,
         "last_time_in_zone_str": "09:49:15",
@@ -405,7 +384,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "22",
         "time_difference": 185.0,
         "last_time_in_zone_str": "09:50:05",
@@ -424,7 +402,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "23",
         "time_difference": 157.0,
         "last_time_in_zone_str": "09:50:37",
@@ -443,7 +420,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "24",
         "time_difference": 197.0,
         "last_time_in_zone_str": "09:51:17",
@@ -462,7 +438,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "25",
         "time_difference": 217.0,
         "last_time_in_zone_str": "09:51:37",
@@ -481,7 +456,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "26",
         "time_difference": 159.0,
         "last_time_in_zone_str": "09:52:39",
@@ -500,7 +474,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "27",
         "time_difference": 193.0,
         "last_time_in_zone_str": "09:53:13",
@@ -519,7 +492,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "28",
         "time_difference": 199.0,
         "last_time_in_zone_str": "09:54:19",
@@ -538,7 +510,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "29",
         "time_difference": 267.0,
         "last_time_in_zone_str": "09:55:27",
@@ -557,7 +528,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "30",
         "time_difference": 245.0,
         "last_time_in_zone_str": "09:56:05",
@@ -576,7 +546,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "31",
         "time_difference": 197.0,
         "last_time_in_zone_str": "09:56:17",
@@ -595,7 +564,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "34",
         "time_difference": 61.0,
         "last_time_in_zone_str": "09:57:01",
@@ -614,7 +582,6 @@ matches = [
         "stop_type": "final",
     },
     {
-        "group_id": "slea|it1|1030|2024-10-23",
         "stop_index": "32",
         "time_difference": 229.0,
         "last_time_in_zone_str": "09:56:49",
