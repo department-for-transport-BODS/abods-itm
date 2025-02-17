@@ -49,12 +49,12 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
         # sirivm_timetable_s3_generation_function sends this message when done refreshing the extract
         if rec.message_attributes["key"].string_value == "timetable":
             logger.info("Updating main timetable")
-            _cache["main_timetable"] = s3_client.download_main_timetable()
+            _cache["main_timetable"] = s3_client.get_timetable_extract()
             continue
 
         if "main_timetable" not in _cache:
             logger.info("Fetching main timetable")
-            _cache["main_timetable"] = s3_client.download_main_timetable()
+            _cache["main_timetable"] = s3_client.get_timetable_extract()
 
         logger.append_keys(historic=False)
         logger.info("Processing live record")

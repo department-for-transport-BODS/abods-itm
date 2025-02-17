@@ -81,11 +81,20 @@ class TimetableS3Client:
         self.bucket = os.environ["SIRIVM_BUCKET"]
         logger.append_keys(s3_bucket=self.bucket)
 
-    def _get_from_s3(self, key: str) -> StreamingBody:
-        """Get streaming data from S3"""
+    def _get_from_s3(self, key: str) -> Any:  # noqa: ANN401 - Any is correct here, callers should determine actual type
+        """Get data from S3"""
         try:
             logger.info("Fetching data from S3", s3_key=key)
-            return self.client.get_object(Bucket=self.bucket, Key=key)["Body"]
+            content = (
+                self.client.get_object(Bucket=self.bucket, Key=key).get("Body").read()
+            )
+            size = round(len(content) / 1024, 2)
+            logger.info(
+                "Successfully fetched data from S3",
+                s3_key=key,
+                size_kb=size,
+            )
+            return json.loads(content)
         except ClientError as e:
             error_code = e.response["Error"]["Code"]
             logger.exception(
@@ -95,20 +104,20 @@ class TimetableS3Client:
             )
             raise
 
-    def download_main_timetable(self) -> Timetable:
+    def get_timetable_extract(self) -> Timetable:
         """Download Main Timetable Data"""
-        return json.load(self._get_from_s3("timetable/timetable.json"))
+        return self._get_from_s3("timetable/timetable.json")
 
     @timer(logger)
     def get_stop_history(self, shard_no: str) -> StopHistory:
         """Get Stop History"""
-        s3_key = stop_history_key(shard_no)
-        logger.info("Fetching Stop History", s3_key=s3_key)
+        key = stop_history_key(shard_no)
+        logger.info("Fetching Stop History", s3_key=key)
         try:
-            stop_history = json.load(self._get_from_s3(s3_key))
+            stop_history = self._get_from_s3(key)
         except ClientError as ex:
             if ex.response.get("Error", {}).get("Code", None) == "NoSuchKey":
-                logger.info("Stop History Not Found, Returning Empty Dict", key=s3_key)
+                logger.info("Stop History Not Found, Returning Empty Dict", key=key)
                 return {}
             raise
         else:
