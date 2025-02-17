@@ -52,37 +52,69 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
             now = datetime.now()
             cur.execute(
                 """
-                WITH partitions AS (
-                   SELECT (now() AT TIME ZONE 'EUROPE/LONDON' + interval '%s' MINUTE)::date AS date UNION
-                   SELECT (now() AT TIME ZONE 'EUROPE/LONDON')::date AS date UNION
-                   SELECT (now() AT TIME ZONE 'EUROPE/LONDON' - interval '%s' MINUTE)::date AS date
-                )
-                WITH my_groups AS
-                  (SELECT DISTINCT vehiclejourney_id
-                   FROM public."Timetable"
-                   WHERE date_of_journey IN (SELECT DISTINCT date FROM partitions)
-                     AND expected_departure_time BETWEEN
-                       current_timestamp(0) - interval '%s' MINUTE AND
-                       current_timestamp(0) + interval '%s' MINUTE)
-                SELECT t.group_id,
-                       row_number() OVER (PARTITION BY t.vehiclejourney_id
-                                          ORDER BY t.group_id,
-                                                   t.expected_departure_time ASC,
-                                                   t.stop_index ASC) AS stop_index,
-                       t.stop_latitude,
-                       t.stop_longitude,
-                       t.expected_departure_time::TIME AS expected_departure_time,
-                       t.timetable_id,
-                       t.date_of_journey,
-                       t.direction
-                FROM public."Timetable" t
-                WHERE t.date_of_journey IN (SELECT DISTINCT date FROM partitions)
-                  AND t.vehiclejourney_id IN
-                    (SELECT vehiclejourney_id
-                     FROM my_groups)
-                ORDER BY t.group_id,
-                         t.expected_departure_time ASC,
-                         t.stop_index ASC;
+                    WITH partitions AS (
+                      SELECT
+                        (
+                          now() AT TIME ZONE 'EUROPE/LONDON' + interval '%s' MINUTE
+                        )::date AS date
+                      UNION
+                      SELECT
+                        (now() AT TIME ZONE 'EUROPE/LONDON')::date AS date
+                      UNION
+                      SELECT
+                        (
+                          now() AT TIME ZONE 'EUROPE/LONDON' - interval '%s' MINUTE
+                        )::date AS date
+                    ),
+                    my_groups AS (
+                      SELECT
+                        DISTINCT vehiclejourney_id
+                      FROM
+                        public."Timetable"
+                      WHERE
+                        date_of_journey IN (
+                          SELECT
+                            DISTINCT date
+                          FROM
+                            partitions
+                        )
+                        AND expected_departure_time BETWEEN current_timestamp(0) - interval '%s' MINUTE
+                        AND current_timestamp(0) + interval '%s' MINUTE
+                    )
+                    SELECT
+                      t.group_id,
+                      row_number() OVER (
+                        PARTITION BY t.vehiclejourney_id
+                        ORDER BY
+                          t.group_id,
+                          t.expected_departure_time,
+                          t.stop_index
+                      ) AS stop_index,
+                      t.stop_latitude,
+                      t.stop_longitude,
+                      t.expected_departure_time::TIME AS expected_departure_time,
+                      t.timetable_id,
+                      t.date_of_journey,
+                      t.direction
+                    FROM
+                      public."Timetable" t
+                    WHERE
+                      t.date_of_journey IN (
+                        SELECT
+                          DISTINCT date
+                        FROM
+                          partitions
+                      )
+                      AND t.vehiclejourney_id IN (
+                        SELECT
+                          vehiclejourney_id
+                        FROM
+                          my_groups
+                      )
+                    ORDER BY
+                      t.group_id,
+                      t.expected_departure_time,
+                      t.stop_index;
                 """,
                 [
                     interval_time,
