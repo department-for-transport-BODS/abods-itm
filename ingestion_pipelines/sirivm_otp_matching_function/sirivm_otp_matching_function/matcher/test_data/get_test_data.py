@@ -5,7 +5,8 @@ import json
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 
-from ..models import AVLRecord, LiveAVLRecord, Timetable, live_avl_column_parsers
+from ...client_s3 import live_avl_column_parsers
+from ..models import AVLRecord, LiveAVLRecord, Timetable
 
 test_data_dir = Path(__file__).parent
 
@@ -15,11 +16,12 @@ def parse_test_avl_file(
     stream: Iterable[str],
 ) -> Iterable[LiveAVLRecord]:
     """Parse live avl csv data into LiveAVLRecord dicts"""
-    for row in csv.DictReader(
-        stream,
-    ):
+    for row in csv.DictReader(stream):
         for key, val in row.items():
-            row[key] = live_avl_column_parsers.get(key, str)(val)
+            parser = live_avl_column_parsers.get(key)
+            if not parser:
+                continue
+            row[key] = parser(val)
         yield row
 
 

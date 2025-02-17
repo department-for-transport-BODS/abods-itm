@@ -1,15 +1,18 @@
 """Fetching and Uploading Data into S3"""
 
-import codecs
-import csv
-import gzip
 import hashlib
 import json
 import os
 from collections.abc import Iterable, Sequence
+from typing import Any
 
 import boto3
 from aws_lambda_powertools import Logger
+from aws_lambda_powertools.utilities.streaming.s3_object import S3Object
+from aws_lambda_powertools.utilities.streaming.transformations import (
+    CsvTransform,
+    GzipTransform,
+)
 from botocore.exceptions import ClientError
 from botocore.response import StreamingBody
 
@@ -17,19 +20,38 @@ from .matcher.models import (
     LiveAVLRecord,
     StopHistory,
     Timetable,
-    live_avl_column_parsers,
 )
 from .matcher.utils import timer
 from .shards import shards
 
 logger = Logger()
-utf8_stream_reader = codecs.getreader("utf-8")
-avl_keys = list(live_avl_column_parsers.keys())
-avl_parsers = [live_avl_column_parsers[key] for key in avl_keys]
 shard_lookup: dict[str, str] = {}
 for shard, operators in shards.items():
     for operator in operators:
         shard_lookup[operator] = shard
+
+
+def to_str_or_empty(obj: Any) -> str:  # noqa:ANN401 - sometimes any is valid
+    if not obj:
+        return ""
+    return str(obj)
+
+
+# Live avl files contain more records than we need, and the ordering is important so defined here to be explicit
+live_avl_column_parsers = {
+    "recorded_at_time": str,
+    "response_timestamp": str,
+    "latitude": float,
+    "longitude": float,
+    "line_name": to_str_or_empty,
+    "operator_ref": str,
+    "vehicle_ref": str,
+    "journey_ref": str,
+    "direction_ref": to_str_or_empty,
+    "date_of_journey": str,
+    "batch_id": int,
+}
+avl_column_names = list(live_avl_column_parsers)
 
 
 def _filter_avl_list(
@@ -108,20 +130,19 @@ class TimetableS3Client:
 
     def _get_all_avl_data(self, filename: str) -> Iterable[LiveAVLRecord]:
         logger.info("Getting AVL Data", path=filename)
-        s3_data_stream = self._get_from_s3(filename)
-        with (
-            gzip.GzipFile(fileobj=s3_data_stream) as uncompressed_stream,
-            utf8_stream_reader(uncompressed_stream) as decoded_stream,
+        obj = S3Object(bucket=self.bucket, key=filename, boto3_client=self.client)
+        for row in obj.transform(
+            [
+                GzipTransform(),
+                CsvTransform(fieldnames=avl_column_names),
+            ],
         ):
-            reader = csv.reader(decoded_stream)
-            for row in reader:
-                avl_record: LiveAVLRecord = {
-                    key: parser(row[idx])
-                    for idx, (key, parser) in enumerate(
-                        zip(avl_keys, avl_parsers, strict=True),
-                    )
-                }
-                yield avl_record
+            for key, val in row.items():
+                parser = live_avl_column_parsers.get(key)
+                if not parser:
+                    continue
+                row[key] = parser(val)
+            yield row
 
     @timer(logger)
     def export_stop_history(self, stop_history: StopHistory, shard_no: str) -> None:
