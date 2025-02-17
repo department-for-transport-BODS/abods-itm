@@ -5,24 +5,18 @@ import pathlib
 from collections.abc import Iterable, Sequence
 from unittest import mock
 
-from ...client_s3 import live_avl_column_parsers
+from ...client_s3 import live_avl_column_parsers, parse_live_avl_row
 from ..live_timetable_store import LiveTimetableStore
 from ..matching import match_group_id_avls
 from ..models import LiveAVLRecord, NewDbMatch
 
 
-# Using a different function to the live workload, so that we can tolerate extra columns
 def parse_test_avl_file(
     stream: Iterable[str],
 ) -> Iterable[LiveAVLRecord]:
     """Parse live avl csv data into LiveAVLRecord dicts"""
     for row in csv.DictReader(stream):
-        for key, val in row.items():
-            parser = live_avl_column_parsers.get(key)
-            if not parser:
-                continue
-            row[key] = parser(val)
-        yield row
+        yield parse_live_avl_row(row)
 
 
 def run_historic_matching_test(

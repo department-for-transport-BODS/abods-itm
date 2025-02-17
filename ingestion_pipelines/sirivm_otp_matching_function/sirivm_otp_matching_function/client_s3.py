@@ -14,7 +14,6 @@ from aws_lambda_powertools.utilities.streaming.transformations import (
     GzipTransform,
 )
 from botocore.exceptions import ClientError
-from botocore.response import StreamingBody
 
 from .matcher.models import (
     LiveAVLRecord,
@@ -51,7 +50,15 @@ live_avl_column_parsers = {
     "date_of_journey": str,
     "batch_id": int,
 }
-avl_column_names = list(live_avl_column_parsers)
+avl_file_transforms = [
+    GzipTransform(),
+    CsvTransform(fieldnames=list(live_avl_column_parsers)),
+]
+def parse_live_avl_row(row: dict[str, str]):
+    return {
+        key: live_avl_column_parsers[key](row[key])
+        for key in live_avl_column_parsers
+    }
 
 
 def _filter_avl_list(
@@ -140,18 +147,8 @@ class TimetableS3Client:
     def _get_all_avl_data(self, filename: str) -> Iterable[LiveAVLRecord]:
         logger.info("Getting AVL Data", path=filename)
         obj = S3Object(bucket=self.bucket, key=filename, boto3_client=self.client)
-        for row in obj.transform(
-            [
-                GzipTransform(),
-                CsvTransform(fieldnames=avl_column_names),
-            ],
-        ):
-            for key, val in row.items():
-                parser = live_avl_column_parsers.get(key)
-                if not parser:
-                    continue
-                row[key] = parser(val)
-            yield row
+        for row in obj.transform(avl_file_transforms):
+            yield parse_live_avl_row(row)
 
     @timer(logger)
     def export_stop_history(self, stop_history: StopHistory, shard_no: str) -> None:
@@ -170,7 +167,7 @@ class TimetableS3Client:
             )
             logger.info("S3 upload successful", path=s3_key)
         except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_code = e.response["Error"]["Code"]
             logger.exception(
                 "S3 upload failed",
                 path=s3_key,
