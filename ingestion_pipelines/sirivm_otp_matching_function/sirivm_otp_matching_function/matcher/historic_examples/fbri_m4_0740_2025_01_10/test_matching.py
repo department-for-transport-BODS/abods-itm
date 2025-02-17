@@ -6,7 +6,6 @@ from ..util import run_historic_matching_test
 
 matches = [
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "1",
         "time_difference": 41.0,
         "last_time_in_zone_str": "07:40:41",
@@ -25,7 +24,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "1",
         "time_difference": 46.0,
         "last_time_in_zone_str": "07:40:46",
@@ -44,7 +42,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "2",
         "time_difference": 61.0,
         "last_time_in_zone_str": "07:43:01",
@@ -63,7 +60,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "3",
         "time_difference": 166.0,
         "last_time_in_zone_str": "07:46:46",
@@ -82,7 +78,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "2",
         "time_difference": 88.0,
         "last_time_in_zone_str": "07:48:28",
@@ -101,7 +96,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "3",
         "time_difference": 52.0,
         "last_time_in_zone_str": "07:49:52",
@@ -120,7 +114,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "4",
         "time_difference": 24.0,
         "last_time_in_zone_str": "07:52:24",
@@ -139,7 +132,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "4",
         "time_difference": 176.0,
         "last_time_in_zone_str": "07:52:56",
@@ -158,7 +150,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "5",
         "time_difference": 74.0,
         "last_time_in_zone_str": "07:54:14",
@@ -177,7 +168,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "5",
         "time_difference": 144.0,
         "last_time_in_zone_str": "07:54:24",
@@ -196,7 +186,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "6",
         "time_difference": 37.0,
         "last_time_in_zone_str": "07:56:37",
@@ -215,7 +204,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "6",
         "time_difference": 156.0,
         "last_time_in_zone_str": "07:56:36",
@@ -234,7 +222,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "7",
         "time_difference": 184.0,
         "last_time_in_zone_str": "07:58:04",
@@ -253,7 +240,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "7",
         "time_difference": 22.0,
         "last_time_in_zone_str": "08:00:22",
@@ -272,7 +258,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "8",
         "time_difference": 145.0,
         "last_time_in_zone_str": "08:00:25",
@@ -291,7 +276,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "8",
         "time_difference": 18.0,
         "last_time_in_zone_str": "08:03:18",
@@ -310,7 +294,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "9",
         "time_difference": 156.0,
         "last_time_in_zone_str": "08:03:36",
@@ -329,7 +312,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "9",
         "time_difference": 29.0,
         "last_time_in_zone_str": "08:05:29",
@@ -348,7 +330,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "10",
         "time_difference": 148.0,
         "last_time_in_zone_str": "08:06:28",
@@ -367,7 +348,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "10",
         "time_difference": 38.0,
         "last_time_in_zone_str": "08:07:38",
@@ -386,7 +366,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "11",
         "time_difference": 148.0,
         "last_time_in_zone_str": "08:08:28",
@@ -405,7 +384,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "12",
         "time_difference": 176.0,
         "last_time_in_zone_str": "08:09:56",
@@ -424,7 +402,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "11",
         "time_difference": 61.0,
         "last_time_in_zone_str": "08:10:01",
@@ -443,7 +420,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "13",
         "time_difference": 144.0,
         "last_time_in_zone_str": "08:11:24",
@@ -462,7 +438,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "14",
         "time_difference": 13.0,
         "last_time_in_zone_str": "08:19:13",
@@ -481,7 +456,6 @@ matches = [
         "stop_type": "final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "12",
         "time_difference": -21.0,
         "last_time_in_zone_str": "08:19:39",
@@ -500,7 +474,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "13",
         "time_difference": -51.0,
         "last_time_in_zone_str": "08:22:09",
@@ -519,7 +492,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "fbri|m4|0740|2025-01-10",
         "stop_index": "14",
         "time_difference": -43.0,
         "last_time_in_zone_str": "08:25:17",

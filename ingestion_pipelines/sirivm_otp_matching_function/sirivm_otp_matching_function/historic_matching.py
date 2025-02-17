@@ -3,7 +3,7 @@
 
 import os
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from multiprocessing import Process, Queue
 from queue import Empty
 from typing import TYPE_CHECKING
@@ -41,6 +41,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
         "avl_timetable.db",
         config={"access_mode": "READ_ONLY"},
     ) as process_conn:
+        process_date = date.fromisoformat(date_str)
         while True:
             try:
                 operator_ref = task_queue.get(timeout=10)
@@ -220,15 +221,29 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                                 level,
                             )
                         )
-                        logger.debug(journey_matches)
+                        logger.debug(
+                            "Got the following matches",
+                            journey_matches=journey_matches,
+                        )
+
+                        deduplicated_matches = list(
+                            {
+                                match["timetable_id"]: match
+                                for match in journey_matches
+                            }.values(),
+                        )
+                        if len(deduplicated_matches) < len(journey_matches):
+                            logger.debug(
+                                "Found some duplicate matches for the same timetable id. Removed earlier ones",
+                                deduplicated_matches=deduplicated_matches,
+                            )
+
                         routes_processed += processed_routes
                         total_matches += match_count
 
                         db_client.historic_update_success(
-                            None,  # We aren't using avl batches, so we need to skip the batch table update
-                            journey_matches,
-                            [],
-                            date_str,
+                            deduplicated_matches,
+                            process_date,
                             level,
                         )
                 logger.info(
@@ -243,7 +258,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                 logger.exception("An error occurred when processing historic record")
 
 
-if __name__ == "__main__":
+def main() -> None:
     try:
         process_date = os.getenv("PROCESS_DATE")
         if not process_date:
@@ -304,9 +319,14 @@ if __name__ == "__main__":
             with log_execution_time(logger, "get_operators"):
                 for row in conn.query(
                     """
-                        SELECT DISTINCT a.operator_ref
-                        FROM timetable t
-                        INNER JOIN avl a ON lower(concat_ws('|', a.operator_ref, a.line_name, a.journey_ref, a.date_of_journey)) = t.group_id
+                        SELECT sub.operator_ref
+                        FROM (
+                            SELECT a.operator_ref, (SELECT COUNT(*) from timetable t WHERE a.operator_ref = t.operator_noc) as count
+                            FROM avl a
+                            GROUP BY a.operator_ref
+                        ) sub
+                        WHERE sub.count > 0
+                        ORDER BY sub.count DESC
                         """,
                 ).fetchall():
                     operator_queue.put(row[0])
@@ -343,3 +363,7 @@ if __name__ == "__main__":
     except Exception:
         logger.exception("An error occurred")
         sys.exit(2)
+
+
+if __name__ == "__main__":
+    main()

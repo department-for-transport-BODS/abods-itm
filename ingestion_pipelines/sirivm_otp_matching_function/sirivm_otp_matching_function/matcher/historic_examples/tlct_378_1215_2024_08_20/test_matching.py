@@ -6,7 +6,6 @@ from ..util import run_historic_matching_test
 
 matches = [
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "1",
         "time_difference": 802.0,
         "last_time_in_zone_str": "11:28:22",
@@ -25,7 +24,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "2",
         "time_difference": 890.0,
         "last_time_in_zone_str": "11:30:50",
@@ -44,7 +42,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "3",
         "time_difference": 893.0,
         "last_time_in_zone_str": "11:31:53",
@@ -63,7 +60,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "4",
         "time_difference": 860.0,
         "last_time_in_zone_str": "11:32:20",
@@ -82,7 +78,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "5",
         "time_difference": 830.0,
         "last_time_in_zone_str": "11:32:50",
@@ -101,7 +96,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "6",
         "time_difference": 882.0,
         "last_time_in_zone_str": "11:34:42",
@@ -120,7 +114,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "7",
         "time_difference": 925.0,
         "last_time_in_zone_str": "11:35:25",
@@ -139,7 +132,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "8",
         "time_difference": 865.0,
         "last_time_in_zone_str": "11:35:25",
@@ -158,7 +150,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "9",
         "time_difference": 914.0,
         "last_time_in_zone_str": "11:36:14",
@@ -177,7 +168,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "10",
         "time_difference": 947.0,
         "last_time_in_zone_str": "11:36:47",
@@ -196,7 +186,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "11",
         "time_difference": 955.0,
         "last_time_in_zone_str": "11:36:55",
@@ -215,7 +204,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "12",
         "time_difference": 937.0,
         "last_time_in_zone_str": "11:37:37",
@@ -234,7 +222,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "13",
         "time_difference": 937.0,
         "last_time_in_zone_str": "11:37:37",
@@ -253,7 +240,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "15",
         "time_difference": 947.0,
         "last_time_in_zone_str": "11:38:47",
@@ -272,7 +258,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "16",
         "time_difference": 980.0,
         "last_time_in_zone_str": "11:39:20",
@@ -291,7 +276,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "17",
         "time_difference": 969.0,
         "last_time_in_zone_str": None,
@@ -310,7 +294,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "18",
         "time_difference": 1003.0,
         "last_time_in_zone_str": None,
@@ -329,7 +312,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "19",
         "time_difference": 946.0,
         "last_time_in_zone_str": "11:40:46",
@@ -348,7 +330,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "20",
         "time_difference": 952.0,
         "last_time_in_zone_str": "11:41:52",
@@ -367,7 +348,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "21",
         "time_difference": 968.0,
         "last_time_in_zone_str": "11:43:08",
@@ -386,7 +366,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "22",
         "time_difference": 968.0,
         "last_time_in_zone_str": "11:43:08",
@@ -405,7 +384,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "23",
         "time_difference": 934.0,
         "last_time_in_zone_str": None,
@@ -424,7 +402,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "24",
         "time_difference": 944.0,
         "last_time_in_zone_str": "11:43:44",
@@ -443,7 +420,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "25",
         "time_difference": 934.0,
         "last_time_in_zone_str": "11:44:34",
@@ -462,7 +438,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "26",
         "time_difference": 982.0,
         "last_time_in_zone_str": "11:46:22",
@@ -481,7 +456,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "27",
         "time_difference": 945.0,
         "last_time_in_zone_str": "11:46:45",
@@ -500,7 +474,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "28",
         "time_difference": 958.0,
         "last_time_in_zone_str": "11:46:58",
@@ -519,7 +492,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "29",
         "time_difference": 930.0,
         "last_time_in_zone_str": "11:47:30",
@@ -538,7 +510,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "30",
         "time_difference": 919.0,
         "last_time_in_zone_str": "11:48:19",
@@ -557,7 +528,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "31",
         "time_difference": 870.0,
         "last_time_in_zone_str": "11:48:30",
@@ -576,7 +546,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "32",
         "time_difference": 894.0,
         "last_time_in_zone_str": None,
@@ -595,7 +564,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "33",
         "time_difference": 868.0,
         "last_time_in_zone_str": "11:50:28",
@@ -614,7 +582,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "34",
         "time_difference": 935.0,
         "last_time_in_zone_str": "11:51:35",
@@ -633,7 +600,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "35",
         "time_difference": 968.0,
         "last_time_in_zone_str": "11:53:08",
@@ -652,7 +618,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "36",
         "time_difference": 1029.0,
         "last_time_in_zone_str": "11:54:09",
@@ -671,7 +636,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "37",
         "time_difference": 989.0,
         "last_time_in_zone_str": "11:54:29",
@@ -690,7 +654,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "38",
         "time_difference": 1037.0,
         "last_time_in_zone_str": None,
@@ -709,7 +672,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "39",
         "time_difference": 1013.0,
         "last_time_in_zone_str": "11:55:53",
@@ -728,7 +690,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "40",
         "time_difference": 1043.0,
         "last_time_in_zone_str": "11:57:23",
@@ -747,7 +708,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "41",
         "time_difference": 1083.0,
         "last_time_in_zone_str": "11:58:03",
@@ -766,7 +726,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "42",
         "time_difference": 1063.0,
         "last_time_in_zone_str": "11:58:43",
@@ -785,7 +744,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "43",
         "time_difference": 1085.0,
         "last_time_in_zone_str": "11:59:05",
@@ -804,7 +762,6 @@ matches = [
         "stop_type": "Non-final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "45",
         "time_difference": 1077.0,
         "last_time_in_zone_str": "11:59:57",
@@ -823,7 +780,6 @@ matches = [
         "stop_type": "final",
     },
     {
-        "group_id": "tlct|378|1215|2024-08-20",
         "stop_index": "44",
         "time_difference": 1047.0,
         "last_time_in_zone_str": "11:59:27",

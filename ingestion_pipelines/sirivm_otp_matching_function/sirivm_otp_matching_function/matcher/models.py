@@ -84,14 +84,12 @@ class BadDbMatch(TypedDict):
     """Represents a record to be removed from the DB after matching"""
 
     timetable_id: int
-    group_id: str
 
 
 class NewDbMatch(TypedDict):
     """Represents a record to be added to the DB after matching"""
 
     stop_index: str
-    group_id: str
     time_difference: float
     last_time_in_zone_str: str | None
     timetable_id: int
