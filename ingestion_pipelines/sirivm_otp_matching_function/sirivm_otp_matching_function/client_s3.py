@@ -51,9 +51,7 @@ avl_file_transforms = [
 
 
 def parse_live_avl_row(row: dict[str, str]) -> LiveAVLRecord:
-    return {
-        key: live_avl_column_parsers[key](row[key]) for key in live_avl_column_parsers
-    }
+    return {key: parser(row[key]) for key, parser in live_avl_column_parsers.items()}
 
 
 def _filter_avl_list(
