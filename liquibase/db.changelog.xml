@@ -382,4 +382,7 @@
     <changeSet id="121" author="abodsuser">
         <sqlFile path="sql/121-remove-unused-corridors-columns.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="122" author="abodsuser">
+        <sqlFile path="sql/122-fix-cron-jobs.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
