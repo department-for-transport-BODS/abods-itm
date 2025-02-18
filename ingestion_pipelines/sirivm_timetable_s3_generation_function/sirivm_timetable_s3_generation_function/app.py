@@ -50,33 +50,31 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
             interval_time = TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES
             late_running_interval = EXPECTED_LATE_RUNNING_SERVICE_INTERVAL_IN_MINUTES
             now = datetime.now()
+            date_of_journey_offsets = [
+                interval_time,
+                interval_time + late_running_interval,
+            ]
+            departure_time_offsets = [
+                interval_time,
+                interval_time,
+            ]
             cur.execute(
                 """
-                    WITH partitions AS (
-                      SELECT
-                        (
-                          now() AT TIME ZONE 'EUROPE/LONDON' + interval '%s' MINUTE
-                        )::date AS date
-                      UNION
-                      SELECT
-                        (now() AT TIME ZONE 'EUROPE/LONDON')::date AS date
-                      UNION
-                      SELECT
-                        (
-                          now() AT TIME ZONE 'EUROPE/LONDON' - interval '%s' MINUTE
-                        )::date AS date
-                    ),
-                    my_groups AS (
+                    WITH my_groups AS (
                       SELECT
                         DISTINCT vehiclejourney_id
                       FROM
                         public."Timetable"
                       WHERE
-                        date_of_journey IN (
-                          SELECT
-                            DISTINCT date
-                          FROM
-                            partitions
+                         -- date_of_journey clause repeated below, so that query planner can do better partition pruning
+                        (
+                          date_of_journey = (
+                            now() AT TIME ZONE 'EUROPE/LONDON' + interval '%s' MINUTE
+                          )::date
+                          OR date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
+                          OR date_of_journey = (
+                            now() AT TIME ZONE 'EUROPE/LONDON' - interval '%s' MINUTE
+                          )::date
                         )
                         AND expected_departure_time BETWEEN current_timestamp(0) - interval '%s' MINUTE
                         AND current_timestamp(0) + interval '%s' MINUTE
@@ -99,11 +97,15 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
                     FROM
                       public."Timetable" t
                     WHERE
-                      t.date_of_journey IN (
-                        SELECT
-                          DISTINCT date
-                        FROM
-                          partitions
+                      -- date_of_journey clause repeated above, so that query planner can do better partition pruning
+                      (
+                        t.date_of_journey = (
+                          now() AT TIME ZONE 'EUROPE/LONDON' + interval '%s' MINUTE
+                        )::date
+                        OR t.date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
+                        OR t.date_of_journey = (
+                          now() AT TIME ZONE 'EUROPE/LONDON' - interval '%s' MINUTE
+                        )::date
                       )
                       AND t.vehiclejourney_id IN (
                         SELECT
@@ -117,10 +119,9 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
                       t.stop_index;
                 """,
                 [
-                    interval_time,
-                    interval_time + late_running_interval,
-                    interval_time,
-                    interval_time,
+                    *date_of_journey_offsets,
+                    *departure_time_offsets,
+                    *date_of_journey_offsets,
                 ],
             )
             timetable_dict = defaultdict(dict)
