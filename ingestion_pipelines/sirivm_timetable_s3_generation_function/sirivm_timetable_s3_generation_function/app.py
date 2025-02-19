@@ -61,23 +61,27 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
             cur.execute(
                 """
                     WITH my_groups AS (
-                      SELECT
-                        DISTINCT vehiclejourney_id
+                      SELECT DISTINCT
+                        vehiclejourney_id,
+                        date_of_journey
                       FROM
                         public."Timetable"
                       WHERE
-                         -- date_of_journey clause repeated below, so that query planner can do better partition pruning
+                        -- date_of_journey clause repeated below, so that query planner can do better partition pruning
                         (
                           date_of_journey = (
                             now() AT TIME ZONE 'EUROPE/LONDON' + interval '%s' MINUTE
-                          )::date
-                          OR date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
+                          )::DATE
+                          OR date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::DATE
                           OR date_of_journey = (
                             now() AT TIME ZONE 'EUROPE/LONDON' - interval '%s' MINUTE
-                          )::date
+                          )::DATE
                         )
-                        AND expected_departure_time BETWEEN current_timestamp(0) - interval '%s' MINUTE
-                        AND current_timestamp(0) + interval '%s' MINUTE
+                        AND expected_departure_time
+                         BETWEEN
+                          current_timestamp(0) - interval '%s' MINUTE
+                         AND
+                          current_timestamp(0) + interval '%s' MINUTE
                     )
                     SELECT
                       t.group_id,
@@ -92,26 +96,23 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
                       t.stop_longitude,
                       t.expected_departure_time::TIME AS expected_departure_time,
                       t.timetable_id,
-                      t.date_of_journey,
+                      t.expected_departure_time::DATE AS expected_departure_date,
                       t.direction
                     FROM
                       public."Timetable" t
+                      INNER JOIN my_groups j
+                        ON t.date_of_journey = j.date_of_journey
+                       AND t.vehiclejourney_id = j.vehiclejourney_id
                     WHERE
                       -- date_of_journey clause repeated above, so that query planner can do better partition pruning
                       (
                         t.date_of_journey = (
                           now() AT TIME ZONE 'EUROPE/LONDON' + interval '%s' MINUTE
-                        )::date
-                        OR t.date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::date
+                        )::DATE
+                        OR t.date_of_journey = (now() AT TIME ZONE 'EUROPE/LONDON')::DATE
                         OR t.date_of_journey = (
                           now() AT TIME ZONE 'EUROPE/LONDON' - interval '%s' MINUTE
-                        )::date
-                      )
-                      AND t.vehiclejourney_id IN (
-                        SELECT
-                          vehiclejourney_id
-                        FROM
-                          my_groups
+                        )::DATE
                       )
                     ORDER BY
                       t.group_id,
