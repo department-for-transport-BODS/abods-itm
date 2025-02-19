@@ -1,11 +1,17 @@
 import csv
 import json
 import os
+from datetime import datetime, timedelta
 from pathlib import Path
 from unittest import mock
 
 import boto3
 import psycopg2
+
+from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
+    Timetable,
+    stop_departure_time,
+)
 
 from ..live_timetable_store import LiveTimetableStore
 from ..matching import match_group_id_avls
@@ -36,14 +42,12 @@ def create_connection() -> psycopg2.extensions.connection:
         ) from e
 
 
-def get_db_data(
+def get_avl_data(
     connection: psycopg2.extensions.connection,
-    group_id: str,
-    avl_destination: Path,
-    timetable_destination: Path,
-) -> None:
-    # We used to use different group id formats, so match the constituent parts for now
-    group_id_parts = group_id.split("|")
+    group_id_parts: list[str],
+    min_time: datetime,
+    max_time: datetime,
+) -> list[tuple]:
     with connection.cursor() as cursor:
         cursor.execute(
             """
@@ -59,22 +63,29 @@ def get_db_data(
                        date_of_journey,
                        batch_id
                 FROM "SiriVMPositions"
-                WHERE date_of_journey = %s
+                WHERE (date_of_journey = %s::DATE OR date_of_journey = %s::DATE)
                   AND operator_ref = %s
                   AND journey_ref = %s
                   AND LOWER(line_name) = %s
+                  AND recorded_at_time >= (%s::timestamptz - interval '120' minute)
+                  AND recorded_at_time <= (%s::timestamptz + interval '120' minute)
                 ORDER BY recorded_at_time
             """,
             [
-                group_id_parts[3],
+                min_time.date().isoformat(),
+                max_time.date().isoformat(),
                 group_id_parts[0].upper(),
                 group_id_parts[2],
                 group_id_parts[1],
+                min_time.isoformat(),
+                max_time.isoformat(),
             ],
         )
-        rows = cursor.fetchall()
+        return cursor.fetchall()
 
-    with open(avl_destination, "w") as csv_file:
+
+def write_avl_data(data: list[tuple], destination: Path) -> None:
+    with open(destination, "w") as csv_file:
         avl_file = csv.writer(csv_file, lineterminator="\n")
         avl_file.writerow(
             [
@@ -91,51 +102,87 @@ def get_db_data(
                 "batch_id",
             ],
         )
-        avl_file.writerows(rows)
+        avl_file.writerows(data)
 
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                    SELECT row_number() OVER (PARTITION BY vehiclejourney_id
-                                              ORDER BY group_id, expected_departure_time ASC, stop_index ASC) AS stop_index,
-                           stop_latitude,
-                           stop_longitude,
-                           ((expected_departure_time AT TIME ZONE 'UTC')::TIME)::TEXT AS expected_departure_time,
-                           timetable_id,
-                           date_of_journey::TEXT,
-                           direction
-                    FROM public."Timetable"
-                    WHERE date_of_journey = %s
-                      AND operator_noc = %s
-                      AND journey_code = %s
-                      AND LOWER(line_name) = %s
-                    ORDER BY stop_index
-                """,
-                [
-                    group_id_parts[3],
-                    group_id_parts[0].upper(),
-                    group_id_parts[2],
-                    group_id_parts[1],
-                ],
-            )
-            rows = cursor.fetchall()
+
+def get_timetable_data(
+    connection: psycopg2.extensions.connection,
+    group_id_parts: list[str],
+) -> Timetable:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+                SELECT row_number() OVER (PARTITION BY vehiclejourney_id
+                                          ORDER BY group_id, expected_departure_time ASC, stop_index ASC) AS stop_index,
+                       stop_latitude,
+                       stop_longitude,
+                       ((expected_departure_time AT TIME ZONE 'UTC')::TIME)::TEXT AS expected_departure_time,
+                       timetable_id,
+                       ((expected_departure_time AT TIME ZONE 'UTC')::DATE)::TEXT AS expected_departure_date,
+                       direction
+                FROM public."Timetable"
+                WHERE date_of_journey = %s
+                  AND operator_noc = %s
+                  AND journey_code = %s
+                  AND LOWER(line_name) = %s
+                ORDER BY stop_index
+            """,
+            [
+                group_id_parts[3],
+                group_id_parts[0].upper(),
+                group_id_parts[2],
+                group_id_parts[1],
+            ],
+        )
+        rows = cursor.fetchall()
     directions = set()
     for i in rows:
         directions.add(i[6])
     timetable = {}
     for i in rows:
-        timetable_index = group_id
+        timetable_index = "|".join(group_id_parts)
         if len(directions) > 1:
             direction = i[6]
-            timetable_index = group_id + "|" + direction
+            timetable_index = "|".join([*group_id_parts, direction])
         timetable.setdefault(timetable_index, {})[str(i[0])] = [
             (float(i[1]), float(i[2])),
             i[3],
             i[4],
             i[5],
         ]
-    with open(timetable_destination, "w") as json_file:
+    return timetable
+
+
+def write_timetable_data(timetable: Timetable, destination: Path) -> None:
+    with open(destination, "w") as json_file:
         json.dump(timetable, json_file)
+
+
+def get_db_data(
+    connection: psycopg2.extensions.connection,
+    group_id: str,
+    avl_destination: Path,
+    timetable_destination: Path,
+) -> None:
+    # We used to use different group id formats, so match the constituent parts for now
+    group_id_parts = group_id.split("|")
+
+    timetable = get_timetable_data(connection, group_id_parts)
+    write_timetable_data(timetable, timetable_destination)
+
+    departure_times = [
+        stop_departure_time(stop)
+        for route in timetable.values()
+        for stop in route.values()
+    ]
+    min_time = datetime.fromisoformat(group_id_parts[3])
+    max_time = min_time + timedelta(days=1, milliseconds=-1)
+    if departure_times:
+        min_time = min(departure_times)
+        max_time = max(departure_times)
+
+    avl_data = get_avl_data(connection, group_id_parts, min_time, max_time)
+    write_avl_data(avl_data, avl_destination)
 
 
 def main() -> None:

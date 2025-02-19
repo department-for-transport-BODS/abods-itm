@@ -1,4 +1,4 @@
-"""Journey that runs over midnight"""
+"""Journey that runs over midnight, but with timetable data generated before relevant fixes"""
 
 import datetime
 
