@@ -1,4 +1,4 @@
-"""Route with avl data more than 2 hours early"""
+"""Route with avl data more than 2 hours early, most ignored by test example generator, as they would not be used for matching"""
 
 from ..util import run_historic_matching_test
 
