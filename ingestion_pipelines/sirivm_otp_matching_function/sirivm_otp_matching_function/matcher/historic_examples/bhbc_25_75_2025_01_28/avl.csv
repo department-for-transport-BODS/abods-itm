@@ -1,4 +1,4 @@
-recorded_at_time,response_time_stamp,latitude,longitude,line_name,operator_ref,vehicle_ref,journey_ref,direction_ref,date_of_journey,batch_id
+recorded_at_time,response_timestamp,latitude,longitude,line_name,operator_ref,vehicle_ref,journey_ref,direction_ref,date_of_journey,batch_id
 2025-01-28 10:17:05.000 +0000,2025-01-28 10:17:10.000 +0000,50.857437,-0.10336,25,BHBC,668,75,inbound,2025-01-28,2192565
 2025-01-28 10:17:21.000 +0000,2025-01-28 10:17:30.000 +0000,50.85755,-0.100772,25,BHBC,668,75,inbound,2025-01-28,2192567
 2025-01-28 10:17:26.000 +0000,2025-01-28 10:17:40.000 +0000,50.85767,-0.09983,25,BHBC,668,75,inbound,2025-01-28,2192568

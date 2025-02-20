@@ -267,7 +267,6 @@ Resources:
       Layers: !If
         - IsNotLocal
         - - !Ref IngestionFunctionLayer
-          - "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python311:12"
         - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
@@ -685,7 +684,6 @@ Resources:
       Layers: !If
         - IsNotLocal
         - - !Ref IngestionFunctionLayer
-          - "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python311:12"
         - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
@@ -753,7 +751,6 @@ Resources:
       Layers: !If
         - IsNotLocal
         - - !Ref IngestionFunctionLayer
-          - "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python311:12"
         - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
@@ -821,7 +818,6 @@ Resources:
       Layers: !If
         - IsNotLocal
         - - !Ref IngestionFunctionLayer
-          - "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python311:12"
         - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
@@ -889,7 +885,6 @@ Resources:
       Layers: !If
         - IsNotLocal
         - - !Ref IngestionFunctionLayer
-          - "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python311:12"
         - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
@@ -957,7 +952,6 @@ Resources:
       Layers: !If
         - IsNotLocal
         - - !Ref IngestionFunctionLayer
-          - "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python311:12"
         - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
@@ -1025,7 +1019,6 @@ Resources:
       Layers: !If
         - IsNotLocal
         - - !Ref IngestionFunctionLayer
-          - "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python311:12"
         - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
@@ -1093,7 +1086,6 @@ Resources:
       Layers: !If
         - IsNotLocal
         - - !Ref IngestionFunctionLayer
-          - "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python311:12"
         - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'

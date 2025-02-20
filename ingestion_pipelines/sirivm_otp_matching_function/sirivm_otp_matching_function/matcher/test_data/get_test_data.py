@@ -1,25 +1,29 @@
 """Helpers to Load Test Data from Files"""
 
+import csv
 import json
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 
-import pandas as pd
-
-from ..models import AVLRecord, Timetable, live_avl_file_columns
+from ...client_s3 import parse_live_avl_row
+from ..models import AVLRecord, LiveAVLRecord, Timetable
 
 test_data_dir = Path(__file__).parent
 
 
+def parse_test_avl_file(
+    stream: Iterable[str],
+) -> Iterable[LiveAVLRecord]:
+    """Parse live avl csv data into LiveAVLRecord dicts"""
+    for row in csv.DictReader(stream):
+        yield parse_live_avl_row(row)
+
+
 def read_timetable(file_name: str) -> Timetable:
-    path = test_data_dir / "timetable" / file_name
-    with Path.open(path) as f:
+    with open(test_data_dir / "timetable" / file_name) as f:
         return json.load(f)
 
 
-def read_avl(file_name: str) -> list[AVLRecord]:
-    path = test_data_dir / "avl" / file_name
-    data = pd.read_csv(path, dtype=live_avl_file_columns, header=0)
-    data["line_name"] = data["line_name"].fillna("")
-    data["direction_ref"] = data["direction_ref"].fillna("")
-
-    return data.to_dict("records")
+def read_avl(file_name: str) -> Sequence[AVLRecord]:
+    with open(test_data_dir / "avl" / file_name) as csvfile:
+        return list(parse_test_avl_file(csvfile))
