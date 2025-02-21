@@ -3,7 +3,7 @@ IMPORT FOREIGN SCHEMA public LIMIT TO (
 )
 FROM SERVER bods INTO bods;
 
-GRANT SELECT ON TABLE bods."UI_LTA" TO abods_rw;
+GRANT SELECT ON TABLE bods."ui_lta" TO abods_rw;
 
 CREATE TABLE public.ui_lta (
 	id serial4 NOT NULL,
