@@ -778,12 +778,12 @@ begin
                     WHEN last_departure::TIME < first_departure::TIME
                      -- There are some dq issues that get caught up in the first clause.
                      -- We can minimise that with the assumption that no journey:
-                     -- a. starts before 22:00 and continues past midnight
-                     -- b. starts before midnight and ends after 02:00
-                     AND first_departure::TIME >= ''22:00:00''
-                     AND last_departure::TIME <= ''02:00:00''
+                     -- a. starts before 18:00 and continues past midnight
+                     -- b. starts before midnight and ends after 06:00
+                     AND first_departure::TIME >= ''18:00:00''
+                     AND last_departure::TIME <= ''06:00:00''
                      -- We only need to modify the date of the departure time for the stops that come after midnight
-                     AND departure_time::TIME <= ''02:00:00''
+                     AND departure_time::TIME <= ''06:00:00''
                       THEN (date_of_journey + INTERVAL ''1'' DAY)::DATE
                       ELSE date_of_journey END
                   )::TEXT,
