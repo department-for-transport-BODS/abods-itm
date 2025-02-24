@@ -11,7 +11,7 @@ begin
         bods.ui_lta
     on conflict("name")
     DO UPDATE SET
-        "name" = EXCLUDED."name"
+        "name" = EXCLUDED."name";
 
     DELETE FROM public.ui_lta
     WHERE id NOT IN (SELECT id FROM bods.ui_lta);
