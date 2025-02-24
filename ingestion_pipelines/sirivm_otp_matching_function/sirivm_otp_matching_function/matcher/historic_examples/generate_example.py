@@ -68,9 +68,9 @@ def get_avl_data(
                     FROM "SiriVMPositions"
                     WHERE date_of_journey = %s
                       AND group_id = %s
-                      AND recorded_at_time >= (%s::timestamptz - interval '120' minute)
-                      AND recorded_at_time <= (%s::timestamptz + interval '120' minute)
-                    ORDER BY recorded_at_time
+                      AND recorded_at_time >= (%s::timestamptz - interval '240' minute)
+                      AND recorded_at_time <= (%s::timestamptz + interval '240' minute)
+                    ORDER BY recorded_at_time, direction_ref, vehicle_ref desc
                 """,
                 [
                     current.isoformat(),
