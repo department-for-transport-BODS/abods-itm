@@ -15,6 +15,7 @@ execute format('
             SELECT timetable_id
             FROM public."Timetable" t
             WHERE date_of_journey = %L
+                AND expected_departure_time < (now() - interval ''120'' minute)
                 AND actual_departure_time IS NULL
                 AND NOT EXISTS (
                     SELECT 1
@@ -41,6 +42,7 @@ execute format('
             FROM public."Timetable" t
             WHERE date_of_journey = %L
                 AND actual_departure_time IS NULL
+                AND expected_departure_time < (now() - interval ''120'' minute)
                 AND NOT EXISTS (
                     SELECT 1
                     FROM public."Timetable" t2
@@ -75,6 +77,7 @@ execute format('
             FROM public."Timetable" t
             WHERE date_of_journey = %L
                 AND actual_departure_time IS NULL
+                AND expected_departure_time < (now() - interval ''120'' minute)
                 AND NOT EXISTS (
                     SELECT 1
                     FROM public."Timetable" t2
@@ -116,6 +119,7 @@ execute format('
             join public."SiriVMPositions" s
             on t.group_id = s.group_id
             where t.date_of_journey = %L
+            and t.expected_departure_time < (now() - interval ''120'' minute)
             and s.date_of_journey = %L
             and t.actual_departure_time IS NULL
             and (2 * ASIN(SQRT(POWER(SIN((RADIANS(t.stop_latitude) - RADIANS(s.latitude)) / 2), 2) + COS(RADIANS(s.latitude)) * COS(RADIANS(t.stop_latitude)) * POWER(SIN((RADIANS(s.longitude) - RADIANS(t.stop_longitude)) / 2), 2))) * 6371) * 1000 <= 70
@@ -135,6 +139,7 @@ execute format('
             join public."SiriVMPositions" s
             on t.group_id = s.group_id
             WHERE t.date_of_journey = %L
+            AND t.expected_departure_time < (now() - interval ''120'' minute)
             AND s.date_of_journey = %L
             AND t.actual_departure_time IS NULL
             AND NOT EXISTS (
