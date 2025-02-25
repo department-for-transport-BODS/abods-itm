@@ -294,3 +294,5 @@ BEGIN
 
 END;
 $$;
+
+alter procedure incomplete_data_load owner to abods_proxy_rw;
