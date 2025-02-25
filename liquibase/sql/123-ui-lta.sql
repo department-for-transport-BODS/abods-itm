@@ -14,4 +14,6 @@ CREATE TABLE public.ui_lta (
 );
 CREATE INDEX ui_lta_name_idx ON public.ui_lta USING btree (name text_pattern_ops);
 
+alter table public.ui_lta owner to abods_rw;
+
 select cron.schedule('update ui lta', '0 2 * * *',  $$call update_ui_lta();$$);
