@@ -30,7 +30,7 @@ BEGIN
                         WHERE
                           t2.timetable_id = t.timetable_id
                           AND t2.date_of_journey = %L
-                          AND s.date_of_journey = %L
+                          AND (s.date_of_journey = %L OR s.date_of_journey = (%L + interval ''1'' DAY))
                       );', concat('stops_wo_nocs_', longdatestring), partition_date, partition_date, partition_date);
 
     RAISE NOTICE '% Created stops without operator nocs table',
@@ -54,11 +54,14 @@ BEGIN
                           1
                         FROM
                           public."Timetable" t2
-                          JOIN public."SiriVMPositions" s ON t2.group_id = s.group_id
+                          JOIN public."SiriVMPositions" s
+                            ON t.operator_noc = s.operator_ref
+                           AND t.line_name = s.line_name
+                           AND t.journey_code = s.journey_ref
                         WHERE
                           t2.timetable_id = t.timetable_id
                           AND t2.date_of_journey = %L
-                          AND s.date_of_journey = %L
+                          AND (s.date_of_journey = %L OR s.date_of_journey = (%L + interval ''1'' DAY))
                       )
                       AND EXISTS (
                         SELECT
@@ -70,7 +73,7 @@ BEGIN
                         WHERE
                           t3.timetable_id = t.timetable_id
                           AND t3.date_of_journey = %L
-                          AND s.date_of_journey = %L
+                          AND (s.date_of_journey = %L OR s.date_of_journey = (%L + interval ''1'' DAY))
                       );', concat('stops_wo_journey_code_', longdatestring), partition_date, partition_date,
                    partition_date, partition_date, partition_date);
 
@@ -95,11 +98,14 @@ BEGIN
                   1
                 FROM
                   public."Timetable" t2
-                  JOIN public."SiriVMPositions" s ON t2.group_id = s.group_id
+                  JOIN public."SiriVMPositions" s
+                    ON t.operator_noc = s.operator_ref
+                   AND t.line_name = s.line_name
+                   AND t.journey_code = s.journey_ref
                 WHERE
                   t2.timetable_id = t.timetable_id
                   AND t2.date_of_journey = %L
-                  AND s.date_of_journey = %L
+                  AND (s.date_of_journey = %L OR s.date_of_journey = (%L + interval ''1'' DAY))
               )
               AND NOT EXISTS (
                 SELECT
@@ -134,11 +140,14 @@ BEGIN
                         DISTINCT timetable_id
                       FROM
                         public."Timetable" t
-                        JOIN public."SiriVMPositions" s ON t.group_id = s.group_id
+                        JOIN public."SiriVMPositions" s
+                          ON t.operator_noc = s.operator_ref
+                         AND t.line_name = s.line_name
+                         AND t.journey_code = s.journey_ref
                       WHERE
                         t.date_of_journey = %L
                         AND t.expected_departure_time < (now() - interval ''120'' MINUTE)
-                        AND s.date_of_journey = %L
+                        AND (s.date_of_journey = %L OR s.date_of_journey = (%L + interval ''1'' DAY))
                         AND t.actual_departure_time IS NULL
                         AND (
                           2 * ASIN(
@@ -171,11 +180,14 @@ BEGIN
                       DISTINCT timetable_id
                     FROM
                       public."Timetable" t
-                      JOIN public."SiriVMPositions" s ON t.group_id = s.group_id
+                      JOIN public."SiriVMPositions" s
+                        ON t.operator_noc = s.operator_ref
+                       AND t.line_name = s.line_name
+                       AND t.journey_code = s.journey_ref
                     WHERE
                       t.date_of_journey = %L
                       AND t.expected_departure_time < (now() - interval ''120'' MINUTE)
-                      AND s.date_of_journey = %L
+                      AND (s.date_of_journey = %L OR s.date_of_journey = (%L + interval ''1'' DAY))
                       AND t.actual_departure_time IS NULL
                       AND NOT EXISTS (
                         SELECT
