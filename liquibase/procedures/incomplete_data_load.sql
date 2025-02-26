@@ -5,11 +5,9 @@ $$
 DECLARE
     longdatestring TEXT := to_char(partition_date, 'YYYY_MM_DD');
 BEGIN
-    RAISE NOTICE '% Start running incomplete_data_load ',
-        clock_timestamp();
+    RAISE NOTICE '% Start running incomplete_data_load ', clock_timestamp();
 
-    RAISE NOTICE '% Creating stops without operator nocs table',
-        clock_timestamp();
+    RAISE NOTICE '% Creating stops without operator nocs table', clock_timestamp();
 
     EXECUTE format('
                     CREATE TABLE public.%I AS
@@ -31,13 +29,17 @@ BEGIN
                           t2.timetable_id = t.timetable_id
                           AND t2.date_of_journey = %L
                           AND (s.date_of_journey = %L OR s.date_of_journey = (%L + interval ''1'' DAY))
-                      );', concat('stops_wo_nocs_', longdatestring), partition_date, partition_date, partition_date);
+                      );',
+                   concat('stops_wo_nocs_', longdatestring),
+                   partition_date,
+                   partition_date,
+                   partition_date,
+                   partition_date
+            );
 
-    RAISE NOTICE '% Created stops without operator nocs table',
-        clock_timestamp();
+    RAISE NOTICE '% Created stops without operator nocs table', clock_timestamp();
 
-    RAISE NOTICE '% Creating stops without journey code table',
-        clock_timestamp();
+    RAISE NOTICE '% Creating stops without journey code table', clock_timestamp();
 
     EXECUTE format('
                     CREATE TABLE public.%I AS
@@ -74,59 +76,73 @@ BEGIN
                           t3.timetable_id = t.timetable_id
                           AND t3.date_of_journey = %L
                           AND (s.date_of_journey = %L OR s.date_of_journey = (%L + interval ''1'' DAY))
-                      );', concat('stops_wo_journey_code_', longdatestring), partition_date, partition_date,
-                   partition_date, partition_date, partition_date);
+                      );',
+                   concat('stops_wo_journey_code_', longdatestring),
+                   partition_date,
+                   partition_date,
+                   partition_date,
+                   partition_date,
+                   partition_date,
+                   partition_date,
+                   partition_date
+            );
 
-    RAISE NOTICE '% Created stops without journey code table',
-        clock_timestamp();
+    RAISE NOTICE '% Created stops without journey code table', clock_timestamp();
 
-    RAISE NOTICE '% Creating stops without service table',
-        clock_timestamp();
+    RAISE NOTICE '% Creating stops without service table', clock_timestamp();
 
     EXECUTE format('
-            CREATE TABLE public.%I AS
-            SELECT
-              timetable_id
-            FROM
-              public."Timetable" t
-            WHERE
-              date_of_journey = %L
-              AND actual_departure_time IS NULL
-              AND expected_departure_time < (now() - interval ''120'' MINUTE)
-              AND NOT EXISTS (
-                SELECT
-                  1
-                FROM
-                  public."Timetable" t2
-                  JOIN public."SiriVMPositions" s
-                    ON t.operator_noc = s.operator_ref
-                   AND t.line_name = s.line_name
-                   AND t.journey_code = s.journey_ref
-                WHERE
-                  t2.timetable_id = t.timetable_id
-                  AND t2.date_of_journey = %L
-                  AND (s.date_of_journey = %L OR s.date_of_journey = (%L + interval ''1'' DAY))
-              )
-              AND NOT EXISTS (
-                SELECT
-                  1
-                FROM
-                  public.%I
-                WHERE
-                  timetable_id = t.timetable_id
-              )
-              AND EXISTS (
-                SELECT
-                  1
-                FROM
-                  public."Timetable" t3
-                  JOIN public."SiriVMPositions" s ON t3.operator_noc = s.operator_ref
-                WHERE
-                  t3.timetable_id = t.timetable_id
-                  AND t3.date_of_journey = %L
-                  AND s.date_of_journey = %L
-              );', concat('stops_wo_service_', longdatestring), partition_date, partition_date, partition_date,
-                   concat('stops_wo_journey_code_', longdatestring), partition_date, partition_date);
+                    CREATE TABLE public.%I AS
+                    SELECT
+                      timetable_id
+                    FROM
+                      public."Timetable" t
+                    WHERE
+                      date_of_journey = %L
+                      AND actual_departure_time IS NULL
+                      AND expected_departure_time < (now() - interval ''120'' MINUTE)
+                      AND NOT EXISTS (
+                        SELECT
+                          1
+                        FROM
+                          public."Timetable" t2
+                          JOIN public."SiriVMPositions" s
+                            ON t.operator_noc = s.operator_ref
+                           AND t.line_name = s.line_name
+                           AND t.journey_code = s.journey_ref
+                        WHERE
+                          t2.timetable_id = t.timetable_id
+                          AND t2.date_of_journey = %L
+                          AND (s.date_of_journey = %L OR s.date_of_journey = (%L + interval ''1'' DAY))
+                      )
+                      AND NOT EXISTS (
+                        SELECT
+                          1
+                        FROM
+                          public.%I
+                        WHERE
+                          timetable_id = t.timetable_id
+                      )
+                      AND EXISTS (
+                        SELECT
+                          1
+                        FROM
+                          public."Timetable" t3
+                          JOIN public."SiriVMPositions" s ON t3.operator_noc = s.operator_ref
+                        WHERE
+                          t3.timetable_id = t.timetable_id
+                          AND t3.date_of_journey = %L
+                          AND s.date_of_journey = %L
+                      );',
+                   concat('stops_wo_service_', longdatestring),
+                   partition_date,
+                   partition_date,
+                   partition_date,
+                   partition_date,
+                   concat('stops_wo_journey_code_', longdatestring),
+                   partition_date,
+                   partition_date
+            );
 
     RAISE NOTICE '% Created stops without service table',
         clock_timestamp();
@@ -166,13 +182,16 @@ BEGIN
                             )
                           ) * 6371
                         ) * 1000 <= 70
-                    );', concat('stops_w_invalid_gps_in_zone', longdatestring), partition_date, partition_date);
+                    );',
+                   concat('stops_w_invalid_gps_in_zone', longdatestring),
+                   partition_date,
+                   partition_date,
+                   partition_date
+            );
 
-    RAISE NOTICE '% Created stops with invalid gps in zone table',
-        clock_timestamp();
+    RAISE NOTICE '% Created stops with invalid gps in zone table', clock_timestamp();
 
-    RAISE NOTICE '% Creating stops without gps in zone table',
-        clock_timestamp();
+    RAISE NOTICE '% Creating stops without gps in zone table', clock_timestamp();
 
     EXECUTE format('
                     CREATE TABLE public.%I AS
@@ -196,8 +215,13 @@ BEGIN
                           public.%I t2
                         WHERE
                           t2.timetable_id = t.timetable_id
-                      );', concat('stops_wo_gps_in_zone_', longdatestring), partition_date, partition_date,
-                   concat('stops_w_invalid_gps_in_zone', longdatestring));
+                      );',
+                   concat('stops_wo_gps_in_zone_', longdatestring),
+                   partition_date,
+                   partition_date,
+                   partition_date,
+                   concat('stops_w_invalid_gps_in_zone', longdatestring)
+            );
 
     RAISE NOTICE '% Created stops without gps in zone table',
         clock_timestamp();
@@ -217,7 +241,10 @@ BEGIN
                         FROM
                           %I
                       )
-                      AND date_of_journey = %L;', concat('stops_wo_nocs_', longdatestring), partition_date);
+                      AND date_of_journey = %L;',
+                   concat('stops_wo_nocs_', longdatestring),
+                   partition_date
+            );
 
     EXECUTE format('
                     UPDATE
@@ -231,7 +258,10 @@ BEGIN
                         FROM
                           %I
                       )
-                      AND date_of_journey = %L;', concat('stops_wo_service_', longdatestring), partition_date);
+                      AND date_of_journey = %L;',
+                   concat('stops_wo_service_', longdatestring),
+                   partition_date
+            );
 
     EXECUTE format('
                     UPDATE
@@ -245,7 +275,10 @@ BEGIN
                         FROM
                           %I
                       )
-                      AND date_of_journey = %L;', concat('stops_wo_journey_code_', longdatestring), partition_date);
+                      AND date_of_journey = %L;',
+                   concat('stops_wo_journey_code_', longdatestring),
+                   partition_date
+            );
 
     EXECUTE format('
                     UPDATE
@@ -259,7 +292,10 @@ BEGIN
                         FROM
                           %I
                       )
-                      AND date_of_journey = %L;', concat('stops_wo_gps_in_zone_', longdatestring), partition_date);
+                      AND date_of_journey = %L;',
+                   concat('stops_wo_gps_in_zone_', longdatestring),
+                   partition_date
+            );
 
     EXECUTE format('
                     UPDATE
@@ -273,8 +309,10 @@ BEGIN
                         FROM
                           %I
                       )
-                      AND date_of_journey = %L;', concat('stops_w_invalid_gps_in_zone', longdatestring),
-                   partition_date);
+                      AND date_of_journey = %L;',
+                   concat('stops_w_invalid_gps_in_zone', longdatestring),
+                   partition_date
+            );
 
     RAISE NOTICE '% Dropping temp tables',
         clock_timestamp();
@@ -289,8 +327,7 @@ BEGIN
 
     EXECUTE format('drop table if exists public.%I', concat('stops_w_invalid_gps_in_zone', longdatestring));
 
-    RAISE NOTICE '% incomplete_data_load complete',
-        clock_timestamp();
+    RAISE NOTICE '% incomplete_data_load complete', clock_timestamp();
 
 END;
 $$;
