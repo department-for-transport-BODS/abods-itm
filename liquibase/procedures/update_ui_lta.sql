@@ -10,10 +10,7 @@ begin
         id,
         "name"
     from
-        bods.ui_lta
-    on conflict("name")
-    DO UPDATE SET
-        "name" = EXCLUDED."name";
+        bods.ui_lta;
 
 end; $procedure$
 ;
