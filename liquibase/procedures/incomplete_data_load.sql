@@ -47,10 +47,7 @@ BEGIN
         FROM
           public."Timetable" t2
           JOIN public."SiriVMPositions" s
-            ON t2.operator_noc = s.operator_ref
-           AND t2.line_name = s.line_name
-           AND t2.journey_code = s.journey_ref
-           AND t2.date_of_journey = s.date_of_journey
+            ON t2.group_id = s.group_id
         WHERE t2.timetable_id = t.timetable_id
           AND t2.date_of_journey = partition_date
           AND t2.expected_departure_time < earliest_departure_time
@@ -99,8 +96,7 @@ BEGIN
           1
         FROM
           incomplete_data_tmp_stops_without_journey_codes
-        WHERE
-          timetable_id = t.timetable_id
+        WHERE timetable_id = t.timetable_id
       )
       AND EXISTS (
         SELECT
@@ -167,8 +163,7 @@ BEGIN
           1
         FROM
           incomplete_data_tmp_stops_with_invalid_gps_in_zone t2
-        WHERE
-          t2.timetable_id = t.timetable_id
+        WHERE t2.timetable_id = t.timetable_id
       );
 
     RAISE NOTICE '% Populating incomplete reason column in timetable', clock_timestamp();
@@ -224,8 +219,7 @@ BEGIN
     UPDATE
       public."Timetable"
     SET incomplete_reason = 5
-    WHERE
-      timetable_id IN (
+    WHERE timetable_id IN (
         SELECT
           timetable_id
         FROM
