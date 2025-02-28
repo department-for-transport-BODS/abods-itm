@@ -1,7 +1,9 @@
 create or replace procedure update_ui_lta()
- LANGUAGE plpgsql
-AS $procedure$
-begin
+    language plpgsql
+as
+$$
+DECLARE
+BEGIN
     DELETE FROM public.ui_lta;
 
     INSERT INTO public.ui_lta
@@ -11,8 +13,7 @@ begin
         "name"
     from
         bods.ui_lta;
+END;
+$$;
 
-end; $procedure$
-;
-
-alter procedure update_ui_lta owner to abods_rw;
+alter procedure update_ui_lta owner to abods_proxy_rw;

@@ -3,17 +3,17 @@ IMPORT FOREIGN SCHEMA public LIMIT TO (
 )
 FROM SERVER bods INTO bods;
 
-GRANT SELECT ON TABLE bods."ui_lta" TO abods_rw;
+GRANT SELECT ON TABLE bods."ui_lta" TO abods_proxy_rw;
 
-CREATE TABLE public.ui_lta (
+CREATE TABLE IF NOT EXISTS public.ui_lta (
 	id serial4 NOT NULL,
 	"name" text NOT NULL,
 	CONSTRAINT ui_lta_id_name_uniq UNIQUE (id, name),
 	CONSTRAINT ui_lta_name_key UNIQUE (name),
 	CONSTRAINT ui_lta_pkey PRIMARY KEY (id)
 );
-CREATE INDEX ui_lta_name_idx ON public.ui_lta USING btree (name text_pattern_ops);
+CREATE INDEX IF NOT EXISTS  ui_lta_name_idx ON public.ui_lta USING btree (name text_pattern_ops);
 
-alter table public.ui_lta owner to abods_rw;
+ALTER TABLE public.ui_lta OWNER TO abods_proxy_rw;
 
-select cron.schedule('update ui lta', '0 2 * * *',  $$call update_ui_lta();$$);
+SELECT cron.schedule('update ui lta', '0 2 * * *',  $$CALL update_ui_lta();$$);
