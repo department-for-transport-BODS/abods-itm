@@ -4,7 +4,7 @@ as
 $$
 DECLARE
 BEGIN
-    DELETE FROM public.ui_lta;
+    TRUNCATE public.ui_lta;
 
     INSERT INTO public.ui_lta
     (id, "name")
