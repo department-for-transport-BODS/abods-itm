@@ -6,13 +6,13 @@ DECLARE
 BEGIN
     TRUNCATE public.ui_lta;
 
-    INSERT INTO public.ui_lta
-    (id, "name")
+    INSERT INTO
+      public.ui_lta (id, name)
     SELECT
-        id,
-        "name"
-    from
-        bods.ui_lta;
+      id,
+      name
+    FROM
+      bods.ui_lta;
 END;
 $$;
 
