@@ -391,4 +391,7 @@
     <changeSet id="124" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_ui_lta.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="125" author="abodsuser">
+        <sqlFile path="sql/125-redo-summaries-evening.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
