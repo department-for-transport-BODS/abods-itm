@@ -6,26 +6,26 @@ SELECT cron.schedule(
 
 SELECT cron.schedule(
                'summary_by_stop',
-               '0 2 * * *',
+               '00 02 * * *',
                $$CALL public.summary_by_stops(CURRENT_DATE - '2 day'::interval);CALL public.summary_by_stops(CURRENT_DATE - '1 day'::interval);$$
        );
 
 SELECT cron.schedule(
                'summary_by_services',
-               '40 2 * * *',
+               '40 02 * * *',
                $$CALL public.summary_by_services(CURRENT_DATE - '2 day'::interval);CALL public.summary_by_services(CURRENT_DATE - '1 day'::interval);$$
        );
 
 SELECT cron.schedule(
                'summary_by_operators',
-               '00 3 * * *',
+               '00 03 * * *',
                $$CALL public.summary_by_operators(CURRENT_DATE - '2 day'::interval);CALL public.summary_by_operators(CURRENT_DATE - '1 day'::interval);$$
        );
 
 
 SELECT cron.schedule(
                'frequent_summary_services',
-               '0 2 * * *',
+               '00 02 * * *',
                $$CALL public.frequent_summary_services();$$
        );
 
