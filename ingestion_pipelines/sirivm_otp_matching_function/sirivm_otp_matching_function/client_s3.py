@@ -3,38 +3,61 @@
 import hashlib
 import json
 import os
-import time
-from collections.abc import Generator, Sequence
+from collections.abc import Iterable, Sequence
 from typing import Any
 
-import awswrangler as wr
 import boto3
 from aws_lambda_powertools import Logger
+from aws_lambda_powertools.utilities.streaming.s3_object import S3Object
+from aws_lambda_powertools.utilities.streaming.transformations import (
+    CsvTransform,
+    GzipTransform,
+)
 from botocore.exceptions import ClientError
-from pandas import DataFrame
 
 from .matcher.models import (
     LiveAVLRecord,
-    OperatorShards,
     StopHistory,
     Timetable,
-    live_avl_file_columns,
 )
 from .matcher.utils import timer
 from .shards import shards
 
 logger = Logger()
-client = boto3.client("s3")
 shard_lookup: dict[str, str] = {}
 for shard, operators in shards.items():
     for operator in operators:
         shard_lookup[operator] = shard
 
 
-def filter_avl_list(
+# Live avl files contain more records than we need, and the ordering is important so defined here to be explicit
+live_avl_column_parsers = {
+    "recorded_at_time": str,
+    "response_timestamp": str,
+    "latitude": float,
+    "longitude": float,
+    "line_name": str,
+    "operator_ref": str,
+    "vehicle_ref": str,
+    "journey_ref": str,
+    "direction_ref": str,
+    "date_of_journey": str,
+    "batch_id": int,
+}
+avl_file_transforms = [
+    GzipTransform(),
+    CsvTransform(fieldnames=list(live_avl_column_parsers)),
+]
+
+
+def parse_live_avl_row(row: dict[str, str]) -> LiveAVLRecord:
+    return {key: parser(row[key]) for key, parser in live_avl_column_parsers.items()}
+
+
+def _filter_avl_list(
     shard_no: str,
-    avl_list: Sequence[LiveAVLRecord],
-) -> Generator[LiveAVLRecord]:
+    avl_list: Iterable[LiveAVLRecord],
+) -> Iterable[LiveAVLRecord]:
     """Given a list of AVLs, returns an AVL list filtered to operators just for this particular shard id"""
     for avl in avl_list:
         operator_ref = avl["operator_ref"]
@@ -65,7 +88,7 @@ class TimetableS3Client:
             content = (
                 self.client.get_object(Bucket=self.bucket, Key=key).get("Body").read()
             )
-            size = round(len(content) / (1024), 2)
+            size = round(len(content) / 1024, 2)
             logger.info(
                 "Successfully fetched data from S3",
                 s3_key=key,
@@ -73,7 +96,7 @@ class TimetableS3Client:
             )
             return json.loads(content)
         except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_code = e.response["Error"]["Code"]
             logger.exception(
                 "Failed to fetch data from S3",
                 s3_key=key,
@@ -81,29 +104,9 @@ class TimetableS3Client:
             )
             raise
 
-    def _write_to_s3(self, data_dict: dict[str, Any], path: str) -> None:
-        """Write dict as JSON file to S3"""
-        try:
-            data_string = json.dumps(data_dict, default=str)
-            self.client.put_object(Bucket=self.bucket, Key=path, Body=data_string)
-            logger.info("S3 upload successful", path=path)
-        except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "Unknown")
-            logger.exception(
-                "S3 upload failed",
-                path=path,
-                error_code=error_code,
-            )
-            raise
-
-    def download_main_timetable(self) -> Timetable:
+    def get_timetable_extract(self) -> Timetable:
         """Download Main Timetable Data"""
         return self._get_from_s3("timetable/timetable.json")
-
-    @timer(logger)
-    def get_shards(self) -> OperatorShards:
-        """Get Shard Data from S3 and return Shards Model"""
-        return self._get_from_s3("shards.json")["shards"]
 
     @timer(logger)
     def get_stop_history(self, shard_no: str) -> StopHistory:
@@ -117,66 +120,53 @@ class TimetableS3Client:
                 logger.info("Stop History Not Found, Returning Empty Dict", key=key)
                 return {}
             raise
-        logger.info(
-            "Fetched and Parsed Stop History",
-            group_ids_count=len(stop_history.keys()),
-        )
-
-        if "control_info" in stop_history:
-            del stop_history["control_info"]
-
-        return stop_history
-
-    def get_avl_data_df(self, filename: str | list[str]) -> DataFrame:
-        """Get AVL Data Dataframe"""
-        paths: list[str] = []
-        if isinstance(filename, list):
-            paths = [f"s3://{self.bucket}/{path}" for path in filename]
         else:
-            paths = [f"s3://{self.bucket}/{filename}"]
-        logger.info("Getting AVL Data", path=filename)
-        logger.info(
-            "Fetching AVL Data can take a while...",
-            number_of_files=len(filename),
-        )
-        start_time = time.time()
-        keys = list(live_avl_file_columns.keys())
-        data = wr.s3.read_csv(
-            path=paths,
-            use_threads=True,
-            names=keys,
-            dtype=live_avl_file_columns,
-            usecols=keys,
-            header=None,
-        )
-        data["line_name"] = data["line_name"].fillna("")
-        data["direction_ref"] = data["direction_ref"].fillna("")
-        logger.info(
-            "AVL Downloaded and Parsed into DataFrame",
-            count=len(data),
-            processing_time=time.time() - start_time,
-        )
-        return data
+            if "control_info" in stop_history:
+                del stop_history["control_info"]
+
+            logger.info(
+                "Fetched and Parsed Stop History",
+                group_ids_count=len(stop_history.keys()),
+            )
+
+            return stop_history
 
     @timer(logger)
-    def get_avl_data(self, filename: str | list[str]) -> Sequence[LiveAVLRecord]:
-        """Get AVL Data from S3 and return a list of AVLData models"""
-        data = self.get_avl_data_df(filename)
-        return data.to_dict("records")
+    def get_avl_data(self, filename: str, shard_no: str) -> Sequence[LiveAVLRecord]:
+        """Get AVL Data from S3 and return a list of AVLData models for the current shard"""
+        avl_stream = self._get_all_avl_data(filename)
+        return list(_filter_avl_list(shard_no, avl_stream))
+
+    def _get_all_avl_data(self, filename: str) -> Iterable[LiveAVLRecord]:
+        logger.info("Getting AVL Data", path=filename)
+        obj = S3Object(bucket=self.bucket, key=filename, boto3_client=self.client)
+        for row in obj.transform(avl_file_transforms):
+            yield parse_live_avl_row(row)
 
     @timer(logger)
     def export_stop_history(self, stop_history: StopHistory, shard_no: str) -> None:
         """Export JourneyStopHistory data to S3"""
         s3_key = stop_history_key(shard_no)
         logger.info(
-            "S3 Upload: Storing Stop history",
+            "Storing Stop history",
             s3_key=s3_key,
             group_id_count=len(stop_history.keys()),
         )
-        self._write_to_s3(
-            stop_history,
-            s3_key,
-        )
+        try:
+            self.client.put_object(
+                Bucket=self.bucket,
+                Key=s3_key,
+                Body=json.dumps(stop_history, default=str),
+            )
+            logger.info("S3 upload successful", path=s3_key)
+        except ClientError as e:
+            error_code = e.response["Error"]["Code"]
+            logger.exception(
+                "S3 upload failed",
+                path=s3_key,
+                error_code=error_code,
+            )
+            raise
 
 
 def stop_history_key(shard_no: str) -> str:

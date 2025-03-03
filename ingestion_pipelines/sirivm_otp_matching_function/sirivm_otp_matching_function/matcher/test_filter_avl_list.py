@@ -1,6 +1,6 @@
 import pytest
 
-from ..client_s3 import filter_avl_list
+from ..client_s3 import _filter_avl_list
 from ..shards import shards
 from .models import LiveAVLRecord
 
@@ -27,4 +27,4 @@ avl_list = [
     ],
 )
 def test_filter(shard_id: str, expected_result: list[LiveAVLRecord]) -> None:
-    assert list(filter_avl_list(shard_id, avl_list)) == expected_result
+    assert list(_filter_avl_list(shard_id, avl_list)) == expected_result

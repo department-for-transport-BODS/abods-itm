@@ -1,57 +1,8 @@
 # Requirements file just for dev environments
 
 # requirements that are in the base lambda runtime
-awslambdaric==2.2.0
 boto3==1.34.145
 botocore==1.34.145
-pip==24.0
-s3transfer==0.10.2
-simplejson==3.19.3
-urllib3==1.26.19
-
-# Most of our lambdas use the AWSSDKPandas-Python311:12 layer, which has these requirements
-# Layer version 12 corresponds to this release https://github.com/aws/aws-sdk-pandas/releases/tag/3.7.3
-aenum==3.1.15
-aiohttp==3.9.5
-aiosignal==1.3.1
-asn1crypto==1.5.1
-async-timeout==4.0.3
-attrs==23.2.0
-awswrangler==3.7.3
-beautifulsoup4==4.12.3
-certifi==2024.2.2
-charset-normalizer==3.3.2
-et-xmlfile==1.1.0
-frozenlist==1.4.1
-gremlinpython==3.7.2
-idna==3.7
-isodate==0.6.1
-jmespath==1.0.1
-jsonpath-ng==1.6.1
-#lxml==5.2.1 conflict with a later version in sirivm_s3_ingestion_function
-multidict==6.0.5
-nest-asyncio==1.6.0
-numpy==1.26.4
-openpyxl==3.1.2
-opensearch-py==2.5.0
-packaging==24.0
-pandas==2.2.2
-pg8000==1.31.1
-ply==3.11
-#pyarrow==14.0.1 conflict with a later version in convert_to_parquet_function
-pymysql==1.1.0
-python-dateutil==2.9.0.post0
-pytz==2024.1
-redshift-connector==2.1.1
-requests-aws4auth==1.2.3
-requests==2.31.0
-scramp==1.4.5
-setuptools==65.5.1
-six==1.16.0
-soupsieve==2.5
-typing-extensions==4.11.0
-tzdata==2024.1
-yarl==1.9.4
 
 # Our custom layer that is used as a layer by most functions
 -r ingestion_layer/requirements.txt
@@ -71,5 +22,5 @@ ruff==0.9.3
 pytest==8.3.3
 checkov==3.1.47
 boto3-stubs[essential]==1.35.32
-types-psycopg2==2.9.21.20240819
+types-psycopg2==2.9.21.20250121
 lxml-stubs==0.5.1
