@@ -1,4 +1,4 @@
-create or replace procedure populate_headway(IN partition_date date)
+create or replace procedure populate_headway(IN pt_date date)
     language plpgsql
 as
 $$
@@ -38,7 +38,7 @@ BEGIN
           ) AS previous_actual_departure_time
         FROM
           public."Timetable"
-        WHERE date_of_journey = partition_date
+        WHERE date_of_journey = pt_date
           AND expected_departure_time < earliest_departure_time
           AND previous_group_id IS NOT NULL
           AND (
@@ -59,7 +59,7 @@ BEGIN
     FROM
       temp_timetable_headway x
     WHERE x.timetable_id = y.timetable_id
-      AND y.date_of_journey = partition_date
+      AND y.date_of_journey = pt_date
       AND y.expected_departure_time < earliest_departure_time;
 
     RAISE NOTICE '% Dropping temp tables', clock_timestamp();
