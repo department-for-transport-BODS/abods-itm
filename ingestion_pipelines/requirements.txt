@@ -1,7 +1,7 @@
 # Requirements file just for dev environments
 
 # requirements that are in the base lambda runtime
-boto3==1.34.145
+boto3==1.37.4
 botocore==1.34.145
 
 # Our custom layer that is used as a layer by most functions
