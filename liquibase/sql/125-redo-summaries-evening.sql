@@ -12,13 +12,13 @@ SELECT cron.schedule(
 
 SELECT cron.schedule(
                'summary_by_services',
-               '20 2 * * *',
+               '40 2 * * *',
                $$CALL public.summary_by_services(CURRENT_DATE - '2 day'::interval);CALL public.summary_by_services(CURRENT_DATE - '1 day'::interval);$$
        );
 
 SELECT cron.schedule(
                'summary_by_operators',
-               '30 2 * * *',
+               '00 3 * * *',
                $$CALL public.summary_by_operators(CURRENT_DATE - '2 day'::interval);CALL public.summary_by_operators(CURRENT_DATE - '1 day'::interval);$$
        );
 
@@ -31,6 +31,6 @@ SELECT cron.schedule(
 
 SELECT cron.schedule(
                'Refresh create_timetable_threshold_summary',
-               '30 02 * * *',
+               '00 03 * * *',
                $$CALL public.create_timetable_threshold_summary(CURRENT_DATE - '2 day'::interval);CALL public.create_timetable_threshold_summary(CURRENT_DATE - '1 day'::interval);$$
        );
