@@ -1,4 +1,4 @@
-siri_vm_positions_id,operator_ref,line_name,journey_ref,direction_ref,date_of_journey,latitude,longitude,vehicle_ref,batch_id,recorded_at_time,response_time_stamp,load_time_stamp,group_id
+siri_vm_positions_id,operator_ref,line_name,journey_ref,direction_ref,date_of_journey,latitude,longitude,vehicle_ref,batch_id,recorded_at_time,response_timestamp,load_time_stamp,group_id
 15958802256,FSMR,"35","0704",outbound,2024-08-21,52.193245,-2.224938,FSMR-YX14RUJ,818927,2024-08-21 07:01:03.000 +0100,2024-08-21 07:01:15.000 +0100,2024-08-21 07:01:28.226 +0100,fsmr|35|0704|2024-08-21
 15958882902,FSMR,"35","0704",outbound,2024-08-21,52.193245,-2.224938,FSMR-YX14RUJ,818932,2024-08-21 07:01:34.000 +0100,2024-08-21 07:01:56.000 +0100,2024-08-21 07:02:08.870 +0100,fsmr|35|0704|2024-08-21
 15958931518,FSMR,"35","0704",outbound,2024-08-21,52.193245,-2.224938,FSMR-YX14RUJ,818935,2024-08-21 07:02:07.000 +0100,2024-08-21 07:02:21.000 +0100,2024-08-21 07:02:33.704 +0100,fsmr|35|0704|2024-08-21

@@ -37,16 +37,14 @@ class TimetableStore(Protocol):
 
     def get_route(
         self,
-        group_id: str,
-        direction_ref: str,
+        avl: AVLRecord,
     ) -> tuple[str, Route | None]:
         """
         Interface for getting the route data for a given group id and direction
 
         Args:
         ----
-            group_id (str): A string representing operator_ref|line_name|journey_ref|date_of_journey in lower case
-            direction_ref (str): Direction ref (e.g. inbound, outbound)
+            avl (AVLRecord): AVL record
 
         Returns:
         -------
@@ -911,30 +909,30 @@ def match_group_id_avls(
         journey_matches.extend(to_set)
         logger.remove_keys(["avl", "group_id", "stop_history_index"])
 
-    groups_and_directions = {(avl_group_id(avl), avl["direction_ref"]) for avl in avls}
-
-    unprocessed_avls = 0
+    no_timetable_counts = {}
     expected_matched_stops = 0
     processed_route_indexes = set()
-    for group_id, direction_ref in groups_and_directions:
-        stop_history_index, route = timetable.get_route(group_id, direction_ref)
-        avl_count = sum(
-            1
-            for avl in avls
-            if len(groups_and_directions) == 1 or avl["direction_ref"] == direction_ref
-        )
 
+    for avl in avls:
+        group_id = avl_group_id(avl)
+        stop_history_index, route = timetable.get_route(avl)
         if not route:
-            logger.info(
-                "Could not find timetable for some avls",
-                group_id=group_id,
-                direction_ref=direction_ref,
-                avl_count=avl_count,
-            )
-            unprocessed_avls += avl_count
+            key = (group_id, avl["direction_ref"])
+            no_timetable_counts.setdefault(key, 0)
+            no_timetable_counts[key] += 1
             continue
         expected_matched_stops += len(route)
         processed_route_indexes.add(stop_history_index)
+
+    unprocessed_avls = 0
+    for (group_id, direction_ref), avl_count in no_timetable_counts.items():
+        logger.info(
+            "Could not find timetable for some avls",
+            group_id=group_id,
+            direction_ref=direction_ref,
+            avl_count=avl_count,
+        )
+        unprocessed_avls += avl_count
 
     match_count = len({match["timetable_id"] for match in journey_matches})
     processed_routes = len(processed_route_indexes)
@@ -974,8 +972,7 @@ def match_avl(
     """
     # 1. check if group id exists in timetable
     group_id = avl_group_id(avl)
-    avl_direction = avl.get("direction_ref", "")
-    stop_history_index, route = timetable.get_route(group_id, avl_direction)
+    stop_history_index, route = timetable.get_route(avl)
     logger.append_keys(
         avl=avl,
         group_id=group_id,

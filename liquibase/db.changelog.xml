@@ -385,4 +385,14 @@
     <changeSet id="122" author="abodsuser">
         <sqlFile path="sql/122-fix-cron-jobs.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="123" author="abodsuser">
+        <sqlFile path="sql/123-ui-lta.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="124" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/update_ui_lta.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="125" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="cron.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>

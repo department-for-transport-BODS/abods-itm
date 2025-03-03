@@ -1,4 +1,4 @@
-siri_vm_positions_id,operator_ref,line_name,journey_ref,direction_ref,date_of_journey,latitude,longitude,vehicle_ref,batch_id,recorded_at_time,response_time_stamp,load_time_stamp,group_id
+siri_vm_positions_id,operator_ref,line_name,journey_ref,direction_ref,date_of_journey,latitude,longitude,vehicle_ref,batch_id,recorded_at_time,response_timestamp,load_time_stamp,group_id
 6211475686,COAC,"41","1630",outbound,2024-10-17,51.588356,-2.132815,YJ14_BWA,474979,2024-10-17 16:09:55.000 +0000,2024-10-17 16:10:08.000 +0000,2024-10-17 16:10:18.250 +0000,coac|41|1630|2024-10-17
 6211494528,COAC,"41","1630",outbound,2024-10-17,51.58957,-2.130056,YJ14_BWA,474980,2024-10-17 16:10:06.000 +0000,2024-10-17 16:10:18.000 +0000,2024-10-17 16:10:29.208 +0000,coac|41|1630|2024-10-17
 6211551051,COAC,"41","1630",outbound,2024-10-17,51.589306,-2.122089,YJ14_BWA,474983,2024-10-17 16:10:39.000 +0000,2024-10-17 16:10:48.000 +0000,2024-10-17 16:11:02.713 +0000,coac|41|1630|2024-10-17
