@@ -1,25 +1,25 @@
 SELECT cron.schedule(
                'Update headway & SiriVMposition id',
                '00 01 * * *', -- at 01:00
-               $$CALL public.populate_headway(CURRENT_DATE - '2 day'::interval);CALL public.populate_headway(CURRENT_DATE - '1 day'::interval);CALL public.incomplete_data_load(CURRENT_DATE - '2 day'::interval);CALL public.incomplete_data_load(CURRENT_DATE - '1 day'::interval);$$
+               $$CALL public.populate_headway(CURRENT_DATE - 2);CALL public.populate_headway(CURRENT_DATE - 1);CALL public.incomplete_data_load(CURRENT_DATE - 2);CALL public.incomplete_data_load(CURRENT_DATE - 1);$$
        );
 
 SELECT cron.schedule(
                'summary_by_stop',
                '00 02 * * *', -- at 02:00
-               $$CALL public.summary_by_stops(CURRENT_DATE - '2 day'::interval);CALL public.summary_by_stops(CURRENT_DATE - '1 day'::interval);$$
+               $$CALL public.summary_by_stops(CURRENT_DATE - 2);CALL public.summary_by_stops(CURRENT_DATE - 1);$$
        );
 
 SELECT cron.schedule(
                'summary_by_services',
                '40 02 * * *', -- at 02:40
-               $$CALL public.summary_by_services(CURRENT_DATE - '2 day'::interval);CALL public.summary_by_services(CURRENT_DATE - '1 day'::interval);$$
+               $$CALL public.summary_by_services(CURRENT_DATE - 2);CALL public.summary_by_services(CURRENT_DATE - 1);$$
        );
 
 SELECT cron.schedule(
                'summary_by_operators',
                '00 03 * * *', -- at 03:00am
-               $$CALL public.summary_by_operators(CURRENT_DATE - '2 day'::interval);CALL public.summary_by_operators(CURRENT_DATE - '1 day'::interval);$$
+               $$CALL public.summary_by_operators(CURRENT_DATE - 2);CALL public.summary_by_operators(CURRENT_DATE - 1);$$
        );
 
 SELECT cron.schedule(
@@ -31,7 +31,7 @@ SELECT cron.schedule(
 SELECT cron.schedule(
                'Refresh create_timetable_threshold_summary',
                '00 03 * * *', -- at 03:00
-               $$CALL public.create_timetable_threshold_summary(CURRENT_DATE - '2 day'::interval);CALL public.create_timetable_threshold_summary(CURRENT_DATE - '1 day'::interval);$$
+               $$CALL public.create_timetable_threshold_summary(CURRENT_DATE - 2);CALL public.create_timetable_threshold_summary(CURRENT_DATE - 1);$$
        );
 
 SELECT cron.schedule(
@@ -43,7 +43,7 @@ SELECT cron.schedule(
 SELECT cron.schedule(
                'partman.run_maintenance_proc',
                '15 23 * * *', -- at 23:15
-               $$CALL partman.run_maintenance_proc()$$
+               $$CALL partman.run_maintenance_proc();$$
        );
 
 SELECT cron.schedule(
@@ -61,13 +61,13 @@ SELECT cron.schedule(
 SELECT cron.schedule(
                'Update Admin Area Shapes',
                '05 02 01 * *', -- at 02:05 on the first day of the month
-               $$call public.update_naptan_adminarea_shape();$$
+               $$CALL public.update_naptan_adminarea_shape();$$
        );
 
 SELECT cron.schedule(
                'update_performance_statistics_v4',
                '10 03 * * *',
-               $$CALL public.update_performance_statistics_v4()$$
+               $$CALL public.update_performance_statistics_v4();$$
        );
 
 SELECT cron.schedule(
@@ -79,7 +79,7 @@ SELECT cron.schedule(
 SELECT cron.schedule(
                'partman.partition_data_proc',
                '00 22 * * *', -- at 22:00
-               $$CALL partman.partition_data_proc('public.SiriVMPositions')$$
+               $$CALL partman.partition_data_proc('public.SiriVMPositions');$$
        );
 
 SELECT cron.schedule(
@@ -95,5 +95,5 @@ SELECT cron.schedule(
                    WHEN SPLIT_PART(aurora_db_instance_identifier(), '-', 2) = 'uat' THEN '05 19 * * *' -- at 19:05
                    ELSE '05 18 * * *' -- at 18:05
                    END,
-               $$call update_all_transmodel_tables(); call update_all_naptan_tables(); call generate_timetable(current_date + 1); call generate_expected_tables(current_date + 1); call update_distinct_routes(current_date + 1);$$
+               $$CALL update_all_transmodel_tables();CALL update_all_naptan_tables();CALL generate_timetable(CURRENT_DATE + 1);CALL generate_expected_tables(CURRENT_DATE + 1);CALL update_distinct_routes(CURRENT_DATE + 1);$$
        );
