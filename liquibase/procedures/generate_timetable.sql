@@ -341,7 +341,8 @@ begin
               a.*,
               tv.*,
               %L::date AS date_of_journey,
-              ts2.line_name AS exploded_line_name
+              ts2.line_name AS exploded_line_name,
+			 (reg_services.service_code is not null) AS registered
             FROM
               public.%I a
               JOIN public.transmodel_service ts
@@ -354,9 +355,13 @@ begin
               JOIN public.transmodel_servicepattern ts2
                 ON tssp.servicepattern_id = ts2.id
               JOIN public.transmodel_vehiclejourney tv
-                ON ts2.id = tv.service_pattern_id;
+                ON ts2.id = tv.service_pattern_id
+			  LEFT JOIN public.%I reg_services
+				ON reg_services.service_code = a.service_code;
             ',
             concat('timetable_vehiclejourney', timetable_suffix),
+            partition_date,
+            concat('organisation_timetable', timetable_suffix),
             partition_date,
             concat('filtered_registered_organisation_timetable', timetable_suffix),
             partition_date
@@ -605,7 +610,8 @@ begin
                   exploded_line_name,
                   journey_code,
                   date_of_journey
-                ) AS group_id
+                ) AS group_id,
+				registered
               FROM
                 public.%I tvw
               WHERE
@@ -672,7 +678,8 @@ begin
               transmodel_servicepattern_id,
               stop.atco_code,
               direction,
-              departure_day_shift
+              departure_day_shift,
+			  registered
             FROM
               public.%I tvw
               JOIN public.transmodel_servicepatternstop stop
@@ -727,7 +734,8 @@ begin
               -- We use these in the next query to help calculate the right date to put in the expected_departure_time
               -- because the raw data only sets departure_day_shift to true if the first stop departure is after midnight
               FIRST_VALUE(departure_time) OVER w AS first_departure,
-              LAST_VALUE(departure_time) OVER w AS last_departure
+              LAST_VALUE(departure_time) OVER w AS last_departure,
+			  registered
             FROM
               public.%I a
               JOIN public.naptan_stoppoint b
@@ -806,7 +814,8 @@ begin
               row_number() OVER w AS real_index,
               count(*) OVER w AS max_index,
               direction,
-              departure_day_shift
+              departure_day_shift,
+			  registered
             FROM
               public.%I
             WHERE
@@ -962,7 +971,8 @@ begin
                 vehiclejourney_id,
                 admin_area_id,
                 direction,
-                departure_day_shift
+                departure_day_shift,
+				registered
               )
             SELECT
               tsr1.operator_noc,
@@ -1022,7 +1032,8 @@ begin
               tsr1.vehiclejourney_id,
               tsr1.admin_area_id,
               tsr1.direction,
-              tsr1.departure_day_shift
+              tsr1.departure_day_shift,
+	      tsr1.registered
             FROM
               public.%I tsr1
               LEFT JOIN public.%I tspgi
@@ -1060,7 +1071,6 @@ begin
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_prev_group_id', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
     END IF;
-
     RAISE NOTICE '% generate_timetable complete', clock_timestamp();
 end;
 $$;
