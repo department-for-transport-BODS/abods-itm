@@ -96,14 +96,14 @@ BEGIN
                          (previous_group_id IS NOT NULL) AS frequent_service,
                          (time_difference IS NULL) AS no_recorded
                   FROM public."Timetable"
-                  WHERE date_of_journey = %L) ttb
+                  WHERE date_of_journey = %L
+		  AND (ttb.registered is null or ttb.registered = true)) ttb
                INNER JOIN public.expected_services es ON ttb.date_of_journey = es.date_of_journey
                AND ttb.operator_noc = es.operator_noc
                AND ttb.line_name = es.line_name
                AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, ''-'', -1)
                AND ttb.frequent_service = FALSE
                AND ttb.no_recorded = FALSE
-	       AND (ttb.registered is null or ttb.registered = true)
                GROUP BY ttb.operator_noc,
                         ttb.line_name,
                         es.noc_and_line_and_servicecode,
