@@ -271,9 +271,11 @@ begin
                     revision_id,
                     revision_number,
                     NULL AS otc_service_code,
-                    NULL AS registration_status
+                    NULL AS registration_status,
+					exploded_line_name
                   FROM
                     public.%I
+					cross join lateral unnest(line_name) as exploded_line_name
                   WHERE
                     service_code like ''UZ%%''
                 )
@@ -286,13 +288,15 @@ begin
                   ot.revision_id,
                   ot.revision_number,
                   osn.otc_service_code,
-                  osn.registration_status
+                  osn.registration_status,
+				  osn.exploded_line_name
                 FROM
                   public.%I ot
                   JOIN (
                     SELECT
                       os.registration_number,
                       registration_code,
+					  exploded_line_name,
                       concat_ws(
                         '':'',
                         substring(os.registration_number, 1, 9),
@@ -306,6 +310,7 @@ begin
                         ON  os.registration_number = ois.registration_number
                         AND ois.registration_status = ''Registered''
                         AND ois.effective_date = %L::date + 1
+						cross join lateral unnest(string_to_array(service_number, ''|'')) as exploded_line_name
                     WHERE
                          os.registration_status = ''Registered''
                       OR os.registration_status = ''''
@@ -357,7 +362,8 @@ begin
               JOIN public.transmodel_vehiclejourney tv
                 ON ts2.id = tv.service_pattern_id
 			  LEFT JOIN public.%I reg_services
-				ON reg_services.service_code = a.service_code;
+				ON reg_services.service_code = a.service_code
+				AND reg_services.exploded_line_name = ts2.line_name;
             ',
             concat('timetable_vehiclejourney', timetable_suffix),
             partition_date,
@@ -1033,7 +1039,7 @@ begin
               tsr1.admin_area_id,
               tsr1.direction,
               tsr1.departure_day_shift,
-	      tsr1.registered
+			  tsr1.registered
             FROM
               public.%I tsr1
               LEFT JOIN public.%I tspgi
