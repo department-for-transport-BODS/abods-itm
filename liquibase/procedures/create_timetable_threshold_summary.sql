@@ -103,6 +103,7 @@ BEGIN
                AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, ''-'', -1)
                AND ttb.frequent_service = FALSE
                AND ttb.no_recorded = FALSE
+	       AND (ttb.registered is null or ttb.registered = true)
                GROUP BY ttb.operator_noc,
                         ttb.line_name,
                         es.noc_and_line_and_servicecode,
