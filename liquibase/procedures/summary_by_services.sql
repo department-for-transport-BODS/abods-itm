@@ -135,7 +135,7 @@ BEGIN
 							, -1)
 					WHERE
 						ttb.date_of_journey = %L AND
-						ttb.previous_group_id IS NULL AND
+						ttb.previous_group_id IS NULL
 				) AS sub
 			WHERE
 				date_of_journey = %L
