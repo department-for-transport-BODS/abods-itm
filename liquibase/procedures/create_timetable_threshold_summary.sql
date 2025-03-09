@@ -97,7 +97,7 @@ BEGIN
                          (time_difference IS NULL) AS no_recorded
                   FROM public."Timetable"
                   WHERE date_of_journey = %L
-		  AND (ttb.registered is null or ttb.registered = true)) ttb
+		  AND (registered is null or registered = true)) ttb
                INNER JOIN public.expected_services es ON ttb.date_of_journey = es.date_of_journey
                AND ttb.operator_noc = es.operator_noc
                AND ttb.line_name = es.line_name
