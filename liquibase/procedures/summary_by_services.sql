@@ -136,7 +136,6 @@ BEGIN
 					WHERE
 						ttb.date_of_journey = %L AND
 						ttb.previous_group_id IS NULL AND
-						(ttb.registered is null or ttb.registered = true)
 				) AS sub
 			WHERE
 				date_of_journey = %L
