@@ -96,8 +96,7 @@ BEGIN
                          (previous_group_id IS NOT NULL) AS frequent_service,
                          (time_difference IS NULL) AS no_recorded
                   FROM public."Timetable"
-                  WHERE date_of_journey = %L
-		  AND (registered is null or registered = true)) ttb
+                  WHERE date_of_journey = %L) ttb
                INNER JOIN public.expected_services es ON ttb.date_of_journey = es.date_of_journey
                AND ttb.operator_noc = es.operator_noc
                AND ttb.line_name = es.line_name
