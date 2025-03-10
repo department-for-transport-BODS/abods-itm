@@ -272,10 +272,10 @@ begin
                     revision_number,
                     NULL AS otc_service_code,
                     NULL AS registration_status,
-					exploded_line_name
+                    exploded_line_name
                   FROM
                     public.%I
-					cross join lateral unnest(line_name) as exploded_line_name
+                  CROSS JOIN LATERAL unnest(line_name) AS exploded_line_name
                   WHERE
                     service_code like ''UZ%%''
                 )
@@ -289,14 +289,14 @@ begin
                   ot.revision_number,
                   osn.otc_service_code,
                   osn.registration_status,
-				  osn.exploded_line_name
+                  osn.exploded_line_name
                 FROM
                   public.%I ot
                   JOIN (
                     SELECT
                       os.registration_number,
                       registration_code,
-					  exploded_line_name,
+                      exploded_line_name,
                       concat_ws(
                         '':'',
                         substring(os.registration_number, 1, 9),
@@ -310,7 +310,7 @@ begin
                         ON  os.registration_number = ois.registration_number
                         AND ois.registration_status = ''Registered''
                         AND ois.effective_date = %L::date + 1
-						cross join lateral unnest(string_to_array(service_number, ''|'')) as exploded_line_name
+                      CROSS JOIN LATERAL unnest(string_to_array(service_number, ''|'')) AS exploded_line_name
                     WHERE
                          os.registration_status = ''Registered''
                       OR os.registration_status = ''''
@@ -347,7 +347,7 @@ begin
               tv.*,
               %L::date AS date_of_journey,
               ts2.line_name AS exploded_line_name,
-			 (reg_services.service_code is not null) AS registered
+              (reg_services.service_code is not null) AS registered
             FROM
               public.%I a
               JOIN public.transmodel_service ts
@@ -361,9 +361,9 @@ begin
                 ON tssp.servicepattern_id = ts2.id
               JOIN public.transmodel_vehiclejourney tv
                 ON ts2.id = tv.service_pattern_id
-			  LEFT JOIN public.%I reg_services
-				ON reg_services.service_code = a.service_code
-				AND reg_services.exploded_line_name = ts2.line_name;
+              LEFT JOIN public.%I reg_services
+                ON reg_services.service_code = a.service_code
+                AND reg_services.exploded_line_name = ts2.line_name;
             ',
             concat('timetable_vehiclejourney', timetable_suffix),
             partition_date,
@@ -617,7 +617,7 @@ begin
                   journey_code,
                   date_of_journey
                 ) AS group_id,
-				registered
+                registered
               FROM
                 public.%I tvw
               WHERE
@@ -685,7 +685,7 @@ begin
               stop.atco_code,
               direction,
               departure_day_shift,
-			  registered
+              registered
             FROM
               public.%I tvw
               JOIN public.transmodel_servicepatternstop stop
@@ -741,7 +741,7 @@ begin
               -- because the raw data only sets departure_day_shift to true if the first stop departure is after midnight
               FIRST_VALUE(departure_time) OVER w AS first_departure,
               LAST_VALUE(departure_time) OVER w AS last_departure,
-			  registered
+              registered
             FROM
               public.%I a
               JOIN public.naptan_stoppoint b
@@ -821,7 +821,7 @@ begin
               count(*) OVER w AS max_index,
               direction,
               departure_day_shift,
-			  registered
+              registered
             FROM
               public.%I
             WHERE
@@ -978,7 +978,7 @@ begin
                 admin_area_id,
                 direction,
                 departure_day_shift,
-				registered
+                registered
               )
             SELECT
               tsr1.operator_noc,
@@ -1039,7 +1039,7 @@ begin
               tsr1.admin_area_id,
               tsr1.direction,
               tsr1.departure_day_shift,
-			  tsr1.registered
+              tsr1.registered
             FROM
               public.%I tsr1
               LEFT JOIN public.%I tspgi
@@ -1077,6 +1077,7 @@ begin
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_prev_group_id', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
     END IF;
+
     RAISE NOTICE '% generate_timetable complete', clock_timestamp();
 end;
 $$;

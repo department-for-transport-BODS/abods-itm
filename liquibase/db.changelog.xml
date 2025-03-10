@@ -395,7 +395,8 @@
     <changeSet id="125" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="cron.sql" splitStatements="false"/>
     </changeSet>
-<changeSet id="126" author="abodsuser">
+
+    <changeSet id="126" author="abodsuser">
         <sqlFile path="src/126-add-unregistered-services.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
