@@ -978,7 +978,8 @@ begin
                 admin_area_id,
                 direction,
                 departure_day_shift,
-                registered
+                registered,
+                reprocessing_required
               )
             SELECT
               tsr1.operator_noc,
@@ -1039,7 +1040,8 @@ begin
               tsr1.admin_area_id,
               tsr1.direction,
               tsr1.departure_day_shift,
-              tsr1.registered
+              tsr1.registered,
+              NULL
             FROM
               public.%I tsr1
               LEFT JOIN public.%I tspgi
