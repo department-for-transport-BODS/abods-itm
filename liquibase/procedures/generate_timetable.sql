@@ -242,7 +242,7 @@ begin
               drv.national_operator_code,
               drv.service_code,
               drv.line_name;
-	        ',
+            ',
             concat('organisation_timetable', timetable_suffix),
             concat('filtered_files', timetable_suffix),
             partition_date,
@@ -437,7 +437,7 @@ begin
                 ON tv.id = workingday.id
             WHERE
               coalesce(workingday.flag, ''yes'') = ''yes'';
-	        ',
+            ',
             concat('timetable_vehiclejourney_workingdays', timetable_suffix),
             concat('timetable_vehiclejourney', timetable_suffix),
             concat('timetable_vehiclejourney', timetable_suffix),
@@ -488,7 +488,7 @@ begin
               ) oper
             WHERE
               oper.flag = 0;
-	        ',
+            ',
             concat('timetable_vehiclejourney_exclusions', timetable_suffix),
             partition_date,
             concat('timetable_vehiclejourney_workingdays', timetable_suffix),
@@ -511,7 +511,7 @@ begin
               tne.non_operating_date = %L::date
             GROUP BY
               1;
-	        ',
+            ',
             concat('timetable_vehiclejourney_exclusions', timetable_suffix),
             concat('timetable_vehiclejourney_workingdays', timetable_suffix),
             partition_date,
@@ -535,7 +535,7 @@ begin
                 ON a.id = b.id
             WHERE
               b.id IS NULL;
-	        ',
+            ',
             concat('timetable_journey_workingdays_with_exclusions', timetable_suffix),
             concat('timetable_vehiclejourney_workingdays', timetable_suffix),
             concat('timetable_vehiclejourney_exclusions', timetable_suffix)
@@ -690,7 +690,7 @@ begin
               public.%I tvw
               JOIN public.transmodel_servicepatternstop stop
                 ON tvw.transmodel_vehiclejourney_id = stop.vehicle_journey_id
-	        ',
+            ',
             concat('timetable_journey', timetable_suffix),
             concat('timetable_vj_per_groupid', timetable_suffix)
             );
@@ -751,7 +751,7 @@ begin
                 ORDER BY
                   stop_index RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
               );
-	        ',
+            ',
             concat('timetable_stop', timetable_suffix),
             concat('timetable_journey', timetable_suffix)
             );

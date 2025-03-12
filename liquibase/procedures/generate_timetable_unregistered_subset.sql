@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE public.generate_timetable_unregistered_subset(IN partition_date date)
- LANGUAGE plpgsql
-AS $procedure$
+create or replace procedure generate_timetable_unregistered_subset(IN partition_date date)
+    language plpgsql
+as
+$$
 
 declare
     longdatestring   text := to_char(partition_date, 'YYYY_MM_DD');
@@ -241,7 +242,7 @@ begin
               drv.national_operator_code,
               drv.service_code,
               drv.line_name;
-	        ',
+            ',
             concat('organisation_timetable', timetable_suffix),
             concat('filtered_files', timetable_suffix),
             partition_date,
@@ -262,49 +263,71 @@ begin
               (
                 WITH already_processed_service_codes AS (
                   SELECT
-                    distinct service_code, line_name 
+                    DISTINCT service_code,
+                    line_name
                   FROM
                     public.%I
                 ),
-                 split_otc_table_license_line as (--create license line concat for all registered data
-                	 select 
-                	 	distinct registration_number,
-                	 	concat(split_part(registration_number, ''/'', 1), split_service_number) as license_line
-                	 from bods.otc_service 
-                	 cross join lateral unnest(string_to_array(service_number, ''|'')) as split_service_number
-				),
-				split_timetables_license_line as (--create license line concat for all timetable data published
-				select
-				*,
-					concat(split_part(service_code, '':'', 1), split_service_number) as license_line
-				from public.%I
-				cross join lateral unnest(line_name) as split_service_number
-				),
-				missing_from_timetable as ( --from all data, what hasnt been processed already
-				select stll.*  from split_timetables_license_line stll
-				left join already_processed_service_codes apsc on stll.service_code = apsc.service_code
-				where apsc.service_code is null
-				),
-				flag_registered as (-- flag the registered services
-				select *,
-				(otc.license_line is not null) as registered
-				from missing_from_timetable mft
-				left join split_otc_table_license_line otc on otc.license_line = mft.license_line
-				)
-				 select distinct
-				 service_code,
-				 registered,
-				 split_service_number as line_name,
-				 txcfileattributes_id ,
-				 national_operator_code,
-				 filename,
-				 revision_id,
-				 revision_number 
-				 from flag_registered
+                split_otc_table_license_line AS (
+                  --create license line concat for all registered data
+                  SELECT
+                    DISTINCT registration_number,
+                    concat(
+                      split_part(registration_number, ''/'', 1),
+                      split_service_number
+                    ) AS license_line
+                  FROM
+                    bods.otc_service
+                    CROSS JOIN LATERAL unnest(string_to_array(service_number, ''|'')) AS split_service_number
+                ),
+                split_timetables_license_line AS (
+                  --create license line concat for all timetable data published
+                  SELECT
+                    *,
+                    concat(
+                      split_part(service_code, '':'', 1),
+                      split_service_number
+                    ) AS license_line
+                  FROM
+                    public.%I
+                    CROSS JOIN LATERAL unnest(line_name) AS split_service_number
+                ),
+                missing_from_timetable AS (
+                  --from all data, what hasnt been processed already
+                  SELECT
+                    stll.*
+                  FROM
+                    split_timetables_license_line stll
+                    LEFT JOIN already_processed_service_codes apsc ON
+                      stll.service_code = apsc.service_code
+                  WHERE
+                    apsc.service_code IS NULL
+                ),
+                flag_registered AS (
+                  -- flag the registered services
+                  SELECT
+                    *,
+                    (otc.license_line IS NOT NULL) AS registered
+                  FROM
+                    missing_from_timetable mft
+                    LEFT JOIN split_otc_table_license_line otc ON
+                      otc.license_line = mft.license_line
+                )
+                SELECT
+                  DISTINCT service_code,
+                  registered,
+                  split_service_number AS line_name,
+                  txcfileattributes_id,
+                  national_operator_code,
+                  filename,
+                  revision_id,
+                  revision_number
+                FROM
+                  flag_registered
               );
             ',
             concat('filtered_unregistered_organisation_timetable', timetable_suffix),
-			concat(tablename, '_p', longdatestring),
+            concat(tablename, '_p', longdatestring),
             concat('organisation_timetable', timetable_suffix)
             );
 
@@ -331,7 +354,7 @@ begin
                 ON ts.id = tssp.service_id
               JOIN public.transmodel_servicepattern ts2
                 ON tssp.servicepattern_id = ts2.id
-				AND ts2.line_name = a.line_name
+                AND ts2.line_name = a.line_name
               JOIN public.transmodel_vehiclejourney tv
                 ON ts2.id = tv.service_pattern_id;
             ',
@@ -405,7 +428,7 @@ begin
                 ON tv.id = workingday.id
             WHERE
               coalesce(workingday.flag, ''yes'') = ''yes'';
-	        ',
+            ',
             concat('timetable_vehiclejourney_workingdays', timetable_suffix),
             concat('timetable_vehiclejourney', timetable_suffix),
             concat('timetable_vehiclejourney', timetable_suffix),
@@ -456,7 +479,7 @@ begin
               ) oper
             WHERE
               oper.flag = 0;
-	        ',
+            ',
             concat('timetable_vehiclejourney_exclusions', timetable_suffix),
             partition_date,
             concat('timetable_vehiclejourney_workingdays', timetable_suffix),
@@ -479,7 +502,7 @@ begin
               tne.non_operating_date = %L::date
             GROUP BY
               1;
-	        ',
+            ',
             concat('timetable_vehiclejourney_exclusions', timetable_suffix),
             concat('timetable_vehiclejourney_workingdays', timetable_suffix),
             partition_date,
@@ -503,7 +526,7 @@ begin
                 ON a.id = b.id
             WHERE
               b.id IS NULL;
-	        ',
+            ',
             concat('timetable_journey_workingdays_with_exclusions', timetable_suffix),
             concat('timetable_vehiclejourney_workingdays', timetable_suffix),
             concat('timetable_vehiclejourney_exclusions', timetable_suffix)
@@ -557,7 +580,7 @@ begin
             concat('timetable_vehiclejourney_servicecode_dupes', timetable_suffix)
             );
 
-   RAISE NOTICE '% (Re)Creating timetable_vj_per_groupid temp table', clock_timestamp();
+    RAISE NOTICE '% (Re)Creating timetable_vj_per_groupid temp table', clock_timestamp();
 
     execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vj_per_groupid', timetable_suffix));
 
@@ -585,7 +608,7 @@ begin
                   journey_code,
                   date_of_journey
                 ) AS group_id,
-				registered
+                registered
               FROM
                 public.%I tvw
               WHERE
@@ -653,12 +676,12 @@ begin
               stop.atco_code,
               direction,
               departure_day_shift,
-			  registered
+              registered
             FROM
               public.%I tvw
               JOIN public.transmodel_servicepatternstop stop
                 ON tvw.transmodel_vehiclejourney_id = stop.vehicle_journey_id
-	        ',
+            ',
             concat('timetable_journey', timetable_suffix),
             concat('timetable_vj_per_groupid', timetable_suffix)
             );
@@ -709,7 +732,7 @@ begin
               -- because the raw data only sets departure_day_shift to true if the first stop departure is after midnight
               FIRST_VALUE(departure_time) OVER w AS first_departure,
               LAST_VALUE(departure_time) OVER w AS last_departure,
-			  registered
+              registered
             FROM
               public.%I a
               JOIN public.naptan_stoppoint b
@@ -719,7 +742,7 @@ begin
                 ORDER BY
                   stop_index RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
               );
-	        ',
+            ',
             concat('timetable_stop', timetable_suffix),
             concat('timetable_journey', timetable_suffix)
             );
@@ -789,7 +812,7 @@ begin
               count(*) OVER w AS max_index,
               direction,
               departure_day_shift,
-			  registered
+              registered
             FROM
               public.%I
             WHERE
@@ -938,8 +961,8 @@ begin
                 admin_area_id,
                 direction,
                 departure_day_shift,
-				registered, 
-				reprocessing_required
+                registered,
+                reprocessing_required
               )
             SELECT
               tsr1.operator_noc,
@@ -1000,8 +1023,8 @@ begin
               tsr1.admin_area_id,
               tsr1.direction,
               tsr1.departure_day_shift,
-			  tsr1.registered,
-			  true
+              tsr1.registered,
+              true
             FROM
               public.%I tsr1
               LEFT JOIN public.%I tspgi
@@ -1040,8 +1063,8 @@ begin
         execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
     END IF;
 
-
     RAISE NOTICE '% generate_timetable complete', clock_timestamp();
 end;
-$procedure$
-;
+$$;
+
+alter procedure generate_timetable_unregistered_subset owner to abods_proxy_rw;
