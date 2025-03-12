@@ -5,7 +5,7 @@ $$
 
 declare
     longdatestring   text := to_char(partition_date, 'YYYY_MM_DD');
-    timetable_suffix text := concat('_', longdatestring);
+    timetable_suffix text := concat('_unregistered_subset_', longdatestring);
     tablename        text := 'Timetable';
 
 begin
