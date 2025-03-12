@@ -1,11 +1,11 @@
-create or replace procedure generate_timetable(IN partition_date date)
+create or replace procedure generate_timetable_unregistered_subset(IN partition_date date)
     language plpgsql
 as
 $$
 
 declare
     longdatestring   text := to_char(partition_date, 'YYYY_MM_DD');
-    timetable_suffix text := concat('_', longdatestring);
+    timetable_suffix text := concat('_unregistered_subset_', longdatestring);
     tablename        text := 'Timetable';
 
 begin
@@ -250,9 +250,9 @@ begin
             partition_date
             );
 
-    RAISE NOTICE '% (Re)Creating filtered_registered_organisation_timetable table', clock_timestamp();
+    RAISE NOTICE '% (Re)Creating filtered_unregistered_organisation_timetable table', clock_timestamp();
 
-    execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_registered_organisation_timetable', timetable_suffix));
+    execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_unregistered_organisation_timetable', timetable_suffix));
 
     execute format(
             '
@@ -261,78 +261,74 @@ begin
               *
             FROM
               (
-                WITH operator_UZ_group AS (
+                WITH already_processed_service_codes AS (
                   SELECT
-                    txcfileattributes_id,
-                    national_operator_code,
-                    service_code,
-                    line_name,
-                    filename,
-                    revision_id,
-                    revision_number,
-                    NULL AS otc_service_code,
-                    NULL AS registration_status,
-                    exploded_line_name
+                    DISTINCT service_code,
+                    line_name
                   FROM
                     public.%I
-                  CROSS JOIN LATERAL unnest(line_name) AS exploded_line_name
+                ),
+                split_otc_table_license_line AS (
+                  --create license line concat for all registered data
+                  SELECT
+                    DISTINCT registration_number,
+                    concat(
+                      split_part(registration_number, ''/'', 1),
+                      split_service_number
+                    ) AS license_line
+                  FROM
+                    bods.otc_service
+                    CROSS JOIN LATERAL unnest(string_to_array(service_number, ''|'')) AS split_service_number
+                ),
+                split_timetables_license_line AS (
+                  --create license line concat for all timetable data published
+                  SELECT
+                    *,
+                    concat(
+                      split_part(service_code, '':'', 1),
+                      split_service_number
+                    ) AS license_line
+                  FROM
+                    public.%I
+                    CROSS JOIN LATERAL unnest(line_name) AS split_service_number
+                ),
+                missing_from_timetable AS (
+                  --from all data, what hasnt been processed already
+                  SELECT
+                    stll.*
+                  FROM
+                    split_timetables_license_line stll
+                    LEFT JOIN already_processed_service_codes apsc ON
+                      stll.service_code = apsc.service_code
                   WHERE
-                    service_code like ''UZ%%''
+                    apsc.service_code IS NULL
+                ),
+                flag_registered AS (
+                  -- flag the registered services
+                  SELECT
+                    *,
+                    (otc.license_line IS NOT NULL) AS registered
+                  FROM
+                    missing_from_timetable mft
+                    LEFT JOIN split_otc_table_license_line otc ON
+                      otc.license_line = mft.license_line
                 )
                 SELECT
-                  ot.txcfileattributes_id,
-                  ot.national_operator_code,
-                  ot.service_code,
-                  ot.line_name,
-                  ot.filename,
-                  ot.revision_id,
-                  ot.revision_number,
-                  osn.otc_service_code,
-                  osn.registration_status,
-                  osn.exploded_line_name
+                  DISTINCT service_code,
+                  registered,
+                  split_service_number AS line_name,
+                  txcfileattributes_id,
+                  national_operator_code,
+                  filename,
+                  revision_id,
+                  revision_number
                 FROM
-                  public.%I ot
-                  JOIN (
-                    SELECT
-                      os.registration_number,
-                      registration_code,
-                      exploded_line_name,
-                      concat_ws(
-                        '':'',
-                        substring(os.registration_number, 1, 9),
-                        substring(os.registration_number, 11, 12)
-                      ) AS otc_service_code,
-                      os.registration_status,
-                      os.effective_date
-                    FROM
-                      bods.otc_service os
-                      LEFT JOIN bods.otc_inactiveservice ois
-                        ON  os.registration_number = ois.registration_number
-                        AND ois.registration_status = ''Registered''
-                        AND ois.effective_date = %L::date + 1
-                      CROSS JOIN LATERAL unnest(string_to_array(service_number, ''|'')) AS exploded_line_name
-                    WHERE
-                         os.registration_status = ''Registered''
-                      OR os.registration_status = ''''
-                      OR os.registration_status = ''New''
-                      OR (
-                            os.registration_status != ''Registered''
-                        AND os.registration_status != ''''
-                        AND os.effective_date > %L::date + 1
-                      )
-                  ) osn ON ot.service_code = osn.otc_service_code
-                UNION
-                SELECT
-                  *
-                FROM
-                  operator_UZ_group
+                  flag_registered
               );
             ',
-            concat('filtered_registered_organisation_timetable', timetable_suffix),
-            concat('organisation_timetable', timetable_suffix),
-            concat('organisation_timetable', timetable_suffix),
-            partition_date,
-            partition_date
+            concat('filtered_unregistered_organisation_timetable', timetable_suffix),
+            concat(tablename, '_p', longdatestring),
+            concat('organisation_timetable', timetable_suffix)
             );
 
     RAISE NOTICE '% (Re)Creating timetable_vehiclejourney temp table', clock_timestamp();
@@ -346,8 +342,7 @@ begin
               a.*,
               tv.*,
               %L::date AS date_of_journey,
-              ts2.line_name AS exploded_line_name,
-              (reg_services.service_code is not null) AS registered
+              ts2.line_name AS exploded_line_name
             FROM
               public.%I a
               JOIN public.transmodel_service ts
@@ -359,17 +354,13 @@ begin
                 ON ts.id = tssp.service_id
               JOIN public.transmodel_servicepattern ts2
                 ON tssp.servicepattern_id = ts2.id
+                AND ts2.line_name = a.line_name
               JOIN public.transmodel_vehiclejourney tv
-                ON ts2.id = tv.service_pattern_id
-              LEFT JOIN public.%I reg_services
-                ON reg_services.service_code = a.service_code
-                AND reg_services.exploded_line_name = ts2.line_name;
+                ON ts2.id = tv.service_pattern_id;
             ',
             concat('timetable_vehiclejourney', timetable_suffix),
             partition_date,
-            concat('organisation_timetable', timetable_suffix),
-            partition_date,
-            concat('filtered_registered_organisation_timetable', timetable_suffix),
+            concat('filtered_unregistered_organisation_timetable', timetable_suffix),
             partition_date
             );
 
@@ -927,14 +918,6 @@ begin
 
     execute format('ALTER TABLE public.%I OWNER to abods_rw', concat(tablename, '_p', longdatestring));
 
-    ------------------------------
-    -- Deleting from partition --
-    ------------------------------
-
-    RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
-
-    execute format('DELETE FROM public.%I', concat(tablename, '_p', longdatestring));
-
     --------------------------
     --Importing to partition --
     --------------------------
@@ -1041,7 +1024,7 @@ begin
               tsr1.direction,
               tsr1.departure_day_shift,
               tsr1.registered,
-              NULL
+              true
             FROM
               public.%I tsr1
               LEFT JOIN public.%I tspgi
@@ -1084,4 +1067,4 @@ begin
 end;
 $$;
 
-alter procedure generate_timetable owner to abods_proxy_rw;
+alter procedure generate_timetable_unregistered_subset owner to abods_proxy_rw;

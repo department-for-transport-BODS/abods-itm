@@ -41,6 +41,7 @@ begin
                                left join transmodel_servicepattern ts
                                          on t.servicepattern_id = ts.id
                       where t.date_of_journey = partition_date
+                      and (t.registered is null or t.registered = true)
                       window w as (
                               partition by t.group_id, t.vehiclejourney_id
                               order by t.stop_index asc
