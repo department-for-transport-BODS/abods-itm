@@ -419,4 +419,8 @@
         <changeSet id="132" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/frequent_summary_services_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
+    </changeSet>
+        <changeSet id="133" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/historic_avl_export_unregistered_subset.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
