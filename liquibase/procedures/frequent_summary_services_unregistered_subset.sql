@@ -124,7 +124,6 @@ BEGIN
                                 AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, '-', -1)
                             WHERE ttb.date_of_journey = partition_date
                                 AND ttb.previous_group_id IS NOT null
-                                AND (ttb.registered is null or ttb.registered = true)
                                 AND ttb.reprocessing_required = TRUE) AS sub
                         WHERE date_of_journey = partition_date
                         GROUP BY operator_noc,
