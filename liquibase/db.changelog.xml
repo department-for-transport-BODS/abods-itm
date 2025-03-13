@@ -403,4 +403,7 @@
     <changeSet id="127" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/generate_timetable_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="128" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="sql/128-update-tokens-throttle-monitoring-access.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
