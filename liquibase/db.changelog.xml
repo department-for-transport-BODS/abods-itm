@@ -412,4 +412,7 @@
     <changeSet id="130" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/populate_headway_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
+        <changeSet id="131" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/generate_expected_tables_unregistered_subset.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
