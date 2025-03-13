@@ -423,4 +423,8 @@
         <changeSet id="133" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/historic_avl_export_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
+        </changeSet>
+        <changeSet id="134" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/historic_timetable_export_unregistered_subset.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
