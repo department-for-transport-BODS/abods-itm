@@ -415,4 +415,8 @@
         <changeSet id="131" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/generate_expected_tables_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
+    </changeSet>
+        <changeSet id="132" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/frequent_summary_services_unregistered_subset.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
