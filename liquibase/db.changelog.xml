@@ -410,24 +410,21 @@
         <sqlFile path="procedures/generate_expected_tables_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
     <changeSet id="130" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="procedures/historic_avl_export_unregistered_subset.sql" splitStatements="false"/>
-    </changeSet>
-    <changeSet id="131" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/historic_timetable_export_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="132" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="131" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/incomplete_data_load_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="133" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="132" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/populate_headway_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="134" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="133" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/summary_by_services_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="135" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="134" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/summary_by_stops_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="136" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="135" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/unregistered_subset_post_matching_functions.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
