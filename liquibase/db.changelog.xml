@@ -427,5 +427,8 @@
     <changeSet id="135" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/incomplete_data_load_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="136" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/unregistered_subset_post_matching_functions.sql" splitStatements="false"/>
+    </changeSet>
     
 </databaseChangeLog>
