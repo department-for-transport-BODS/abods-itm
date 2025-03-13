@@ -3,7 +3,7 @@
 
 import os
 import sys
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from multiprocessing import Process, Queue
 from queue import Empty
 from typing import TYPE_CHECKING
@@ -271,6 +271,7 @@ def main() -> None:
 
         local_timetable_path = "/tmp/timetable.parquet"  # noqa: S108 intentional use of /tmp
         local_avl_path = "/tmp/avl.parquet"  # noqa: S108 intentional use of /tmp
+        local_tomorrow_avl_path = "/tmp/avl2.parquet"  # noqa: S108 intentional use of /tmp
 
         with log_execution_time(logger, "parquet_download"):
             process_date_parts = process_date.split("-")
@@ -301,6 +302,24 @@ def main() -> None:
                 Filename=local_avl_path,
             )
 
+            # Also get tomorrow's AVL data for after midnight matching
+            (date.fromisoformat(process_date) + timedelta(days=1)).isoformat().split("-")
+            process_date_parts = (date.fromisoformat(process_date) + timedelta(days=1)).isoformat().split("-")
+            year = process_date_parts[0]
+            month = process_date_parts[1].zfill(2)
+            day = process_date_parts[2].zfill(2)
+            remote_tomorrow_avl_path = f"historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet"
+            logger.info(
+                "Downloading file",
+                remote_path=remote_tomorrow_avl_path,
+                local_path=local_tomorrow_avl_path,
+            )
+            s3.download_file(
+                Bucket=s3_bucket,
+                Key=remote_tomorrow_avl_path,
+                Filename=local_tomorrow_avl_path,
+            )
+
         operator_queue = Queue()
         with duckdb.connect("avl_timetable.db") as conn:
             with log_execution_time(logger, "build_db"):
@@ -311,10 +330,17 @@ def main() -> None:
                     FROM '{local_avl_path}'
                 """)  # noqa: S608 Not really sql injection
                 conn.execute(f"""
+                    INSERT INTO avl
+                    SELECT *
+                    FROM '{local_tomorrow_avl_path}'
+                """)  # noqa: S608 Not really sql injection
+                conn.execute(f"""
                     CREATE TABLE timetable AS
                     SELECT *
                     FROM '{local_timetable_path}'
                 """)  # noqa: S608 Not really sql injection
+
+
 
             with log_execution_time(logger, "get_operators"):
                 for row in conn.query(
