@@ -17,8 +17,8 @@ BEGIN
       public."Timetable" t
     WHERE t.date_of_journey = partition_date
       AND t.expected_departure_time < earliest_departure_time
-      AND actual_departure_time IS null
-      and reprocessing_required = True
+      AND actual_departure_time IS NULL
+      AND reprocessing_required = True
       AND NOT EXISTS (
         SELECT
           1
@@ -42,7 +42,7 @@ BEGIN
     WHERE date_of_journey = partition_date
       AND actual_departure_time IS NULL
       AND expected_departure_time < (now() - recent_stop_interval)
-      and reprocessing_required = True
+      AND reprocessing_required = True
       AND NOT EXISTS (
         SELECT
           1
@@ -79,7 +79,7 @@ BEGIN
     WHERE t.date_of_journey = partition_date
       AND t.actual_departure_time IS NULL
       AND t.expected_departure_time < earliest_departure_time
-      and reprocessing_required = True
+      AND reprocessing_required = True
       AND NOT EXISTS (
         SELECT
           1
@@ -127,8 +127,8 @@ BEGIN
     WHERE t.date_of_journey = partition_date
       AND t.expected_departure_time < earliest_departure_time
       AND s.date_of_journey = partition_date
-      AND t.actual_departure_time IS null
-      and reprocessing_required = True
+      AND t.actual_departure_time IS NULL
+      AND reprocessing_required = True
       AND (
         2 * ASIN(
           SQRT(
@@ -161,8 +161,8 @@ BEGIN
     WHERE t.date_of_journey = partition_date
       AND t.expected_departure_time < earliest_departure_time
       AND s.date_of_journey = partition_date
-      AND t.actual_departure_time IS null
-      and reprocessing_required = True
+      AND t.actual_departure_time IS NULL
+      AND reprocessing_required = True
       AND NOT EXISTS (
         SELECT
           1

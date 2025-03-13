@@ -1,8 +1,8 @@
-CREATE OR REPLACE PROCEDURE public.unregistered_subset_post_matching_functions(IN partition_date date)
- LANGUAGE plpgsql
-AS $$
+create or replace procedure unregistered_subset_post_matching_functions(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
+    language plpgsql
+as
+$$
 DECLARE
-    datestring TEXT := to_char(partition_date, 'YYYY-MM-DD');
 BEGIN
     RAISE NOTICE '% Running unregistered_subset functions %', clock_timestamp(), partition_date::TEXT;
    
@@ -25,3 +25,5 @@ BEGIN
 END;
 $$
 ;
+
+alter procedure unregistered_subset_post_matching_functions owner to abods_proxy_rw;
