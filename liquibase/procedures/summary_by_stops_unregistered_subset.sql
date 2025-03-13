@@ -138,7 +138,6 @@ BEGIN
 					WHERE
 						ttb.date_of_journey = %L
 						and ttb.previous_group_id is null
-						and ttb.registered = true
 						and ttb.reprocessing_required = True
 				) AS sub
 				WHERE
