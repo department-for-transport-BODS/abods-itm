@@ -399,8 +399,17 @@
     <changeSet id="126" author="abodsuser">
         <sqlFile path="src/126-add-unregistered-services.sql" splitStatements="false"/>
     </changeSet>
-
     <changeSet id="127" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/generate_timetable_unregistered_subset.sql" splitStatements="false"/>
+    </changeSet>
+        
+    <changeSet id="128" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/summary_by_stops_unregistered_subset.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="129" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/summary_by_services_unregistered_subset.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="130" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/populate_headway_unregistered_subset.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
