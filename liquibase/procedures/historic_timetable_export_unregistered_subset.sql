@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE public.historic_timetable_export_unregistered_subset(IN partition_date date)
- LANGUAGE plpgsql
-AS $$
+create or replace procedure historic_timetable_export_unregistered_subset(IN partition_date date)
+    language plpgsql
+as
+$$
 DECLARE
     datestring TEXT := to_char(partition_date, 'YYYY-MM-DD');
 BEGIN
@@ -43,5 +44,6 @@ BEGIN
 
     RAISE NOTICE '% Exported timetable for date %', clock_timestamp(), partition_date::TEXT;
 END;
-$$
-;
+$$;
+
+alter procedure historic_timetable_export_unregistered_subset owner to abods_proxy_rw;

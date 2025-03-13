@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE public.populate_headway_unregistered_subset(IN pt_date date)
- LANGUAGE plpgsql
-AS $$
+create or replace procedure populate_headway_unregistered_subset(IN pt_date date)
+    language plpgsql
+as
+$$
 DECLARE
     recent_stop_interval    INTERVAL    = INTERVAL '120' MINUTE;
     earliest_departure_time TIMESTAMPTZ = now() - recent_stop_interval;
@@ -68,5 +69,6 @@ BEGIN
 
     RAISE NOTICE '% populate_headway complete', clock_timestamp();
 END;
-$$
-;
+$$;
+
+alter procedure populate_headway_unregistered_subset owner to abods_proxy_rw;

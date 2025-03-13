@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE public.summary_by_stops_unregistered_subset(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
- LANGUAGE plpgsql
-AS $$
+create or replace procedure summary_by_stops_unregistered_subset(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
+    language plpgsql
+as
+$$
 DECLARE
     tablename TEXT;
 
@@ -168,5 +169,6 @@ BEGIN
 
     RAISE NOTICE '% summary_by_stops complete', clock_timestamp();
 END;
-$$
-;
+$$;
+
+alter procedure summary_by_stops_unregistered_subset owner to abods_proxy_rw;

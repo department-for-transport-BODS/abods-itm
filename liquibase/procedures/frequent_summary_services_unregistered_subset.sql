@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE public.frequent_summary_services_unregistered_subset(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
- LANGUAGE plpgsql
-AS $$
+create or replace procedure public.frequent_summary_services_unregistered_subset(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
+    language plpgsql
+as
+$$
 DECLARE
     tablename TEXT;
 
@@ -201,5 +202,6 @@ BEGIN
 
     RAISE NOTICE '% frequent_summary_services complete', clock_timestamp();
 END;
-$$
-;
+$$;
+
+alter procedure frequent_summary_services_unregistered_subset owner to abods_proxy_rw;

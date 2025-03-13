@@ -7,7 +7,7 @@ DECLARE
 
 BEGIN
     tablename := 'timetable_frequent_summary_services';
-   
+
     RAISE NOTICE '% Deleting from %', clock_timestamp(), (concat(tablename, ' for ', partition_date::date));
 
     execute format('DELETE FROM public.%I WHERE date_of_journey = %L', tablename, partition_date::date);
@@ -116,7 +116,7 @@ BEGIN
                                     ttb.actual_headway,
                                     ttb.headway_time_difference,
                                     (ttb.timestamp_after_estimate IS NOT NULL)             AS estimated,
-                                    ttb.stop_id, 
+                                    ttb.stop_id,
                                     ttb.is_timing_point
                             FROM public."Timetable" ttb
                                         INNER JOIN public.expected_services es ON
@@ -198,7 +198,7 @@ BEGIN
                     headway_stops_count,
                     is_timing_point
             FROM Timetable_Agg;
-          
+
 
     RAISE NOTICE '% frequent_summary_services complete', clock_timestamp();
 END;

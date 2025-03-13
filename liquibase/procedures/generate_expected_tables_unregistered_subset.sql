@@ -1,8 +1,8 @@
-CREATE OR REPLACE PROCEDURE public.generate_expected_tables_unregistered_subset(IN partition_date date)
- LANGUAGE plpgsql
-AS $$
+create or replace procedure public.generate_expected_tables_unregistered_subset(IN partition_date date)
+    language plpgsql
+as
+$$
 begin
-
     RAISE NOTICE '% Inserting expected journeys for %', clock_timestamp(), partition_date::text;
 
     insert into expected_journeys (date_of_journey,
@@ -155,5 +155,6 @@ begin
     RAISE NOTICE '% generate_expected_tables complete', clock_timestamp();
 
 end;
-$$
-;
+$$;
+
+alter procedure generate_expected_tables_unregistered_subset owner to abods_proxy_rw;

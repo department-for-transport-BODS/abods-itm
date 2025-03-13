@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE public.incomplete_data_load_unregistered_subset(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
- LANGUAGE plpgsql
-AS $$
+create or replace procedure incomplete_data_load_unregistered_subset(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
+    language plpgsql
+as
+$$
 DECLARE
     recent_stop_interval    INTERVAL    = INTERVAL '120' MINUTE;
     earliest_departure_time TIMESTAMPTZ = now() - recent_stop_interval;
@@ -242,5 +243,6 @@ BEGIN
 
     RAISE NOTICE '% incomplete_data_load complete', clock_timestamp();
 END;
-$$
-;
+$$;
+
+alter procedure incomplete_data_load_unregistered_subset owner to abods_proxy_rw;

@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE public.historic_avl_export_unregistered_subset(IN partition_date date)
- LANGUAGE plpgsql
-AS $$
+create or replace procedure public.historic_avl_export_unregistered_subset(IN partition_date date)
+    language plpgsql
+as
+$$
 DECLARE
     datestring TEXT := to_char(partition_date, 'YYYY-MM-DD');
 BEGIN
@@ -24,7 +25,7 @@ BEGIN
                                 s.destination_ref,
                                 to_json(s.departure_time)#>>''{}'' as departure_time
                              FROM public."SiriVMPositions" s
-                             WHERE (date_of_journey = ''%s''::DATE  OR  date_of_journey = (''%s''::DATE + INTERVAL ''1 day''))
+                             WHERE (date_of_journey = ''%s''::DATE OR date_of_journey = (''%s''::DATE + INTERVAL ''1 day''))
                              ORDER BY s.operator_ref, s.line_name, s.journey_ref, s.date_of_journey, s.direction_ref, s.vehicle_ref, s.recorded_at_time',
                             datestring),
                      aws_commons.create_s3_uri(
@@ -44,5 +45,6 @@ BEGIN
 
     RAISE NOTICE '% Exported sirivmpositions for date %', clock_timestamp(), partition_date::TEXT;
 END;
-$$
-;
+$$;
+
+alter procedure historic_avl_export_unregistered_subset owner to abods_proxy_rw;
