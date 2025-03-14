@@ -258,7 +258,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                 logger.exception("An error occurred when processing historic record")
 
 
-def main() -> None:
+def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an issue here
     try:
         process_date = os.getenv("PROCESS_DATE")
         if not process_date:
@@ -303,8 +303,14 @@ def main() -> None:
             )
 
             # Also get tomorrow's AVL data for after midnight matching
-            (date.fromisoformat(process_date) + timedelta(days=1)).isoformat().split("-")
-            process_date_parts = (date.fromisoformat(process_date) + timedelta(days=1)).isoformat().split("-")
+            (date.fromisoformat(process_date) + timedelta(days=1)).isoformat().split(
+                "-",
+            )
+            process_date_parts = (
+                (date.fromisoformat(process_date) + timedelta(days=1))
+                .isoformat()
+                .split("-")
+            )
             year = process_date_parts[0]
             month = process_date_parts[1].zfill(2)
             day = process_date_parts[2].zfill(2)
@@ -339,8 +345,6 @@ def main() -> None:
                     SELECT *
                     FROM '{local_timetable_path}'
                 """)  # noqa: S608 Not really sql injection
-
-
 
             with log_execution_time(logger, "get_operators"):
                 for row in conn.query(
