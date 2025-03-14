@@ -19,6 +19,7 @@ from .matcher.utils import log_execution_time
 
 if TYPE_CHECKING:
     from .matcher.models import (
+        AVLRecord,
         Stop,
     )
 
@@ -27,6 +28,13 @@ initial_level = logger.log_level
 group_ids_to_debug = [
     group_id for group_id in os.getenv("DEBUG_GROUP_IDS", "").split(",") if group_id
 ]
+
+
+def log_level_for_group_id(group_id: str):
+    if group_id in group_ids_to_debug:
+        return "DEBUG"
+    else:
+        return initial_level
 
 
 def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of an issue here
@@ -70,126 +78,134 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                     estimated_remaining_groups=task_queue.qsize(),
                 )
 
-                avls_by_group_id = {}
-                with log_execution_time(logger, "fetch_avls"):
-                    for (
-                        recorded_at_time,
-                        response_timestamp,
-                        latitude,
-                        longitude,
-                        line_name,
-                        vehicle_ref,
-                        journey_ref,
-                        direction_ref,
-                        date_of_journey,
-                        group_id,
-                    ) in process_conn.execute(
-                        f"""
-                            SELECT
-                                recorded_at_time,
-                                response_timestamp,
-                                latitude,
-                                longitude,
-                                line_name,
-                                vehicle_ref,
-                                journey_ref,
-                                direction_ref,
-                                date_of_journey,
-                                group_id
-                            FROM avl
-                            WHERE operator_ref = '{operator_ref}'
-                        """,  # noqa: S608 Not really sql injection
-                    ).fetchall():
-                        avls_by_group_id.setdefault(group_id, []).append(
-                            {
-                                "recorded_at_time": utc_iso_string(recorded_at_time),
-                                "response_timestamp": utc_iso_string(
+                def fetch_avls() -> dict[str, list[AVLRecord]]:
+                    grouped = {}
+                    with log_execution_time(logger, "fetch_avls"):
+                        for (
+                            recorded_at_time,
+                            response_timestamp,
+                            latitude,
+                            longitude,
+                            line_name,
+                            vehicle_ref,
+                            journey_ref,
+                            direction_ref,
+                            date_of_journey,
+                            group_id,
+                        ) in process_conn.execute(
+                            f"""
+                                SELECT
+                                    recorded_at_time,
                                     response_timestamp,
-                                ),
-                                "latitude": float(latitude),
-                                "longitude": float(longitude),
-                                "line_name": str(line_name),
-                                "operator_ref": str(operator_ref),
-                                "vehicle_ref": str(vehicle_ref),
-                                "journey_ref": str(journey_ref),
-                                "direction_ref": str(direction_ref),
-                                "date_of_journey": str(date_of_journey),
-                            },
-                        )
-                timetable: dict[str, dict[str, Stop]] = {}
-                with log_execution_time(logger, "fetch_timetable"):
-                    group_id_col_index = 0
-                    direction_col_index = 2
-                    stop_index_col_index = 8
-                    stop_data = process_conn.execute(
-                        f"""
-                            SELECT
-                                group_id,
-                                operator_noc,
+                                    latitude,
+                                    longitude,
+                                    line_name,
+                                    vehicle_ref,
+                                    journey_ref,
+                                    direction_ref,
+                                    date_of_journey,
+                                    group_id
+                                FROM avl
+                                WHERE operator_ref = '{operator_ref}'
+                            """,  # noqa: S608 Not really sql injection
+                        ).fetchall():
+                            grouped.setdefault(group_id, []).append(
+                                {
+                                    "recorded_at_time": utc_iso_string(
+                                        recorded_at_time
+                                    ),
+                                    "response_timestamp": utc_iso_string(
+                                        response_timestamp,
+                                    ),
+                                    "latitude": float(latitude),
+                                    "longitude": float(longitude),
+                                    "line_name": str(line_name),
+                                    "operator_ref": str(operator_ref),
+                                    "vehicle_ref": str(vehicle_ref),
+                                    "journey_ref": str(journey_ref),
+                                    "direction_ref": str(direction_ref),
+                                    "date_of_journey": str(date_of_journey),
+                                },
+                            )
+                    return grouped
+
+                def fetch_timetable():
+                    routes: dict[str, dict[str, Stop]] = {}
+                    with log_execution_time(logger, "fetch_timetable"):
+                        group_id_col_index = 0
+                        direction_col_index = 2
+                        stop_index_col_index = 8
+                        stop_data = process_conn.execute(
+                            f"""
+                                SELECT
+                                    group_id,
+                                    operator_noc,
+                                    direction,
+                                    stop_latitude,
+                                    stop_longitude,
+                                    expected_departure_time,
+                                    timetable_id,
+                                    date_of_journey,
+                                    stop_index
+                                FROM timetable
+                                WHERE operator_noc = '{operator_ref}'
+                            """,  # noqa: S608 Not really sql injection
+                        ).fetchall()
+                        # Initially bucket by group_id, since we need to do something different if there are multiple directions within each
+                        by_group_id = {}
+                        for data in stop_data:
+                            by_group_id.setdefault(data[group_id_col_index], []).append(
+                                data,
+                            )
+
+                        for group_id, stops in by_group_id.items():
+                            logger.setLevel(log_level_for_group_id(group_id))
+                            # sort just in case duckdb returns in the wrong order
+                            stops.sort(key=lambda x: int(x[stop_index_col_index]))
+
+                            directions = {rec[direction_col_index] for rec in stops}
+                            logger.debug(
+                                "Directions found for journey",
+                                directions=directions,
+                                group_id=group_id,
+                            )
+                            for (
+                                _group_id,
+                                _operator_noc,
                                 direction,
                                 stop_latitude,
                                 stop_longitude,
                                 expected_departure_time,
                                 timetable_id,
                                 date_of_journey,
-                                stop_index
-                            FROM timetable
-                            WHERE operator_noc = '{operator_ref}'
-                        """,  # noqa: S608 Not really sql injection
-                    ).fetchall()
-                    # Initially bucket by group_id, since we need to do something different if there are multiple directions within each
-                    by_group_id = {}
-                    for data in stop_data:
-                        by_group_id.setdefault(data[group_id_col_index], []).append(
-                            data,
-                        )
+                                _stop_index,
+                            ) in stops:
+                                index = group_id
+                                # If the timetable data has multiple directions, we need to separate those in this representation
+                                # LiveTimetableStore will try the plain group_id first and then try with the avl direction if not found
+                                if len(directions) > 1:
+                                    stop_direction = str(direction)
+                                    index += f"|{stop_direction}"
 
-                    for group_id, stops in by_group_id.items():
-                        if group_id in group_ids_to_debug:
-                            level = "DEBUG"
-                        else:
-                            level = initial_level
+                                route = routes.setdefault(index, {})
+                                normalised_stop_index = str(len(route) + 1)
+                                route[normalised_stop_index] = (
+                                    (
+                                        float(stop_latitude),
+                                        float(stop_longitude),
+                                    ),
+                                    str(expected_departure_time),
+                                    int(timetable_id),
+                                    str(date_of_journey),
+                                )
 
-                        logger.setLevel(level)
-                        # sort just in case duckdb returns in the wrong order
-                        stops.sort(key=lambda x: int(x[stop_index_col_index]))
+                        logger.setLevel(initial_level)
+                    return routes
 
-                        directions = {rec[direction_col_index] for rec in stops}
-                        logger.debug(
-                            "Directions found for journey",
-                            directions=directions,
-                            group_id=group_id,
-                        )
-                        for (
-                            _group_id,
-                            _operator_noc,
-                            direction,
-                            stop_latitude,
-                            stop_longitude,
-                            expected_departure_time,
-                            timetable_id,
-                            date_of_journey,
-                            _stop_index,
-                        ) in stops:
-                            index = group_id
-                            # If the timetable data has multiple directions, we need to separate those in this representation
-                            # LiveTimetableStore will try the plain group_id first and then try with the avl direction if not found
-                            if len(directions) > 1:
-                                stop_direction = str(direction)
-                                index += f"|{stop_direction}"
-
-                            route = timetable.setdefault(index, {})
-                            normalised_stop_index = str(len(route) + 1)
-                            route[normalised_stop_index] = (
-                                (
-                                    float(stop_latitude),
-                                    float(stop_longitude),
-                                ),
-                                str(expected_departure_time),
-                                int(timetable_id),
-                                str(date_of_journey),
-                            )
+                timetable = fetch_timetable()
                 timetable_store = LiveTimetableStore(timetable)
+
+                avls_by_group_id = fetch_avls()
 
                 total_routes = len(timetable)
                 total_stops = sum(len(route) for route in timetable.values())
@@ -204,21 +220,32 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                     operator_ref=operator_ref,
                 ):
                     for group_id, group_avls in avls_by_group_id.items():
+                        if not group_id.endswith(process_date.isoformat()):
+                            continue
+
+                        # If there are avls from after midnight as well, add those
+                        tomorrow_group_id = (
+                            group_id.removesuffix(process_date.isoformat())
+                            + (process_date + timedelta(days=1)).isoformat()
+                        )
+                        if tomorrow_group_id in avls_by_group_id:
+                            group_avls = [
+                                *group_avls,
+                                *avls_by_group_id[tomorrow_group_id],
+                            ]
+
                         # sort just in case duckdb returns in the wrong order
                         group_avls.sort(key=lambda x: x["recorded_at_time"])
 
-                        if group_id in group_ids_to_debug:
-                            level = "DEBUG"
-                        else:
-                            level = initial_level
+                        level = log_level_for_group_id(group_id)
 
-                        logger.setLevel(level)
+                        logger.setLevel(log_level_for_group_id(group_id))
 
                         journey_matches, processed_routes, match_count = (
                             match_group_id_avls(
                                 timetable_store,
                                 group_avls,
-                                level,
+                                log_level_for_group_id(group_id),
                             )
                         )
                         logger.debug(
@@ -246,6 +273,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                             process_date,
                             level,
                         )
+                        logger.setLevel(initial_level)
                 logger.info(
                     "Processed operator data",
                     total_routes=total_routes,
