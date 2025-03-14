@@ -206,7 +206,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                     operator_timetables=len(timetable),
                     operator_ref=operator_ref,
                 ):
-                    for group_id, group_avls in avls_by_group_id.items():
+                    for group_id, avls in avls_by_group_id.items():
                         if not group_id.endswith(process_date.isoformat()):
                             continue
 
@@ -215,6 +215,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                             group_id.removesuffix(process_date.isoformat())
                             + (process_date + timedelta(days=1)).isoformat()
                         )
+                        group_avls = avls
                         if tomorrow_group_id in avls_by_group_id:
                             group_avls = [
                                 *group_avls,
