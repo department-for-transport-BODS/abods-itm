@@ -1,6 +1,13 @@
-from datetime import date, timedelta, datetime
+from datetime import date, datetime, timedelta
 
-from .models import AVLRecord, Route, Timetable, avl_group_id, avl_recorded_at_time_utc, stop_departure_time
+from .models import (
+    AVLRecord,
+    Route,
+    Timetable,
+    avl_group_id,
+    avl_recorded_at_time_utc,
+    stop_departure_time,
+)
 
 
 class LiveTimetableStore:
@@ -10,7 +17,11 @@ class LiveTimetableStore:
         """Construct a live timetable store"""
         self._timetable = timetable
 
-    def _get_timetable_by_index(self, timetable_index: str, avl_time:datetime) -> Route|None:
+    def _get_timetable_by_index(
+        self,
+        timetable_index: str,
+        avl_time: datetime,
+    ) -> Route | None:
         route = self._timetable.get(timetable_index)
         if not route:
             return None
@@ -32,7 +43,12 @@ class LiveTimetableStore:
 
         return route
 
-    def _get_timetable_for_group_id(self, group_id: str, direction_ref:str, avl_time:datetime) -> tuple[str, Route]:
+    def _get_timetable_for_group_id(
+        self,
+        group_id: str,
+        direction_ref: str,
+        avl_time: datetime,
+    ) -> tuple[str, Route]:
         route_details = self._get_timetable_by_index(group_id, avl_time)
         if route_details:
             return group_id, route_details
@@ -66,7 +82,11 @@ class LiveTimetableStore:
         direction_ref = avl["direction_ref"]
 
         avl_time = avl_recorded_at_time_utc(avl)
-        stop_history_index, route = self._get_timetable_for_group_id(avl_group_id(avl), direction_ref, avl_time)
+        stop_history_index, route = self._get_timetable_for_group_id(
+            avl_group_id(avl),
+            direction_ref,
+            avl_time,
+        )
         if route:
             return stop_history_index, route
 
@@ -80,7 +100,9 @@ class LiveTimetableStore:
         }
 
         stop_history_index_yesterday, route = self._get_timetable_for_group_id(
-            avl_group_id(modified_avl),direction_ref, avl_time
+            avl_group_id(modified_avl),
+            direction_ref,
+            avl_time,
         )
         if route:
             return stop_history_index_yesterday, route

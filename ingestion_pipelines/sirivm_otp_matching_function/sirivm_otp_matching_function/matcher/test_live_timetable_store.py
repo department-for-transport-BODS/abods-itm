@@ -10,7 +10,7 @@ avl = {
     "line_name": "10",
     "journey_ref": "20",
     "date_of_journey": "2024-12-25",
-    "recorded_at_time": "2024-12-25 12:00:00"
+    "recorded_at_time": "2024-12-25 12:00:00",
 }
 group_id = avl_group_id(avl)
 
@@ -99,14 +99,22 @@ no_route_for_group_id = {"different_group_id": outbound_route["2"]}
         ),
         pytest.param(
             generic_timetable,
-            {**avl,  "recorded_at_time": "2024-12-25 07:59:59", "direction_ref": "outbound"},
+            {
+                **avl,
+                "recorded_at_time": "2024-12-25 07:59:59",
+                "direction_ref": "outbound",
+            },
             outbound_index,
             None,
             id="single journey for group id, returns none if more than 4 hours before start of journey",
         ),
         pytest.param(
             generic_timetable,
-            {**avl,  "recorded_at_time": "2024-12-25 16:00:01", "direction_ref": "outbound"},
+            {
+                **avl,
+                "recorded_at_time": "2024-12-25 16:00:01",
+                "direction_ref": "outbound",
+            },
             outbound_index,
             None,
             id="single journey for group id, returns none if more than 4 hours after end of journey",
