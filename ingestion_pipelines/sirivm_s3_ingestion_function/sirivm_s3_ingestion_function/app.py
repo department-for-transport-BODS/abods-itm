@@ -46,7 +46,7 @@ def get_rds_token():  # noqa: ANN201 - BODS-7131
             DBUsername=db_user,
         )
     except Exception as e:
-        logging.exception("could not get token ")
+        logging.exception("could not get token ")  # noqa: LOG015
         raise e  # noqa: TRY201 - BODS-7131
 
     return token
@@ -66,11 +66,11 @@ def write_list_to_file(output_csv_file, lst, sirivm_process_bucket, fname):  # n
             fname,
             ExtraArgs={"ContentEncoding": "gzip"},
         )
-        logging.info(f"gzip file {fname} uploaded to {sirivm_process_bucket} created")
+        logging.info(f"gzip file {fname} uploaded to {sirivm_process_bucket} created")  # noqa: LOG015
 
 
 def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # noqa: PLR0915 - BODS-7131
-    logging.info(
+    logging.info(  # noqa: LOG015
         f"Starting s3 ingestion - Time to Run [{round(context.get_remaining_time_in_millis() / 1000)}] seconds / Memory [{context.memory_limit_in_mb}] Mb",
     )
 
@@ -113,13 +113,13 @@ def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # no
                     encoding="utf-8",
                 )
                 version_id = message["versionId"]
-                logging.info(
+                logging.info(  # noqa: LOG015
                     f"Processing AVL bucket {bucket}, file {key}, versionId {version_id}",
                 )
                 try:
                     obj = s3.get_object(Bucket=bucket, Key=key, VersionId=version_id)
                     try:
-                        logging.info("Parsing XML file")
+                        logging.info("Parsing XML file")  # noqa: LOG015
                         avl_response = parse_xml(
                             obj["Body"].read(),
                             batch_id,
@@ -131,7 +131,7 @@ def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # no
                             sirivm_process_bucket,
                             fname,
                         )
-                        logging.info(
+                        logging.info(  # noqa: LOG015
                             f"Writing gzip file to S3 bucket {sirivm_process_bucket}",
                         )
                         queue = sqs.get_queue_by_name(QueueName=process_queue)
@@ -149,7 +149,7 @@ def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # no
                                 },
                             },
                         )
-                        logging.info(
+                        logging.info(  # noqa: LOG015
                             f"Written to gzip file key to Queue {process_queue}",
                         )
                         end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
@@ -187,17 +187,17 @@ def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # no
                                     },
                                 )
                             except Exception:
-                                logging.exception(
+                                logging.exception(  # noqa: LOG015
                                     "Failed to write message to queue",
                                     extra={"queue_name": queue_name},
                                 )
                                 raise
-                            logging.info(
+                            logging.info(  # noqa: LOG015
                                 f"Written to gzip file key to Queues {queue_name}",
                             )
                     except Exception as e:
                         end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
-                        logging.exception(
+                        logging.exception(  # noqa: LOG015
                             f"Lambda failed either connecting to database or processing AVL Zip file or writing to queue. Error {e}",  # noqa: TRY401 - BODS-7131
                         )
                         cur.execute(
@@ -208,7 +208,7 @@ def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # no
                         # raise e
                 except Exception as e:
                     end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
-                    logging.exception(
+                    logging.exception(  # noqa: LOG015
                         f"Error getting object {key} from bucket {bucket}. Error {e}",  # noqa: TRY401 - BODS-7131
                     )
                     cur.execute(
@@ -219,8 +219,8 @@ def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # no
                     # raise e
         except Exception as e:
             end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
-            logging.info(f"Event {event}")
-            logging.exception(f"Error consuming the event. Error {e}")  # noqa: TRY401 - BODS-7131
+            logging.info(f"Event {event}")  # noqa: LOG015
+            logging.exception(f"Error consuming the event. Error {e}")  # noqa: LOG015, TRY401
             cur.execute(
                 "Update public.batch set s3_ingestion_status = 'Failed',s3_ingestion_end_prc_ts=%s where batch_id=%s ;",
                 [end_time, batch_id],
@@ -228,4 +228,4 @@ def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # no
             cur.close()
             # raise e
     except Exception as e:
-        logging.exception(f"Error connecting to abods DB. Error {e}")  # noqa: TRY401 - BODS-7131
+        logging.exception(f"Error connecting to abods DB. Error {e}")  # noqa: LOG015, TRY401

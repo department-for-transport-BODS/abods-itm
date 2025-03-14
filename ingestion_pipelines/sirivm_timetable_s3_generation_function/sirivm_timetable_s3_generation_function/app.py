@@ -178,8 +178,8 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
                 },
             )
         except Exception:
-            logging.exception(f"Failed to write to queue {queue_name}")
+            logging.exception(f"Failed to write to queue {queue_name}")  # noqa: LOG015
             raise
-        logging.info(
+        logging.info(  # noqa: LOG015
             f"Send message to  {otp_queue}{shard_no + 1} so timetable is refreshed.",
         )
