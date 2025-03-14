@@ -1,4 +1,4 @@
-create or replace procedure public.frequent_summary_services(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
+create or replace procedure public.frequent_summary_services_unregistered_subset(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
     language plpgsql
 as
 $$
@@ -54,8 +54,7 @@ BEGIN
                                 AVG(sub.actual_headway) FILTER (
                                     WHERE sub.actual_headway IS NOT NULL)                    AS actual_headway,
                                 AVG(sub.headway_time_difference) FILTER (
-                                    WHERE sub.actual_headway IS NOT NULL
-                                    AND (ttb.registered is null or ttb.registered = true))    AS excess_wait_Time,
+                                    WHERE sub.actual_headway IS NOT NULL)                    AS excess_wait_Time,
                                 sub.estimated,
                                 sub.stop_id,
                                 count(sub.actual_headway)                                    AS headway_stops_count,
@@ -125,7 +124,8 @@ BEGIN
                                 AND ttb.line_name = es.line_name
                                 AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, '-', -1)
                             WHERE ttb.date_of_journey = partition_date
-                                AND ttb.previous_group_id IS NOT NULL) AS sub
+                                AND ttb.previous_group_id IS NOT null
+                                AND ttb.reprocessing_required = TRUE) AS sub
                         WHERE date_of_journey = partition_date
                         GROUP BY operator_noc,
                                 service_code,
@@ -204,4 +204,4 @@ BEGIN
 END;
 $$;
 
-alter procedure frequent_summary_services owner to abods_proxy_rw;
+alter procedure frequent_summary_services_unregistered_subset owner to abods_proxy_rw;
