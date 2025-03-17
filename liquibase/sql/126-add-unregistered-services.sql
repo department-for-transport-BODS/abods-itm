@@ -3,7 +3,7 @@ ALTER TABLE public."Timetable"
 
 
 CREATE TABLE public.login_details (
-    user_id INT NOT NULL,
+    user_id primary key INT,
     data_monitoring_access_count INT,
     data_monitoring_last_accessed TIMESTAMP
 );
