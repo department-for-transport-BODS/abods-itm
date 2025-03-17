@@ -926,7 +926,7 @@ def match_group_id_avls(
 
     unprocessed_avls = 0
     for (group_id, direction_ref), avl_count in no_timetable_counts.items():
-        logger.info(
+        logger.debug(
             "Could not find timetable for some avls",
             group_id=group_id,
             direction_ref=direction_ref,
