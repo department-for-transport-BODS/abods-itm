@@ -54,8 +54,7 @@ BEGIN
                                 AVG(sub.actual_headway) FILTER (
                                     WHERE sub.actual_headway IS NOT NULL)                    AS actual_headway,
                                 AVG(sub.headway_time_difference) FILTER (
-                                    WHERE sub.actual_headway IS NOT NULL
-                                    AND (ttb.registered is null or ttb.registered = true))    AS excess_wait_Time,
+                                    WHERE sub.actual_headway IS NOT NULL)    				 AS excess_wait_Time,
                                 sub.estimated,
                                 sub.stop_id,
                                 count(sub.actual_headway)                                    AS headway_stops_count,
