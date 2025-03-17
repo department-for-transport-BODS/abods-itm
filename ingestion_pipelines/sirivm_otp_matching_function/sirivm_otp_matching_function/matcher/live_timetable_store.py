@@ -42,6 +42,9 @@ class LiveTimetableStore:
             if not self._historic:
                 logger.warning(
                     "AVL is more than 4 hours before the start of a matching journey in the extract",
+                    timetable_index=timetable_index,
+                    start_of_journey=start_of_journey,
+                    lower_bound=lower_bound,
                 )
             return None
 
@@ -51,6 +54,9 @@ class LiveTimetableStore:
             if not self._historic:
                 logger.warning(
                     "AVL is more than 4 hours after the end of a matching journey in the extract",
+                    timetable_index=timetable_index,
+                    end_of_journey=end_of_journey,
+                    upper_bound=upper_bound,
                 )
             return None
 
