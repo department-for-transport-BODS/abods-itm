@@ -3,9 +3,10 @@ ALTER TABLE public."Timetable"
 
 
 CREATE TABLE public.login_details (
-    user_id primary key INT,
+    user_id INT primary key,
     data_monitoring_access_count INT,
-    data_monitoring_last_accessed TIMESTAMP
+    data_monitoring_last_accessed TIMESTAMP,
+    last_login TIMESTAMP
 );
 
 ALTER TABLE public.login_details OWNER TO abods_proxy_rw;
