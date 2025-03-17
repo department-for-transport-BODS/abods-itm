@@ -311,7 +311,7 @@ begin
                   FROM
                     missing_from_timetable mft
                     LEFT JOIN split_otc_table_license_line otc ON
-                      otc.license_line = mft.license_line
+                      LOWER(otc.license_line) = LOWER(mft.license_line)
                 )
                 SELECT
                   DISTINCT service_code,
