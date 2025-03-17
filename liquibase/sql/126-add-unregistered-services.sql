@@ -2,11 +2,17 @@ ALTER TABLE public."Timetable"
     ADD COLUMN IF NOT EXISTS registered BOOLEAN;
 
 
-CREATE TABLE public.login_details (
-    user_id INT primary key,
-    data_monitoring_access_count INT,
-    data_monitoring_last_accessed TIMESTAMP,
-    last_login TIMESTAMP
+CREATE TABLE public.login_details
+(
+    user_id                       INT NOT NULL primary key,
+    last_login                    TIMESTAMP NOT NULL,
+    data_monitoring_access_count  INT,
+    data_monitoring_last_accessed TIMESTAMP
 );
 
-ALTER TABLE public.login_details OWNER TO abods_proxy_rw;
+ALTER TABLE public.login_details
+    OWNER TO abods_proxy_rw;
+
+INSERT INTO public.login_details (user_id, last_login)
+SELECT user_id, (expires - interval '14' day)
+FROM public."Tokens";
