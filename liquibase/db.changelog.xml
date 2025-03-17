@@ -397,7 +397,7 @@
     </changeSet>
 
     <changeSet id="126" author="abodsuser">
-        <sqlFile path="src/126-add-unregistered-services.sql" splitStatements="false"/>
+        <sqlFile path="sql/126-add-unregistered-services.sql" splitStatements="false"/>
     </changeSet>
 
     <changeSet id="127" author="abodsuser" runOnChange="true" runInTransaction="true">
