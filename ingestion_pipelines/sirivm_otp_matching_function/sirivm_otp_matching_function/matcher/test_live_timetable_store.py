@@ -10,19 +10,20 @@ avl = {
     "line_name": "10",
     "journey_ref": "20",
     "date_of_journey": "2024-12-25",
+    "recorded_at_time": "2024-12-25 12:00:00",
 }
 group_id = avl_group_id(avl)
 
-generic_route = {"1": ((1.0, 1.0), "time", "timetable_id", "date")}
+generic_route = {"1": ((1.0, 1.0), "12:00:00", "timetable_id", "2024-12-25")}
 generic_timetable = {group_id: generic_route}
 
 inbound_direction = "inbound"
 inbound_index = group_id + "|" + inbound_direction
-inbound_route = {"1": ((1.0, 2.0), "time", "inbound_timetable_id", "date")}
+inbound_route = {"1": ((1.0, 2.0), "12:00:00", "inbound_timetable_id", "2024-12-25")}
 
 outbound_direction = "outbound"
 outbound_index = group_id + "|" + outbound_direction
-outbound_route = {"2": ((2.0, 1.0), "time", "outbound_timetable_id", "date")}
+outbound_route = {"2": ((2.0, 1.0), "12:00:00", "outbound_timetable_id", "2024-12-25")}
 
 split_timetable = {
     inbound_index: inbound_route,
@@ -95,6 +96,28 @@ no_route_for_group_id = {"different_group_id": outbound_route["2"]}
             group_id,
             generic_route,
             id="avl after midnight returns correct timetable",
+        ),
+        pytest.param(
+            generic_timetable,
+            {
+                **avl,
+                "recorded_at_time": "2024-12-25 07:59:59",
+                "direction_ref": "outbound",
+            },
+            outbound_index,
+            None,
+            id="single journey for group id, returns none if more than 4 hours before start of journey",
+        ),
+        pytest.param(
+            generic_timetable,
+            {
+                **avl,
+                "recorded_at_time": "2024-12-25 16:00:01",
+                "direction_ref": "outbound",
+            },
+            outbound_index,
+            None,
+            id="single journey for group id, returns none if more than 4 hours after end of journey",
         ),
     ],
 )
