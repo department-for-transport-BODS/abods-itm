@@ -1,12 +1,8 @@
-create or replace procedure generate_expected_tables(IN partition_date date)
+create or replace procedure public.generate_expected_tables_unregistered_subset(IN partition_date date)
     language plpgsql
 as
 $$
 begin
-    RAISE NOTICE '% Deleting expected journeys for %', clock_timestamp(), partition_date::text;
-
-    delete from expected_journeys where date_of_journey = partition_date;
-
     RAISE NOTICE '% Inserting expected journeys for %', clock_timestamp(), partition_date::text;
 
     insert into expected_journeys (date_of_journey,
@@ -42,6 +38,7 @@ begin
                                          on t.servicepattern_id = ts.id
                       where t.date_of_journey = partition_date
                       and (t.registered is null or t.registered = true)
+                      and t.reprocessing_required = True
                       window w as (
                               partition by t.group_id, t.vehiclejourney_id
                               order by t.stop_index asc
@@ -160,4 +157,4 @@ begin
 end;
 $$;
 
-alter procedure generate_expected_tables owner to abods_proxy_rw;
+alter procedure generate_expected_tables_unregistered_subset owner to abods_proxy_rw;
