@@ -156,9 +156,7 @@ BEGIN
 					t.trend_total_count,
 					CASE WHEN t.trend_total_count = 0 THEN 0 ELSE (t.trend_on_time_count::FLOAT / t.trend_total_count)*100 END,
 					CASE
-					    WHEN c.total_count = 0 AND t.trend_total_count = 0 THEN 0
-					    WHEN c.total_count = 0 THEN -((t.trend_on_time_count::FLOAT / t.trend_total_count)*100)
-					    WHEN t.trend_total_count = 0 THEN (c.on_time_count::FLOAT / c.total_count)*100
+					    WHEN c.total_count = 0 OR t.trend_total_count = 0 THEN NULL
 					    ELSE ((c.on_time_count::FLOAT / c.total_count)*100) - ((t.trend_on_time_count::FLOAT / t.trend_total_count)*100)
 					END AS percentage_change
 				FROM temp_current_stats_%s_%s c
