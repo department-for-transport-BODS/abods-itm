@@ -42,7 +42,7 @@ class LiveTimetableStore:
         lower_bound = start_of_journey - timedelta(hours=4)
         if recorded_at_time < lower_bound:
             if not self._historic:
-                logger.warning(
+                logger.debug(
                     "AVL is more than 4 hours before the start of a matching journey in the extract",
                     timetable_index=timetable_index,
                     start_of_journey=start_of_journey,
