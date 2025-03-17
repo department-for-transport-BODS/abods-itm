@@ -320,7 +320,7 @@ begin
                         AND os.registration_status != ''''
                         AND os.effective_date > %L::date + 1
                       )
-                  ) osn ON ot.service_code = osn.otc_service_code
+                  ) osn ON LOWER(ot.service_code) = LOWER(osn.otc_service_code)
                 UNION
                 SELECT
                   *
@@ -362,8 +362,8 @@ begin
               JOIN public.transmodel_vehiclejourney tv
                 ON ts2.id = tv.service_pattern_id
               LEFT JOIN public.%I reg_services
-                ON reg_services.service_code = a.service_code
-                AND reg_services.exploded_line_name = ts2.line_name;
+                ON LOWER(reg_services.service_code) = LOWER(a.service_code)
+                AND LOWER(reg_services.exploded_line_name) = LOWER(ts2.line_name);
             ',
             concat('timetable_vehiclejourney', timetable_suffix),
             partition_date,
