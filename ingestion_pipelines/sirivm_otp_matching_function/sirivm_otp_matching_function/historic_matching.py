@@ -192,7 +192,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
 
                 logger.setLevel(initial_level)
 
-                timetable_store = LiveTimetableStore(timetable)
+                timetable_store = LiveTimetableStore(timetable, historic=True)
 
                 total_routes = len(timetable)
                 total_stops = sum(len(route) for route in timetable.values())

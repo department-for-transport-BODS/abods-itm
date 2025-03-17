@@ -1,5 +1,7 @@
 from datetime import date, datetime, timedelta
 
+from aws_lambda_powertools import Logger
+
 from .models import (
     AVLRecord,
     Route,
@@ -9,13 +11,16 @@ from .models import (
     stop_departure_time,
 )
 
+logger = Logger()
+
 
 class LiveTimetableStore:
     """Timetable store used for live matching"""
 
-    def __init__(self, timetable: Timetable) -> None:
+    def __init__(self, timetable: Timetable, historic: bool = False) -> None:  # noqa: FBT001,FBT002 boolean arg just used to control logging, don't let it get out of hand
         """Construct a live timetable store"""
         self._timetable = timetable
+        self._historic = historic
 
     def _get_timetable_by_index(
         self,
@@ -34,11 +39,19 @@ class LiveTimetableStore:
         start_of_journey = min(departure_times)
         lower_bound = start_of_journey - timedelta(hours=4)
         if avl_time < lower_bound:
+            if not self._historic:
+                logger.warning(
+                    "AVL is more than 4 hours before the start of a matching journey in the extract",
+                )
             return None
 
         end_of_journey = max(departure_times)
         upper_bound = end_of_journey + timedelta(hours=4)
         if avl_time > upper_bound:
+            if not self._historic:
+                logger.warning(
+                    "AVL is more than 4 hours after the end of a matching journey in the extract",
+                )
             return None
 
         return route
