@@ -34,10 +34,12 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
     sqs_event = SQSEvent(event)
 
     for rec in sqs_event.records:
-        with logger.append_context_keys(message_attributes={
+        with logger.append_context_keys(
+            message_attributes={
                 key: val.string_value for key, val in rec.message_attributes.items()
-            },historic=False):
-
+            },
+            historic=False,
+        ):
             # sirivm_timetable_s3_generation_function sends this message when done refreshing the extract
             if rec.message_attributes["key"].string_value == "timetable":
                 logger.info("Updating main timetable")
@@ -59,7 +61,10 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             avl_file_time = avl_file_key[-17:-3]
             avl_file_datetime = parse(avl_file_time)
 
-            with logger.append_context_keys(avl_file_time=avl_file_time, avl_datetime=avl_file_datetime):
+            with logger.append_context_keys(
+                avl_file_time=avl_file_time,
+                avl_datetime=avl_file_datetime,
+            ):
                 try:
                     shard_stop_history = s3_client.get_stop_history(shard_no)
 
