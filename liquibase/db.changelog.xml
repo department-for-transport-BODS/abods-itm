@@ -427,4 +427,8 @@
     <changeSet id="135" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/unregistered_subset_post_matching_functions.sql" splitStatements="false"/>
     </changeSet>
+
+    <changeSet id="136" author="abodsuser">
+        <sqlFile path="src/136-add-login-details.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
