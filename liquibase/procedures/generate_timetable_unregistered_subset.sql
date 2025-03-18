@@ -308,12 +308,12 @@ begin
                   SELECT
                     mft.license_line,
                     service_code,
-					split_service_number,
-                  	txcfileattributes_id,
-                  	national_operator_code,
-                  	filename,
-                  	revision_id,
-                  	revision_number,
+		    split_service_number,
+                    txcfileattributes_id,
+                    national_operator_code,
+                    filename,
+                    revision_id,
+                    revision_number,
                     (otc.license_line IS NOT NULL) AS registered
                   FROM
                     missing_from_timetable mft
