@@ -329,7 +329,7 @@ begin
                   filename,
                   revision_id,
                   revision_number, 
-				  license_line
+		  license_line
                 FROM
                   flag_registered
               );
