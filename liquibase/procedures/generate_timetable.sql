@@ -271,11 +271,9 @@ begin
                     revision_id,
                     revision_number,
                     NULL AS otc_service_code,
-                    NULL AS registration_status,
-                    exploded_line_name
+                    NULL AS registration_status
                   FROM
                     public.%I
-                  CROSS JOIN LATERAL unnest(line_name) AS exploded_line_name
                   WHERE
                     service_code like ''UZ%%''
                 )
@@ -288,15 +286,13 @@ begin
                   ot.revision_id,
                   ot.revision_number,
                   osn.otc_service_code,
-                  osn.registration_status,
-                  osn.exploded_line_name
+                  osn.registration_status
                 FROM
                   public.%I ot
                   JOIN (
                     SELECT
                       os.registration_number,
                       registration_code,
-                      exploded_line_name,
                       concat_ws(
                         '':'',
                         substring(os.registration_number, 1, 9),
@@ -310,7 +306,6 @@ begin
                         ON  os.registration_number = ois.registration_number
                         AND ois.registration_status = ''Registered''
                         AND ois.effective_date = %L::date + 1
-                      CROSS JOIN LATERAL unnest(string_to_array(service_number, ''|'')) AS exploded_line_name
                     WHERE
                          os.registration_status = ''Registered''
                       OR os.registration_status = ''''
@@ -362,8 +357,7 @@ begin
               JOIN public.transmodel_vehiclejourney tv
                 ON ts2.id = tv.service_pattern_id
               LEFT JOIN public.%I reg_services
-                ON LOWER(reg_services.service_code) = LOWER(a.service_code)
-                AND LOWER(reg_services.exploded_line_name) = LOWER(ts2.line_name);
+                ON LOWER(reg_services.service_code) = LOWER(a.service_code);
             ',
             concat('timetable_vehiclejourney', timetable_suffix),
             partition_date,
@@ -612,9 +606,9 @@ begin
                 departure_day_shift,
                 concat_ws(
                   ''|'',
-                  national_operator_code,
-                  exploded_line_name,
-                  journey_code,
+                  TRIM(national_operator_code),
+                  TRIM(exploded_line_name),
+                  TRIM(journey_code),
                   date_of_journey
                 ) AS group_id,
                 registered
