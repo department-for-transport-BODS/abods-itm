@@ -438,7 +438,4 @@
     <changeSet id="138" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/repopulate_distinct_routes.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="139" author="abodsuser">
-        <sqlFile path="sql/139-repopulate-distinct-routes.sql" splitStatements="false"/>
-    </changeSet>
 </databaseChangeLog>
