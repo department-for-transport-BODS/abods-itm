@@ -1,15 +1,8 @@
-CREATE OR REPLACE PROCEDURE public.generate_license_lines_with_dq_issues(IN partition_date date)
- LANGUAGE plpgsql
-AS $$
-
-declare
-    longdatestring   text := to_char(partition_date, 'YYYY_MM_DD');
-
+create or replace procedure generate_license_lines_with_dq_issues(IN partition_date date)
+    language plpgsql
+as
+$$
 begin
-
-
-   
-
     RAISE NOTICE '% (Re)Creating license_line_data_quality_isses table', clock_timestamp();
 
     DROP TABLE IF EXISTS public.license_line_data_quality_isses;
@@ -17,28 +10,45 @@ begin
     execute format(
             '
             CREATE TABLE public.license_line_data_quality_isses AS
-			            SELECT
+            SELECT
               *
             FROM
-            (with service_code_list as(
-			select registration_number , split_service_number
-			FROM  bods.otc_service
-			CROSS JOIN LATERAL unnest(string_to_array(service_number, ''|'')) AS split_service_number
-			where (split_service_number like ''%% %%'' or LENGTH(split_service_number) > 4 or split_service_number like ''%%[^a-zA-Z0-9]%%'')),
-			timetable_list as (
-			select distinct service_code, line_name
-			from public."Timetable"
-			where date_of_journey >= %L::date - INTERVAL ''8 day'' AND date_of_journey < %L::date )
-			select distinct otc.registration_number, 
-				otc.split_service_number as otc_service_code, 
-				t.line_name,                   
-				concat(
-                      split_part(t.service_code, '':'', 1),
-                      t.line_name
-                    ) AS dq_issues_license_line
-                    from service_code_list otc
-			left join timetable_list t on REPLACE(t.service_code, '':'', ''/'') = otc.registration_number
-			where t.service_code is not null);
+              (
+                WITH service_code_list AS (
+                  SELECT
+                    registration_number,
+                    split_service_number
+                  FROM
+                    bods.otc_service
+                    CROSS JOIN LATERAL unnest(string_to_array(service_number, ''|'')) AS split_service_number
+                  WHERE
+                    (
+                      split_service_number like ''%% %%''
+                      OR LENGTH(split_service_number) > 4
+                      OR split_service_number like ''%%[^a-zA-Z0-9]%%''
+                    )
+                ),
+                timetable_list AS (
+                  SELECT
+                    DISTINCT service_code,
+                    line_name
+                  FROM
+                    public."Timetable"
+                  WHERE
+                    date_of_journey >= %L::date - INTERVAL ''8 day''
+                    AND date_of_journey < %L::date
+                )
+                SELECT
+                  DISTINCT otc.registration_number,
+                  otc.split_service_number AS otc_service_code,
+                  t.line_name,
+                  concat(split_part(t.service_code, '':'', 1), t.line_name) AS dq_issues_license_line
+                FROM
+                  service_code_list otc
+                  LEFT JOIN timetable_list t ON REPLACE(t.service_code, '':'', ''/'') = otc.registration_number
+                WHERE
+                  t.service_code IS NOT NULL
+              );
 	        ',
             partition_date,
             partition_date
@@ -47,5 +57,6 @@ begin
 
     RAISE NOTICE '% License_line_data_quality_isses completed', clock_timestamp();
 end;
-$$
-;
+$$;
+
+alter procedure generate_license_lines_with_dq_issues owner to abods_proxy_rw;
