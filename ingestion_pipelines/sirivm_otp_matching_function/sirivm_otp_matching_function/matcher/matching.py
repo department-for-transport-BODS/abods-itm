@@ -857,7 +857,6 @@ def match_avl_batch(
             all_matched.extend(to_add)
             all_removed.extend(to_remove)
 
-    logger.remove_keys(["avl", "group_id", "stop_history_index"])
     logger.info(
         "Processed batch",
         new_matches=len(all_matched),
@@ -907,7 +906,6 @@ def match_group_id_avls(
             if rec["timetable_id"] not in remove_timetable_ids
         ]
         journey_matches.extend(to_set)
-        logger.remove_keys(["avl", "group_id", "stop_history_index"])
 
     no_timetable_counts = {}
     expected_matched_stops = 0
@@ -926,7 +924,7 @@ def match_group_id_avls(
 
     unprocessed_avls = 0
     for (group_id, direction_ref), avl_count in no_timetable_counts.items():
-        logger.info(
+        logger.debug(
             "Could not find timetable for some avls",
             group_id=group_id,
             direction_ref=direction_ref,
@@ -972,83 +970,80 @@ def match_avl(
     """
     # 1. check if group id exists in timetable
     group_id = avl_group_id(avl)
-    stop_history_index, route = timetable.get_route(avl)
-    logger.append_keys(
-        avl=avl,
-        group_id=group_id,
-        stop_history_index=stop_history_index,
-    )
-    if not route:
-        logger.debug("Could not find timetable for avl in timetable extract")
-        return [], [], stop_history
+    with logger.append_context_keys(avl=avl, group_id=group_id):
+        stop_history_index, route = timetable.get_route(avl)
+        with logger.append_context_keys(stop_history_index=stop_history_index):
+            if not route:
+                logger.debug("Could not find timetable for avl in timetable extract")
+                return [], [], stop_history
 
-    logger.debug(f"stop_history_index {stop_history_index} in timetable")
+            logger.debug(f"stop_history_index {stop_history_index} in timetable")
 
-    # 2. check if group id exists in stop_history, if not, create a blank group stop history
-    if stop_history_index not in stop_history:
-        default_route_history: RouteHistory = {
-            "last_avl_time": "",
-            "last_avl_longitude": None,
-            "last_avl_latitude": None,
-            "matched_stops": {},
-            "potential_matches": {},
-        }
-        stop_history[stop_history_index] = default_route_history
-    route_history = stop_history[stop_history_index]
-    current_avl_time = str(avl_recorded_at_time_utc(avl))
+            # 2. check if group id exists in stop_history, if not, create a blank group stop history
+            if stop_history_index not in stop_history:
+                default_route_history: RouteHistory = {
+                    "last_avl_time": "",
+                    "last_avl_longitude": None,
+                    "last_avl_latitude": None,
+                    "matched_stops": {},
+                    "potential_matches": {},
+                }
+                stop_history[stop_history_index] = default_route_history
+            route_history = stop_history[stop_history_index]
+            current_avl_time = str(avl_recorded_at_time_utc(avl))
 
-    # 3. check if current recorded_at_time is the same as the last avl time in route_history
-    last_avl_time = route_history["last_avl_time"]
-    if last_avl_time == current_avl_time:
-        logger.debug(
-            "Same avl time seen again. Skipping avl...",
-            last_avl_time=last_avl_time,
-            current_avl_time=current_avl_time,
-        )
-        return [], [], stop_history
+            # 3. check if current recorded_at_time is the same as the last avl time in route_history
+            last_avl_time = route_history["last_avl_time"]
+            if last_avl_time == current_avl_time:
+                logger.debug(
+                    "Same avl time seen again. Skipping avl...",
+                    last_avl_time=last_avl_time,
+                    current_avl_time=current_avl_time,
+                )
+                return [], [], stop_history
 
-    if last_avl_time > current_avl_time:
-        logger.debug(
-            "Out of order avl matching. Probably from a second vehicle",
-            last_avl_time=last_avl_time,
-            current_avl_time=current_avl_time,
-        )
+            if last_avl_time > current_avl_time:
+                logger.debug(
+                    "Out of order avl matching. Probably from a second vehicle",
+                    last_avl_time=last_avl_time,
+                    current_avl_time=current_avl_time,
+                )
 
-    bad_matches: list[BadDbMatch] = []
-    # 4. update the time
-    if len(route_history["matched_stops"]) > 0:
-        # 6-10. Check if the bus is revisiting stop 1
-        check_update_first_stop(avl, route, route_history, bad_matches)
+            bad_matches: list[BadDbMatch] = []
+            # 4. update the time
+            if len(route_history["matched_stops"]) > 0:
+                # 6-10. Check if the bus is revisiting stop 1
+                check_update_first_stop(avl, route, route_history, bad_matches)
 
-    # 11-14. Find potential matches
-    logger.debug("11. find potential matches")
+            # 11-14. Find potential matches
+            logger.debug("11. find potential matches")
 
-    find_potential_matches(avl, route, route_history)
+            find_potential_matches(avl, route, route_history)
 
-    # update last avl time, longitude and latitude
-    route_history["last_avl_time"] = str(avl_recorded_at_time_utc(avl))
-    route_history["last_avl_longitude"] = avl["longitude"]
-    route_history["last_avl_latitude"] = avl["latitude"]
+            # update last avl time, longitude and latitude
+            route_history["last_avl_time"] = str(avl_recorded_at_time_utc(avl))
+            route_history["last_avl_longitude"] = avl["longitude"]
+            route_history["last_avl_latitude"] = avl["latitude"]
 
-    # Check if avl is anywhere within the zone of a potential match
-    # 14-34. Find matches
-    if len(route_history.get("potential_matches")) <= 0:
-        return [], bad_matches, stop_history
+            # Check if avl is anywhere within the zone of a potential match
+            # 14-34. Find matches
+            if len(route_history.get("potential_matches")) <= 0:
+                return [], bad_matches, stop_history
 
-    new_matches: list[NewDbMatch] = []
-    potential_matches_to_remove = []
-    find_matches_in_potential_matches(
-        avl,
-        route,
-        route_history,
-        new_matches,
-        potential_matches_to_remove,
-        bad_matches,
-    )
-    # 22.1 remove matched stops from potential matches
-    remove_matched_stops(
-        route_history,
-        potential_matches_to_remove,
-    )
+            new_matches: list[NewDbMatch] = []
+            potential_matches_to_remove = []
+            find_matches_in_potential_matches(
+                avl,
+                route,
+                route_history,
+                new_matches,
+                potential_matches_to_remove,
+                bad_matches,
+            )
+            # 22.1 remove matched stops from potential matches
+            remove_matched_stops(
+                route_history,
+                potential_matches_to_remove,
+            )
 
-    return new_matches, bad_matches, stop_history
+            return new_matches, bad_matches, stop_history

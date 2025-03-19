@@ -3,7 +3,7 @@
 
 import os
 import sys
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from multiprocessing import Process, Queue
 from queue import Empty
 from typing import TYPE_CHECKING
@@ -189,7 +189,10 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                                 int(timetable_id),
                                 str(date_of_journey),
                             )
-                timetable_store = LiveTimetableStore(timetable)
+
+                logger.setLevel(initial_level)
+
+                timetable_store = LiveTimetableStore(timetable, historic=True)
 
                 total_routes = len(timetable)
                 total_stops = sum(len(route) for route in timetable.values())
@@ -203,7 +206,22 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                     operator_timetables=len(timetable),
                     operator_ref=operator_ref,
                 ):
-                    for group_id, group_avls in avls_by_group_id.items():
+                    for group_id, avls in avls_by_group_id.items():
+                        if not group_id.endswith(process_date.isoformat()):
+                            continue
+
+                        # If there are avls from after midnight as well, add those
+                        tomorrow_group_id = (
+                            group_id.removesuffix(process_date.isoformat())
+                            + (process_date + timedelta(days=1)).isoformat()
+                        )
+                        group_avls = avls
+                        if tomorrow_group_id in avls_by_group_id:
+                            group_avls = [
+                                *group_avls,
+                                *avls_by_group_id[tomorrow_group_id],
+                            ]
+
                         # sort just in case duckdb returns in the wrong order
                         group_avls.sort(key=lambda x: x["recorded_at_time"])
 
@@ -246,6 +264,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                             process_date,
                             level,
                         )
+                        logger.setLevel(initial_level)
                 logger.info(
                     "Processed operator data",
                     total_routes=total_routes,
@@ -258,7 +277,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                 logger.exception("An error occurred when processing historic record")
 
 
-def main() -> None:
+def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an issue here
     try:
         process_date = os.getenv("PROCESS_DATE")
         if not process_date:
@@ -271,6 +290,7 @@ def main() -> None:
 
         local_timetable_path = "/tmp/timetable.parquet"  # noqa: S108 intentional use of /tmp
         local_avl_path = "/tmp/avl.parquet"  # noqa: S108 intentional use of /tmp
+        local_tomorrow_avl_path = "/tmp/avl2.parquet"  # noqa: S108 intentional use of /tmp
 
         with log_execution_time(logger, "parquet_download"):
             process_date_parts = process_date.split("-")
@@ -301,6 +321,30 @@ def main() -> None:
                 Filename=local_avl_path,
             )
 
+            # Also get tomorrow's AVL data for after midnight matching
+            (date.fromisoformat(process_date) + timedelta(days=1)).isoformat().split(
+                "-",
+            )
+            process_date_parts = (
+                (date.fromisoformat(process_date) + timedelta(days=1))
+                .isoformat()
+                .split("-")
+            )
+            year = process_date_parts[0]
+            month = process_date_parts[1].zfill(2)
+            day = process_date_parts[2].zfill(2)
+            remote_tomorrow_avl_path = f"historic/parquet/YYYY={year}/MM={month}/DD={day}/siri_vm_{year}{month}{day}.parquet"
+            logger.info(
+                "Downloading file",
+                remote_path=remote_tomorrow_avl_path,
+                local_path=local_tomorrow_avl_path,
+            )
+            s3.download_file(
+                Bucket=s3_bucket,
+                Key=remote_tomorrow_avl_path,
+                Filename=local_tomorrow_avl_path,
+            )
+
         operator_queue = Queue()
         with duckdb.connect("avl_timetable.db") as conn:
             with log_execution_time(logger, "build_db"):
@@ -309,6 +353,11 @@ def main() -> None:
                     CREATE TABLE avl AS
                     SELECT *
                     FROM '{local_avl_path}'
+                """)  # noqa: S608 Not really sql injection
+                conn.execute(f"""
+                    INSERT INTO avl
+                    SELECT *
+                    FROM '{local_tomorrow_avl_path}'
                 """)  # noqa: S608 Not really sql injection
                 conn.execute(f"""
                     CREATE TABLE timetable AS

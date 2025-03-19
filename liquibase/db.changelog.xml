@@ -397,7 +397,7 @@
     </changeSet>
 
     <changeSet id="126" author="abodsuser">
-        <sqlFile path="src/126-add-unregistered-services.sql" splitStatements="false"/>
+        <sqlFile path="sql/126-add-unregistered-services.sql" splitStatements="false"/>
     </changeSet>
 
     <changeSet id="127" author="abodsuser" runOnChange="true" runInTransaction="true">
@@ -427,8 +427,14 @@
     <changeSet id="135" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/unregistered_subset_post_matching_functions.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="136" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/generate_license_lines_with_dq_issues.sql" splitStatements="false"/>
+    </changeSet>
 
-    <changeSet id="136" author="abodsuser">
-        <sqlFile path="src/136-add-login-details.sql" splitStatements="false"/>
+    <changeSet id="137" author="abodsuser">
+        <sqlFile path="sql/137-create_reprocessing_required_column.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="138" author="abodsuser">
+        <sqlFile path="src/138-add-login-details.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
