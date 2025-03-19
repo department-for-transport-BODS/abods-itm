@@ -97,3 +97,9 @@ SELECT cron.schedule(
                    END,
                $$CALL update_all_transmodel_tables();CALL update_all_naptan_tables();CALL generate_timetable(CURRENT_DATE + 1);CALL generate_expected_tables(CURRENT_DATE + 1);CALL update_distinct_routes(CURRENT_DATE + 1);$$
        );
+
+SELECT cron.schedule(
+               'generate_license_lines_with_dq_issues',
+               '00 05 * * SUN', -- sundays at 05:00
+               $$CALL generate_license_lines_with_dq_issues(CURRENT_DATE);$$
+       );
