@@ -3,7 +3,7 @@ create or replace procedure generate_license_lines_with_dq_issues(IN partition_d
 as
 $$
 begin
-    RAISE NOTICE '% (Re)Creating license_line_data_quality_isses table', clock_timestamp();
+    RAISE NOTICE '% (Re)Creating license_line_data_quality_issues table', clock_timestamp();
 
     TRUNCATE public.license_line_data_quality_issues;
 
@@ -57,7 +57,7 @@ begin
           t.service_code IS NOT NULL
       ) sub;
 
-    RAISE NOTICE '% License_line_data_quality_isses completed', clock_timestamp();
+    RAISE NOTICE '% generate_license_lines_with_dq_issues completed', clock_timestamp();
 end;
 $$;
 
