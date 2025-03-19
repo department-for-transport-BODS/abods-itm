@@ -30,9 +30,9 @@ begin
             CROSS JOIN LATERAL unnest(string_to_array(service_number, '|')) AS split_service_number
           WHERE
             (
-              split_service_number like '%% %%'
+              split_service_number like '% %'
               OR LENGTH(split_service_number) > 4
-              OR split_service_number like '%%[^a-zA-Z0-9]%%'
+              OR split_service_number like '%[^a-zA-Z0-9]%'
             )
         ),
         timetable_list AS (
