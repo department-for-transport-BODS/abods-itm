@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS public.login_details
 (
-    user_id                       INT       NOT NULL PRIMARY KEY,
-    last_login                    TIMESTAMP NOT NULL,
-    data_monitoring_access_count  INT,
-    data_monitoring_last_accessed TIMESTAMP
+    user_id                        INT       NOT NULL PRIMARY KEY,
+    last_login                     TIMESTAMP NOT NULL,
+    data_monitoring_access_count   INT,
+    data_monitoring_access_refresh TIMESTAMP
 );
 
 ALTER TABLE public.login_details
