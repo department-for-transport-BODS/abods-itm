@@ -433,5 +433,8 @@
 
     <changeSet id="137" author="abodsuser">
         <sqlFile path="sql/137-create_reprocessing_required_column.sql" splitStatements="false"/>
-    </changeSet> 
+    </changeSet>
+    <changeSet id="138" author="abodsuser">
+        <sqlFile path="src/138-add-login-details.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
