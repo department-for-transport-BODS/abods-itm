@@ -358,7 +358,7 @@ def main():
             "avl_parquet": (avl_parquet_path in files),
         }
         timetable_export_needed.append(current)
-        if not data["avl_csv"]:
+        if not data["avl_parquet"] and not data["avl_csv"]:
             avl_export_needed.append(current)
             continue
 
