@@ -357,14 +357,10 @@ def main():
             "avl_gz": (avl_gz_path in files),
             "avl_parquet": (avl_parquet_path in files),
         }
-        if data["avl_parquet"] and data["timetable_parquet"]:
-            ready_to_run.append(current)
-            timetable_export_needed.append(current)
-            continue
+        timetable_export_needed.append(current)
         if not data["avl_csv"]:
             avl_export_needed.append(current)
             continue
-            timetable_export_needed.append(current)
 
     ready_to_run = sorted(ready_to_run)
     avl_export_needed = sorted(avl_export_needed)
@@ -383,17 +379,6 @@ def main():
     if timetable_export_needed:
         print("Will export timetable data for the following dates:")
         print(";".join(d.isoformat() for d in timetable_export_needed))
-
-    regenerate_timetables = True
-    if timetable_export_needed or avl_export_needed:
-        regenerate_timetables = (
-            input("Should timetable data be re-generated before export? (yes/NO)")
-            .lower()
-            .strip()
-            == "yes"
-        )
-        if regenerate_timetables:
-            print("Will regenerate timetables")
 
     db_password = get_db_password(environment)
 
@@ -445,8 +430,7 @@ def main():
             timetable_export_needed = sorted({*timetable_export_needed, process_date})
         elif timetable_export_needed and not ready_to_run:
             process_date = timetable_export_needed.pop(0)
-            if regenerate_timetables:
-                timetable_generation(db_password, process_date)
+            timetable_generation(db_password, process_date)
             timetable_export(db_password, process_date)
             convert_to_parquet(process_date, environment)
             ready_to_run = sorted({*ready_to_run, process_date})
