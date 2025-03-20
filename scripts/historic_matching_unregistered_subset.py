@@ -359,11 +359,12 @@ def main():
         }
         if data["avl_parquet"] and data["timetable_parquet"]:
             ready_to_run.append(current)
+            timetable_export_needed.append(current)
             continue
         if not data["avl_csv"]:
             avl_export_needed.append(current)
             continue
-        timetable_export_needed.append(current)
+            timetable_export_needed.append(current)
 
     ready_to_run = sorted(ready_to_run)
     avl_export_needed = sorted(avl_export_needed)
