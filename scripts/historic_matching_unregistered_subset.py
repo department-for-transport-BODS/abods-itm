@@ -384,7 +384,7 @@ def main():
         print("Will export timetable data for the following dates:")
         print(";".join(d.isoformat() for d in timetable_export_needed))
 
-    regenerate_timetables = False
+    regenerate_timetables = True
     if timetable_export_needed or avl_export_needed:
         regenerate_timetables = (
             input("Should timetable data be re-generated before export? (yes/NO)")
