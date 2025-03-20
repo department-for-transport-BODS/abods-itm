@@ -168,7 +168,7 @@ def run_query(query: str, db_password: str):
 
 def timetable_generation(db_password: str, process_date: date):
     run_query(
-        f"CALL generate_timetable('{process_date.isoformat()}');",
+        f"CALL generate_timetable_unregistered_subset('{process_date.isoformat()}');",
         db_password,
     )
     wait_for_queues()
@@ -176,7 +176,7 @@ def timetable_generation(db_password: str, process_date: date):
 
 def timetable_export(db_password: str, process_date: date):
     run_query(
-        f"CALL historic_timetable_export('{process_date.isoformat()}');",
+        f"CALL historic_timetable_export_unregistered_subset('{process_date.isoformat()}');",
         db_password,
     )
 
@@ -212,7 +212,7 @@ def convert_to_parquet(process_date: date, environment: str):
 
 def summary_generation(db_password: str, process_date: date):
     run_query(
-        f"CALL historic_matching_summary_generation('{process_date.isoformat()}');",
+        f"CALL unregistered_subset_post_matching_functions('{process_date.isoformat()}');",
         db_password,
     )
 
