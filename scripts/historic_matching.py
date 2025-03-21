@@ -17,6 +17,10 @@ base_prefix = "historic/"
 max_queue_length = 6
 
 
+def current_time_london():
+    return datetime.now(ZoneInfo("Europe/London"))
+
+
 def list_files(environment: str, prefix: str):
     bucket = f"abods-{environment}-exporter-bucket"
     for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
@@ -100,7 +104,7 @@ def start_historic_matching(current: date, environment: str):
         }
         cloudwatch = cloudwatch_logs_link(task_arn, environment)
         print(
-            f"{datetime.now().isoformat()}: {process_date} started. You can read the logs at {cloudwatch}"
+            f"{current_time_london().isoformat()}: {process_date} started. You can read the logs at {cloudwatch}"
         )
 
 
@@ -111,7 +115,7 @@ def look_for_existing_tasks(environment: str):
     status_output = get_task_status(environment, arns)
     for task_arn, status, process_date in parse_task_output(status_output):
         print(
-            f"{datetime.now().isoformat()}: {task_arn} for date {process_date.isoformat()} is {status}"
+            f"{current_time_london().isoformat()}: {task_arn} for date {process_date.isoformat()} is {status}"
         )
         running_tasks[task_arn] = {
             "status": status,
@@ -135,12 +139,12 @@ def wait_for_queues():
 
             if queue_length > max_queue_length:
                 print(
-                    f"{datetime.now().isoformat()}: Queue {shard} has {queue_length} messages"
+                    f"{current_time_london().isoformat()}: Queue {shard} has {queue_length} messages"
                 )
                 break
         else:
             print(
-                f"{datetime.now().isoformat()}: All queues have {longest_queue} messages or less"
+                f"{current_time_london().isoformat()}: All queues have {longest_queue} messages or less"
             )
             return
 
@@ -230,7 +234,7 @@ def check_for_completed_tasks(environment: str):
         found_arns.append(task_arn)
         if running_tasks[task_arn]["status"] != status:
             print(
-                f"{datetime.now().isoformat()}: {task_arn} for date {process_date.isoformat()} is {status}"
+                f"{current_time_london().isoformat()}: {task_arn} for date {process_date.isoformat()} is {status}"
             )
         running_tasks[task_arn]["status"] = status
 
@@ -244,7 +248,7 @@ def check_for_completed_tasks(environment: str):
             completed_dates.append(process_date)
             del running_tasks[arn]
             print(
-                f"{datetime.now().isoformat()}: {process_date.isoformat()} finished. You can read the logs at {cloudwatch}"
+                f"{current_time_london().isoformat()}: {process_date.isoformat()} finished. You can read the logs at {cloudwatch}"
             )
             continue
 
@@ -252,7 +256,7 @@ def check_for_completed_tasks(environment: str):
             completed_dates.append(process_date)
             del running_tasks[arn]
             print(
-                f"{datetime.now().isoformat()}: {process_date.isoformat()} was not found in the list. You can read the logs at {cloudwatch}. Assuming it completed successfully"
+                f"{current_time_london().isoformat()}: {process_date.isoformat()} was not found in the list. You can read the logs at {cloudwatch}. Assuming it completed successfully"
             )
             continue
     return completed_dates
@@ -301,21 +305,23 @@ def get_dates_to_run():
 
 
 def in_service_hours():
-    current_time = datetime.now(ZoneInfo("Europe/London"))
+    current_time = current_time_london()
 
     if current_time.weekday() > 4:
-        print("It's the weekend")
+        print(f"{current_time.isoformat()}: It's the weekend")
         return False
 
     if current_time.hour < 8:
-        print("It's early morning")
+        print(f"{current_time.isoformat()}: It's early morning")
         return False
 
     if current_time.hour > 18:
-        print("It's the evening")
+        print(f"{current_time.isoformat()}: It's the evening")
         return False
 
-    print("It's working hours, no blocking the database now")
+    print(
+        f"{current_time.isoformat()}: It's working hours, no blocking the database now"
+    )
     return True
 
 
@@ -428,7 +434,7 @@ def main():
             start_historic_matching(ready_to_run.pop(0), environment)
             if ready_to_run:
                 print(
-                    f"{datetime.now().isoformat()}: Dates still queued for matching: {';'.join(d.isoformat() for d in ready_to_run)}"
+                    f"{current_time_london().isoformat()}: Dates still queued for matching: {';'.join(d.isoformat() for d in ready_to_run)}"
                 )
 
                 # Keep starting tasks if there's more we can run
@@ -438,7 +444,7 @@ def main():
         summaries_to_run = sorted({*summaries_to_run, *completed_dates})
         if completed_dates:
             print(
-                f"{datetime.now().isoformat()}: Dates queued for summary generation: {';'.join(d.isoformat() for d in summaries_to_run)}"
+                f"{current_time_london().isoformat()}: Dates queued for summary generation: {';'.join(d.isoformat() for d in summaries_to_run)}"
             )
 
             # Need to start more tasks before doing summary generation
@@ -453,7 +459,7 @@ def main():
                 summary_generation(db_password, process_date)
             if summaries_to_run:
                 print(
-                    f"{datetime.now().isoformat()}: Dates queued for summary generation: {';'.join(d.isoformat() for d in summaries_to_run)}"
+                    f"{current_time_london().isoformat()}: Dates queued for summary generation: {';'.join(d.isoformat() for d in summaries_to_run)}"
                 )
             continue
 
