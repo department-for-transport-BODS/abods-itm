@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import json
-from datetime import datetime
 import subprocess
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 from subprocess import CalledProcessError
 from time import sleep
+from zoneinfo import ZoneInfo
 
 import boto3
 from botocore.config import Config
@@ -300,6 +300,25 @@ def get_dates_to_run():
     return process_dates
 
 
+def in_service_hours():
+    current_time = datetime.now(ZoneInfo("Europe/London"))
+
+    if current_time.weekday() > 4:
+        print("It's the weekend")
+        return False
+
+    if current_time.hour < 8:
+        print("It's early morning")
+        return False
+
+    if current_time.hour > 18:
+        print("It's the evening")
+        return False
+
+    print("It's working hours, no blocking the database now")
+    return True
+
+
 def main():
     while True:
         environment = input("Which environment? (prod|sandbox): ")
@@ -425,7 +444,7 @@ def main():
             # Need to start more tasks before doing summary generation
             continue
 
-        if summaries_to_run:
+        if summaries_to_run and not in_service_hours():
             process_date = summaries_to_run.pop(0)
             try:
                 summary_generation(db_password, process_date)
