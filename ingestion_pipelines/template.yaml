@@ -25,6 +25,9 @@ Parameters:
   RdsDbPort:
     Type: Number
     Default: 5432
+  QueueVisibilityTimeout:
+    Type: Number
+    Default: 430
   VpcId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
     Default: ''
@@ -558,7 +561,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-ingestion-queue.fifo'
       FifoQueue: true
       ContentBasedDeduplication: true
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmIngestionQueuePolicy:
     Type: AWS::SQS::QueuePolicy
@@ -589,7 +592,7 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-process-queue'
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   ####################################################################
   #### SIRIVM OTP PARALLEL MATCHING FUNCTIONS (& ASSC. RESOURCES) ####
@@ -622,7 +625,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue1.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue2:
     Type: AWS::SQS::Queue
@@ -630,7 +633,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue2.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue3:
     Type: AWS::SQS::Queue
@@ -638,7 +641,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue3.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue4:
     Type: AWS::SQS::Queue
@@ -646,7 +649,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue4.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue5:
     Type: AWS::SQS::Queue
@@ -654,7 +657,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue5.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue6:
     Type: AWS::SQS::Queue
@@ -662,7 +665,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue6.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue7:
     Type: AWS::SQS::Queue
@@ -670,7 +673,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue7.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingFunction1:
     Type: AWS::Serverless::Function
