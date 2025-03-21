@@ -27,7 +27,7 @@ Parameters:
     Default: 5432
   QueueVisibilityTimeout:
     Type: Number
-    Default: 430
+    Default: 90
   VpcId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
     Default: ''
