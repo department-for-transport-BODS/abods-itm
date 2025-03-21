@@ -908,8 +908,7 @@ def match_group_id_avls(
         journey_matches.extend(to_set)
 
     no_timetable_counts = {}
-    expected_matched_stops = 0
-    processed_route_indexes = set()
+    matched_routes = {}
 
     for avl in avls:
         group_id = avl_group_id(avl)
@@ -919,8 +918,7 @@ def match_group_id_avls(
             no_timetable_counts.setdefault(key, 0)
             no_timetable_counts[key] += 1
             continue
-        expected_matched_stops += len(route)
-        processed_route_indexes.add(stop_history_index)
+        matched_routes[stop_history_index] = route
 
     unprocessed_avls = 0
     for (group_id, direction_ref), avl_count in no_timetable_counts.items():
@@ -933,10 +931,10 @@ def match_group_id_avls(
         unprocessed_avls += avl_count
 
     match_count = len({match["timetable_id"] for match in journey_matches})
-    processed_routes = len(processed_route_indexes)
+    processed_routes = len(matched_routes)
     logger.info(
         "Processed group_id",
-        expected_stop_count=expected_matched_stops,
+        expected_stop_count=sum([len(route) for route in matched_routes.values()]),
         processed_avls=len(avls) - unprocessed_avls,
         skipped_avls=unprocessed_avls,
         match_count=match_count,  # If this is ever different to match_length, then we should consider de-duplicating
