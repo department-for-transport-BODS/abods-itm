@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import json
-from datetime import datetime
 import subprocess
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 from subprocess import CalledProcessError
 from time import sleep
+from zoneinfo import ZoneInfo
 
 import boto3
 from botocore.config import Config
@@ -15,6 +15,10 @@ s3 = boto3.client("s3")
 paginator = s3.get_paginator("list_objects_v2")
 base_prefix = "historic/"
 max_queue_length = 6
+
+
+def current_time_london():
+    return datetime.now(ZoneInfo("Europe/London"))
 
 
 def list_files(environment: str, prefix: str):
@@ -100,7 +104,7 @@ def start_historic_matching(current: date, environment: str):
         }
         cloudwatch = cloudwatch_logs_link(task_arn, environment)
         print(
-            f"{datetime.now().isoformat()}: {process_date} started. You can read the logs at {cloudwatch}"
+            f"{current_time_london().isoformat()}: {process_date} started. You can read the logs at {cloudwatch}"
         )
 
 
@@ -111,7 +115,7 @@ def look_for_existing_tasks(environment: str):
     status_output = get_task_status(environment, arns)
     for task_arn, status, process_date in parse_task_output(status_output):
         print(
-            f"{datetime.now().isoformat()}: {task_arn} for date {process_date.isoformat()} is {status}"
+            f"{current_time_london().isoformat()}: {task_arn} for date {process_date.isoformat()} is {status}"
         )
         running_tasks[task_arn] = {
             "status": status,
@@ -135,12 +139,12 @@ def wait_for_queues():
 
             if queue_length > max_queue_length:
                 print(
-                    f"{datetime.now().isoformat()}: Queue {shard} has {queue_length} messages"
+                    f"{current_time_london().isoformat()}: Queue {shard} has {queue_length} messages"
                 )
                 break
         else:
             print(
-                f"{datetime.now().isoformat()}: All queues have {longest_queue} messages or less"
+                f"{current_time_london().isoformat()}: All queues have {longest_queue} messages or less"
             )
             return
 
@@ -230,7 +234,7 @@ def check_for_completed_tasks(environment: str):
         found_arns.append(task_arn)
         if running_tasks[task_arn]["status"] != status:
             print(
-                f"{datetime.now().isoformat()}: {task_arn} for date {process_date.isoformat()} is {status}"
+                f"{current_time_london().isoformat()}: {task_arn} for date {process_date.isoformat()} is {status}"
             )
         running_tasks[task_arn]["status"] = status
 
@@ -244,7 +248,7 @@ def check_for_completed_tasks(environment: str):
             completed_dates.append(process_date)
             del running_tasks[arn]
             print(
-                f"{datetime.now().isoformat()}: {process_date.isoformat()} finished. You can read the logs at {cloudwatch}"
+                f"{current_time_london().isoformat()}: {process_date.isoformat()} finished. You can read the logs at {cloudwatch}"
             )
             continue
 
@@ -252,7 +256,7 @@ def check_for_completed_tasks(environment: str):
             completed_dates.append(process_date)
             del running_tasks[arn]
             print(
-                f"{datetime.now().isoformat()}: {process_date.isoformat()} was not found in the list. You can read the logs at {cloudwatch}. Assuming it completed successfully"
+                f"{current_time_london().isoformat()}: {process_date.isoformat()} was not found in the list. You can read the logs at {cloudwatch}. Assuming it completed successfully"
             )
             continue
     return completed_dates
@@ -298,6 +302,27 @@ def get_dates_to_run():
             current = current + timedelta(days=1)
             process_dates.add(current)
     return process_dates
+
+
+def in_service_hours():
+    current_time = current_time_london()
+
+    if current_time.weekday() > 4:
+        print(f"{current_time.isoformat()}: It's the weekend")
+        return False
+
+    if current_time.hour < 8:
+        print(f"{current_time.isoformat()}: It's early morning")
+        return False
+
+    if current_time.hour > 18:
+        print(f"{current_time.isoformat()}: It's the evening")
+        return False
+
+    print(
+        f"{current_time.isoformat()}: It's working hours, no blocking the database now"
+    )
+    return True
 
 
 def main():
@@ -395,7 +420,7 @@ def main():
             start_historic_matching(ready_to_run.pop(0), environment)
             if ready_to_run:
                 print(
-                    f"{datetime.now().isoformat()}: Dates still queued for matching: {';'.join(d.isoformat() for d in ready_to_run)}"
+                    f"{current_time_london().isoformat()}: Dates still queued for matching: {';'.join(d.isoformat() for d in ready_to_run)}"
                 )
 
                 # Keep starting tasks if there's more we can run
@@ -405,13 +430,13 @@ def main():
         summaries_to_run = sorted({*summaries_to_run, *completed_dates})
         if completed_dates:
             print(
-                f"{datetime.now().isoformat()}: Dates queued for summary generation: {';'.join(d.isoformat() for d in summaries_to_run)}"
+                f"{current_time_london().isoformat()}: Dates queued for summary generation: {';'.join(d.isoformat() for d in summaries_to_run)}"
             )
 
             # Need to start more tasks before doing summary generation
             continue
 
-        if summaries_to_run:
+        if summaries_to_run and not in_service_hours():
             process_date = summaries_to_run.pop(0)
             try:
                 summary_generation(db_password, process_date)
@@ -420,7 +445,7 @@ def main():
                 summary_generation(db_password, process_date)
             if summaries_to_run:
                 print(
-                    f"{datetime.now().isoformat()}: Dates queued for summary generation: {';'.join(d.isoformat() for d in summaries_to_run)}"
+                    f"{current_time_london().isoformat()}: Dates queued for summary generation: {';'.join(d.isoformat() for d in summaries_to_run)}"
                 )
             continue
 
