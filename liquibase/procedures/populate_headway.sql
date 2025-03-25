@@ -1,7 +1,6 @@
-create or replace procedure populate_headway(IN pt_date date)
-    language plpgsql
-as
-$$
+CREATE OR REPLACE PROCEDURE public.populate_headway(IN pt_date date)
+ LANGUAGE plpgsql
+AS $$
 DECLARE
     recent_stop_interval    INTERVAL    = INTERVAL '120' MINUTE;
     earliest_departure_time TIMESTAMPTZ = now() - recent_stop_interval;
@@ -30,7 +29,8 @@ BEGIN
             line_name,
             date_of_journey,
             stop_id,
-            stop_index
+            stop_index,
+            direction
             ORDER BY
               stop_id,
               stop_index ASC,
@@ -40,7 +40,9 @@ BEGIN
           public."Timetable"
         WHERE date_of_journey = pt_date
           AND expected_departure_time < earliest_departure_time
-          AND previous_group_id IS NOT NULL
+          AND previous_group_id IS NOT null 
+          and previous_group_id != 'FIRST_SERVICE' 
+          and previous_group_id != 'LAST_STOP'
           AND (
             actual_departure_time IS NOT NULL
             OR timestamp_after_estimate IS NOT NULL
@@ -68,6 +70,5 @@ BEGIN
 
     RAISE NOTICE '% populate_headway complete', clock_timestamp();
 END;
-$$;
-
-alter procedure populate_headway owner to abods_proxy_rw;
+$$
+;
