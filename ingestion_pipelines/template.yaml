@@ -8,7 +8,7 @@ Globals:
     Architectures:
       - x86_64
     Runtime: python3.13
-    Timeout: 400
+    Timeout: 60
     MemorySize: 2048
 
 Parameters:
@@ -25,6 +25,9 @@ Parameters:
   RdsDbPort:
     Type: Number
     Default: 5432
+  QueueVisibilityTimeout:
+    Type: Number
+    Default: 90
   VpcId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
     Default: ''
@@ -371,7 +374,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-traveline-db-ingestion-function'
       CodeUri: ./traveline_import_function
       Handler: traveline_import_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 512
       Layers: !If
         - IsNotLocal
@@ -558,7 +560,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-ingestion-queue.fifo'
       FifoQueue: true
       ContentBasedDeduplication: true
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmIngestionQueuePolicy:
     Type: AWS::SQS::QueuePolicy
@@ -589,7 +591,7 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-process-queue'
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   ####################################################################
   #### SIRIVM OTP PARALLEL MATCHING FUNCTIONS (& ASSC. RESOURCES) ####
@@ -622,7 +624,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue1.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue2:
     Type: AWS::SQS::Queue
@@ -630,7 +632,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue2.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue3:
     Type: AWS::SQS::Queue
@@ -638,7 +640,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue3.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue4:
     Type: AWS::SQS::Queue
@@ -646,7 +648,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue4.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue5:
     Type: AWS::SQS::Queue
@@ -654,7 +656,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue5.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue6:
     Type: AWS::SQS::Queue
@@ -662,7 +664,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue6.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue7:
     Type: AWS::SQS::Queue
@@ -670,7 +672,7 @@ Resources:
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue7.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingFunction1:
     Type: AWS::Serverless::Function
@@ -678,7 +680,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function1'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -745,7 +746,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function2'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -812,7 +812,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function3'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -879,7 +878,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function4'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -946,7 +944,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function5'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -1013,7 +1010,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function6'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -1080,7 +1076,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function7'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
