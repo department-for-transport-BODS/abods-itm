@@ -1,7 +1,6 @@
-create or replace procedure public.frequent_summary_services(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
-    language plpgsql
-as
-$$
+CREATE OR REPLACE PROCEDURE public.frequent_summary_services(IN partition_date date DEFAULT (CURRENT_DATE - '1 day'::interval))
+ LANGUAGE plpgsql
+AS $$
 DECLARE
     tablename TEXT;
 
@@ -124,7 +123,9 @@ BEGIN
                                 AND ttb.line_name = es.line_name
                                 AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, '-', -1)
                             WHERE ttb.date_of_journey = partition_date
-                                AND ttb.previous_group_id IS NOT NULL) AS sub
+                                AND ttb.previous_group_id IS NOT null
+                                and previous_group_id != 'FIRST_SERVICE' 
+          						and previous_group_id != 'LAST_STOP') AS sub
                         WHERE date_of_journey = partition_date
                         GROUP BY operator_noc,
                                 service_code,
@@ -201,6 +202,5 @@ BEGIN
 
     RAISE NOTICE '% frequent_summary_services complete', clock_timestamp();
 END;
-$$;
-
-alter procedure frequent_summary_services owner to abods_proxy_rw;
+$$
+;
