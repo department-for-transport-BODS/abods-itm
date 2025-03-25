@@ -22,7 +22,7 @@ run = "ruff check ."
 run = "pytest"
 
 [tasks.checkov]
-run = "checkov --baseline .checkov.baseline -d . --skip-path ./venv"
+run = "checkov --quiet -d . --skip-path ./venv"
 
 [tasks.fix]
 run = [

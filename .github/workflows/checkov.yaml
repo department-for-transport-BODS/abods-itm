@@ -20,4 +20,3 @@ jobs:
           skip_check: ""
           output_format: cli,sarif
           quiet: true # display only failed checks
-          baseline: .checkov.baseline
