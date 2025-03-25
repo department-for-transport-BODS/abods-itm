@@ -1032,6 +1032,7 @@ begin
               LEFT JOIN public.%I tspgi
                 ON  tsr1.group_id = tspgi.group_id
                 AND tsr1.direction = tspgi.direction
+                AND tsr1.stop_id = tspgi.stop_id
                 AND tsr1.real_index = tspgi.real_index;
             ',
             concat(tablename, '_p', longdatestring),
