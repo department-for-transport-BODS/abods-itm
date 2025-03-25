@@ -7,7 +7,7 @@ Globals:
   Function:
     Architectures:
       - x86_64
-    Runtime: python3.11
+    Runtime: python3.13
     Timeout: 400
     MemorySize: 2048
 
@@ -497,9 +497,9 @@ Resources:
       LayerName: !Sub '${ProjectName}-${Environment}-ingestion-layer'
       ContentUri: ./ingestion_layer
       CompatibleRuntimes:
-        - python3.11
+        - python3.13
     Metadata:
-      BuildMethod: python3.11
+      BuildMethod: python3.13
 
   SnsSubscriptionFunction:
     Type: AWS::Serverless::Function

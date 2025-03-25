@@ -4,7 +4,7 @@ asdf_compat = true
 
 [tasks.install]
 dir = "ingestion_pipelines"
-run = "pip install -r requirements.txt"
+run = "pip install --upgrade pip setuptools wheel && pip install -r requirements.txt"
 
 [tasks.fmt]
 run = "ruff format"
