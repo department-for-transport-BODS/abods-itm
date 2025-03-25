@@ -17,6 +17,6 @@
 ruff==0.10.0
 pytest==8.3.3
 checkov==3.1.47
-boto3-stubs[essential]==1.37.18
+boto3-stubs[essential]==1.37.19
 types-psycopg2==2.9.21.20250121
 lxml-stubs==0.5.1
