@@ -8,7 +8,7 @@ Globals:
     Architectures:
       - x86_64
     Runtime: python3.13
-    Timeout: 400
+    Timeout: 60
     MemorySize: 2048
 
 Parameters:
@@ -374,7 +374,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-traveline-db-ingestion-function'
       CodeUri: ./traveline_import_function
       Handler: traveline_import_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 512
       Layers: !If
         - IsNotLocal
@@ -681,7 +680,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function1'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -748,7 +746,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function2'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -815,7 +812,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function3'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -882,7 +878,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function4'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -949,7 +944,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function5'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -1016,7 +1010,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function6'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -1083,7 +1076,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function7'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
