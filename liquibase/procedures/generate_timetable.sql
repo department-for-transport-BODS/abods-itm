@@ -1030,7 +1030,7 @@ on f.vehiclejourney_id = t.vehiclejourney_id;
               NULL AS actual_departure_time,
               tsr1.is_timing_point,
               tsr1.group_id,
-              LOWER(tspgi.previous_group_id) AS previous_group_id,
+              LOWER(tsr1.previous_group_id) AS previous_group_id,
               tsr1.otp_state,
               extract(
                 epoch
