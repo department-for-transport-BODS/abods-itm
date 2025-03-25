@@ -1,7 +1,6 @@
-create or replace procedure generate_timetable(IN partition_date date)
-    language plpgsql
-as
-$$
+CREATE OR REPLACE PROCEDURE public.generate_timetable(IN partition_date date)
+ LANGUAGE plpgsql
+AS $$
 
 declare
     longdatestring   text := to_char(partition_date, 'YYYY_MM_DD');
@@ -831,36 +830,6 @@ begin
             concat('timetable_stop', timetable_suffix)
             );
 
-    ----------------------------
-    --Removing last stop --
-    ----------------------------
-
-    RAISE NOTICE '% Removing last stop', clock_timestamp();
-
-    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_no_last_stops', timetable_suffix));
-
-    execute format(
-            '
-            CREATE TABLE public.%I AS
-            SELECT
-              operator_noc,
-              line_name,
-              date_of_journey,
-              stop_index,
-              expected_departure_time,
-              group_id,
-              stop_id,
-              real_index,
-              direction
-            FROM
-              public.%I
-            WHERE
-              real_index != max_index;
-            ',
-            concat('timetable_stop_no_last_stops', timetable_suffix),
-            concat('timetable_stop_rank_1', timetable_suffix)
-            );
-
     -------------------------------------------------------------
     -- Add previous group id for frequent services no last stop--
     -------------------------------------------------------------
@@ -872,37 +841,103 @@ begin
     execute format(
             '
             CREATE TABLE public.%I AS
-            SELECT
-              operator_noc,
-              line_name,
-              date_of_journey,
-              stop_index,
-              expected_departure_time,
-              group_id,
-              CASE WHEN COUNT(*) OVER w >= 6 THEN LOWER(LAG(group_id) OVER w) ELSE NULL END AS previous_group_id,
-              stop_id,
-              real_index,
-              direction
-            FROM
-              public.%I WINDOW w AS (
-                PARTITION BY operator_noc,
-                line_name,
-                date_of_journey,
-                stop_id,
-                stop_index,
-                extract(
-                  HOUR
-                  FROM
-                    expected_departure_time
-                )
-                ORDER BY
-                  expected_departure_time,
-                  stop_index ASC RANGE BETWEEN UNBOUNDED PRECEDING
-                  AND UNBOUNDED FOLLOWING
-              );
+with trip_stop_sequences as (
+ select
+ 	t.group_id,
+ 	t.line_name,
+ 	t.operator_noc,
+ 	t.direction,
+ 	t.vehiclejourney_id,
+ 	STRING_AGG(CAST(t.stop_id as VARCHAR), ''|'' order by expected_departure_time) as route_id,
+ 	Min(expected_departure_time) as departure_time,
+ 	Max(expected_departure_time) as final_arrival
+ 	--MD5(STRING_AGG(CAST(stop_id as VARCHAR), ''-->'' order by expected_departure_time)) as route_id
+ 	FROM public.timetable_stop_rank_1_2025_03_24 t
+ 	group by t.group_id,
+ 	t.vehiclejourney_id ,
+ 	t.line_name,
+ 	t.operator_noc,
+ 	t.direction,
+ 	t.vehiclejourney_id
+ 	),
+ 	sliding_window_counts AS (
+  	SELECT
+    d1.route_id,
+    d1.line_name,
+    d1.operator_noc,
+    d1.group_id,
+    d1.direction,
+    d1.departure_time,
+    d1.final_arrival,
+    d1.vehiclejourney_id ,
+    COUNT(*) over(
+    	partition by  d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
+    	range between current row and interval ''60 minutes 0 seconds'' following) as departures_in_window_hour_after,
+    COUNT(*) over(
+    	partition by   d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
+    	range between interval ''60 minutes 0 seconds'' preceding and current row) as departures_in_window_hour_before,
+    COUNT(*) over(
+    	partition by   d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
+    	range between current row and interval ''30 minutes 0 seconds'' following) +
+    COUNT(*) over(
+    	partition by  d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
+    	range between interval ''30 minutes 0 seconds'' preceding and current row) -1 as departures_in_window_hour_surrounding
+  FROM trip_stop_sequences d1),
+  frequent_services AS (
+    SELECT
+        *,
+        -- Identify if this is part of a frequent batch (6+ departures in surrounding hour)
+        (departures_in_window_hour_before >= 6 OR departures_in_window_hour_after >= 6 OR departures_in_window_hour_surrounding >= 6) AS is_frequent,
+        -- Identify if this is the first in a frequent batch
+        (departures_in_window_hour_after >= 6 and 
+        departures_in_window_hour_surrounding < 6 AND 
+        departures_in_window_hour_before < 6 and 
+        ((LAG(departures_in_window_hour_after < 6) over w AND LAG(departures_in_window_hour_surrounding < 6) OVER w) or
+        LAG(departures_in_window_hour_surrounding < 6) OVER w isnull))  AS is_first_in_frequent_batch,
+        LAG(group_id) over w as previous_group_id
+    FROM sliding_window_counts d1
+    window w as (
+            PARTITION BY  line_name, operator_noc, route_id , direction
+            ORDER BY departure_time
+        )  
+)
+SELECT
+              t.operator_noc,
+              t.service_code,
+              t.line_name,
+              t.xml_file_name,
+              t.journey_code,
+              t.date_of_journey,
+              t.day_of_week,
+              t.common_name,
+              t.atco_code,
+              t.stop_type,
+              t.stop_index,
+              t.stop_latitude,
+              t.stop_longitude,
+              t.locality_id,
+              t.expected_departure_time,
+              t.is_timing_point,
+              t.group_id,
+              t.otp_state,
+              t.stop_id,
+              t.servicepattern_id,
+              t.vehiclejourney_id,
+              t.admin_area_id,
+              t.direction,
+              t.departure_day_shift,
+              t.registered,
+              CASE WHEN f.is_frequent and f.is_first_in_frequent_batch then ''FIRST_SERVICE'' --identifier for the first journey in a frequent services block, e.g. if frequent 7-8am and 5-6pm- the 7am and 5pm journey
+              	   when f.is_frequent and t.expected_departure_time = f.final_arrival then ''LAST_STOP'' --identifier for last stop in a frequent service journey
+              	   when f.is_frequent then f.previous_group_id  
+              else null 
+              end as previous_group_id
+FROM public.timetable_stop_rank_1_2025_03_24 t
+left join frequent_services f
+on f.vehiclejourney_id = t.vehiclejourney_id;
             ',
             concat('timetable_stop_prev_group_id', timetable_suffix),
-            concat('timetable_stop_no_last_stops', timetable_suffix)
+            concat('timetable_stop_rank_1', timetable_suffix)
             );
 
     ----------------------------
@@ -1005,11 +1040,12 @@ begin
                     tsr1.line_name,
                     tsr1.date_of_journey,
                     tsr1.stop_id,
-                    tsr1.stop_index
+                    tsr1.stop_index,
+					tsr1.direction
                     ORDER BY
+					  tsr1.expected_departure_time::TIME ASC,
                       tsr1.stop_id,
-                      tsr1.stop_index,
-                      tsr1.expected_departure_time::TIME ASC
+                      tsr1.stop_index
                   )
               ) AS expected_headway,
               NULL AS actual_headway,
@@ -1037,14 +1073,9 @@ begin
               tsr1.registered,
               NULL
             FROM
-              public.%I tsr1
-              LEFT JOIN public.%I tspgi
-                ON  tsr1.group_id = tspgi.group_id
-                AND tsr1.direction = tspgi.direction
-                AND tsr1.real_index = tspgi.real_index;
+              public.%I tsr1;
             ',
             concat(tablename, '_p', longdatestring),
-            concat('timetable_stop_rank_1', timetable_suffix),
             concat('timetable_stop_prev_group_id', timetable_suffix)
             );
 
@@ -1069,13 +1100,11 @@ begin
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vj_per_groupid', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_rank_1', timetable_suffix));
-        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_no_last_stops', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_prev_group_id', timetable_suffix));
         execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
     END IF;
 
     RAISE NOTICE '% generate_timetable complete', clock_timestamp();
 end;
-$$;
-
-alter procedure generate_timetable owner to abods_proxy_rw;
+$$
+;
