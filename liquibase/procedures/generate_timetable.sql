@@ -1032,22 +1032,7 @@ on f.vehiclejourney_id = t.vehiclejourney_id;
               tsr1.group_id,
               LOWER(tsr1.previous_group_id) AS previous_group_id,
               tsr1.otp_state,
-              extract(
-                epoch
-                FROM
-                  tsr1.expected_departure_time::TIME - lag(tsr1.expected_departure_time::TIME) over (
-                    PARTITION BY tsr1.operator_noc,
-                    tsr1.line_name,
-                    tsr1.date_of_journey,
-                    tsr1.stop_id,
-                    tsr1.stop_index,
-					tsr1.direction
-                    ORDER BY
-					  tsr1.expected_departure_time::TIME ASC,
-                      tsr1.stop_id,
-                      tsr1.stop_index
-                  )
-              ) AS expected_headway,
+              NULL AS expected_headway,
               NULL AS actual_headway,
               NULL AS headway_time_difference,
               NULL AS siri_vm_position_id,
