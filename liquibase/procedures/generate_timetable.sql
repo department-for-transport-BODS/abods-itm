@@ -863,8 +863,7 @@ begin
                 t.vehiclejourney_id,
                 t.line_name,
                 t.operator_noc,
-                t.direction,
-                t.vehiclejourney_id
+                t.direction
             ),
             sliding_window_counts AS (
               SELECT
