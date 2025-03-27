@@ -103,3 +103,9 @@ SELECT cron.schedule(
                '00 05 * * SUN', -- sundays at 05:00
                $$CALL generate_license_lines_with_dq_issues(CURRENT_DATE);$$
        );
+
+SELECT cron.schedule(
+               'export data for historic matching',
+               '30 17 * * *', -- at 17:30
+               $$CALL historic_timetable_export(CURRENT_DATE - 1);CALL historic_avl_export(CURRENT_DATE - 1);$$
+       );
