@@ -220,11 +220,14 @@ def summary_generation(db_password: str, process_date: date):
             f"CALL unregistered_subset_post_matching_functions('{process_date.isoformat()}');",
             db_password,
         )
+
     try:
         run_summary_generation()
     except CalledProcessError as e:
         print(e)
-        print("Trying once more, because the daily summaries may have interrupted this one")
+        print(
+            "Trying once more, because the daily summaries may have interrupted this one"
+        )
         run_summary_generation()
 
 

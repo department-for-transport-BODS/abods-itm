@@ -170,19 +170,31 @@ def run_query(query: str, db_password: str):
     )
 
 
-def timetable_generation(db_password: str, process_date: date):
-    run_query(
-        f"CALL generate_timetable('{process_date.isoformat()}');",
-        db_password,
-    )
+def timetable_generation(db_password: str, process_date: date, subset: bool):
+    if subset:
+        run_query(
+            f"CALL generate_timetable_unregistered_subset('{process_date.isoformat()}');",
+            db_password,
+        )
+    else:
+        run_query(
+            f"CALL generate_timetable('{process_date.isoformat()}');",
+            db_password,
+        )
     wait_for_queues()
 
 
-def timetable_export(db_password: str, process_date: date):
-    run_query(
-        f"CALL historic_timetable_export('{process_date.isoformat()}');",
-        db_password,
-    )
+def timetable_export(db_password: str, process_date: date, subset: bool):
+    if subset:
+        run_query(
+            f"CALL historic_timetable_export_unregistered_subset('{process_date.isoformat()}');",
+            db_password,
+        )
+    else:
+        run_query(
+            f"CALL historic_timetable_export('{process_date.isoformat()}');",
+            db_password,
+        )
 
 
 def avl_export(db_password: str, process_date: date):
@@ -214,17 +226,26 @@ def convert_to_parquet(process_date: date, environment: str):
     print(json.loads(response["Payload"].read()))
 
 
-def summary_generation(db_password: str, process_date: date):
+def summary_generation(db_password: str, process_date: date, subset: bool):
     def run_summary_generation():
-        run_query(
-            f"CALL historic_matching_summary_generation('{process_date.isoformat()}');",
-            db_password,
-        )
+        if subset:
+            run_query(
+                f"CALL unregistered_subset_post_matching_functions('{process_date.isoformat()}');",
+                db_password,
+            )
+        else:
+            run_query(
+                f"CALL historic_matching_summary_generation('{process_date.isoformat()}');",
+                db_password,
+            )
+
     try:
         run_summary_generation()
     except CalledProcessError as e:
         print(e)
-        print("Trying once more, because the daily summaries may have interrupted this one")
+        print(
+            "Trying once more, because the daily summaries may have interrupted this one"
+        )
         run_summary_generation()
 
 
@@ -275,6 +296,10 @@ def get_db_password(environment: str):
             SecretId=f"abods/{environment}/rds/user/{db_user}",
         )["SecretString"],
     )["password"]
+
+
+def get_boolean_input(prompt: str):
+    return input(f"{prompt} (y/N): ").lower().strip()[0] == "y"
 
 
 def get_dates_to_run():
@@ -340,6 +365,14 @@ def main():
         if environment == "prod":
             break
         print("Wrong, try again")
+    subset = get_boolean_input("Process only unregistered subset?")
+    force_timetable_export = False
+    if subset:
+        print("Will only process unregistered subset")
+    else:
+        print("Will process whole timetable")
+        force_timetable_export = get_boolean_input("Force export of timetable data?")
+
     process_dates = get_dates_to_run()
 
     look_for_existing_tasks(environment)
@@ -389,13 +422,23 @@ def main():
             "avl_gz": (avl_gz_path in files),
             "avl_parquet": (avl_parquet_path in files),
         }
-        if data["avl_parquet"] and data["timetable_parquet"]:
-            ready_to_run.append(current)
-            continue
-        if not data["avl_csv"]:
-            avl_export_needed.append(current)
-            continue
-        timetable_export_needed.append(current)
+        if subset:
+            timetable_export_needed.append(current)
+            if not data["avl_parquet"] and not data["avl_csv"]:
+                avl_export_needed.append(current)
+                continue
+        else:
+            if (
+                not force_timetable_export
+                and data["avl_parquet"]
+                and data["timetable_parquet"]
+            ):
+                ready_to_run.append(current)
+                continue
+            if not data["avl_csv"]:
+                avl_export_needed.append(current)
+                continue
+            timetable_export_needed.append(current)
 
     ready_to_run = sorted(ready_to_run)
     avl_export_needed = sorted(avl_export_needed)
@@ -416,15 +459,15 @@ def main():
         print(";".join(d.isoformat() for d in timetable_export_needed))
 
     regenerate_timetables = False
-    if timetable_export_needed or avl_export_needed:
-        regenerate_timetables = (
-            input("Should timetable data be re-generated before export? (yes/NO)")
-            .lower()
-            .strip()
-            == "yes"
-        )
-        if regenerate_timetables:
-            print("Will regenerate timetables")
+    if subset:
+        regenerate_timetables = True
+    else:
+        if timetable_export_needed or avl_export_needed:
+            regenerate_timetables = get_boolean_input(
+                "Should timetable data be re-generated before export?"
+            )
+            if regenerate_timetables:
+                print("Will regenerate timetables")
 
     db_password = get_db_password(environment)
 
@@ -461,7 +504,7 @@ def main():
         if summaries_to_run and not in_service_hours():
             process_date = summaries_to_run.pop(0)
             try:
-                summary_generation(db_password, process_date)
+                summary_generation(db_password, process_date, subset)
             except CalledProcessError as e:
                 print(e)
                 failed_summaries = sorted({*failed_summaries, process_date})
@@ -482,8 +525,8 @@ def main():
         elif timetable_export_needed and not ready_to_run:
             process_date = timetable_export_needed.pop(0)
             if regenerate_timetables:
-                timetable_generation(db_password, process_date)
-            timetable_export(db_password, process_date)
+                timetable_generation(db_password, process_date, subset)
+            timetable_export(db_password, process_date, subset)
             convert_to_parquet(process_date, environment)
             ready_to_run = sorted({*ready_to_run, process_date})
 
