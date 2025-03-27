@@ -322,7 +322,7 @@ def in_service_hours():
         print(f"{current_time.isoformat()}: It's early morning")
         return False
 
-    if current_time.hour > 18:
+    if current_time.hour > 17:
         print(f"{current_time.isoformat()}: It's the evening")
         return False
 
