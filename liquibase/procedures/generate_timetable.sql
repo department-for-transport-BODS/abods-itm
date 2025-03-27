@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE public.generate_timetable(IN partition_date date)
- LANGUAGE plpgsql
-AS $$
+create or replace procedure generate_timetable(IN partition_date date)
+    language plpgsql
+as
+$$
 
 declare
     longdatestring   text := to_char(partition_date, 'YYYY_MM_DD');
@@ -840,68 +841,114 @@ begin
 
     execute format(
             '
-            CREATE TABLE public.%I AS
-with trip_stop_sequences as (
- select
- 	t.group_id,
- 	t.line_name,
- 	t.operator_noc,
- 	t.direction,
- 	t.vehiclejourney_id,
- 	STRING_AGG(CAST(t.stop_id as VARCHAR), ''|'' order by expected_departure_time) as route_id,
- 	Min(expected_departure_time) as departure_time,
- 	Max(expected_departure_time) as final_arrival
- 	--MD5(STRING_AGG(CAST(stop_id as VARCHAR), ''-->'' order by expected_departure_time)) as route_id
- 	FROM public.timetable_stop_rank_1_2025_03_24 t
- 	group by t.group_id,
- 	t.vehiclejourney_id ,
- 	t.line_name,
- 	t.operator_noc,
- 	t.direction,
- 	t.vehiclejourney_id
- 	),
- 	sliding_window_counts AS (
-  	SELECT
-    d1.route_id,
-    d1.line_name,
-    d1.operator_noc,
-    d1.group_id,
-    d1.direction,
-    d1.departure_time,
-    d1.final_arrival,
-    d1.vehiclejourney_id ,
-    COUNT(*) over(
-    	partition by  d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
-    	range between current row and interval ''60 minutes 0 seconds'' following) as departures_in_window_hour_after,
-    COUNT(*) over(
-    	partition by   d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
-    	range between interval ''60 minutes 0 seconds'' preceding and current row) as departures_in_window_hour_before,
-    COUNT(*) over(
-    	partition by   d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
-    	range between current row and interval ''30 minutes 0 seconds'' following) +
-    COUNT(*) over(
-    	partition by  d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
-    	range between interval ''30 minutes 0 seconds'' preceding and current row) -1 as departures_in_window_hour_surrounding
-  FROM trip_stop_sequences d1),
-  frequent_services AS (
-    SELECT
-        *,
-        -- Identify if this is part of a frequent batch (6+ departures in surrounding hour)
-        (departures_in_window_hour_before >= 6 OR departures_in_window_hour_after >= 6 OR departures_in_window_hour_surrounding >= 6) AS is_frequent,
-        -- Identify if this is the first in a frequent batch
-        (departures_in_window_hour_after >= 6 and 
-        departures_in_window_hour_surrounding < 6 AND 
-        departures_in_window_hour_before < 6 and 
-        ((LAG(departures_in_window_hour_after < 6) over w AND LAG(departures_in_window_hour_surrounding < 6) OVER w) or
-        LAG(departures_in_window_hour_surrounding < 6) OVER w isnull))  AS is_first_in_frequent_batch,
-        LAG(group_id) over w as previous_group_id
-    FROM sliding_window_counts d1
-    window w as (
-            PARTITION BY  line_name, operator_noc, route_id , direction
-            ORDER BY departure_time
-        )  
-)
-SELECT
+            CREATE TABLE public.% I AS WITH trip_stop_sequences AS (
+              SELECT
+                t.group_id,
+                t.line_name,
+                t.operator_noc,
+                t.direction,
+                t.vehiclejourney_id,
+                STRING_AGG(
+                  CAST(t.stop_id AS VARCHAR),
+                  ''|''
+                  ORDER BY
+                    expected_departure_time
+                ) AS route_id,
+                Min(expected_departure_time) AS departure_time,
+                Max(expected_departure_time) AS final_arrival
+                --MD5(STRING_AGG(CAST(stop_id as VARCHAR), ''-->'' order by expected_departure_time)) as route_id
+              FROM
+                public.timetable_stop_rank_1_2025_03_24 t
+              GROUP BY
+                t.group_id,
+                t.vehiclejourney_id,
+                t.line_name,
+                t.operator_noc,
+                t.direction,
+                t.vehiclejourney_id
+            ),
+            sliding_window_counts AS (
+              SELECT
+                d1.route_id,
+                d1.line_name,
+                d1.operator_noc,
+                d1.group_id,
+                d1.direction,
+                d1.departure_time,
+                d1.final_arrival,
+                d1.vehiclejourney_id,
+                COUNT(*) over(
+                  PARTITION BY d1.route_id,
+                  d1.line_name,
+                  d1.operator_noc,
+                  d1.direction
+                  ORDER BY
+                    d1.departure_time RANGE BETWEEN CURRENT ROW
+                    AND interval ''60 minutes 0 seconds'' FOLLOWING
+                ) AS departures_in_window_hour_after,
+                COUNT(*) over(
+                  PARTITION BY d1.route_id,
+                  d1.line_name,
+                  d1.operator_noc,
+                  d1.direction
+                  ORDER BY
+                    d1.departure_time RANGE BETWEEN interval ''60 minutes 0 seconds'' PRECEDING
+                    AND CURRENT ROW
+                ) AS departures_in_window_hour_before,
+                COUNT(*) over(
+                  PARTITION BY d1.route_id,
+                  d1.line_name,
+                  d1.operator_noc,
+                  d1.direction
+                  ORDER BY
+                    d1.departure_time RANGE BETWEEN CURRENT ROW
+                    AND interval ''30 minutes 0 seconds'' FOLLOWING
+                ) + COUNT(*) over(
+                  PARTITION BY d1.route_id,
+                  d1.line_name,
+                  d1.operator_noc,
+                  d1.direction
+                  ORDER BY
+                    d1.departure_time RANGE BETWEEN interval ''30 minutes 0 seconds'' PRECEDING
+                    AND CURRENT ROW
+                ) -1 AS departures_in_window_hour_surrounding
+              FROM
+                trip_stop_sequences d1
+            ),
+            frequent_services AS (
+              SELECT
+                *,
+                -- Identify if this is part of a frequent batch (6+ departures in surrounding hour)
+                (
+                  departures_in_window_hour_before >= 6
+                  OR departures_in_window_hour_after >= 6
+                  OR departures_in_window_hour_surrounding >= 6
+                ) AS is_frequent,
+                -- Identify if this is the first in a frequent batch
+                (
+                  departures_in_window_hour_after >= 6
+                  AND departures_in_window_hour_surrounding < 6
+                  AND departures_in_window_hour_before < 6
+                  AND (
+                    (
+                      LAG(departures_in_window_hour_after < 6) OVER w
+                      AND LAG(departures_in_window_hour_surrounding < 6) OVER w
+                    )
+                    OR LAG(departures_in_window_hour_surrounding < 6) OVER w ISNULL
+                  )
+                ) AS is_first_in_frequent_batch,
+                LAG(group_id) OVER w AS previous_group_id
+              FROM
+                sliding_window_counts d1 WINDOW w AS (
+                  PARTITION BY line_name,
+                  operator_noc,
+                  route_id,
+                  direction
+                  ORDER BY
+                    departure_time
+                )
+            )
+            SELECT
               t.operator_noc,
               t.service_code,
               t.line_name,
@@ -927,14 +974,20 @@ SELECT
               t.direction,
               t.departure_day_shift,
               t.registered,
-              CASE WHEN f.is_frequent and f.is_first_in_frequent_batch then ''FIRST_SERVICE'' --identifier for the first journey in a frequent services block, e.g. if frequent 7-8am and 5-6pm- the 7am and 5pm journey
-              	   when f.is_frequent and t.expected_departure_time = f.final_arrival then ''LAST_STOP'' --identifier for last stop in a frequent service journey
-              	   when f.is_frequent then f.previous_group_id  
-              else null 
-              end as previous_group_id
-FROM public.timetable_stop_rank_1_2025_03_24 t
-left join frequent_services f
-on f.vehiclejourney_id = t.vehiclejourney_id;
+              CASE
+                WHEN f.is_frequent
+                 AND f.is_first_in_frequent_batch
+                    THEN ''FIRST_SERVICE'' --identifier for the first journey in a frequent services block, e.g. if frequent 7-8am and 5-6pm- the 7am and 5pm journey
+                WHEN f.is_frequent
+                 AND t.expected_departure_time = f.final_arrival
+                    THEN ''LAST_STOP'' --identifier for last stop in a frequent service journey
+                WHEN f.is_frequent
+                    THEN f.previous_group_id
+                ELSE NULL
+              END AS previous_group_id
+            FROM
+              public.timetable_stop_rank_1_2025_03_24 t
+              LEFT JOIN frequent_services f ON f.vehiclejourney_id = t.vehiclejourney_id;
             ',
             concat('timetable_stop_prev_group_id', timetable_suffix),
             concat('timetable_stop_rank_1', timetable_suffix)
@@ -1091,5 +1144,6 @@ on f.vehiclejourney_id = t.vehiclejourney_id;
 
     RAISE NOTICE '% generate_timetable complete', clock_timestamp();
 end;
-$$
-;
+$$;
+
+alter procedure generate_timetable owner to abods_proxy_rw;
