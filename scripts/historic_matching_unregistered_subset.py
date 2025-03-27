@@ -215,10 +215,17 @@ def convert_to_parquet(process_date: date, environment: str):
 
 
 def summary_generation(db_password: str, process_date: date):
-    run_query(
-        f"CALL unregistered_subset_post_matching_functions('{process_date.isoformat()}');",
-        db_password,
-    )
+    def run_summary_generation():
+        run_query(
+            f"CALL unregistered_subset_post_matching_functions('{process_date.isoformat()}');",
+            db_password,
+        )
+    try:
+        run_summary_generation()
+    except CalledProcessError as e:
+        print(e)
+        print("Trying once more, because the daily summaries may have interrupted this one")
+        run_summary_generation()
 
 
 def cloudwatch_logs_link(arn: str, environment: str):
@@ -409,6 +416,7 @@ def main():
 
     max_tasks = 5
     summaries_to_run = []
+    failed_summaries = []
     while (
         ready_to_run
         or running_tasks
@@ -442,7 +450,11 @@ def main():
                 summary_generation(db_password, process_date)
             except CalledProcessError as e:
                 print(e)
-                summary_generation(db_password, process_date)
+                failed_summaries = sorted({*failed_summaries, process_date})
+            if failed_summaries:
+                print(
+                    f"{current_time_london().isoformat()}: The following dates have failed summary generation: {';'.join(d.isoformat() for d in failed_summaries)}"
+                )
             if summaries_to_run:
                 print(
                     f"{current_time_london().isoformat()}: Dates queued for summary generation: {';'.join(d.isoformat() for d in summaries_to_run)}"
@@ -461,6 +473,12 @@ def main():
             ready_to_run = sorted({*ready_to_run, process_date})
 
         sleep(60)
+
+    print("All processing complete")
+    if failed_summaries:
+        print(
+            f"{current_time_london().isoformat()}: The following dates have failed summary generation, you may want to re-run them: {';'.join(d.isoformat() for d in failed_summaries)}"
+        )
 
 
 if __name__ == "__main__":
