@@ -9,12 +9,19 @@ from zoneinfo import ZoneInfo
 import boto3
 from botocore.config import Config
 
-db_host = "abods-prod-db.cluster-cpwu8ksu6zyo.eu-west-2.rds.amazonaws.com"
 db_user = "root"
 s3 = boto3.client("s3")
 paginator = s3.get_paginator("list_objects_v2")
 base_prefix = "historic/"
 max_queue_length = 6
+
+
+def get_db_host(environment: str):
+    rds_client = boto3.client("rds")
+    response = rds_client.describe_db_clusters(
+        DBClusterIdentifier=f"abods-{environment}-db"
+    )
+    return response["DBClusters"][0]["Endpoint"]
 
 
 def current_time_london():
@@ -123,14 +130,21 @@ def look_for_existing_tasks(environment: str):
         }
 
 
-def wait_for_queues():
+def get_aws_account_id():
+    sts_client = boto3.client("sts")
+    response = sts_client.get_caller_identity()
+    return response["Account"]
+
+
+def wait_for_queues(environment: str):
+    account_id = get_aws_account_id()
     while True:
         longest_queue = 0
         sqs = boto3.client("sqs")
         for shard in range(7, 0, -1):
             queue_length = int(
                 sqs.get_queue_attributes(
-                    QueueUrl=f"https://sqs.eu-west-2.amazonaws.com/637423206165/abods-prod-sirivm-otp-queue{7}.fifo",
+                    QueueUrl=f"https://sqs.eu-west-2.amazonaws.com/{account_id}/abods-{environment}-sirivm-otp-queue{7}.fifo",
                     AttributeNames=["ApproximateNumberOfMessages"],
                 )["Attributes"]["ApproximateNumberOfMessages"]
             )
@@ -151,7 +165,7 @@ def wait_for_queues():
         sleep(60)
 
 
-def run_query(query: str, db_password: str):
+def run_query(query: str, db_host: str, db_password: str):
     subprocess.run(
         [
             # This is where it's installed on the bastion, doesn't seem to be on PATH when called by subprocess
@@ -170,36 +184,43 @@ def run_query(query: str, db_password: str):
     )
 
 
-def timetable_generation(db_password: str, process_date: date, subset: bool):
+def timetable_generation(
+    db_password: str, db_host: str, process_date: date, environment: str, subset: bool
+):
     if subset:
         run_query(
             f"CALL generate_timetable_unregistered_subset('{process_date.isoformat()}');",
+            db_host,
             db_password,
         )
     else:
         run_query(
             f"CALL generate_timetable('{process_date.isoformat()}');",
+            db_host,
             db_password,
         )
-    wait_for_queues()
+    wait_for_queues(environment)
 
 
-def timetable_export(db_password: str, process_date: date, subset: bool):
+def timetable_export(db_password: str, db_host: str, process_date: date, subset: bool):
     if subset:
         run_query(
             f"CALL historic_timetable_export_unregistered_subset('{process_date.isoformat()}');",
+            db_host,
             db_password,
         )
     else:
         run_query(
             f"CALL historic_timetable_export('{process_date.isoformat()}');",
+            db_host,
             db_password,
         )
 
 
-def avl_export(db_password: str, process_date: date):
+def avl_export(db_password: str, db_host: str, process_date: date):
     run_query(
         f"CALL historic_avl_export('{process_date.isoformat()}');",
+        db_host,
         db_password,
     )
 
@@ -226,16 +247,20 @@ def convert_to_parquet(process_date: date, environment: str):
     print(json.loads(response["Payload"].read()))
 
 
-def summary_generation(db_password: str, process_date: date, subset: bool):
+def summary_generation(
+    db_password: str, db_host: str, process_date: date, subset: bool
+):
     def run_summary_generation():
         if subset:
             run_query(
                 f"CALL unregistered_subset_post_matching_functions('{process_date.isoformat()}');",
+                db_host,
                 db_password,
             )
         else:
             run_query(
                 f"CALL historic_matching_summary_generation('{process_date.isoformat()}');",
+                db_host,
                 db_password,
             )
 
@@ -359,12 +384,16 @@ def in_service_hours():
 
 def main():
     while True:
-        environment = input("Which environment? (prod|sandbox): ")
+        environment = input("Which environment? (prod|uat|sandbox): ").strip().lower()
         if environment == "sandbox":
+            break
+        if environment == "uat":
             break
         if environment == "prod":
             break
         print("Wrong, try again")
+
+    db_host = get_db_host(environment)
     subset = get_boolean_input("Process only unregistered subset?")
     force_timetable_export = False
     if subset:
@@ -504,7 +533,7 @@ def main():
         if summaries_to_run and not in_service_hours():
             process_date = summaries_to_run.pop(0)
             try:
-                summary_generation(db_password, process_date, subset)
+                summary_generation(db_password, db_host, process_date, subset)
             except CalledProcessError as e:
                 print(e)
                 failed_summaries = sorted({*failed_summaries, process_date})
@@ -520,13 +549,15 @@ def main():
 
         if avl_export_needed:
             process_date = avl_export_needed.pop(0)
-            avl_export(db_password, process_date)
+            avl_export(db_password, db_host, process_date)
             timetable_export_needed = sorted({*timetable_export_needed, process_date})
         elif timetable_export_needed and not ready_to_run:
             process_date = timetable_export_needed.pop(0)
             if regenerate_timetables:
-                timetable_generation(db_password, process_date, subset)
-            timetable_export(db_password, process_date, subset)
+                timetable_generation(
+                    db_password, db_host, process_date, environment, subset
+                )
+            timetable_export(db_password, db_host, process_date, subset)
             convert_to_parquet(process_date, environment)
             ready_to_run = sorted({*ready_to_run, process_date})
 
