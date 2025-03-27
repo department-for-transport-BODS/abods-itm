@@ -30,8 +30,7 @@ BEGIN
             line_name,
             date_of_journey,
             stop_id,
-            stop_index,
-            direction
+            stop_index
             ORDER BY
               stop_id,
               stop_index ASC,
@@ -42,8 +41,6 @@ BEGIN
         WHERE date_of_journey = pt_date
           AND expected_departure_time < earliest_departure_time
           AND previous_group_id IS NOT NULL
-          AND previous_group_id != 'FIRST_SERVICE'
-          AND previous_group_id != 'LAST_STOP'
           AND (
             actual_departure_time IS NOT NULL
             OR timestamp_after_estimate IS NOT NULL
