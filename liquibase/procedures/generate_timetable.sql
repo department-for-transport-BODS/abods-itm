@@ -841,7 +841,7 @@ begin
 
     execute format(
             '
-            CREATE TABLE public.% I AS WITH trip_stop_sequences AS (
+            CREATE TABLE public.%I AS WITH trip_stop_sequences AS (
               SELECT
                 t.group_id,
                 t.line_name,
@@ -858,7 +858,7 @@ begin
                 Max(expected_departure_time) AS final_arrival
                 --MD5(STRING_AGG(CAST(stop_id as VARCHAR), ''-->'' order by expected_departure_time)) as route_id
               FROM
-                public.timetable_stop_rank_1_2025_03_24 t
+                public.%I t
               GROUP BY
                 t.group_id,
                 t.vehiclejourney_id,
@@ -986,10 +986,11 @@ begin
                 ELSE NULL
               END AS previous_group_id
             FROM
-              public.timetable_stop_rank_1_2025_03_24 t
+              public.%I t
               LEFT JOIN frequent_services f ON f.vehiclejourney_id = t.vehiclejourney_id;
             ',
             concat('timetable_stop_prev_group_id', timetable_suffix),
+            concat('timetable_stop_rank_1', timetable_suffix),
             concat('timetable_stop_rank_1', timetable_suffix)
             );
 
