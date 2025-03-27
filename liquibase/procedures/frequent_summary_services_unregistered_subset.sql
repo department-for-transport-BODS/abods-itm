@@ -86,37 +86,41 @@ BEGIN
               ) AS actual_departure_time,
               ttb.time_difference,
               CASE
-                WHEN otp_state = 'Early' AND time_difference >= -600
+                WHEN otp_state <> 'Early'
+                  THEN 0
+                WHEN time_difference >= -600
                   THEN 10
-                WHEN otp_state = 'Early' AND time_difference < -600 AND time_difference >= -1200
+                WHEN time_difference >= -1200
                   THEN 20
-                WHEN otp_state = 'Early' AND time_difference < -1200 AND time_difference >= -1800
+                WHEN time_difference >= -1800
                   THEN 30
-                WHEN otp_state = 'Early' AND time_difference < -1800 AND time_difference >= -2400
+                WHEN time_difference >= -2400
                   THEN 40
-                WHEN otp_state = 'Early' AND time_difference < -2400 AND time_difference >= -3000
+                WHEN time_difference >= -3000
                   THEN 50
-                WHEN otp_state = 'Early' AND time_difference < -3000 AND time_difference >= -3600
+                WHEN time_difference >= -3600
                   THEN 60
-                WHEN otp_state = 'Early' AND time_difference < -3600
+                WHEN time_difference < -3600
                   THEN 70
                 ELSE
                   0
               END AS max_early,
               CASE
-                WHEN otp_state = 'Late' AND time_difference <= 600
+                WHEN otp_state <> 'Late'
+                  THEN 0
+                WHEN time_difference <= 600
                   THEN 10
-                WHEN otp_state = 'Late' AND time_difference > 600 AND time_difference <= 1200
+                WHEN time_difference <= 1200
                   THEN 20
-                WHEN otp_state = 'Late' AND time_difference > 1200 AND time_difference <= 1800
+                WHEN time_difference <= 1800
                   THEN 30
-                WHEN otp_state = 'Late' AND time_difference > 1800 AND time_difference <= 2400
+                WHEN time_difference <= 2400
                   THEN 40
-                WHEN otp_state = 'Late' AND time_difference > 2400 AND time_difference <= 3000
+                WHEN time_difference <= 3000
                   THEN 50
-                WHEN otp_state = 'Late' AND time_difference > 3000 AND time_difference <= 3600
+                WHEN time_difference <= 3600
                   THEN 60
-                WHEN otp_state = 'Late' AND time_difference > 3600
+                WHEN time_difference > 3600
                   THEN 70
                 ELSE
                   0
@@ -203,34 +207,24 @@ BEGIN
       max_early,
       max_late,
       avg_time_difference,
-      -- Temporary coalesce of values to 0, long term fix is to identify why this is happening
-      COALESCE(
-        CASE
-          WHEN
-            headway_stops_count = 0 THEN 0
-          ELSE
-            (expected_headway / (headway_stops_count * 60))
-        END,
-        0
-      ) AS expected_headway,
-      COALESCE(
-        CASE
-          WHEN
-            headway_stops_count = 0 THEN 0
-          ELSE
-            (actual_headway / (headway_stops_count * 60))
-        END,
-        0
-      ) AS actual_headway,
-      COALESCE(
-        CASE
-          WHEN
-            headway_stops_count = 0 THEN 0
-          ELSE
-            (excess_wait_time / (headway_stops_count * 60))
-        END,
-        0
-      ) AS excess_wait_time,
+      CASE
+        WHEN
+          headway_stops_count = 0 THEN 0
+        ELSE
+          (expected_headway / (headway_stops_count * 60))
+      END AS expected_headway,
+      CASE
+        WHEN
+          headway_stops_count = 0 THEN 0
+        ELSE
+          (actual_headway / (headway_stops_count * 60))
+      END AS actual_headway,
+      CASE
+        WHEN
+          headway_stops_count = 0 THEN 0
+        ELSE
+          (excess_wait_time / (headway_stops_count * 60))
+      END AS excess_wait_time,
       estimated,
       headway_stops_count,
       is_timing_point
