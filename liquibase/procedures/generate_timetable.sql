@@ -856,7 +856,6 @@ begin
                 ) AS route_id,
                 Min(expected_departure_time) AS departure_time,
                 Max(expected_departure_time) AS final_arrival
-                --MD5(STRING_AGG(CAST(stop_id as VARCHAR), ''-->'' order by expected_departure_time)) as route_id
               FROM
                 public.%I t
               GROUP BY
