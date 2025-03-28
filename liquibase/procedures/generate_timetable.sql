@@ -680,7 +680,7 @@ begin
               direction,
               departure_day_shift,
               registered,
-			  stop.stop_activity_id as stop_activity_id
+              stop.stop_activity_id as stop_activity_id
             FROM
               public.%I tvw
               JOIN public.transmodel_servicepatternstop stop
@@ -737,7 +737,7 @@ begin
               FIRST_VALUE(departure_time) OVER w AS first_departure,
               LAST_VALUE(departure_time) OVER w AS last_departure,
               registered,
-			  stop_activity_id
+              stop_activity_id
             FROM
               public.%I a
               JOIN public.naptan_stoppoint b
@@ -818,10 +818,10 @@ begin
               direction,
               departure_day_shift,
               registered,
-			  CASE
-				WHEN stop_activity_id = 2 THEN TRUE
-			  ELSE FALSE
-			  END AS set_down
+              CASE
+                WHEN stop_activity_id = 2 THEN TRUE
+              ELSE FALSE
+              END AS set_down
             FROM
               public.%I
             WHERE
@@ -980,7 +980,7 @@ begin
                 departure_day_shift,
                 registered,
                 reprocessing_required,
-				set_down
+                set_down
               )
             SELECT
               tsr1.operator_noc,
@@ -1043,7 +1043,7 @@ begin
               tsr1.departure_day_shift,
               tsr1.registered,
               NULL,
-			  tsr1.set_down
+              tsr1.set_down
             FROM
               public.%I tsr1
               LEFT JOIN public.%I tspgi
