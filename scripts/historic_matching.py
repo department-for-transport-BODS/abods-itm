@@ -14,7 +14,7 @@ $ AWS_DEFAULT_REGION=eu-west-2 ./historic_matching.py
 The script will prompt you for more information, like the date range, and then will:
 - Regenerate the timetable for the day (optional)
 - Export the timetable if needed
-- Export the avl data if needed
+- Export the avl data if needed (including the next day for overnight matching)
 - Run the matching (up to 5 days concurrently) and wait for completion
 - Generate data for summary tables (and report if this errors at the end)
 """
@@ -377,6 +377,11 @@ def get_dates_to_run():
         while current < end:
             current = current + timedelta(days=1)
             process_dates.add(current)
+    earliest_possible_date =(date.today() - timedelta(days=2))
+    for process_date in process_dates:
+        if process_date > earliest_possible_date:
+            print(f"Can't process a date after {earliest_possible_date}, as we don't have the required AVL data yet. (hint: matching for a date can continue past midnight)")
+            exit(1)
     return process_dates
 
 
@@ -399,6 +404,35 @@ def in_service_hours():
         f"{current_time.isoformat()}: It's working hours, no blocking the database now"
     )
     return True
+
+
+def which_files_exist(current:date, files:list[str]):
+    year = current.year
+    month = str(current.month).zfill(2)
+    day = str(current.day).zfill(2)
+    date_with_dashes = f"{year}-{month}-{day}"
+    date_without_dashes = f"{year}{month}{day}"
+    year_month_prefix = f"YYYY={year}/MM={month}"
+    year_month_day_prefix = f"{year_month_prefix}/DD={day}"
+    timetable_csv_path = (
+        f"{base_prefix}csv/timetable/{year_month_prefix}/{date_with_dashes}.csv"
+    )
+    timetable_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/timetable_{date_without_dashes}.parquet"
+    avl_csv_path = (
+        f"{base_prefix}csv/siri/{year_month_prefix}/siri_vm_{date_with_dashes}.csv"
+    )
+    avl_gz_path = (
+        f"{base_prefix}gz/{year_month_day_prefix}/{date_with_dashes}.csv.gz"
+    )
+    avl_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/siri_vm_{date_without_dashes}.parquet"
+    data = {
+        "timetable_csv": (timetable_csv_path in files),
+        "timetable_parquet": (timetable_parquet_path in files),
+        "avl_csv": avl_csv_path in files,
+        "avl_gz": (avl_gz_path in files),
+        "avl_parquet": (avl_parquet_path in files),
+    }
+    return data
 
 
 def main():
@@ -441,35 +475,21 @@ def main():
     files = list(list_files(environment, base_prefix))
 
     avl_export_needed = []
+    next_day_avl_export_needed = []
+    next_day_avl_conversion_needed = []
     timetable_export_needed = []
     ready_to_run = []
 
     for current in process_dates:
-        year = current.year
-        month = str(current.month).zfill(2)
-        day = str(current.day).zfill(2)
-        date_with_dashes = f"{year}-{month}-{day}"
-        date_without_dashes = f"{year}{month}{day}"
-        year_month_prefix = f"YYYY={year}/MM={month}"
-        year_month_day_prefix = f"{year_month_prefix}/DD={day}"
-        timetable_csv_path = (
-            f"{base_prefix}csv/timetable/{year_month_prefix}/{date_with_dashes}.csv"
-        )
-        timetable_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/timetable_{date_without_dashes}.parquet"
-        avl_csv_path = (
-            f"{base_prefix}csv/siri/{year_month_prefix}/siri_vm_{date_with_dashes}.csv"
-        )
-        avl_gz_path = (
-            f"{base_prefix}gz/{year_month_day_prefix}/{date_with_dashes}.csv.gz"
-        )
-        avl_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/siri_vm_{date_without_dashes}.parquet"
-        data = {
-            "timetable_csv": (timetable_csv_path in files),
-            "timetable_parquet": (timetable_parquet_path in files),
-            "avl_csv": avl_csv_path in files,
-            "avl_gz": (avl_gz_path in files),
-            "avl_parquet": (avl_parquet_path in files),
-        }
+        next_day = current + timedelta(days=1)
+        if next_day not in process_dates:
+            tomorrows_data = which_files_exist(current, files)
+            if not tomorrows_data["avl_csv"] and not tomorrows_data["avl_parquet"]:
+                next_day_avl_export_needed.append(current)
+            elif not tomorrows_data["avl_parquet"]:
+                next_day_avl_conversion_needed.append(current)
+
+        data = which_files_exist(current, files)
         if subset:
             timetable_export_needed.append(current)
             if not data["avl_parquet"] and not data["avl_csv"]:
@@ -530,14 +550,28 @@ def main():
         or timetable_export_needed
     ):
         if ready_to_run and len(running_tasks) < max_tasks:
-            start_historic_matching(ready_to_run.pop(0), environment)
-            if ready_to_run:
-                print(
-                    f"{current_time_london().isoformat()}: Dates still queued for matching: {';'.join(d.isoformat() for d in ready_to_run)}"
-                )
+            # Ensure that we have the avl data for the next day available before we kick off matching
+            next_day = ready_to_run[0] + timedelta(days=1)
+            if not next_day in avl_export_needed and not next_day in timetable_export_needed:
 
-                # Keep starting tasks if there's more we can run
-                continue
+                if next_day in next_day_avl_export_needed:
+                    avl_export(db_password, db_host, next_day)
+                    next_day_avl_export_needed.remove(next_day)
+                    next_day_avl_conversion_needed.append(next_day)
+
+                if next_day in next_day_avl_conversion_needed:
+                    convert_to_parquet(next_day, environment)
+                    next_day_avl_conversion_needed.remove(next_day)
+
+
+                start_historic_matching(ready_to_run.pop(0), environment)
+                if ready_to_run:
+                    print(
+                        f"{current_time_london().isoformat()}: Dates still queued for matching: {';'.join(d.isoformat() for d in ready_to_run)}"
+                    )
+
+                    # Keep starting tasks if there's more we can run
+                    continue
 
         completed_dates = check_for_completed_tasks(environment)
         summaries_to_run = sorted({*summaries_to_run, *completed_dates})
