@@ -33,3 +33,9 @@ RADIUS_OF_EARTH_IN_METERS = 6_371_000
 
 TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE = "timetable"
 """Value passed by the extract generation to trigger otp matching to refresh the cached timetable extract"""
+
+EARLY_THRESHOLD_IN_SECONDS = 60
+"""The time difference between a match and the expected departure time must be more than this for the match to be considered early"""
+
+LATE_THRESHOLD_IN_SECONDS = 359
+"""The time difference between a match and the expected departure time must be more than this for the match to be considered late"""

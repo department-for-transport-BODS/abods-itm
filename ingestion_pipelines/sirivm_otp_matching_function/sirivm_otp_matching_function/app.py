@@ -6,7 +6,6 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import SQSEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from dateutil.parser import parse
-from shared.config import TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE
 
 from .client_db import TimetableDBClient
 from .client_s3 import TimetableS3Client
@@ -15,6 +14,7 @@ from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import match_avl_batch
 from .matcher.models import LiveAVLRecord, Timetable
 from .matcher.utils import timer
+from .shared.config import TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE
 
 logger = Logger()
 

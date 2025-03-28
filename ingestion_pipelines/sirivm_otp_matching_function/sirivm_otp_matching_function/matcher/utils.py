@@ -9,9 +9,7 @@ import boto3
 import pyproj
 from aws_lambda_powertools import Logger
 
-EARLY_THRESHOLD_IN_SECONDS = 60
-LATE_THRESHOLD_IN_SECONDS = 359
-
+from ..shared.config import EARLY_THRESHOLD_IN_SECONDS, LATE_THRESHOLD_IN_SECONDS
 
 logger = Logger()
 session = boto3.Session()

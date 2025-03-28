@@ -5,7 +5,8 @@ from math import asin, cos, radians, sin, sqrt
 from typing import Protocol
 
 from aws_lambda_powertools import Logger
-from shared.config import (
+
+from ..shared.config import (
     END_OF_JOURNEY_PROPORTION,
     ESTIMATED_MATCHING_DISTANCE_UPPER_LIMIT_IN_METRES,
     ESTIMATED_MATCHING_TIME_UPPER_LIMIT_IN_SECONDS,
@@ -16,7 +17,6 @@ from shared.config import (
     SAVED_MATCHES_LIMIT,
     SHORT_JOURNEY_STOP_COUNT,
 )
-
 from .models import (
     AVLRecord,
     BadDbMatch,
