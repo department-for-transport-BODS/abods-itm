@@ -1,4 +1,23 @@
 #!/usr/bin/env python3
+"""
+A script to run the entire historic matching process for a range of dates.
+Currently, this script is intended to be copied to the abods-$env-bastion instance and run in a session on there.
+Some permissions will need to be attached and an example redacted policy is at ./bastion_policy.json
+After copying (assuming you aren't updating it), you will need to make the file executable:
+```
+$ chmod +x ./historic_matching.py
+```
+Then you can start the script:
+```
+$ AWS_DEFAULT_REGION=eu-west-2 ./historic_matching.py
+```
+The script will prompt you for more information, like the date range, and then will:
+- Regenerate the timetable for the day (optional)
+- Export the timetable if needed
+- Export the avl data if needed
+- Run the matching (up to 5 days concurrently) and wait for completion
+- Generate data for summary tables (and report if this errors at the end)
+"""
 import json
 import subprocess
 from datetime import datetime, date, timedelta
