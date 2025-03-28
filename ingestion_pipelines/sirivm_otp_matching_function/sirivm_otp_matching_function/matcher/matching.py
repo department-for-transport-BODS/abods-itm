@@ -5,6 +5,17 @@ from math import asin, cos, radians, sin, sqrt
 from typing import Protocol
 
 from aws_lambda_powertools import Logger
+from shared.config import (
+    END_OF_JOURNEY_PROPORTION,
+    ESTIMATED_MATCHING_DISTANCE_UPPER_LIMIT_IN_METRES,
+    ESTIMATED_MATCHING_TIME_UPPER_LIMIT_IN_SECONDS,
+    MATCHING_TIME_LOWER_LIMIT_IN_SECONDS,
+    MATCHING_TIME_UPPER_LIMIT_IN_SECONDS,
+    MATCH_ZONE_RADIUS_IN_METERS,
+    RADIUS_OF_EARTH_IN_METERS,
+    SAVED_MATCHES_LIMIT,
+    SHORT_JOURNEY_STOP_COUNT,
+)
 
 from .models import (
     AVLRecord,
@@ -57,14 +68,6 @@ class TimetableStore(Protocol):
 
 logger = Logger()
 
-MATCH_ZONE_RADIUS_IN_METERS = 70
-SAVED_MATCHES_LIMIT = 2
-JOURNEY_STOPS_MIN_THRESHOLD = 3
-ESTIMATED_MATCHING_TIME_UPPER_LIMIT_IN_SECONDS = 60
-ESTIMATED_MATCHING_DISTANCE_UPPER_LIMIT_IN_METRES = 2000
-MATCHING_TIME_LOWER_LIMIT_IN_SECONDS = -2 * 60 * 60
-MATCHING_TIME_UPPER_LIMIT_IN_SECONDS = 1 * 60 * 60
-
 
 def get_final_stop_index(route: Route) -> int:
     return len(route)
@@ -110,8 +113,7 @@ def distance_from_stop(avl: AVLRecord, stop: Stop) -> float:
     dlat = lat2 - lat1
     a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     c = 2 * asin(sqrt(a))
-    r = 6371  # Radius of earth in kilometers. Use 3956 for miles. Determines return value units.
-    return (c * r) * 1000
+    return c * RADIUS_OF_EARTH_IN_METERS
 
 
 def get_lowest_matched_stop_index(route_history: RouteHistory) -> int:
@@ -224,8 +226,8 @@ def find_potential_matches(
         # 12.3 Is this index less than 3/4*last stop index?
         if (
             num_of_matched_stops <= 1
-            and final_stop_index > JOURNEY_STOPS_MIN_THRESHOLD
-            and stop_index_int > int(final_stop_index * 3 / 4)
+            and final_stop_index > SHORT_JOURNEY_STOP_COUNT
+            and stop_index_int > int(final_stop_index * END_OF_JOURNEY_PROPORTION)
         ):
             logger.debug(
                 f"12.1/2/3 Number of matched stops is {num_of_matched_stops}, the final stop index {final_stop_index} > 3 and stop index {stop_index} is greater than {int(final_stop_index * 3 / 4)} 3/4 of the final stop index. Skip stop {stop_index} from being a potential match",

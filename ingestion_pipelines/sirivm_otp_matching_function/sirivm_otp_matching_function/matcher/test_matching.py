@@ -682,7 +682,7 @@ class TestFindMatchesInPotentialMatches:  # noqa: D101 - BODS-7131
                     "matched_stops": {},
                     "potential_matches": {
                         "1": {
-                            "last_distance": 11.812096582392824,
+                            "last_distance": 11.812096582392826,
                             "last_time_in_zone": str(
                                 datetime(
                                     2024,
