@@ -1,4 +1,24 @@
 #!/usr/bin/env python3
+"""
+A script to run the entire historic matching process for a range of dates.
+Currently, this script is intended to be copied to the abods-$env-bastion instance and run in a session on there.
+Some permissions will need to be attached and an example redacted policy is at ./bastion_policy.json
+After copying (assuming you aren't updating it), you will need to make the file executable:
+```
+$ chmod +x ./historic_matching.py
+```
+Then you can start the script:
+```
+$ AWS_DEFAULT_REGION=eu-west-2 ./historic_matching.py
+```
+The script will prompt you for more information, like the date range, and then will:
+- Regenerate the timetable for the day (optional)
+- Export the timetable if needed
+- Export the avl data if needed (including the next day for overnight matching)
+- Run the matching (up to 5 days concurrently) and wait for completion
+- Generate data for summary tables (and report if this errors at the end)
+"""
+
 import json
 import subprocess
 from datetime import datetime, date, timedelta
@@ -9,12 +29,19 @@ from zoneinfo import ZoneInfo
 import boto3
 from botocore.config import Config
 
-db_host = "abods-prod-db.cluster-cpwu8ksu6zyo.eu-west-2.rds.amazonaws.com"
 db_user = "root"
 s3 = boto3.client("s3")
 paginator = s3.get_paginator("list_objects_v2")
 base_prefix = "historic/"
 max_queue_length = 6
+
+
+def get_db_host(environment: str):
+    rds_client = boto3.client("rds")
+    response = rds_client.describe_db_clusters(
+        DBClusterIdentifier=f"abods-{environment}-db"
+    )
+    return response["DBClusters"][0]["Endpoint"]
 
 
 def current_time_london():
@@ -123,14 +150,21 @@ def look_for_existing_tasks(environment: str):
         }
 
 
-def wait_for_queues():
+def get_aws_account_id():
+    sts_client = boto3.client("sts")
+    response = sts_client.get_caller_identity()
+    return response["Account"]
+
+
+def wait_for_queues(environment: str):
+    account_id = get_aws_account_id()
     while True:
         longest_queue = 0
         sqs = boto3.client("sqs")
         for shard in range(7, 0, -1):
             queue_length = int(
                 sqs.get_queue_attributes(
-                    QueueUrl=f"https://sqs.eu-west-2.amazonaws.com/637423206165/abods-prod-sirivm-otp-queue{7}.fifo",
+                    QueueUrl=f"https://sqs.eu-west-2.amazonaws.com/{account_id}/abods-{environment}-sirivm-otp-queue{7}.fifo",
                     AttributeNames=["ApproximateNumberOfMessages"],
                 )["Attributes"]["ApproximateNumberOfMessages"]
             )
@@ -151,7 +185,7 @@ def wait_for_queues():
         sleep(60)
 
 
-def run_query(query: str, db_password: str):
+def run_query(query: str, db_host: str, db_password: str):
     subprocess.run(
         [
             # This is where it's installed on the bastion, doesn't seem to be on PATH when called by subprocess
@@ -170,24 +204,43 @@ def run_query(query: str, db_password: str):
     )
 
 
-def timetable_generation(db_password: str, process_date: date):
-    run_query(
-        f"CALL generate_timetable('{process_date.isoformat()}');",
-        db_password,
-    )
-    wait_for_queues()
+def timetable_generation(
+    db_password: str, db_host: str, process_date: date, environment: str, subset: bool
+):
+    if subset:
+        run_query(
+            f"CALL generate_timetable_unregistered_subset('{process_date.isoformat()}');",
+            db_host,
+            db_password,
+        )
+    else:
+        run_query(
+            f"CALL generate_timetable('{process_date.isoformat()}');",
+            db_host,
+            db_password,
+        )
+    wait_for_queues(environment)
 
 
-def timetable_export(db_password: str, process_date: date):
-    run_query(
-        f"CALL historic_timetable_export('{process_date.isoformat()}');",
-        db_password,
-    )
+def timetable_export(db_password: str, db_host: str, process_date: date, subset: bool):
+    if subset:
+        run_query(
+            f"CALL historic_timetable_export_unregistered_subset('{process_date.isoformat()}');",
+            db_host,
+            db_password,
+        )
+    else:
+        run_query(
+            f"CALL historic_timetable_export('{process_date.isoformat()}');",
+            db_host,
+            db_password,
+        )
 
 
-def avl_export(db_password: str, process_date: date):
+def avl_export(db_password: str, db_host: str, process_date: date):
     run_query(
         f"CALL historic_avl_export('{process_date.isoformat()}');",
+        db_host,
         db_password,
     )
 
@@ -214,11 +267,31 @@ def convert_to_parquet(process_date: date, environment: str):
     print(json.loads(response["Payload"].read()))
 
 
-def summary_generation(db_password: str, process_date: date):
-    run_query(
-        f"CALL historic_matching_summary_generation('{process_date.isoformat()}');",
-        db_password,
-    )
+def summary_generation(
+    db_password: str, db_host: str, process_date: date, subset: bool
+):
+    def run_summary_generation():
+        if subset:
+            run_query(
+                f"CALL unregistered_subset_post_matching_functions('{process_date.isoformat()}');",
+                db_host,
+                db_password,
+            )
+        else:
+            run_query(
+                f"CALL historic_matching_summary_generation('{process_date.isoformat()}');",
+                db_host,
+                db_password,
+            )
+
+    try:
+        run_summary_generation()
+    except CalledProcessError as e:
+        print(e)
+        print(
+            "Trying once more, because the daily summaries may have interrupted this one"
+        )
+        run_summary_generation()
 
 
 def cloudwatch_logs_link(arn: str, environment: str):
@@ -270,6 +343,10 @@ def get_db_password(environment: str):
     )["password"]
 
 
+def get_boolean_input(prompt: str):
+    return input(f"{prompt} (y/N): ").lower().strip()[0] == "y"
+
+
 def get_dates_to_run():
     while True:
         try:
@@ -301,6 +378,13 @@ def get_dates_to_run():
         while current < end:
             current = current + timedelta(days=1)
             process_dates.add(current)
+    earliest_possible_date = date.today() - timedelta(days=2)
+    for process_date in process_dates:
+        if process_date > earliest_possible_date:
+            print(
+                f"Can't process a date after {earliest_possible_date}, as we don't have the required AVL data yet. (hint: matching for a date can continue past midnight)"
+            )
+            exit(1)
     return process_dates
 
 
@@ -315,7 +399,7 @@ def in_service_hours():
         print(f"{current_time.isoformat()}: It's early morning")
         return False
 
-    if current_time.hour > 18:
+    if current_time.hour > 17:
         print(f"{current_time.isoformat()}: It's the evening")
         return False
 
@@ -325,14 +409,53 @@ def in_service_hours():
     return True
 
 
+def which_files_exist(current: date, files: list[str]):
+    year = current.year
+    month = str(current.month).zfill(2)
+    day = str(current.day).zfill(2)
+    date_with_dashes = f"{year}-{month}-{day}"
+    date_without_dashes = f"{year}{month}{day}"
+    year_month_prefix = f"YYYY={year}/MM={month}"
+    year_month_day_prefix = f"{year_month_prefix}/DD={day}"
+    timetable_csv_path = (
+        f"{base_prefix}csv/timetable/{year_month_prefix}/{date_with_dashes}.csv"
+    )
+    timetable_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/timetable_{date_without_dashes}.parquet"
+    avl_csv_path = (
+        f"{base_prefix}csv/siri/{year_month_prefix}/siri_vm_{date_with_dashes}.csv"
+    )
+    avl_gz_path = f"{base_prefix}gz/{year_month_day_prefix}/{date_with_dashes}.csv.gz"
+    avl_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/siri_vm_{date_without_dashes}.parquet"
+    data = {
+        "timetable_csv": (timetable_csv_path in files),
+        "timetable_parquet": (timetable_parquet_path in files),
+        "avl_csv": avl_csv_path in files,
+        "avl_gz": (avl_gz_path in files),
+        "avl_parquet": (avl_parquet_path in files),
+    }
+    return data
+
+
 def main():
     while True:
-        environment = input("Which environment? (prod|sandbox): ")
+        environment = input("Which environment? (prod|uat|sandbox): ").strip().lower()
         if environment == "sandbox":
+            break
+        if environment == "uat":
             break
         if environment == "prod":
             break
         print("Wrong, try again")
+
+    db_host = get_db_host(environment)
+    subset = get_boolean_input("Process only unregistered subset?")
+    force_timetable_export = False
+    if subset:
+        print("Will only process unregistered subset")
+    else:
+        print("Will process whole timetable")
+        force_timetable_export = get_boolean_input("Force export of timetable data?")
+
     process_dates = get_dates_to_run()
 
     look_for_existing_tasks(environment)
@@ -353,42 +476,38 @@ def main():
     files = list(list_files(environment, base_prefix))
 
     avl_export_needed = []
+    next_day_avl_export_needed = []
+    next_day_avl_conversion_needed = []
     timetable_export_needed = []
     ready_to_run = []
 
     for current in process_dates:
-        year = current.year
-        month = str(current.month).zfill(2)
-        day = str(current.day).zfill(2)
-        date_with_dashes = f"{year}-{month}-{day}"
-        date_without_dashes = f"{year}{month}{day}"
-        year_month_prefix = f"YYYY={year}/MM={month}"
-        year_month_day_prefix = f"{year_month_prefix}/DD={day}"
-        timetable_csv_path = (
-            f"{base_prefix}csv/timetable/{year_month_prefix}/{date_with_dashes}.csv"
-        )
-        timetable_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/timetable_{date_without_dashes}.parquet"
-        avl_csv_path = (
-            f"{base_prefix}csv/siri/{year_month_prefix}/siri_vm_{date_with_dashes}.csv"
-        )
-        avl_gz_path = (
-            f"{base_prefix}gz/{year_month_day_prefix}/{date_with_dashes}.csv.gz"
-        )
-        avl_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/siri_vm_{date_without_dashes}.parquet"
-        data = {
-            "timetable_csv": (timetable_csv_path in files),
-            "timetable_parquet": (timetable_parquet_path in files),
-            "avl_csv": avl_csv_path in files,
-            "avl_gz": (avl_gz_path in files),
-            "avl_parquet": (avl_parquet_path in files),
-        }
-        if data["avl_parquet"] and data["timetable_parquet"]:
-            ready_to_run.append(current)
-            continue
-        if not data["avl_csv"]:
-            avl_export_needed.append(current)
-            continue
-        timetable_export_needed.append(current)
+        next_day = current + timedelta(days=1)
+        if next_day not in process_dates:
+            tomorrows_data = which_files_exist(current, files)
+            if not tomorrows_data["avl_csv"] and not tomorrows_data["avl_parquet"]:
+                next_day_avl_export_needed.append(current)
+            elif not tomorrows_data["avl_parquet"]:
+                next_day_avl_conversion_needed.append(current)
+
+        data = which_files_exist(current, files)
+        if subset:
+            timetable_export_needed.append(current)
+            if not data["avl_parquet"] and not data["avl_csv"]:
+                avl_export_needed.append(current)
+                continue
+        else:
+            if (
+                not force_timetable_export
+                and data["avl_parquet"]
+                and data["timetable_parquet"]
+            ):
+                ready_to_run.append(current)
+                continue
+            if not data["avl_csv"]:
+                avl_export_needed.append(current)
+                continue
+            timetable_export_needed.append(current)
 
     ready_to_run = sorted(ready_to_run)
     avl_export_needed = sorted(avl_export_needed)
@@ -409,20 +528,21 @@ def main():
         print(";".join(d.isoformat() for d in timetable_export_needed))
 
     regenerate_timetables = False
-    if timetable_export_needed or avl_export_needed:
-        regenerate_timetables = (
-            input("Should timetable data be re-generated before export? (yes/NO)")
-            .lower()
-            .strip()
-            == "yes"
-        )
-        if regenerate_timetables:
-            print("Will regenerate timetables")
+    if subset:
+        regenerate_timetables = True
+    else:
+        if timetable_export_needed or avl_export_needed:
+            regenerate_timetables = get_boolean_input(
+                "Should timetable data be re-generated before export?"
+            )
+            if regenerate_timetables:
+                print("Will regenerate timetables")
 
     db_password = get_db_password(environment)
 
     max_tasks = 5
     summaries_to_run = []
+    failed_summaries = []
     while (
         ready_to_run
         or running_tasks
@@ -431,14 +551,29 @@ def main():
         or timetable_export_needed
     ):
         if ready_to_run and len(running_tasks) < max_tasks:
-            start_historic_matching(ready_to_run.pop(0), environment)
-            if ready_to_run:
-                print(
-                    f"{current_time_london().isoformat()}: Dates still queued for matching: {';'.join(d.isoformat() for d in ready_to_run)}"
-                )
+            # Ensure that we have the avl data for the next day available before we kick off matching
+            next_day = ready_to_run[0] + timedelta(days=1)
+            if (
+                next_day not in avl_export_needed
+                and next_day not in timetable_export_needed
+            ):
+                if next_day in next_day_avl_export_needed:
+                    avl_export(db_password, db_host, next_day)
+                    next_day_avl_export_needed.remove(next_day)
+                    next_day_avl_conversion_needed.append(next_day)
 
-                # Keep starting tasks if there's more we can run
-                continue
+                if next_day in next_day_avl_conversion_needed:
+                    convert_to_parquet(next_day, environment)
+                    next_day_avl_conversion_needed.remove(next_day)
+
+                start_historic_matching(ready_to_run.pop(0), environment)
+                if ready_to_run:
+                    print(
+                        f"{current_time_london().isoformat()}: Dates still queued for matching: {';'.join(d.isoformat() for d in ready_to_run)}"
+                    )
+
+                    # Keep starting tasks if there's more we can run
+                    continue
 
         completed_dates = check_for_completed_tasks(environment)
         summaries_to_run = sorted({*summaries_to_run, *completed_dates})
@@ -453,10 +588,14 @@ def main():
         if summaries_to_run and not in_service_hours():
             process_date = summaries_to_run.pop(0)
             try:
-                summary_generation(db_password, process_date)
+                summary_generation(db_password, db_host, process_date, subset)
             except CalledProcessError as e:
                 print(e)
-                summary_generation(db_password, process_date)
+                failed_summaries = sorted({*failed_summaries, process_date})
+            if failed_summaries:
+                print(
+                    f"{current_time_london().isoformat()}: The following dates have failed summary generation: {';'.join(d.isoformat() for d in failed_summaries)}"
+                )
             if summaries_to_run:
                 print(
                     f"{current_time_london().isoformat()}: Dates queued for summary generation: {';'.join(d.isoformat() for d in summaries_to_run)}"
@@ -465,17 +604,25 @@ def main():
 
         if avl_export_needed:
             process_date = avl_export_needed.pop(0)
-            avl_export(db_password, process_date)
+            avl_export(db_password, db_host, process_date)
             timetable_export_needed = sorted({*timetable_export_needed, process_date})
         elif timetable_export_needed and not ready_to_run:
             process_date = timetable_export_needed.pop(0)
             if regenerate_timetables:
-                timetable_generation(db_password, process_date)
-            timetable_export(db_password, process_date)
+                timetable_generation(
+                    db_password, db_host, process_date, environment, subset
+                )
+            timetable_export(db_password, db_host, process_date, subset)
             convert_to_parquet(process_date, environment)
             ready_to_run = sorted({*ready_to_run, process_date})
 
         sleep(60)
+
+    print("All processing complete")
+    if failed_summaries:
+        print(
+            f"{current_time_london().isoformat()}: The following dates have failed summary generation, you may want to re-run them: {';'.join(d.isoformat() for d in failed_summaries)}"
+        )
 
 
 if __name__ == "__main__":
