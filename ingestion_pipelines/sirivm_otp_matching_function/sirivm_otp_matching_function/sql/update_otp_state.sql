@@ -1,8 +1,11 @@
 UPDATE public."Timetable" u
 SET otp_state = CASE
                     WHEN u.time_difference::int > 359 THEN 'Late'
-                    WHEN (is_final_stop = 'Non-final'
-                          AND u.time_difference::int < -60) THEN 'Early'
+                    -- If it's the final stop, we don't consider it early
+                    WHEN (t.is_final_stop = 'Non-final'
+                      -- When passengers aren't being picked up, we don't consider it early
+                      AND (u.set_down IS NULL OR NOT u.set_down)
+                      AND u.time_difference::int < -60) THEN 'Early'
                     ELSE 'OnTime'
                 END,
     load_time_stamp = now()::timestamp(0)
