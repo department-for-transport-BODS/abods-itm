@@ -18,6 +18,7 @@ The script will prompt you for more information, like the date range, and then w
 - Run the matching (up to 5 days concurrently) and wait for completion
 - Generate data for summary tables (and report if this errors at the end)
 """
+
 import json
 import subprocess
 from datetime import datetime, date, timedelta
@@ -377,10 +378,12 @@ def get_dates_to_run():
         while current < end:
             current = current + timedelta(days=1)
             process_dates.add(current)
-    earliest_possible_date =(date.today() - timedelta(days=2))
+    earliest_possible_date = date.today() - timedelta(days=2)
     for process_date in process_dates:
         if process_date > earliest_possible_date:
-            print(f"Can't process a date after {earliest_possible_date}, as we don't have the required AVL data yet. (hint: matching for a date can continue past midnight)")
+            print(
+                f"Can't process a date after {earliest_possible_date}, as we don't have the required AVL data yet. (hint: matching for a date can continue past midnight)"
+            )
             exit(1)
     return process_dates
 
@@ -406,7 +409,7 @@ def in_service_hours():
     return True
 
 
-def which_files_exist(current:date, files:list[str]):
+def which_files_exist(current: date, files: list[str]):
     year = current.year
     month = str(current.month).zfill(2)
     day = str(current.day).zfill(2)
@@ -421,9 +424,7 @@ def which_files_exist(current:date, files:list[str]):
     avl_csv_path = (
         f"{base_prefix}csv/siri/{year_month_prefix}/siri_vm_{date_with_dashes}.csv"
     )
-    avl_gz_path = (
-        f"{base_prefix}gz/{year_month_day_prefix}/{date_with_dashes}.csv.gz"
-    )
+    avl_gz_path = f"{base_prefix}gz/{year_month_day_prefix}/{date_with_dashes}.csv.gz"
     avl_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/siri_vm_{date_without_dashes}.parquet"
     data = {
         "timetable_csv": (timetable_csv_path in files),
@@ -552,8 +553,10 @@ def main():
         if ready_to_run and len(running_tasks) < max_tasks:
             # Ensure that we have the avl data for the next day available before we kick off matching
             next_day = ready_to_run[0] + timedelta(days=1)
-            if not next_day in avl_export_needed and not next_day in timetable_export_needed:
-
+            if (
+                next_day not in avl_export_needed
+                and next_day not in timetable_export_needed
+            ):
                 if next_day in next_day_avl_export_needed:
                     avl_export(db_password, db_host, next_day)
                     next_day_avl_export_needed.remove(next_day)
@@ -562,7 +565,6 @@ def main():
                 if next_day in next_day_avl_conversion_needed:
                     convert_to_parquet(next_day, environment)
                     next_day_avl_conversion_needed.remove(next_day)
-
 
                 start_historic_matching(ready_to_run.pop(0), environment)
                 if ready_to_run:
