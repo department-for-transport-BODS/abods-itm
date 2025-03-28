@@ -62,16 +62,16 @@ def log_execution_time(
         )
 
 
-def validate_date(date_input: datetime | str) -> datetime:
+def parse_date(date_input: datetime | str) -> datetime:
     if isinstance(date_input, datetime):
         return date_input
-    date_input_wo_tz = date_input[:19]
+    input_without_time_zone = date_input[:19]
 
     date_format = "%Y-%m-%d %H:%M:%S"
     if "T" in date_input:
         date_format = "%Y-%m-%dT%H:%M:%S"
 
-    return datetime.strptime(date_input_wo_tz, date_format).replace(tzinfo=UTC)
+    return datetime.strptime(input_without_time_zone, date_format).replace(tzinfo=UTC)
 
 
 def get_otp_state(

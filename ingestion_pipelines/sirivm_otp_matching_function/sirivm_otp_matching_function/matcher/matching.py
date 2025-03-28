@@ -37,9 +37,9 @@ from .timetable_store import TimetableStore
 from .utils import (
     get_otp_state,
     log_execution_time,
+    parse_date,
     timer,
     transform_coordinates_and_calculate_intersections,
-    validate_date,
 )
 
 logger = Logger()
@@ -111,7 +111,7 @@ def check_estimated_match(  # noqa: PLR0911 - it's not that many returns
     if not bool(route_history.get("last_avl_time")):
         return None
 
-    previous_avl_time = validate_date(route_history["last_avl_time"][:19])
+    previous_avl_time = parse_date(route_history["last_avl_time"])
 
     time_diff = (avl_recorded_at_time_utc(avl) - previous_avl_time).total_seconds()
 
@@ -239,7 +239,7 @@ def check_update_first_stop(
         return
 
     matched_stop = route_history["matched_stops"][stop_index]
-    matched_stop_time = validate_date(matched_stop["last_match_time"])
+    matched_stop_time = parse_date(matched_stop["last_match_time"])
 
     logger.debug(
         f"6+7. avl is {stop_distance_in_meters}m, within {MATCH_ZONE_RADIUS_IN_METERS}m",
@@ -549,7 +549,7 @@ def move_potential_match_to_match(
     is_final_stop = stop_index_int == final_stop_index
     matched_stops = route_history["matched_stops"]
     delete_potential_match = False
-    last_time_in_zone = validate_date(potential_match["last_time_in_zone"])
+    last_time_in_zone = parse_date(potential_match["last_time_in_zone"])
 
     # 33. is this potential match the first match?
     if len(matched_stops) != 0:
@@ -564,7 +564,7 @@ def move_potential_match_to_match(
         ordered_matches: dict[str, MatchedStop] = dict(
             sorted(
                 matched_stops_with_new_match.items(),
-                key=lambda t: validate_date(t[1]["last_match_time"]).timestamp(),
+                key=lambda t: parse_date(t[1]["last_match_time"]).timestamp(),
             ),
         )
         latest_index_int = int(list(ordered_matches.keys())[-1])
