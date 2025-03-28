@@ -679,7 +679,8 @@ begin
               stop.atco_code,
               direction,
               departure_day_shift,
-              registered
+              registered,
+			  stop.stop_activity_id as stop_activity_id
             FROM
               public.%I tvw
               JOIN public.transmodel_servicepatternstop stop
@@ -735,7 +736,8 @@ begin
               -- because the raw data only sets departure_day_shift to true if the first stop departure is after midnight
               FIRST_VALUE(departure_time) OVER w AS first_departure,
               LAST_VALUE(departure_time) OVER w AS last_departure,
-              registered
+              registered,
+			  stop_activity_id
             FROM
               public.%I a
               JOIN public.naptan_stoppoint b
@@ -815,7 +817,11 @@ begin
               count(*) OVER w AS max_index,
               direction,
               departure_day_shift,
-              registered
+              registered,
+			  CASE
+				WHEN stop_activity_id = 2 THEN TRUE
+			  ELSE FALSE
+			  END AS set_down
             FROM
               public.%I
             WHERE
@@ -973,7 +979,8 @@ begin
                 direction,
                 departure_day_shift,
                 registered,
-                reprocessing_required
+                reprocessing_required,
+				set_down
               )
             SELECT
               tsr1.operator_noc,
@@ -1035,7 +1042,8 @@ begin
               tsr1.direction,
               tsr1.departure_day_shift,
               tsr1.registered,
-              NULL
+              NULL,
+			  tsr1.set_down
             FROM
               public.%I tsr1
               LEFT JOIN public.%I tspgi
