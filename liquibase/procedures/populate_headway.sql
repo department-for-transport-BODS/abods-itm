@@ -13,7 +13,6 @@ BEGIN
     CREATE TABLE temp_timetable_headway AS
     SELECT
       t1.timetable_id,
-      COALESCE(
         EXTRACT(
           EPOCH
           FROM
@@ -26,19 +25,16 @@ BEGIN
                 t1.timestamp_after_estimate
               )
             )
-        ),
-        0
-      ) AS actual_headway,
-      COALESCE(
+        )
+        AS actual_headway,
         EXTRACT(
           EPOCH
           FROM
             (
               t2.expected_departure_time - t1.expected_departure_time
             )
-        ),
-        0
-      ) AS expected_headway
+        ) 
+        AS expected_headway
     FROM
       public."Timetable" t1
       LEFT JOIN public."Timetable" t2 ON t1.previous_group_id = t2.group_id
