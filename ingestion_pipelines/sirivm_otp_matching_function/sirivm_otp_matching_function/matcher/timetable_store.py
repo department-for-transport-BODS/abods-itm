@@ -14,7 +14,7 @@ from .models import (
 logger = Logger()
 
 
-class LiveTimetableStore:
+class TimetableStore:
     def __init__(self, timetable: Timetable, historic: bool = False) -> None:  # noqa: FBT001,FBT002 boolean arg just used to control logging, don't let it get out of hand
         self._timetable = timetable
         self._historic = historic

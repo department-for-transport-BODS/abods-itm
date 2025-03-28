@@ -2,7 +2,6 @@ import os
 from collections.abc import Sequence
 from datetime import datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
-from typing import Protocol
 
 from aws_lambda_powertools import Logger
 
@@ -34,6 +33,7 @@ from .models import (
     stop_longitude,
     stop_timetable_id,
 )
+from .timetable_store import TimetableStore
 from .utils import (
     get_otp_state,
     log_execution_time,
@@ -41,14 +41,6 @@ from .utils import (
     transform_coordinates_and_calculate_intersections,
     validate_date,
 )
-
-
-class TimetableStore(Protocol):
-    def get_route(
-        self,
-        avl: AVLRecord,
-    ) -> tuple[str, Route | None]: ...
-
 
 logger = Logger()
 
