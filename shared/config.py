@@ -28,7 +28,7 @@ MATCHING_TIME_LOWER_LIMIT_IN_SECONDS = -2 * 60 * 60
 MATCHING_TIME_UPPER_LIMIT_IN_SECONDS = 1 * 60 * 60
 """Maximum time after expected departure time that a late AVL can still be matched"""
 
-RADIUS_OF_EARTH_IN_METERS = 6_371_1000
+RADIUS_OF_EARTH_IN_METERS = 6_371_000
 """Used for determining distances between points"""
 
 TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE = "timetable"
