@@ -11,6 +11,7 @@ import psycopg2
 from .shared.config import (
     EXPECTED_LATE_RUNNING_SERVICE_INTERVAL_IN_MINUTES,
     TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES,
+    TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE,
 )
 
 session = boto3.Session()
@@ -174,7 +175,10 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
                 MessageDeduplicationId=str(uuid.uuid4()),
                 MessageGroupId=f"{group}-group",
                 MessageAttributes={
-                    "key": {"StringValue": "timetable", "DataType": "String"},
+                    "key": {
+                        "StringValue": TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE,
+                        "DataType": "String",
+                    },
                 },
             )
         except Exception:

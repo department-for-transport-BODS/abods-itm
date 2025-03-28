@@ -6,6 +6,7 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import SQSEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from dateutil.parser import parse
+from shared.config import TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE
 
 from .client_db import TimetableDBClient
 from .client_s3 import TimetableS3Client
@@ -41,7 +42,10 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             historic=False,
         ):
             # sirivm_timetable_s3_generation_function sends this message when done refreshing the extract
-            if rec.message_attributes["key"].string_value == "timetable":
+            if (
+                rec.message_attributes["key"].string_value
+                == TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE
+            ):
                 logger.info("Updating main timetable")
                 _cache["main_timetable"] = s3_client.get_timetable_extract()
                 continue
