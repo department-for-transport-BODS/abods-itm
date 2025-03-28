@@ -1,5 +1,3 @@
-"""Fetching and Uploading Data into S3"""
-
 import hashlib
 import json
 import os
@@ -73,16 +71,12 @@ def _filter_avl_list(
 
 
 class TimetableS3Client:
-    """Download / Upload Data from S3 with Parsing"""
-
     def __init__(self) -> None:
-        """Construct a client"""
         self.client = boto3.client("s3")
         self.bucket = os.environ["SIRIVM_BUCKET"]
         logger.append_keys(s3_bucket=self.bucket)
 
     def _get_from_s3(self, key: str) -> Any:  # noqa: ANN401 - Any is correct here, callers should determine actual type
-        """Get data from S3"""
         try:
             logger.info("Fetching data from S3", s3_key=key)
             content = (
@@ -105,12 +99,10 @@ class TimetableS3Client:
             raise
 
     def get_timetable_extract(self) -> Timetable:
-        """Download Main Timetable Data"""
         return self._get_from_s3("timetable/timetable.json")
 
     @timer(logger)
     def get_stop_history(self, shard_no: str) -> StopHistory:
-        """Get Stop History"""
         key = stop_history_key(shard_no)
         logger.info("Fetching Stop History", s3_key=key)
         try:
@@ -145,7 +137,6 @@ class TimetableS3Client:
 
     @timer(logger)
     def export_stop_history(self, stop_history: StopHistory, shard_no: str) -> None:
-        """Export JourneyStopHistory data to S3"""
         s3_key = stop_history_key(shard_no)
         logger.info(
             "Storing Stop history",

@@ -14,7 +14,6 @@ from ..models import LiveAVLRecord, NewDbMatch
 def parse_test_avl_file(
     stream: Iterable[str],
 ) -> Iterable[LiveAVLRecord]:
-    """Parse live avl csv data into LiveAVLRecord dicts"""
     for row in csv.DictReader(stream):
         yield parse_live_avl_row(row)
 

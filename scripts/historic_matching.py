@@ -1,23 +1,5 @@
 #!/usr/bin/env python3
-"""
-A script to run the entire historic matching process for a range of dates.
-Currently, this script is intended to be copied to the abods-$env-bastion instance and run in a session on there.
-Some permissions will need to be attached and an example redacted policy is at ./bastion_policy.json
-After copying (assuming you aren't updating it), you will need to make the file executable:
-```
-$ chmod +x ./historic_matching.py
-```
-Then you can start the script:
-```
-$ AWS_DEFAULT_REGION=eu-west-2 ./historic_matching.py
-```
-The script will prompt you for more information, like the date range, and then will:
-- Regenerate the timetable for the day (optional)
-- Export the timetable if needed
-- Export the avl data if needed (including the next day for overnight matching)
-- Run the matching (up to 5 days concurrently) and wait for completion
-- Generate data for summary tables (and report if this errors at the end)
-"""
+"""Remember to update this script on the instance where it runs"""
 
 import json
 import subprocess
@@ -29,11 +11,13 @@ from zoneinfo import ZoneInfo
 import boto3
 from botocore.config import Config
 
-db_user = "root"
+DB_USER = "root"
+BASE_PREFIX = "historic/"
+MAX_LIVE_MATCHING_QUEUE_LENGTH = 6
+MAX_CONCURRENT_MATCHING_TASKS = 5
+
 s3 = boto3.client("s3")
 paginator = s3.get_paginator("list_objects_v2")
-base_prefix = "historic/"
-max_queue_length = 6
 
 
 def get_db_host(environment: str):
@@ -171,7 +155,7 @@ def wait_for_queues(environment: str):
             if queue_length > longest_queue:
                 longest_queue = queue_length
 
-            if queue_length > max_queue_length:
+            if queue_length > MAX_LIVE_MATCHING_QUEUE_LENGTH:
                 print(
                     f"{current_time_london().isoformat()}: Queue {shard} has {queue_length} messages"
                 )
@@ -195,7 +179,7 @@ def run_query(query: str, db_host: str, db_password: str):
             "-h",
             db_host,
             "-U",
-            db_user,
+            DB_USER,
             "-c",
             query,
         ],
@@ -338,7 +322,7 @@ def check_for_completed_tasks(environment: str):
 def get_db_password(environment: str):
     return json.loads(
         boto3.client("secretsmanager").get_secret_value(
-            SecretId=f"abods/{environment}/rds/user/{db_user}",
+            SecretId=f"abods/{environment}/rds/user/{DB_USER}",
         )["SecretString"],
     )["password"]
 
@@ -418,14 +402,14 @@ def which_files_exist(current: date, files: list[str]):
     year_month_prefix = f"YYYY={year}/MM={month}"
     year_month_day_prefix = f"{year_month_prefix}/DD={day}"
     timetable_csv_path = (
-        f"{base_prefix}csv/timetable/{year_month_prefix}/{date_with_dashes}.csv"
+        f"{BASE_PREFIX}csv/timetable/{year_month_prefix}/{date_with_dashes}.csv"
     )
-    timetable_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/timetable_{date_without_dashes}.parquet"
+    timetable_parquet_path = f"{BASE_PREFIX}parquet/{year_month_day_prefix}/timetable_{date_without_dashes}.parquet"
     avl_csv_path = (
-        f"{base_prefix}csv/siri/{year_month_prefix}/siri_vm_{date_with_dashes}.csv"
+        f"{BASE_PREFIX}csv/siri/{year_month_prefix}/siri_vm_{date_with_dashes}.csv"
     )
-    avl_gz_path = f"{base_prefix}gz/{year_month_day_prefix}/{date_with_dashes}.csv.gz"
-    avl_parquet_path = f"{base_prefix}parquet/{year_month_day_prefix}/siri_vm_{date_without_dashes}.parquet"
+    avl_gz_path = f"{BASE_PREFIX}gz/{year_month_day_prefix}/{date_with_dashes}.csv.gz"
+    avl_parquet_path = f"{BASE_PREFIX}parquet/{year_month_day_prefix}/siri_vm_{date_without_dashes}.parquet"
     data = {
         "timetable_csv": (timetable_csv_path in files),
         "timetable_parquet": (timetable_parquet_path in files),
@@ -473,7 +457,7 @@ def main():
             )
         )
 
-    files = list(list_files(environment, base_prefix))
+    files = list(list_files(environment, BASE_PREFIX))
 
     avl_export_needed = []
     next_day_avl_export_needed = []
@@ -540,7 +524,6 @@ def main():
 
     db_password = get_db_password(environment)
 
-    max_tasks = 5
     summaries_to_run = []
     failed_summaries = []
     while (
@@ -550,7 +533,7 @@ def main():
         or avl_export_needed
         or timetable_export_needed
     ):
-        if ready_to_run and len(running_tasks) < max_tasks:
+        if ready_to_run and len(running_tasks) < MAX_CONCURRENT_MATCHING_TASKS:
             # Ensure that we have the avl data for the next day available before we kick off matching
             next_day = ready_to_run[0] + timedelta(days=1)
             if (

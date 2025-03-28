@@ -31,13 +31,10 @@ def stop_date(stop: Stop) -> str:
 
 
 def stop_departure_time(stop: Stop) -> datetime:
-    """Datetime of the expected stop departure"""
     return validate_date(f"{stop_date(stop)} {stop_expected_time(stop)}")
 
 
 class AVLRecord(TypedDict):
-    """Generic AVL record"""
-
     recorded_at_time: str
     latitude: float
     longitude: float
@@ -50,8 +47,6 @@ class AVLRecord(TypedDict):
 
 
 class LiveAVLRecord(AVLRecord):
-    """AVL data from live matching"""
-
     # Does not exist in historical data from ITO, so should not be used in new historic matching
     batch_id: int
 
