@@ -440,4 +440,7 @@
     <changeSet id="139" author="abodsuser">
         <sqlFile path="sql/139-add-timetable-column.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="140" author="abodsuser">
+        <sqlFile path="sql/140-update-excess-wait-time-column.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>

@@ -14,6 +14,9 @@ BEGIN
 
     RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
 
+    DELETE from public.timetable_frequent_summary_services
+        where date_of_journey = partition_date;
+
     INSERT INTO
       public.timetable_frequent_summary_services(
         operator_noc,
