@@ -1850,8 +1850,6 @@ class TestMovePotentialMatchToMatch:  # noqa: D101 - BODS-7131
 
 
 class TestCheckEstimatedMatches:  # noqa: D101 - BODS-7131
-    os.environ["ENABLE_ESTIMATED_MATCHING"] = "true"
-
     @pytest.mark.parametrize(
         (
             "avl",
