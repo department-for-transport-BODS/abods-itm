@@ -8,12 +8,12 @@ from unittest import mock
 import boto3
 import psycopg2
 
-from ..live_timetable_store import LiveTimetableStore
 from ..matching import match_group_id_avls
 from ..models import (
     Timetable,
     stop_departure_time,
 )
+from ..timetable_store import TimetableStore
 from .util import parse_test_avl_file
 
 directory = Path(__file__).parent
@@ -196,7 +196,7 @@ def main() -> None:
         timetable = json.load(jsonfile)
 
     with mock.patch.dict(os.environ, {"ENABLE_ESTIMATED_MATCHING": "true"}):
-        to_set, _, __ = match_group_id_avls(LiveTimetableStore(timetable), avl_list)
+        to_set, _, __ = match_group_id_avls(TimetableStore(timetable), avl_list)
 
     with open(example_dir / "__init__.py", "w"):
         pass

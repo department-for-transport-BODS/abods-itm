@@ -6,9 +6,9 @@ from collections.abc import Iterable, Sequence
 from unittest import mock
 
 from ...client_s3 import parse_live_avl_row
-from ..live_timetable_store import LiveTimetableStore
 from ..matching import match_group_id_avls
 from ..models import LiveAVLRecord, NewDbMatch
+from ..timetable_store import TimetableStore
 
 
 def parse_test_avl_file(
@@ -29,6 +29,6 @@ def run_historic_matching_test(
         avl_list = list(parse_test_avl_file(csvfile))
 
     with mock.patch.dict(os.environ, {"ENABLE_ESTIMATED_MATCHING": "true"}):
-        to_set, _, __ = match_group_id_avls(LiveTimetableStore(timetable), avl_list)
+        to_set, _, __ = match_group_id_avls(TimetableStore(timetable), avl_list)
 
     return to_set

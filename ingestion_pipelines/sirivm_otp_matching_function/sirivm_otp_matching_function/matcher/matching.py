@@ -2,10 +2,10 @@ import os
 from collections.abc import Sequence
 from datetime import datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
-from typing import Protocol
 
 from aws_lambda_powertools import Logger
-from shared.config import (
+
+from ..shared.config import (
     END_OF_JOURNEY_PROPORTION,
     ESTIMATED_MATCHING_DISTANCE_UPPER_LIMIT_IN_METRES,
     ESTIMATED_MATCHING_TIME_UPPER_LIMIT_IN_SECONDS,
@@ -16,7 +16,6 @@ from shared.config import (
     SAVED_MATCHES_LIMIT,
     SHORT_JOURNEY_STOP_COUNT,
 )
-
 from .models import (
     AVLRecord,
     BadDbMatch,
@@ -34,21 +33,14 @@ from .models import (
     stop_longitude,
     stop_timetable_id,
 )
+from .timetable_store import TimetableStore
 from .utils import (
     get_otp_state,
     log_execution_time,
+    parse_date,
     timer,
     transform_coordinates_and_calculate_intersections,
-    validate_date,
 )
-
-
-class TimetableStore(Protocol):
-    def get_route(
-        self,
-        avl: AVLRecord,
-    ) -> tuple[str, Route | None]: ...
-
 
 logger = Logger()
 
@@ -75,17 +67,23 @@ def create_potential_match(
 def distance_from_stop(avl: AVLRecord, stop: Stop) -> float:
     """Calculate the distance in meters between an avl and a stop"""
     # convert decimal degrees to radians
-    lat1, lon1 = float(avl["latitude"]), float(avl["longitude"])
-    lat2, lon2 = stop_latitude(stop), stop_longitude(stop)
+    vehicle_lat, vehicle_lon = float(avl["latitude"]), float(avl["longitude"])
+    stop_lat, stop_lon = stop_latitude(stop), stop_longitude(stop)
 
-    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    vehicle_lon, vehicle_lat, stop_lon, stop_lat = map(
+        radians,
+        [vehicle_lon, vehicle_lat, stop_lon, stop_lat],
+    )
 
     # haversine formula
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-    c = 2 * asin(sqrt(a))
-    return c * RADIUS_OF_EARTH_IN_METERS
+    latitude_delta = stop_lat - vehicle_lat
+    longitude_delta = stop_lon - vehicle_lon
+    half_chord_squared = (
+        sin(latitude_delta / 2) ** 2
+        + cos(vehicle_lat) * cos(stop_lat) * sin(longitude_delta / 2) ** 2
+    )
+    angular_distance = 2 * asin(sqrt(half_chord_squared))
+    return angular_distance * RADIUS_OF_EARTH_IN_METERS
 
 
 def get_lowest_matched_stop_index(route_history: RouteHistory) -> int:
@@ -119,7 +117,7 @@ def check_estimated_match(  # noqa: PLR0911 - it's not that many returns
     if not bool(route_history.get("last_avl_time")):
         return None
 
-    previous_avl_time = validate_date(route_history["last_avl_time"][:19])
+    previous_avl_time = parse_date(route_history["last_avl_time"])
 
     time_diff = (avl_recorded_at_time_utc(avl) - previous_avl_time).total_seconds()
 
@@ -247,7 +245,7 @@ def check_update_first_stop(
         return
 
     matched_stop = route_history["matched_stops"][stop_index]
-    matched_stop_time = validate_date(matched_stop["last_match_time"])
+    matched_stop_time = parse_date(matched_stop["last_match_time"])
 
     logger.debug(
         f"6+7. avl is {stop_distance_in_meters}m, within {MATCH_ZONE_RADIUS_IN_METERS}m",
@@ -557,7 +555,7 @@ def move_potential_match_to_match(
     is_final_stop = stop_index_int == final_stop_index
     matched_stops = route_history["matched_stops"]
     delete_potential_match = False
-    last_time_in_zone = validate_date(potential_match["last_time_in_zone"])
+    last_time_in_zone = parse_date(potential_match["last_time_in_zone"])
 
     # 33. is this potential match the first match?
     if len(matched_stops) != 0:
@@ -572,7 +570,7 @@ def move_potential_match_to_match(
         ordered_matches: dict[str, MatchedStop] = dict(
             sorted(
                 matched_stops_with_new_match.items(),
-                key=lambda t: validate_date(t[1]["last_match_time"]).timestamp(),
+                key=lambda t: parse_date(t[1]["last_match_time"]).timestamp(),
             ),
         )
         latest_index_int = int(list(ordered_matches.keys())[-1])
