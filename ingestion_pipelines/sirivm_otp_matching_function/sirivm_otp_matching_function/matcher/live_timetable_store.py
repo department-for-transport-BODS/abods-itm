@@ -15,10 +15,7 @@ logger = Logger()
 
 
 class LiveTimetableStore:
-    """Timetable store used for live matching"""
-
     def __init__(self, timetable: Timetable, historic: bool = False) -> None:  # noqa: FBT001,FBT002 boolean arg just used to control logging, don't let it get out of hand
-        """Construct a live timetable store"""
         self._timetable = timetable
         self._historic = historic
 
@@ -88,19 +85,6 @@ class LiveTimetableStore:
         self,
         avl: AVLRecord,
     ) -> tuple[str, Route | None]:
-        """
-        Get the route data for a given group id and direction
-
-        Args:
-        ----
-            avl (AVLRecord): AVL record
-
-        Returns:
-        -------
-            str: The last index used to find the route in the timetable
-            Route | None: The matched route data if any
-
-        """
         stop_history_index, route = self._get_timetable_for_group_id(
             avl,
         )

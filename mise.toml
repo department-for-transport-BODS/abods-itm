@@ -1,49 +1,123 @@
+[tools]
+awscli = "latest"
+granted = "latest"
+usage = "latest"
+jq = "latest"
+
+[env]
+REGION = "eu-west-2"
+
 [settings]
 experimental = true
 asdf_compat = true
 
 [tasks.install]
+description = "Install python requirements for local development"
 dir = "ingestion_pipelines"
 run = "pip install --upgrade pip setuptools wheel && pip install -r requirements.txt"
 
 [tasks.fmt]
+description = "Format all python files"
 run = "ruff format"
 
 [tasks."fmt:check"]
+description = "Check formatting. As done in CI"
 run = "ruff format --check --diff"
 
 [tasks."lint"]
+description = "Apply all auto-fixable lints"
 run = "ruff check --fix ."
 
 [tasks."lint:check"]
+description = "Check linting. As done in CI"
 run = "ruff check ."
 
 [tasks.test]
+description = "Run python tests"
 run = "pytest"
 
 [tasks.checkov]
+description = "Run checkov"
 run = "checkov --quiet -d . --skip-path ./venv"
 
 [tasks.fix]
+description = "Run linting and formatting. Useful before committing"
 run = [
     "mise tasks run lint || true",
     "mise tasks run fmt",
 ]
 
 [tasks.checks]
+description = "Run all available checks. Useful before pushing"
 depends = ["checkov", "test", "fmt:check", "lint:check"]
 
 [tasks.example]
+description = "Create an example test case"
 run = "assume --exec \"python -m ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.historic_examples.generate_example\""
 
-[tasks.db]
+[tasks."db:sandbox"]
+alias = "db"
+description = "Connect to the sandbox database"
 run = "assume --exec -- ./scripts/db-connect.sh sandbox"
 
 [tasks."db:dev"]
+description = "Connect to the dev database"
 run = "assume --exec -- ./scripts/db-connect.sh dev"
 
 [tasks."db:test"]
+description = "Connect to the test database"
 run = "assume --exec -- ./scripts/db-connect.sh test"
 
 [tasks."db:uat"]
+description = "Connect to the uat database"
 run = "assume --exec -- ./scripts/db-connect.sh uat"
+
+# The prod env is missing here, don't make a habit of connecting directly to it
+
+# The following tasks are here for convenience and assume that you are using granted with the right profile/role set up:
+
+[tasks.sandbox_console]
+alias = "s"
+description = "Open AWS console in your browser, using abods-sandbox profile/container"
+run = "assume abods-sandbox -c"
+
+[tasks.sandbox_bastion]
+description = "Start a Session Manager session as ec2-user on the sandbox bastion"
+env = { environment = "sandbox" }
+run = "assume abods-sandbox --exec -- mise task run connect_to_bastion"
+
+[tasks.nonprod_console]
+alias = "np"
+description = "Open AWS console in your browser, using abods-nonprod profile/container"
+run = "assume abods-nonprod -c"
+
+[tasks.dev_bastion]
+description = "Start a Session Manager session as ec2-user on the dev bastion"
+env = { environment = "dev" }
+run = "assume abods-nonprod --exec -- mise task run connect_to_bastion"
+
+[tasks.test_bastion]
+description = "Start a Session Manager session as ec2-user on the test bastion"
+env = { environment = "test" }
+run = "assume abods-nonprod --exec -- mise task run connect_to_bastion"
+
+[tasks.uat_bastion]
+description = "Start a Session Manager session as ec2-user on the UAT bastion"
+env = { environment = "uat" }
+run = "assume abods-nonprod --exec -- mise task run connect_to_bastion"
+
+[tasks.prod_console]
+alias = "p"
+description = "Open AWS console in your browser, using abods-prod profile/container"
+run = "assume abods-prod -c"
+
+[tasks.prod_bastion]
+description = "Start a Session Manager session as ec2-user on the prod bastion"
+env = { environment = "prod" }
+run = "assume abods-prod --exec -- mise task run connect_to_bastion"
+
+[tasks.connect_to_bastion]
+hide = true
+run = """
+aws ssm start-session --target $(aws ec2 describe-instances --region=$REGION --filters Name=tag:Name,Values=abods-$environment-bastion Name=instance-state-name,Values=running | jq -r '.Reservations[0].Instances[0].InstanceId') --document-name AWS-StartInteractiveCommand --parameters command="sudo -i -u ec2-user"
+"""

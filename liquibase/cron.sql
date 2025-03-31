@@ -66,13 +66,13 @@ SELECT cron.schedule(
 
 SELECT cron.schedule(
                'update_performance_statistics_v4',
-               '10 03 * * *',
+               '10 03 * * *', -- at 03:10
                $$CALL public.update_performance_statistics_v4();$$
        );
 
 SELECT cron.schedule(
                'Refresh noc_adminarea materialized view',
-               '05 03 * * *', -- at 03:10
+               '05 03 * * *', -- at 03:05
                $$refresh MATERIALIZED VIEW public.noc_adminarea;$$
        );
 

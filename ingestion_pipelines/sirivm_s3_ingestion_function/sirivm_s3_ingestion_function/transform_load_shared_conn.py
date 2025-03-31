@@ -7,12 +7,12 @@ NS = {"siri": "http://www.siri.org.uk/siri"}
 
 def parse_xml(source, batch_id, source_type="string"):  # noqa: ANN001, ANN201 - BODS-7131
     """
-    Parses XML data from a given source, which can be either a file path or a direct XML string.
+    Parse XML data from a given source, which can be either a file path or a direct XML string.
 
     :param source: The XML source, either a file path or an XML string.
     :param source_type: The type of the source, 'file' for file paths or 'string' for XML strings.
     :return: A list of data extracted from the XML.
-    """  # noqa: D401 - BODS-7131
+    """
     NS = {  # noqa: N806 - BODS-7131
         "siri": "http://www.siri.org.uk/siri",
     }  # Namespace declaration

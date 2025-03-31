@@ -65,16 +65,6 @@ def log_execution_time(
 
 
 def validate_date(date_input: datetime | str) -> datetime:
-    """
-    Validate the date
-
-    Args:
-        date_input (datetime | str): Date input
-
-    Returns:
-        datetime: Converted datetime
-
-    """
     if isinstance(date_input, datetime):
         return date_input
     date_input_wo_tz = date_input[:19]

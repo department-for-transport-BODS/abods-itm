@@ -1,5 +1,3 @@
-"""Database Functions"""
-
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, timedelta
@@ -19,8 +17,6 @@ logger = Logger()
 
 @dataclass
 class SQLQueries:
-    """SQL data loaded from file"""
-
     set_live_matching: str
     set_historic_matching: str
     remove_live_matching: str
@@ -61,7 +57,6 @@ def execute_values_amended(
     sql: str,
     values: list,
 ) -> None:
-    """Log the updated row counts"""
     logger.debug("Executing SQL query", sql=sql, values=values)
     result = execute_values(
         cur=cur,
@@ -85,10 +80,7 @@ def execute_values_amended(
 
 
 class TimetableDBClient:
-    """Client for interacting with database"""
-
     def __init__(self) -> None:
-        """Construct a client"""
         self.sql_queries = _load_sql_queries()
         self.connection = setup_db()
 

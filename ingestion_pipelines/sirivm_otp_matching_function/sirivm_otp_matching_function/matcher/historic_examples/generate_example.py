@@ -8,13 +8,12 @@ from unittest import mock
 import boto3
 import psycopg2
 
-from ingestion_pipelines.sirivm_otp_matching_function.sirivm_otp_matching_function.matcher.models import (
+from ..live_timetable_store import LiveTimetableStore
+from ..matching import match_group_id_avls
+from ..models import (
     Timetable,
     stop_departure_time,
 )
-
-from ..live_timetable_store import LiveTimetableStore
-from ..matching import match_group_id_avls
 from .util import parse_test_avl_file
 
 directory = Path(__file__).parent
