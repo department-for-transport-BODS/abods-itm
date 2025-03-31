@@ -1,1 +1,6 @@
+aws-lambda-powertools==3.9.0
+aws-lambda-powertools[parser]
+boto3==1.37.19
+psycopg2-binary==2.9.10
+
 pyarrow==19.0.1

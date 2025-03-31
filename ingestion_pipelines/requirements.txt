@@ -1,12 +1,11 @@
 # Requirements file just for dev environments
 
-# Our custom layer that is used as a layer by most functions
--r ingestion_layer/requirements.txt
-
 # Requirements for specific lambdas
 -r convert_to_parquet_function/requirements.txt
+-r sirivm_db_ingestion_function/requirements.txt
 -r sirivm_otp_matching_function/requirements.txt
 -r sirivm_s3_ingestion_function/requirements.txt
+-r sirivm_timetable_s3_generation_function/requirements.txt
 -r sns_subscription_function/requirements.txt
 -r traveline_import_function/requirements.txt
 
