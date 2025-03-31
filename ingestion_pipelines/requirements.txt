@@ -14,7 +14,7 @@
 -r ../docker/historic-matching/requirements.txt
 
 # Tools used for dev purposes
-ruff==0.10.0
+ruff==0.11.2
 pytest==8.3.3
 checkov==3.1.47
 boto3-stubs[essential]==1.37.19
