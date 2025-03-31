@@ -1,6 +1,7 @@
 name: docker build and push
 on:
   workflow_dispatch:
+    # checkov:skip=CKV_GHA_7:Intended for users to be able to run manually
     inputs:
       service:
         type: choice
@@ -15,6 +16,8 @@ on:
         description: Custom tag to apply to images. If 'blank', use git commit sha
         type: string
         default: ""
+
+permissions: read-all
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.inputs.service }}

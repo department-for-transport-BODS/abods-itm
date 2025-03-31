@@ -36,4 +36,7 @@ RUN apt update \
 
 RUN sed "s/#shared_preload_libraries.*/shared_preload_libraries = 'pg_cron'/" \
     $PG_CONF_SRC > $PG_CONF_DST \
-    && echo "cron.database_name = 'abods'" >> $PG_CONF_DST
+    && echo "cron.database_name = 'abods'" >> $PG_CONF_DST \
+
+# checkov:skip=CKV_DOCKER_2:Not a long lived service, just for local dev, no need for health checks
+# checkov:skip=CKV_DOCKER_3:No user needed
