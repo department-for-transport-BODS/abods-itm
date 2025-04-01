@@ -6,6 +6,7 @@ run-name:
   github.ref_name == 'dev' && 'dev' || 'sandbox' }}
 on:
   workflow_dispatch:
+    # checkov:skip=CKV_GHA_7:Intended for users to be able to run manually
     inputs:
       action:
         type: choice
@@ -16,6 +17,8 @@ on:
           - "destroy"
           - "initialise"
           - "run-migrations"
+
+permissions: read-all
 
 concurrency:
   group:

@@ -17,13 +17,6 @@ logger = Logger(child=True)
 
 
 def get_rds_token() -> str:
-    """
-    Generate an RDS authentication token using AWS SDK.
-
-    Returns:
-        str: The RDS token.
-
-    """
     try:
         token = client.generate_db_auth_token(
             DBHostname=db_host,
@@ -39,13 +32,6 @@ def get_rds_token() -> str:
 
 
 def setup_db() -> psycopg2.extensions.connection:
-    """
-    Establish a connection to the PostgreSQL database using an RDS token for authentication.
-
-    Returns:
-        psycopg2.extensions.connection: A psycopg2 database connection object.
-
-    """
     try:
         logger.info("Creating new DB connection")
         conn = psycopg2.connect(

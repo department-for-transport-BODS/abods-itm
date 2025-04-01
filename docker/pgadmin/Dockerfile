@@ -20,5 +20,6 @@ RUN cat <<EOF > /pgadmin4/servers.json
   }
 }
 EOF
+# checkov:skip=CKV_DOCKER_2:Not a long lived service, no need for health checks
 
 USER pgadmin

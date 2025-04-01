@@ -10,9 +10,7 @@ sqs = session.client("sqs")
 
 
 def check_subscription_status(topic_arn, queue_arn):  # noqa: ANN001, ANN201 - BODS-7131
-    """
-    Queries the SNS queue for existing subscriptions to determine the status of pre-existing subscriptions.
-    """  # noqa: D200, D401 - BODS-7131
+    """Query the SNS queue for existing subscriptions to determine the status of pre-existing subscriptions"""
     response = sns.list_subscriptions_by_topic(TopicArn=topic_arn)
 
     for subscription in response["Subscriptions"]:
@@ -31,9 +29,7 @@ def confirm_subscription(  # noqa: ANN201 - BODS-7131
     timeout_seconds=180,  # noqa: ANN001 - BODS-7131
     poll_interval=10,  # noqa: ANN001 - BODS-7131
 ):
-    """
-    Polls the SQS queue to find and confirm the subscription confirmation message.
-    """  # noqa: D200, D401 - BODS-7131
+    """Poll the SQS queue to find and confirm the subscription confirmation message"""
     subscription_arn, is_confirmed = check_subscription_status(topic_arn, queue_arn)
 
     if not is_confirmed:

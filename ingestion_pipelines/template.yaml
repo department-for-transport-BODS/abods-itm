@@ -7,8 +7,8 @@ Globals:
   Function:
     Architectures:
       - x86_64
-    Runtime: python3.11
-    Timeout: 400
+    Runtime: python3.13
+    Timeout: 60
     MemorySize: 2048
 
 Parameters:
@@ -25,6 +25,9 @@ Parameters:
   RdsDbPort:
     Type: Number
     Default: 5432
+  QueueVisibilityTimeout:
+    Type: Number
+    Default: 90
   VpcId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
     Default: ''
@@ -43,11 +46,12 @@ Resources:
   SiriVmS3IngestionFunction:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-s3-ingestion-function'
       ReservedConcurrentExecutions: 1
       CodeUri: ./sirivm_s3_ingestion_function
       Handler: sirivm_s3_ingestion_function.app.lambda_handler
-      KmsKeyArn: !If 
+      KmsKeyArn: !If
         - IsNotLocal
         - !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/lambda/arn}}'
         - !Ref AWS::NoValue
@@ -91,7 +95,7 @@ Resources:
             Action:
               - 'sqs:GetQueueUrl'
               - 'sqs:SendMessage*'
-            Resource: 
+            Resource:
               - !GetAtt SiriVmOtpMatchingQueue1.Arn
               - !GetAtt SiriVmOtpMatchingQueue2.Arn
               - !GetAtt SiriVmOtpMatchingQueue3.Arn
@@ -148,9 +152,10 @@ Resources:
     Properties:
       GroupDescription: !Sub 'Security group for ${ProjectName}-${Environment}-sirivm-s3-ingestion-function'
       GroupName: !Sub '${ProjectName}-${Environment}-sirivm-s3-ingestion-function'
-      SecurityGroupEgress: 
+      SecurityGroupEgress:
         - IpProtocol: '-1'
           CidrIp: '0.0.0.0/0'
+          Description: Allow all egress
       VpcId: !Ref VpcId
       Tags:
         - Key: Name
@@ -170,6 +175,9 @@ Resources:
   SiriVmDbIngestionFunction:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
+      # checkov:skip=CKV_AWS_115:If we get close to the account level limit ever, consider a reserved concurrency of 1
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-db-ingestion-function'
       CodeUri: ./sirivm_db_ingestion_function
       Handler: sirivm_db_ingestion_function.app.lambda_handler
@@ -237,9 +245,10 @@ Resources:
     Properties:
       GroupDescription: !Sub 'Security group for ${ProjectName}-${Environment}-sirivm-db-ingestion-function'
       GroupName: !Sub '${ProjectName}-${Environment}-sirivm-db-ingestion-function'
-      SecurityGroupEgress: 
+      SecurityGroupEgress:
         - IpProtocol: '-1'
           CidrIp: '0.0.0.0/0'
+          Description: Allow all egress
       VpcId: !Ref VpcId
       Tags:
         - Key: Name
@@ -259,6 +268,9 @@ Resources:
   SiriVmTimetableS3GenerationFunction:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
+      # checkov:skip=CKV_AWS_115:Consider a reserved concurrency of 1, if we ever get close to the account level limit
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-timetable-s3-generation-function'
       CodeUri: ./sirivm_timetable_s3_generation_function
       Handler: sirivm_timetable_s3_generation_function.app.lambda_handler
@@ -302,7 +314,7 @@ Resources:
             Action:
               - 'sqs:GetQueueUrl'
               - 'sqs:SendMessage*'
-            Resource: 
+            Resource:
               - !GetAtt SiriVmOtpMatchingQueue1.Arn
               - !GetAtt SiriVmOtpMatchingQueue2.Arn
               - !GetAtt SiriVmOtpMatchingQueue3.Arn
@@ -314,7 +326,7 @@ Resources:
         EventName:
           Type: Schedule
           Properties:
-            Schedule: cron(0/30 * * * ? *)      
+            Schedule: cron(0/30 * * * ? *)
       VpcConfig:
         SubnetIds: !Ref VpcSubnets
         SecurityGroupIds:
@@ -346,9 +358,10 @@ Resources:
     Properties:
       GroupDescription: !Sub 'Security group for ${ProjectName}-${Environment}-sirivm-timetable-s3-generation-function'
       GroupName: !Sub '${ProjectName}-${Environment}-sirivm-timetable-s3-generation-function'
-      SecurityGroupEgress: 
+      SecurityGroupEgress:
         - IpProtocol: '-1'
           CidrIp: '0.0.0.0/0'
+          Description: Allow all egress
       VpcId: !Ref VpcId
       Tags:
         - Key: Name
@@ -368,10 +381,12 @@ Resources:
   TravelineDbIngestionFunction:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
+      # checkov:skip=CKV_AWS_115:Use account level concurrency for now, this is rarely if ever used
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
       FunctionName: !Sub '${ProjectName}-${Environment}-traveline-db-ingestion-function'
       CodeUri: ./traveline_import_function
       Handler: traveline_import_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 512
       Layers: !If
         - IsNotLocal
@@ -422,9 +437,10 @@ Resources:
     Properties:
       GroupDescription: !Sub 'Security group for ${ProjectName}-${Environment}-traveline-db-ingestion-function'
       GroupName: !Sub '${ProjectName}-${Environment}-traveline-db-ingestion-function'
-      SecurityGroupEgress: 
+      SecurityGroupEgress:
         - IpProtocol: '-1'
           CidrIp: '0.0.0.0/0'
+          Description: Allow all egress
       VpcId: !Ref VpcId
       Tags:
         - Key: Name
@@ -445,6 +461,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       # checkov:skip=CKV_AWS_117:No need to run in a vpc, only accesses AWS API
+      # checkov:skip=CKV_AWS_116:No DLQ needed, only called as part of a batch process
+      # checkov:skip=CKV_AWS_115:If we get close to the account level limit ever, consider a reserved concurrency of 1
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
       FunctionName: !Sub '${ProjectName}-${Environment}-convert-to-parquet-function'
       CodeUri: ./convert_to_parquet_function
       Handler: convert_to_parquet_function.app.lambda_handler
@@ -497,13 +516,16 @@ Resources:
       LayerName: !Sub '${ProjectName}-${Environment}-ingestion-layer'
       ContentUri: ./ingestion_layer
       CompatibleRuntimes:
-        - python3.11
+        - python3.13
     Metadata:
-      BuildMethod: python3.11
+      BuildMethod: python3.13
 
   SnsSubscriptionFunction:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_117:No need to run in a vpc, only accesses AWS API
+      # checkov:skip=CKV_AWS_116:No DLQ needed, only used for to set up subscription to IAVL on deployment
+      # checkov:skip=CKV_AWS_115:If we get close to the account level limit ever, consider a reserved concurrency of 1
       FunctionName: !Sub '${ProjectName}-${Environment}-sns-subscription-function'
       CodeUri: ./sns_subscription_function
       Handler: sns_subscription_function.app.lambda_handler
@@ -543,22 +565,37 @@ Resources:
     DeletionPolicy: Retain
     Condition: IsNotLocal
     Properties:
+      # checkov:skip=CKV_AWS_18:Just contains matching, timetable, and avl data which is not sensitive, so not concerned about access logs
+      # checkov:skip=CKV_AWS_21:Versioning is a nice-to-have, but lifecycle rules needed (also for non-deleted objects)
       BucketName: !Sub '${ProjectName}-${Environment}-process-bucket'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+        BlockPublicPolicy: true
 
   ExporterBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     Condition: IsNotLocal
     Properties:
+      # checkov:skip=CKV_AWS_18:Just contains matching, timetable, and avl data which is not sensitive, so not concerned about access logs
+      # checkov:skip=CKV_AWS_21:Versioning is a nice-to-have, but lifecycle rules needed (also for non-deleted objects)
       BucketName: !Sub '${ProjectName}-${Environment}-exporter-bucket'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+        BlockPublicPolicy: true
 
   SiriVmIngestionQueue:
     Type: AWS::SQS::Queue
     Properties:
+      # checkov:skip=CKV_AWS_27:Encryption is a nice to have but all this contains is S3 object metadata
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-ingestion-queue.fifo'
       FifoQueue: true
       ContentBasedDeduplication: true
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmIngestionQueuePolicy:
     Type: AWS::SQS::QueuePolicy
@@ -588,8 +625,9 @@ Resources:
   SiriVmProcessQueue:
     Type: AWS::SQS::Queue
     Properties:
+      # checkov:skip=CKV_AWS_27:Encryption is a nice to have but all this contains is S3 object metadata
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-process-queue'
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   ####################################################################
   #### SIRIVM OTP PARALLEL MATCHING FUNCTIONS (& ASSC. RESOURCES) ####
@@ -603,6 +641,7 @@ Resources:
       SecurityGroupEgress:
         - IpProtocol: '-1'
           CidrIp: '0.0.0.0/0'
+          Description: Allow all egress
       VpcId: !Ref VpcId
       Tags:
         - Key: Name
@@ -619,66 +658,74 @@ Resources:
   SiriVmOtpMatchingQueue1:
     Type: AWS::SQS::Queue
     Properties:
+      # checkov:skip=CKV_AWS_27:Encryption is a nice to have but all this contains is S3 object metadata
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue1.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue2:
     Type: AWS::SQS::Queue
     Properties:
+      # checkov:skip=CKV_AWS_27:Encryption is a nice to have but all this contains is S3 object metadata
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue2.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue3:
     Type: AWS::SQS::Queue
     Properties:
+      # checkov:skip=CKV_AWS_27:Encryption is a nice to have but all this contains is S3 object metadata
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue3.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue4:
     Type: AWS::SQS::Queue
     Properties:
+      # checkov:skip=CKV_AWS_27:Encryption is a nice to have but all this contains is S3 object metadata
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue4.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue5:
     Type: AWS::SQS::Queue
     Properties:
+      # checkov:skip=CKV_AWS_27:Encryption is a nice to have but all this contains is S3 object metadata
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue5.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue6:
     Type: AWS::SQS::Queue
     Properties:
+      # checkov:skip=CKV_AWS_27:Encryption is a nice to have but all this contains is S3 object metadata
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue6.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingQueue7:
     Type: AWS::SQS::Queue
     Properties:
+      # checkov:skip=CKV_AWS_27:Encryption is a nice to have but all this contains is S3 object metadata
       QueueName: !Sub '${ProjectName}-${Environment}-sirivm-otp-queue7.fifo'
       FifoQueue: true
       ContentBasedDeduplication: false
-      VisibilityTimeout: 430
+      VisibilityTimeout: !Ref QueueVisibilityTimeout
 
   SiriVmOtpMatchingFunction1:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function1'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -742,10 +789,11 @@ Resources:
   SiriVmOtpMatchingFunction2:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function2'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -809,10 +857,11 @@ Resources:
   SiriVmOtpMatchingFunction3:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function3'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -876,10 +925,11 @@ Resources:
   SiriVmOtpMatchingFunction4:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function4'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -943,10 +993,11 @@ Resources:
   SiriVmOtpMatchingFunction5:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function5'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -1010,10 +1061,11 @@ Resources:
   SiriVmOtpMatchingFunction6:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function6'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If
@@ -1077,10 +1129,11 @@ Resources:
   SiriVmOtpMatchingFunction7:
     Type: AWS::Serverless::Function
     Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-otp-matching-function7'
       CodeUri: ./sirivm_otp_matching_function
       Handler: sirivm_otp_matching_function.app.lambda_handler
-      Timeout: 60
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
       Layers: !If

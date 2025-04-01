@@ -1,5 +1,4 @@
 import json
-import logging
 import uuid
 from collections import defaultdict
 from datetime import datetime
@@ -7,10 +6,12 @@ from os import environ
 
 import boto3
 import psycopg2
+from aws_lambda_powertools import Logger
 
 from .shared.config import (
     EXPECTED_LATE_RUNNING_SERVICE_INTERVAL_IN_MINUTES,
     TIMETABLE_EXTRACT_SLIDING_WINDOW_TIME_IN_MINUTES,
+    TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE,
 )
 
 session = boto3.Session()
@@ -20,8 +21,8 @@ db_user = environ.get("POSTGRES_USER")
 db_database = environ.get("POSTGRES_DB")
 sirivm_bucket = environ.get("SIRIVM_BUCKET")
 otp_queue = environ.get("SIRIVM_OTP_QUEUE_PREFIX")
-logger = logging.getLogger("sirivm")
-logging.getLogger().setLevel("INFO")
+
+logger = Logger()
 
 client = boto3.client("s3")
 
@@ -174,12 +175,15 @@ def lambda_handler(event, context):  # noqa: ANN001, ANN201, ARG001 - BODS-7131
                 MessageDeduplicationId=str(uuid.uuid4()),
                 MessageGroupId=f"{group}-group",
                 MessageAttributes={
-                    "key": {"StringValue": "timetable", "DataType": "String"},
+                    "key": {
+                        "StringValue": TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE,
+                        "DataType": "String",
+                    },
                 },
             )
         except Exception:
-            logging.exception(f"Failed to write to queue {queue_name}")  # noqa: LOG015
+            logger.exception(f"Failed to write to queue {queue_name}")  # noqa: LOG015
             raise
-        logging.info(  # noqa: LOG015
+        logger.info(  # noqa: LOG015
             f"Send message to  {otp_queue}{shard_no + 1} so timetable is refreshed.",
         )

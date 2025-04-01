@@ -2,8 +2,8 @@ from datetime import date, timedelta
 
 import pytest
 
-from .live_timetable_store import LiveTimetableStore
 from .models import AVLRecord, Route, Timetable, avl_group_id
+from .timetable_store import TimetableStore
 
 avl = {
     "operator_ref": "TEST",
@@ -127,7 +127,7 @@ def test_live_timetable_store(
     expected_index: str,
     expected_route: Route,
 ) -> None:
-    store = LiveTimetableStore(timetable)
+    store = TimetableStore(timetable)
 
     actual_index, actual_timetable = store.get_route(avl_record)
 

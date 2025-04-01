@@ -63,3 +63,6 @@ RUN pip3 install --no-cache --upgrade pip setuptools && \
     pip3 install --platform manylinux2014_x86_64 --target=package --implementation cp --python-version 3.11 --only-binary=:all: --upgrade "psycopg[binary]" -t .
 
 CMD ["app.lambda_handler"]
+
+# checkov:skip=CKV_DOCKER_2:Not a long lived service, just for migrations, no need for health checks
+# checkov:skip=CKV_DOCKER_3:No user needed

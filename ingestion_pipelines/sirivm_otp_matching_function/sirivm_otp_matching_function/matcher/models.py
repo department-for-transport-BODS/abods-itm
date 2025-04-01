@@ -2,7 +2,7 @@ from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import Literal, NotRequired, TypedDict
 
-from .utils import validate_date
+from .utils import parse_date
 
 Stop = tuple[tuple[float, float], str, int, str]
 Route = Mapping[str, Stop]
@@ -31,13 +31,10 @@ def stop_date(stop: Stop) -> str:
 
 
 def stop_departure_time(stop: Stop) -> datetime:
-    """Datetime of the expected stop departure"""
-    return validate_date(f"{stop_date(stop)} {stop_expected_time(stop)}")
+    return parse_date(f"{stop_date(stop)} {stop_expected_time(stop)}")
 
 
 class AVLRecord(TypedDict):
-    """Generic AVL record"""
-
     recorded_at_time: str
     latitude: float
     longitude: float
@@ -50,8 +47,6 @@ class AVLRecord(TypedDict):
 
 
 class LiveAVLRecord(AVLRecord):
-    """AVL data from live matching"""
-
     # Does not exist in historical data from ITO, so should not be used in new historic matching
     batch_id: int
 
@@ -61,7 +56,7 @@ def avl_group_id(avl: AVLRecord) -> str:
 
 
 def avl_recorded_at_time_utc(avl: AVLRecord) -> datetime:
-    return validate_date(avl["recorded_at_time"][:19])
+    return parse_date(avl["recorded_at_time"])
 
 
 class BadDbMatch(TypedDict):
