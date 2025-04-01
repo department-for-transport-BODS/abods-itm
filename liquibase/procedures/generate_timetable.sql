@@ -13,12 +13,12 @@ begin
 	
     is_future := (partition_date > now());
    
-   if is_future then
+    if is_future then
 	RAISE NOTICE '% is_future flag set to: True', clock_timestamp();
-   else 
-    RAISE NOTICE '% is_future flag set to: False', clock_timestamp();
-   end if;
-    RAISE NOTICE '% (Re)Creating filtered_files temp table', clock_timestamp();
+    else 
+        RAISE NOTICE '% is_future flag set to: False', clock_timestamp();
+    end if;
+        RAISE NOTICE '% (Re)Creating filtered_files temp table', clock_timestamp();
 
     execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
 
