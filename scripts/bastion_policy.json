@@ -1,0 +1,56 @@
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "VisualEditor0",
+			"Effect": "Allow",
+			"Action": [
+				"iam:PassRole",
+				"secretsmanager:GetSecretValue",
+				"kms:Decrypt",
+				"ecs:RunTask",
+				"lambda:InvokeFunction",
+				"ecs:ListTasks",
+				"kms:GenerateDataKey",
+				"sqs:GetQueueAttributes",
+				"ecs:DescribeTasks",
+				"rds:DescribeDBClusters"
+			],
+			"Resource": [
+				"arn:aws:rds:*:${account_id}:cluster:*",
+				"arn:aws:iam::${account_id}:role/abods-${env}-ecs-historic-matching-task-role",
+				"arn:aws:iam::${account_id}:role/abods-${env}-ecs-historic-matching-fargate-execution-role",
+				"arn:aws:sqs:eu-west-2:${account_id}:abods-${env}-sirivm-otp-queue1.fifo",
+				"arn:aws:sqs:eu-west-2:${account_id}:abods-${env}-sirivm-otp-queue2.fifo",
+				"arn:aws:sqs:eu-west-2:${account_id}:abods-${env}-sirivm-otp-queue3.fifo",
+				"arn:aws:sqs:eu-west-2:${account_id}:abods-${env}-sirivm-otp-queue4.fifo",
+				"arn:aws:sqs:eu-west-2:${account_id}:abods-${env}-sirivm-otp-queue5.fifo",
+				"arn:aws:sqs:eu-west-2:${account_id}:abods-${env}-sirivm-otp-queue6.fifo",
+				"arn:aws:sqs:eu-west-2:${account_id}:abods-${env}-sirivm-otp-queue7.fifo",
+				"arn:aws:lambda:eu-west-2:${account_id}:function:abods-${env}-convert-to-parquet-function",
+				"arn:aws:secretsmanager:eu-west-2:${account_id}:secret:abods/${env}/rds/user/root-${root_password_secret_id_suffix}",
+				"arn:aws:ecs:*:${account_id}:container-instance/*/*",
+				"arn:aws:ecs:*:${account_id}:task-definition/*:*",
+				"arn:aws:ecs:*:${account_id}:task/*/*",
+				"arn:aws:kms:eu-west-2:${account_id}:key/{secrets_manager_key}"
+			]
+		},
+		{
+			"Sid": "VisualEditor1",
+			"Effect": "Allow",
+			"Action": "ssm:GetParameter",
+			"Resource": [
+				"arn:aws:ssm:*:${account_id}:parameter/*",
+				"arn:aws:iam::${account_id}:role/abods-${env}-ecs-historic-matching-task-role",
+				"arn:aws:iam::${account_id}:role/abods-${env}-ecs-historic-matching-fargate-execution-role",
+				"arn:aws:ecs:*:${account_id}:task/*/*"
+			]
+		},
+		{
+			"Sid": "VisualEditor2",
+			"Effect": "Allow",
+			"Action": "ssm:GetParameter",
+			"Resource": "arn:aws:ecs:*:${account_id}:task-definition/*:*"
+		}
+	]
+}

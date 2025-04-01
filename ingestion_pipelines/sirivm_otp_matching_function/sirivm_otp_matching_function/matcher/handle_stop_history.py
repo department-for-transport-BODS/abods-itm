@@ -14,17 +14,6 @@ def clean_stop_history(
     stop_history: StopHistory,
     avl_datetime: datetime,
 ) -> dict:
-    """
-    Remove stop history which has the last avl time longer than an hour ago
-
-    Args:
-        stop_history (StopHistory): Full stop history
-        avl_datetime (datetime): Current avl record time
-
-    Returns:
-        dict: The stop history with the records within an hour of the avl time
-
-    """
     cleaned: StopHistory = {}
     for group_id, match_details in stop_history.items():
         last_avl_time_str = match_details["last_avl_time"][:19]

@@ -13,8 +13,8 @@ import duckdb
 from aws_lambda_powertools import Logger
 
 from .client_db import TimetableDBClient
-from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import match_group_id_avls
+from .matcher.timetable_store import TimetableStore
 from .matcher.utils import log_execution_time
 
 if TYPE_CHECKING:
@@ -82,7 +82,6 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         journey_ref,
                         direction_ref,
                         date_of_journey,
-                        group_id,
                     ) in process_conn.execute(
                         f"""
                             SELECT
@@ -95,11 +94,11 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                                 journey_ref,
                                 direction_ref,
                                 date_of_journey,
-                                group_id
                             FROM avl
                             WHERE operator_ref = '{operator_ref}'
                         """,  # noqa: S608 Not really sql injection
                     ).fetchall():
+                        group_id = f"{operator_ref}|{line_name}|{journey_ref}|{date_of_journey}".lower()
                         avls_by_group_id.setdefault(group_id, []).append(
                             {
                                 "recorded_at_time": utc_iso_string(recorded_at_time),
@@ -192,7 +191,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
 
                 logger.setLevel(initial_level)
 
-                timetable_store = LiveTimetableStore(timetable, historic=True)
+                timetable_store = TimetableStore(timetable, historic=True)
 
                 total_routes = len(timetable)
                 total_stops = sum(len(route) for route in timetable.values())

@@ -10,10 +10,11 @@ from dateutil.parser import parse
 from .client_db import TimetableDBClient
 from .client_s3 import TimetableS3Client
 from .matcher.handle_stop_history import clean_stop_history
-from .matcher.live_timetable_store import LiveTimetableStore
 from .matcher.matching import match_avl_batch
 from .matcher.models import LiveAVLRecord, Timetable
+from .matcher.timetable_store import TimetableStore
 from .matcher.utils import timer
+from .shared.config import TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE
 
 logger = Logger()
 
@@ -41,7 +42,10 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
             historic=False,
         ):
             # sirivm_timetable_s3_generation_function sends this message when done refreshing the extract
-            if rec.message_attributes["key"].string_value == "timetable":
+            if (
+                rec.message_attributes["key"].string_value
+                == TIMETABLE_UPDATED_NOTIFICATION_SQS_KEY_VALUE
+            ):
                 logger.info("Updating main timetable")
                 _cache["main_timetable"] = s3_client.get_timetable_extract()
                 continue
@@ -77,7 +81,7 @@ def lambda_handler(event: dict[str, Any], _: LambdaContext) -> None:
                     validate_avl_list(avl_list, batch_id)
 
                     to_set, to_remove, stop_history = match_avl_batch(
-                        LiveTimetableStore(_cache["main_timetable"]),
+                        TimetableStore(_cache["main_timetable"]),
                         avl_list,
                         clean_shard_stop_history,
                     )
