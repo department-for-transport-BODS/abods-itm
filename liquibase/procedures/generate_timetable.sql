@@ -9,8 +9,6 @@ declare
     tablename        text := 'Timetable';
     is_future        BOOLEAN;
    
-   
-
 begin
 	
     is_future := (partition_date > now());
