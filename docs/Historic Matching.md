@@ -108,7 +108,11 @@ Use the [`generate_timetable`](../liquibase/procedures/generate_timetable.sql) p
 CALL public.generate_timetable('2024-12-04');
 ```
 
-### 2. Export Timetable CSV Data
+### 2. Export Timetable CSV Data (Optional)
+
+> [!NOTE]
+> This should not need to be done unnles you are re-generating the timetable.
+> Timetable data for a day is exported at 5pm the following day.
 
 Use the [`historic_timetable_export`](../liquibase/procedures/historic_timetable_export.sql) procedure to export timetable data to the export bucket:
 
@@ -118,7 +122,11 @@ Use the [`historic_timetable_export`](../liquibase/procedures/historic_timetable
 CALL public.historic_timetable_export('2024-12-04');
 ```
 
-### 3. Export AVL CSV Data
+### 3. Export AVL CSV Data (Optional)
+
+> [!NOTE]
+> This should not need to be done.
+> AVL data for a day is exported at 5pm the following day.
 
 Use the [`historic_avl_export`](../liquibase/procedures/historic_avl_export.sql) procedure to export AVL data for both the target date and the following day the export bucket:
 
