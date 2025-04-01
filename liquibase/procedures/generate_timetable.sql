@@ -340,7 +340,6 @@ begin
             );
 
     RAISE NOTICE '% (Re)Creating timetable_vehiclejourney temp table', clock_timestamp();
-   
     execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney', timetable_suffix));
 
     execute format(
