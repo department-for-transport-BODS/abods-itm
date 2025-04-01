@@ -7,14 +7,24 @@ declare
     longdatestring   text := to_char(partition_date, 'YYYY_MM_DD');
     timetable_suffix text := concat('_', longdatestring);
     tablename        text := 'Timetable';
+    is_future        BOOLEAN;
+   
+   
 
 begin
-
+	
+    is_future := (partition_date > now());
+   
+   if is_future then
+	RAISE NOTICE '% is_future flag set to: True', clock_timestamp();
+   else 
+    RAISE NOTICE '% is_future flag set to: False', clock_timestamp();
+   end if;
     RAISE NOTICE '% (Re)Creating filtered_files temp table', clock_timestamp();
 
     execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
 
-    IF partition_date > now() THEN
+    IF is_future THEN
         execute format(
                 '
                 CREATE TABLE public.%I AS
@@ -254,6 +264,7 @@ begin
 
     execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_registered_organisation_timetable', timetable_suffix));
 
+    IF is_future THEN
     execute format(
             '
             CREATE TABLE public.%I AS
@@ -331,7 +342,7 @@ begin
             );
 
     RAISE NOTICE '% (Re)Creating timetable_vehiclejourney temp table', clock_timestamp();
-
+   
     execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney', timetable_suffix));
 
     execute format(
@@ -366,7 +377,103 @@ begin
             concat('filtered_registered_organisation_timetable', timetable_suffix),
             partition_date
             );
+           
+    else 
 
+    execute format(
+            '
+            CREATE TABLE public.%I AS
+            SELECT
+              *
+            FROM
+              (
+                WITH split_otc_table_license_line AS (
+                  --create license line concat for all registered data
+                  SELECT
+                    DISTINCT registration_number,
+                    concat(
+                      split_part(registration_number, ''/'', 1),
+                      split_service_number
+                    ) AS license_line
+                  FROM
+                    bods.otc_service
+                    CROSS JOIN LATERAL unnest(string_to_array(service_number, ''|'')) AS split_service_number
+                ),
+                split_timetables_license_line AS (
+                  --create license line concat for all timetable data published
+                  SELECT
+                    *,
+                    concat(
+                      split_part(service_code, '':'', 1),
+                      split_service_number
+                    ) AS license_line
+                  FROM
+                    public.%I
+                    CROSS JOIN LATERAL unnest(line_name) AS split_service_number
+                ),
+                flag_registered AS (
+                  -- flag the registered services
+                  SELECT
+                    *,
+                    (otc.license_line IS NOT NULL OR lldqi.dq_issues_license_line IS NOT NULL) AS registered
+                  FROM
+                    split_timetables_license_line mft
+                    LEFT JOIN split_otc_table_license_line otc ON
+                      LOWER(otc.license_line) = LOWER(mft.license_line)
+					LEFT JOIN license_line_data_quality_isses lldqi ON
+						LOWER(lldqi.dq_issues_license_line) = LOWER(mft.license_line)
+                )
+                SELECT
+                  DISTINCT service_code,
+                  registered,
+                  split_service_number AS line_name,
+                  txcfileattributes_id,
+                  national_operator_code,
+                  filename,
+                  revision_id,
+                  revision_number
+                FROM
+                  flag_registered
+              );
+            ',
+            concat('filtered_registered_organisation_timetable', timetable_suffix),
+            concat('organisation_timetable', timetable_suffix)
+            );
+    
+    RAISE NOTICE '% (Re)Creating timetable_vehiclejourney temp table', clock_timestamp();
+
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney', timetable_suffix));
+
+    execute format(
+            '
+            CREATE TABLE public.%I AS
+            SELECT
+              a.*,
+              tv.*,
+              %L::date AS date_of_journey,
+              ts2.line_name AS exploded_line_name
+            FROM
+              public.%I a
+              JOIN public.transmodel_service ts
+                ON  a.revision_id = ts.revision_id
+                AND a.txcfileattributes_id = ts.txcfileattributes_id
+                AND %L BETWEEN ts.start_date
+                AND coalesce(ts.end_date, ''2050-12-31''::date)
+              JOIN public.transmodel_service_service_patterns tssp
+                ON ts.id = tssp.service_id
+              JOIN public.transmodel_servicepattern ts2
+                ON tssp.servicepattern_id = ts2.id
+                AND ts2.line_name = a.line_name
+              JOIN public.transmodel_vehiclejourney tv
+                ON ts2.id = tv.service_pattern_id;
+            ',
+            concat('timetable_vehiclejourney', timetable_suffix),
+            partition_date,
+            concat('filtered_registered_organisation_timetable', timetable_suffix),
+            partition_date
+            );
+           
+    end if;
 
     RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_workingdays temp table', clock_timestamp();
 
@@ -818,10 +925,7 @@ begin
               direction,
               departure_day_shift,
               registered,
-              CASE
-                WHEN stop_activity_id = 2 THEN TRUE
-              ELSE FALSE
-              END AS set_down
+              stop_activity_id in (2,7) AS set_down
             FROM
               public.%I
             WHERE
