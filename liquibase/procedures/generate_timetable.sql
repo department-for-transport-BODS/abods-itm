@@ -417,7 +417,7 @@ begin
                     split_timetables_license_line mft
                     LEFT JOIN split_otc_table_license_line otc ON
                       LOWER(otc.license_line) = LOWER(mft.license_line)
-					LEFT JOIN license_line_data_quality_isses lldqi ON
+					LEFT JOIN public.license_line_data_quality_issues lldqi ON
 						LOWER(lldqi.dq_issues_license_line) = LOWER(mft.license_line)
                 )
                 SELECT
