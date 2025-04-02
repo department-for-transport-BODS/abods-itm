@@ -1089,7 +1089,8 @@ begin
                 WHEN f.is_frequent
                     THEN f.previous_group_id
                 ELSE NULL
-              END AS previous_group_id
+              END AS previous_group_id,
+	      t.set_down
             FROM
               public.%I t
               LEFT JOIN frequent_services f ON f.vehiclejourney_id = t.vehiclejourney_id;
