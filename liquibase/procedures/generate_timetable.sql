@@ -1,32 +1,30 @@
-CREATE OR REPLACE PROCEDURE public.generate_timetable(IN partition_date date) LANGUAGE plpgsql AS $procedure$
-declare longdatestring text := to_char(partition_date, 'YYYY_MM_DD');
+create or replace procedure generate_timetable(IN partition_date date)
+    language plpgsql
+as
+$$
 
-timetable_suffix text := concat('_', longdatestring);
+declare
+    longdatestring   text := to_char(partition_date, 'YYYY_MM_DD');
+    timetable_suffix text := concat('_', longdatestring);
+    tablename        text := 'Timetable';
+    is_future        BOOLEAN;
+   
+begin
+	
+    is_future := (partition_date > now());
+   
+    if is_future then
+	RAISE NOTICE '% is_future flag set to: True', clock_timestamp();
+    else 
+        RAISE NOTICE '% is_future flag set to: False', clock_timestamp();
+    end if;
+        RAISE NOTICE '% (Re)Creating filtered_files temp table', clock_timestamp();
 
-tablename text := 'Timetable';
+    execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
 
-is_future BOOLEAN;
-
-begin is_future := (partition_date > now());
-
-if is_future then RAISE NOTICE '% is_future flag set to: True',
-clock_timestamp();
-
-else RAISE NOTICE '% is_future flag set to: False',
-clock_timestamp();
-
-end if;
-
-RAISE NOTICE '% (Re)Creating filtered_files temp table',
-clock_timestamp();
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('filtered_files', timetable_suffix)
-);
-
-IF is_future THEN execute format(
-    '
+    IF is_future THEN
+        execute format(
+                '
                 CREATE TABLE public.%I AS
                 SELECT
                   od.dataset_id,
@@ -50,13 +48,13 @@ IF is_future THEN execute format(
                   AND od.status = ''live''
                   AND d.dataset_type = 1
                 ',
-    concat('filtered_files', timetable_suffix),
-    partition_date,
-    partition_date
-);
-
-ELSE execute format(
-    '
+                concat('filtered_files', timetable_suffix),
+                partition_date,
+                partition_date
+                );
+    ELSE
+        execute format(
+                '
                 CREATE TABLE public.%I AS
                 WITH potential_datasets AS (
                   --get list of all potential timetable dataset ids (od2.dataset_type = 1)
@@ -159,23 +157,18 @@ ELSE execute format(
                 WHERE
                   a.id IS NOT NULL
                 ',
-    concat('filtered_files', timetable_suffix),
-    partition_date,
-    partition_date
-);
+                concat('filtered_files', timetable_suffix),
+                partition_date,
+                partition_date
+                );
+    END IF;
 
-END IF;
+    RAISE NOTICE '% (Re)Creating organisation_timetable temp table', clock_timestamp();
 
-RAISE NOTICE '% (Re)Creating organisation_timetable temp table',
-clock_timestamp();
+    execute format('DROP TABLE IF EXISTS public.%I', concat('organisation_timetable', timetable_suffix));
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('organisation_timetable', timetable_suffix)
-);
-
-execute format(
-    '
+    execute format(
+            '
             CREATE TABLE public.%I AS
             WITH query_date_dataset_revision AS (
               SELECT
@@ -258,26 +251,20 @@ execute format(
               drv.service_code,
               drv.line_name;
             ',
-    concat('organisation_timetable', timetable_suffix),
-    concat('filtered_files', timetable_suffix),
-    partition_date,
-    concat('filtered_files', timetable_suffix),
-    partition_date
-);
+            concat('organisation_timetable', timetable_suffix),
+            concat('filtered_files', timetable_suffix),
+            partition_date,
+            concat('filtered_files', timetable_suffix),
+            partition_date
+            );
 
-RAISE NOTICE '% (Re)Creating filtered_registered_organisation_timetable table',
-clock_timestamp();
+    RAISE NOTICE '% (Re)Creating filtered_registered_organisation_timetable table', clock_timestamp();
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'filtered_registered_organisation_timetable',
-        timetable_suffix
-    )
-);
+    execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_registered_organisation_timetable', timetable_suffix));
 
-IF is_future THEN execute format(
-    '
+    IF is_future THEN
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               *
@@ -345,26 +332,18 @@ IF is_future THEN execute format(
                   operator_UZ_group
               );
             ',
-    concat(
-        'filtered_registered_organisation_timetable',
-        timetable_suffix
-    ),
-    concat('organisation_timetable', timetable_suffix),
-    concat('organisation_timetable', timetable_suffix),
-    partition_date,
-    partition_date
-);
+            concat('filtered_registered_organisation_timetable', timetable_suffix),
+            concat('organisation_timetable', timetable_suffix),
+            concat('organisation_timetable', timetable_suffix),
+            partition_date,
+            partition_date
+            );
 
-RAISE NOTICE '% (Re)Creating timetable_vehiclejourney temp table',
-clock_timestamp();
+    RAISE NOTICE '% (Re)Creating timetable_vehiclejourney temp table', clock_timestamp();
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney', timetable_suffix));
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_vehiclejourney', timetable_suffix)
-);
-
-execute format(
-    '
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               a.*,
@@ -388,19 +367,18 @@ execute format(
               LEFT JOIN public.%I reg_services
                 ON LOWER(reg_services.service_code) = LOWER(a.service_code);
             ',
-    concat('timetable_vehiclejourney', timetable_suffix),
-    partition_date,
-    concat('organisation_timetable', timetable_suffix),
-    partition_date,
-    concat(
-        'filtered_registered_organisation_timetable',
-        timetable_suffix
-    ),
-    partition_date
-);
+            concat('timetable_vehiclejourney', timetable_suffix),
+            partition_date,
+            concat('organisation_timetable', timetable_suffix),
+            partition_date,
+            concat('filtered_registered_organisation_timetable', timetable_suffix),
+            partition_date
+            );
+           
+    else 
 
-else execute format(
-    '
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               *
@@ -455,23 +433,16 @@ else execute format(
                   flag_registered
               );
             ',
-    concat(
-        'filtered_registered_organisation_timetable',
-        timetable_suffix
-    ),
-    concat('organisation_timetable', timetable_suffix)
-);
+            concat('filtered_registered_organisation_timetable', timetable_suffix),
+            concat('organisation_timetable', timetable_suffix)
+            );
+    
+    RAISE NOTICE '% (Re)Creating timetable_vehiclejourney temp table', clock_timestamp();
 
-RAISE NOTICE '% (Re)Creating timetable_vehiclejourney temp table',
-clock_timestamp();
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney', timetable_suffix));
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_vehiclejourney', timetable_suffix)
-);
-
-execute format(
-    '
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               a.*,
@@ -493,30 +464,20 @@ execute format(
               JOIN public.transmodel_vehiclejourney tv
                 ON ts2.id = tv.service_pattern_id;
             ',
-    concat('timetable_vehiclejourney', timetable_suffix),
-    partition_date,
-    concat(
-        'filtered_registered_organisation_timetable',
-        timetable_suffix
-    ),
-    partition_date
-);
+            concat('timetable_vehiclejourney', timetable_suffix),
+            partition_date,
+            concat('filtered_registered_organisation_timetable', timetable_suffix),
+            partition_date
+            );
+           
+    end if;
 
-end if;
+    RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_workingdays temp table', clock_timestamp();
 
-RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_workingdays temp table',
-clock_timestamp();
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_workingdays', timetable_suffix));
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'timetable_vehiclejourney_workingdays',
-        timetable_suffix
-    )
-);
-
-execute format(
-    '
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               tv.*
@@ -575,29 +536,19 @@ execute format(
             WHERE
               coalesce(workingday.flag, ''yes'') = ''yes'';
             ',
-    concat(
-        'timetable_vehiclejourney_workingdays',
-        timetable_suffix
-    ),
-    concat('timetable_vehiclejourney', timetable_suffix),
-    concat('timetable_vehiclejourney', timetable_suffix),
-    partition_date,
-    partition_date
-);
+            concat('timetable_vehiclejourney_workingdays', timetable_suffix),
+            concat('timetable_vehiclejourney', timetable_suffix),
+            concat('timetable_vehiclejourney', timetable_suffix),
+            partition_date,
+            partition_date
+            );
 
-RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_exclusions temp table',
-clock_timestamp();
+    RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_exclusions temp table', clock_timestamp();
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'timetable_vehiclejourney_exclusions',
-        timetable_suffix
-    )
-);
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_exclusions', timetable_suffix));
 
-execute format(
-    '
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               id
@@ -636,23 +587,16 @@ execute format(
             WHERE
               oper.flag = 0;
             ',
-    concat(
-        'timetable_vehiclejourney_exclusions',
-        timetable_suffix
-    ),
-    partition_date,
-    concat(
-        'timetable_vehiclejourney_workingdays',
-        timetable_suffix
-    ),
-    partition_date
-);
+            concat('timetable_vehiclejourney_exclusions', timetable_suffix),
+            partition_date,
+            concat('timetable_vehiclejourney_workingdays', timetable_suffix),
+            partition_date
+            );
 
-RAISE NOTICE '% Inserting into timetable_vehiclejourney_exclusions temp table',
-clock_timestamp();
+    RAISE NOTICE '% Inserting into timetable_vehiclejourney_exclusions temp table', clock_timestamp();
 
-execute format(
-    '
+    execute format(
+            '
             INSERT INTO
               public.%I (id)
             SELECT
@@ -666,35 +610,20 @@ execute format(
             GROUP BY
               1;
             ',
-    concat(
-        'timetable_vehiclejourney_exclusions',
-        timetable_suffix
-    ),
-    concat(
-        'timetable_vehiclejourney_workingdays',
-        timetable_suffix
-    ),
-    partition_date,
-    concat(
-        'timetable_vehiclejourney_exclusions',
-        timetable_suffix
-    ),
-    partition_date
-);
+            concat('timetable_vehiclejourney_exclusions', timetable_suffix),
+            concat('timetable_vehiclejourney_workingdays', timetable_suffix),
+            partition_date,
+            concat('timetable_vehiclejourney_exclusions', timetable_suffix),
+            partition_date
+            );
 
-RAISE NOTICE '% (Re)Creating timetable_journey_workingdays_with_exclusions temp table',
-clock_timestamp();
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'timetable_journey_workingdays_with_exclusions',
-        timetable_suffix
-    )
-);
+    RAISE NOTICE '% (Re)Creating timetable_journey_workingdays_with_exclusions temp table', clock_timestamp();
 
-execute format(
-    '
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_journey_workingdays_with_exclusions', timetable_suffix));
+
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               a.*
@@ -705,33 +634,18 @@ execute format(
             WHERE
               b.id IS NULL;
             ',
-    concat(
-        'timetable_journey_workingdays_with_exclusions',
-        timetable_suffix
-    ),
-    concat(
-        'timetable_vehiclejourney_workingdays',
-        timetable_suffix
-    ),
-    concat(
-        'timetable_vehiclejourney_exclusions',
-        timetable_suffix
-    )
-);
+            concat('timetable_journey_workingdays_with_exclusions', timetable_suffix),
+            concat('timetable_vehiclejourney_workingdays', timetable_suffix),
+            concat('timetable_vehiclejourney_exclusions', timetable_suffix)
+            );
 
-RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_servicecode_dupes temp table',
-clock_timestamp();
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'timetable_vehiclejourney_servicecode_dupes',
-        timetable_suffix
-    )
-);
+    RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_servicecode_dupes temp table', clock_timestamp();
 
-execute format(
-    '
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_servicecode_dupes', timetable_suffix));
+
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               national_operator_code,
@@ -746,29 +660,16 @@ execute format(
             HAVING
               count(DISTINCT service_code) > 1;
             ',
-    concat(
-        'timetable_vehiclejourney_servicecode_dupes',
-        timetable_suffix
-    ),
-    concat(
-        'timetable_journey_workingdays_with_exclusions',
-        timetable_suffix
-    )
-);
+            concat('timetable_vehiclejourney_servicecode_dupes', timetable_suffix),
+            concat('timetable_journey_workingdays_with_exclusions', timetable_suffix)
+            );
 
-RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_nodupes temp table',
-clock_timestamp();
+    RAISE NOTICE '% (Re)Creating timetable_vehiclejourney_nodupes temp table', clock_timestamp();
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'timetable_vehiclejourney_nodupes',
-        timetable_suffix
-    )
-);
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_nodupes', timetable_suffix));
 
-execute format(
-    '
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               a.*
@@ -781,30 +682,17 @@ execute format(
             WHERE
               drv.journey_code IS NULL;
             ',
-    concat(
-        'timetable_vehiclejourney_nodupes',
-        timetable_suffix
-    ),
-    concat(
-        'timetable_journey_workingdays_with_exclusions',
-        timetable_suffix
-    ),
-    concat(
-        'timetable_vehiclejourney_servicecode_dupes',
-        timetable_suffix
-    )
-);
+            concat('timetable_vehiclejourney_nodupes', timetable_suffix),
+            concat('timetable_journey_workingdays_with_exclusions', timetable_suffix),
+            concat('timetable_vehiclejourney_servicecode_dupes', timetable_suffix)
+            );
 
-RAISE NOTICE '% (Re)Creating timetable_vj_per_groupid temp table',
-clock_timestamp();
+    RAISE NOTICE '% (Re)Creating timetable_vj_per_groupid temp table', clock_timestamp();
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_vj_per_groupid', timetable_suffix)
-);
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vj_per_groupid', timetable_suffix));
 
-execute format(
-    '
+    execute format(
+            '
             CREATE TABLE public.%I AS
             WITH ranked_directional_journeys AS (
               SELECT
@@ -832,11 +720,11 @@ execute format(
                 public.%I tvw
               WHERE
                 trim(tvw.journey_code) <> '''' WINDOW w AS (
-                  PARTITION BY national_operator_code,
-                  exploded_line_name,
-                  journey_code,
+                  PARTITION BY LOWER(TRIM(national_operator_code)),
+                  LOWER(TRIM(exploded_line_name)),
+                  LOWER(TRIM(journey_code)),
                   date_of_journey,
-                  direction
+                  LOWER(TRIM(direction))
                   ORDER BY
                     id DESC,
                     service_pattern_id DESC RANGE BETWEEN UNBOUNDED PRECEDING
@@ -850,9 +738,9 @@ execute format(
               ranked_directional_journeys
             WHERE
               rank = 1 WINDOW w2 AS (
-                PARTITION BY LOWER(TRIM(operator_ref)),
-                LOWER(TRIM(line_name)),
-                LOWER(TRIM(journey_code)),
+                PARTITION BY operator_ref,
+                line_name,
+                journey_code,
                 date_of_journey RANGE BETWEEN UNBOUNDED PRECEDING
                 AND UNBOUNDED FOLLOWING
               )
@@ -862,23 +750,16 @@ execute format(
               line_name,
               journey_code;
             ',
-    concat('timetable_vj_per_groupid', timetable_suffix),
-    concat(
-        'timetable_vehiclejourney_nodupes',
-        timetable_suffix
-    )
-);
+            concat('timetable_vj_per_groupid', timetable_suffix),
+            concat('timetable_vehiclejourney_nodupes', timetable_suffix)
+            );
 
-RAISE NOTICE '% (Re)Creating timetable_journey temp table',
-clock_timestamp();
+    RAISE NOTICE '% (Re)Creating timetable_journey temp table', clock_timestamp();
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_journey', timetable_suffix)
-);
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_journey', timetable_suffix));
 
-execute format(
-    '
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               operator_ref,
@@ -903,26 +784,22 @@ execute format(
               direction,
               departure_day_shift,
               registered,
-			  stop.stop_activity_id as stop_activity_id
+              stop.stop_activity_id as stop_activity_id
             FROM
               public.%I tvw
               JOIN public.transmodel_servicepatternstop stop
                 ON tvw.transmodel_vehiclejourney_id = stop.vehicle_journey_id
             ',
-    concat('timetable_journey', timetable_suffix),
-    concat('timetable_vj_per_groupid', timetable_suffix)
-);
+            concat('timetable_journey', timetable_suffix),
+            concat('timetable_vj_per_groupid', timetable_suffix)
+            );
 
-RAISE NOTICE '% (Re)Creating timetable_stop temp table',
-clock_timestamp();
+    RAISE NOTICE '% (Re)Creating timetable_stop temp table', clock_timestamp();
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_stop', timetable_suffix)
-);
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop', timetable_suffix));
 
-execute format(
-    '
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               operator_ref,
@@ -964,7 +841,7 @@ execute format(
               FIRST_VALUE(departure_time) OVER w AS first_departure,
               LAST_VALUE(departure_time) OVER w AS last_departure,
               registered,
-			  stop_activity_id
+              stop_activity_id
             FROM
               public.%I a
               JOIN public.naptan_stoppoint b
@@ -975,23 +852,20 @@ execute format(
                   stop_index RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
               );
             ',
-    concat('timetable_stop', timetable_suffix),
-    concat('timetable_journey', timetable_suffix)
-);
+            concat('timetable_stop', timetable_suffix),
+            concat('timetable_journey', timetable_suffix)
+            );
 
--------------------------------
--- Selecting ranked 1 files --
--------------------------------
-RAISE NOTICE '% Selecting rank 1 files',
-clock_timestamp();
+    -------------------------------
+    -- Selecting ranked 1 files --
+    -------------------------------
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_stop_rank_1', timetable_suffix)
-);
+    RAISE NOTICE '% Selecting rank 1 files', clock_timestamp();
 
-execute format(
-    '
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_rank_1', timetable_suffix));
+
+    execute format(
+            '
             CREATE TABLE public.%I AS
             SELECT
               operator_ref AS operator_noc,
@@ -1048,7 +922,7 @@ execute format(
               direction,
               departure_day_shift,
               registered,
-			  stop_activity_id in (2,7) AS set_down
+              stop_activity_id in (2,7) AS set_down
             FROM
               public.%I
             WHERE
@@ -1060,85 +934,126 @@ execute format(
                   AND UNBOUNDED FOLLOWING
               );
             ',
-    concat('timetable_stop_rank_1', timetable_suffix),
-    concat('timetable_stop', timetable_suffix)
-);
+            concat('timetable_stop_rank_1', timetable_suffix),
+            concat('timetable_stop', timetable_suffix)
+            );
 
--------------------------------------------------------------
--- Add previous group id for frequent services no last stop--
--------------------------------------------------------------
-RAISE NOTICE '% Adding previous_group_id',
-clock_timestamp();
+    -------------------------------------------------------------
+    -- Add previous group id for frequent services no last stop--
+    -------------------------------------------------------------
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_stop_prev_group_id', timetable_suffix)
-);
+    RAISE NOTICE '% Adding previous_group_id', clock_timestamp();
 
-execute format(
-    '
-            CREATE TABLE public.%I AS
-with trip_stop_sequences as (
- select
- 	t.group_id,
- 	t.line_name,
- 	t.operator_noc,
- 	t.direction,
- 	t.vehiclejourney_id,
- 	STRING_AGG(CAST(t.stop_id as VARCHAR), ''|'' order by expected_departure_time) as route_id,
- 	Min(expected_departure_time) as departure_time,
- 	Max(expected_departure_time) as final_arrival
- 	--MD5(STRING_AGG(CAST(stop_id as VARCHAR), ''-->'' order by expected_departure_time)) as route_id
- 	FROM public.%I t
- 	group by t.group_id,
- 	t.vehiclejourney_id ,
- 	t.line_name,
- 	t.operator_noc,
- 	t.direction,
- 	t.vehiclejourney_id
- 	),
- 	sliding_window_counts AS (
-  	SELECT
-    d1.route_id,
-    d1.line_name,
-    d1.operator_noc,
-    d1.group_id,
-    d1.direction,
-    d1.departure_time,
-    d1.final_arrival,
-    d1.vehiclejourney_id ,
-    COUNT(*) over(
-    	partition by  d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
-    	range between current row and interval ''60 minutes 0 seconds'' following) as departures_in_window_hour_after,
-    COUNT(*) over(
-    	partition by   d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
-    	range between interval ''60 minutes 0 seconds'' preceding and current row) as departures_in_window_hour_before,
-    COUNT(*) over(
-    	partition by   d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
-    	range between current row and interval ''30 minutes 0 seconds'' following) +
-    COUNT(*) over(
-    	partition by  d1.route_id, d1.line_name, d1.operator_noc, d1.direction order by d1.departure_time
-    	range between interval ''30 minutes 0 seconds'' preceding and current row) -1 as departures_in_window_hour_surrounding
-  FROM trip_stop_sequences d1),
-  frequent_services AS (
-    SELECT
-        *,
-        -- Identify if this is part of a frequent batch (6+ departures in surrounding hour)
-        (departures_in_window_hour_before >= 6 OR departures_in_window_hour_after >= 6 OR departures_in_window_hour_surrounding >= 6) AS is_frequent,
-        -- Identify if this is the first in a frequent batch
-        (departures_in_window_hour_after >= 6 and 
-        departures_in_window_hour_surrounding < 6 AND 
-        departures_in_window_hour_before < 6 and 
-        ((LAG(departures_in_window_hour_after < 6) over w AND LAG(departures_in_window_hour_surrounding < 6) OVER w) or
-        LAG(departures_in_window_hour_surrounding < 6) OVER w isnull))  AS is_first_in_frequent_batch,
-        LAG(group_id) over w as previous_group_id
-    FROM sliding_window_counts d1
-    window w as (
-            PARTITION BY  line_name, operator_noc, route_id , direction
-            ORDER BY departure_time
-        )  
-)
-SELECT
+    execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_prev_group_id', timetable_suffix));
+
+    execute format(
+            '
+            CREATE TABLE public.%I AS WITH trip_stop_sequences AS (
+              SELECT
+                t.group_id,
+                t.line_name,
+                t.operator_noc,
+                t.direction,
+                t.vehiclejourney_id,
+                STRING_AGG(
+                  CAST(t.stop_id AS VARCHAR),
+                  ''|''
+                  ORDER BY
+                    expected_departure_time
+                ) AS route_id,
+                Min(expected_departure_time) AS departure_time,
+                Max(expected_departure_time) AS final_arrival
+              FROM
+                public.%I t
+              GROUP BY
+                t.group_id,
+                t.vehiclejourney_id,
+                t.line_name,
+                t.operator_noc,
+                t.direction
+            ),
+            sliding_window_counts AS (
+              SELECT
+                d1.route_id,
+                d1.line_name,
+                d1.operator_noc,
+                d1.group_id,
+                d1.direction,
+                d1.departure_time,
+                d1.final_arrival,
+                d1.vehiclejourney_id,
+                COUNT(*) over(
+                  PARTITION BY d1.route_id,
+                  d1.line_name,
+                  d1.operator_noc,
+                  d1.direction
+                  ORDER BY
+                    d1.departure_time RANGE BETWEEN CURRENT ROW
+                    AND interval ''60 minutes 0 seconds'' FOLLOWING
+                ) AS departures_in_window_hour_after,
+                COUNT(*) over(
+                  PARTITION BY d1.route_id,
+                  d1.line_name,
+                  d1.operator_noc,
+                  d1.direction
+                  ORDER BY
+                    d1.departure_time RANGE BETWEEN interval ''60 minutes 0 seconds'' PRECEDING
+                    AND CURRENT ROW
+                ) AS departures_in_window_hour_before,
+                COUNT(*) over(
+                  PARTITION BY d1.route_id,
+                  d1.line_name,
+                  d1.operator_noc,
+                  d1.direction
+                  ORDER BY
+                    d1.departure_time RANGE BETWEEN CURRENT ROW
+                    AND interval ''30 minutes 0 seconds'' FOLLOWING
+                ) + COUNT(*) over(
+                  PARTITION BY d1.route_id,
+                  d1.line_name,
+                  d1.operator_noc,
+                  d1.direction
+                  ORDER BY
+                    d1.departure_time RANGE BETWEEN interval ''30 minutes 0 seconds'' PRECEDING
+                    AND CURRENT ROW
+                ) -1 AS departures_in_window_hour_surrounding
+              FROM
+                trip_stop_sequences d1
+            ),
+            frequent_services AS (
+              SELECT
+                *,
+                -- Identify if this is part of a frequent batch (6+ departures in surrounding hour)
+                (
+                  departures_in_window_hour_before >= 6
+                  OR departures_in_window_hour_after >= 6
+                  OR departures_in_window_hour_surrounding >= 6
+                ) AS is_frequent,
+                -- Identify if this is the first in a frequent batch
+                (
+                  departures_in_window_hour_after >= 6
+                  AND departures_in_window_hour_surrounding < 6
+                  AND departures_in_window_hour_before < 6
+                  AND (
+                    (
+                      LAG(departures_in_window_hour_after < 6) OVER w
+                      AND LAG(departures_in_window_hour_surrounding < 6) OVER w
+                    )
+                    OR LAG(departures_in_window_hour_surrounding < 6) OVER w ISNULL
+                  )
+                ) AS is_first_in_frequent_batch,
+                LAG(group_id) OVER w AS previous_group_id
+              FROM
+                sliding_window_counts d1 WINDOW w AS (
+                  PARTITION BY line_name,
+                  operator_noc,
+                  route_id,
+                  direction
+                  ORDER BY
+                    departure_time
+                )
+            )
+            SELECT
               t.operator_noc,
               t.service_code,
               t.line_name,
@@ -1164,62 +1079,59 @@ SELECT
               t.direction,
               t.departure_day_shift,
               t.registered,
-              CASE WHEN f.is_frequent and f.is_first_in_frequent_batch then ''FIRST_SERVICE'' --identifier for the first journey in a frequent services block, e.g. if frequent 7-8am and 5-6pm- the 7am and 5pm journey
-              	   when f.is_frequent and t.expected_departure_time = f.final_arrival then ''LAST_STOP'' --identifier for last stop in a frequent service journey
-              	   when f.is_frequent then f.previous_group_id  
-              else null 
-              end as previous_group_id,
-			  t.set_down
-FROM public.%I t
-left join frequent_services f
-on f.vehiclejourney_id = t.vehiclejourney_id;
+              CASE
+                WHEN f.is_frequent
+                 AND f.is_first_in_frequent_batch
+                    THEN ''FIRST_SERVICE'' --identifier for the first journey in a frequent services block, e.g. if frequent 7-8am and 5-6pm- the 7am and 5pm journey
+                WHEN f.is_frequent
+                 AND t.expected_departure_time = f.final_arrival
+                    THEN ''LAST_STOP'' --identifier for last stop in a frequent service journey
+                WHEN f.is_frequent
+                    THEN f.previous_group_id
+                ELSE NULL
+              END AS previous_group_id,
+	      t.set_down
+            FROM
+              public.%I t
+              LEFT JOIN frequent_services f ON f.vehiclejourney_id = t.vehiclejourney_id;
             ',
-    concat('timetable_stop_prev_group_id', timetable_suffix),
-    concat('timetable_stop_rank_1', timetable_suffix),
-    concat('timetable_stop_rank_1', timetable_suffix)
-);
+            concat('timetable_stop_prev_group_id', timetable_suffix),
+            concat('timetable_stop_rank_1', timetable_suffix),
+            concat('timetable_stop_rank_1', timetable_suffix)
+            );
 
-----------------------------
--- Create dated partition --
-----------------------------
-RAISE NOTICE '% (Re)Creating partition public.%',
-clock_timestamp(),
-tablename;
+    ----------------------------
+    -- Create dated partition --
+    ----------------------------
 
-execute format(
-    'CREATE TABLE if not exists public.%I partition of public.%I FOR VALUES FROM (%L) TO (%L);',
-    concat(tablename, '_p', longdatestring),
-    tablename,
-    partition_date,
-    partition_date + interval '1' day
-);
+    RAISE NOTICE '% (Re)Creating partition public.%', clock_timestamp(), tablename;
 
-execute format(
-    'ALTER TABLE public.%I OWNER to abods_rw',
-    concat(tablename, '_p', longdatestring)
-);
 
-------------------------------
--- Deleting from partition --
-------------------------------
-RAISE NOTICE '% Deleting from %',
-clock_timestamp(),
-tablename;
+    execute format(
+            'CREATE TABLE if not exists public.%I partition of public.%I FOR VALUES FROM (%L) TO (%L);',
+            concat(tablename, '_p', longdatestring),
+            tablename,
+            partition_date,
+            partition_date + interval '1' day);
 
-execute format(
-    'DELETE FROM public.%I',
-    concat(tablename, '_p', longdatestring)
-);
+    execute format('ALTER TABLE public.%I OWNER to abods_rw', concat(tablename, '_p', longdatestring));
 
---------------------------
---Importing to partition --
---------------------------
-RAISE NOTICE '% Inserting into %',
-clock_timestamp(),
-tablename;
+    ------------------------------
+    -- Deleting from partition --
+    ------------------------------
 
-execute format(
-    '
+    RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
+
+    execute format('DELETE FROM public.%I', concat(tablename, '_p', longdatestring));
+
+    --------------------------
+    --Importing to partition --
+    --------------------------
+
+    RAISE NOTICE '% Inserting into %', clock_timestamp(), tablename;
+
+    execute format(
+            '
             INSERT INTO
               public.%I (
                 operator_noc,
@@ -1257,7 +1169,7 @@ execute format(
                 departure_day_shift,
                 registered,
                 reprocessing_required,
-				set_down
+                set_down
               )
             SELECT
               tsr1.operator_noc,
@@ -1306,116 +1218,41 @@ execute format(
               tsr1.departure_day_shift,
               tsr1.registered,
               NULL,
-			  tsr1.set_down
+              tsr1.set_down
             FROM
               public.%I tsr1;
             ',
-    concat(tablename, '_p', longdatestring),
-    concat('timetable_stop_prev_group_id', timetable_suffix)
-);
+            concat(tablename, '_p', longdatestring),
+            concat('timetable_stop_prev_group_id', timetable_suffix)
+            );
 
---------------
--- Clean Up --
---------------
-IF SPLIT_PART(aurora_db_instance_identifier(), '-', 2) = 'sandbox' THEN RAISE NOTICE '% Skipping clean up',
-clock_timestamp();
+    --------------
+    -- Clean Up --
+    --------------
 
-ELSE RAISE NOTICE '% Cleaning Up',
-clock_timestamp();
+    IF SPLIT_PART(aurora_db_instance_identifier(), '-', 2) = 'sandbox' THEN
+        RAISE NOTICE '% Skipping clean up', clock_timestamp();
+    ELSE
+        RAISE NOTICE '% Cleaning Up', clock_timestamp();
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('organisation_timetable', timetable_suffix)
-);
+        execute format('DROP TABLE IF EXISTS public.%I', concat('organisation_timetable', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_registered_organisation_timetable', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_workingdays', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_exclusions', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_journey_workingdays_with_exclusions', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_servicecode_dupes', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vehiclejourney_nodupes', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_journey', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_vj_per_groupid', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_rank_1', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('timetable_stop_prev_group_id', timetable_suffix));
+        execute format('DROP TABLE IF EXISTS public.%I', concat('filtered_files', timetable_suffix));
+    END IF;
 
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'filtered_registered_organisation_timetable',
-        timetable_suffix
-    )
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_vehiclejourney', timetable_suffix)
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'timetable_vehiclejourney_workingdays',
-        timetable_suffix
-    )
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'timetable_vehiclejourney_exclusions',
-        timetable_suffix
-    )
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'timetable_journey_workingdays_with_exclusions',
-        timetable_suffix
-    )
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'timetable_vehiclejourney_servicecode_dupes',
-        timetable_suffix
-    )
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat(
-        'timetable_vehiclejourney_nodupes',
-        timetable_suffix
-    )
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_journey', timetable_suffix)
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_stop', timetable_suffix)
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_vj_per_groupid', timetable_suffix)
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_stop_rank_1', timetable_suffix)
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('timetable_stop_prev_group_id', timetable_suffix)
-);
-
-execute format(
-    'DROP TABLE IF EXISTS public.%I',
-    concat('filtered_files', timetable_suffix)
-);
-
-END IF;
-
-RAISE NOTICE '% generate_timetable complete',
-clock_timestamp();
-
+    RAISE NOTICE '% generate_timetable complete', clock_timestamp();
 end;
+$$;
 
-$procedure$;
+alter procedure generate_timetable owner to abods_proxy_rw;
