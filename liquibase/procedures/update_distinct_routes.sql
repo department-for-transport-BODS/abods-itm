@@ -15,7 +15,7 @@ begin
                     atco_code,
                     ','
                               ) over (
-                        partition by group_id
+                        partition by group_id, vehiclejourney_id
                         order by
                             expected_departure_time asc,
                             stop_index asc,
