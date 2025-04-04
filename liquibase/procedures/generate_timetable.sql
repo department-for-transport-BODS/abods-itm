@@ -720,11 +720,11 @@ begin
                 public.%I tvw
               WHERE
                 trim(tvw.journey_code) <> '''' WINDOW w AS (
-                  PARTITION BY national_operator_code,
-                  exploded_line_name,
-                  journey_code,
+                  PARTITION BY LOWER(TRIM(national_operator_code)),
+                  LOWER(TRIM(exploded_line_name)),
+                  LOWER(TRIM(journey_code)),
                   date_of_journey,
-                  direction
+                  LOWER(TRIM(direction))
                   ORDER BY
                     id DESC,
                     service_pattern_id DESC RANGE BETWEEN UNBOUNDED PRECEDING
