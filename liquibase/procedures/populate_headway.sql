@@ -52,7 +52,7 @@ BEGIN
     UPDATE
       public."Timetable" y
     SET
-      headway_time_difference = x.actual_headway- x.expected_headway,
+      headway_time_difference = x.actual_headway - x.expected_headway,
       actual_headway = x.actual_headway,
       expected_headway = x.expected_headway
     FROM
