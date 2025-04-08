@@ -18,11 +18,11 @@ BEGIN
           FROM
             (
               COALESCE(
-                t2.actual_departure_time,
-                t2.timestamp_after_estimate
-              ) - COALESCE(
                 t1.actual_departure_time,
                 t1.timestamp_after_estimate
+              ) - COALESCE(
+                t2.actual_departure_time,
+                t2.timestamp_after_estimate
               )
             )
         )
@@ -31,7 +31,7 @@ BEGIN
           EPOCH
           FROM
             (
-              t2.expected_departure_time - t1.expected_departure_time
+              t1.expected_departure_time - t2.expected_departure_time
             )
         ) 
         AS expected_headway
@@ -52,7 +52,7 @@ BEGIN
     UPDATE
       public."Timetable" y
     SET
-      headway_time_difference = x.expected_headway - x.actual_headway,
+      headway_time_difference = x.actual_headway - x.expected_headway,
       actual_headway = x.actual_headway,
       expected_headway = x.expected_headway
     FROM
