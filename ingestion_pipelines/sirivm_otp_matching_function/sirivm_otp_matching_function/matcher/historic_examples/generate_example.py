@@ -1,9 +1,7 @@
 import csv
 import json
-import os
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest import mock
 
 import boto3
 import psycopg2
@@ -195,8 +193,7 @@ def main() -> None:
     with open(timetable_destination) as jsonfile:
         timetable = json.load(jsonfile)
 
-    with mock.patch.dict(os.environ, {"ENABLE_ESTIMATED_MATCHING": "true"}):
-        to_set, _, __ = match_group_id_avls(TimetableStore(timetable), avl_list)
+    to_set, _, __ = match_group_id_avls(TimetableStore(timetable), avl_list)
 
     with open(example_dir / "__init__.py", "w"):
         pass
