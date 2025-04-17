@@ -1,9 +1,7 @@
 import csv
 import json
-import os
 import pathlib
 from collections.abc import Iterable, Sequence
-from unittest import mock
 
 from ...client_s3 import parse_live_avl_row
 from ..matching import match_group_id_avls
@@ -28,7 +26,6 @@ def run_historic_matching_test(
     with open(directory / "avl.csv") as csvfile:
         avl_list = list(parse_test_avl_file(csvfile))
 
-    with mock.patch.dict(os.environ, {"ENABLE_ESTIMATED_MATCHING": "true"}):
-        to_set, _, __ = match_group_id_avls(TimetableStore(timetable), avl_list)
+    to_set, _, __ = match_group_id_avls(TimetableStore(timetable), avl_list)
 
     return to_set

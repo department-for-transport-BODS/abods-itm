@@ -782,7 +782,6 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
-          ENABLE_ESTIMATED_MATCHING: "true"
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -850,7 +849,6 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
-          ENABLE_ESTIMATED_MATCHING: "true"
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -918,7 +916,6 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
-          ENABLE_ESTIMATED_MATCHING: "true"
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -986,7 +983,6 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
-          ENABLE_ESTIMATED_MATCHING: "true"
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -1054,7 +1050,6 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
-          ENABLE_ESTIMATED_MATCHING: "true"
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -1122,7 +1117,6 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
-          ENABLE_ESTIMATED_MATCHING: "true"
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup
 
@@ -1190,6 +1184,5 @@ Resources:
             - IsNotLocal
             - !Ref ProcessBucket
             - !Ref AWS::NoValue
-          ENABLE_ESTIMATED_MATCHING: "true"
       LoggingConfig:
         LogGroup: !Ref SiriVmOtpMatchingFunctionLogGroup

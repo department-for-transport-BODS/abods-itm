@@ -1,4 +1,3 @@
-import os
 from collections.abc import Sequence
 from datetime import datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
@@ -105,9 +104,6 @@ def check_estimated_match(  # noqa: PLR0911 - it's not that many returns
     stop: Stop,
 ) -> str | None:
     """Check if there is an estimated match between the current and previous avl points"""
-    if os.getenv("ENABLE_ESTIMATED_MATCHING") != "true":
-        return None
-
     if route_history.get("last_avl_longitude") is None:
         return None
 
