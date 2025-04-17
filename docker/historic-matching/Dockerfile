@@ -3,8 +3,6 @@ FROM python:3.12-slim
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
-ENV ENABLE_ESTIMATED_MATCHING="true"
-
 COPY requirements.txt .
 RUN apt-get update \
     && apt-get -y install libpq-dev gcc \

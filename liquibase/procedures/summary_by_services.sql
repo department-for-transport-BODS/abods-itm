@@ -31,7 +31,7 @@ BEGIN
                 tablename
                 );
 
-        RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
+        RAISE NOTICE '% Generating and adding new data to %', clock_timestamp(), tablename;
 
         EXECUTE format(
                 'INSERT INTO public.%I(
@@ -60,23 +60,18 @@ BEGIN
 				sub.line_name,
 				sub.noc_and_line_and_servicecode,
 				sub.date_of_journey,
-				date_trunc(''hour'', sub.expected_departure_time::timestamptz) AS departure_hour,
-				(EXTRACT(HOUR FROM sub.expected_departure_time)::text || '':00:00'' ||
-					CASE
-						WHEN RIGHT(sub.expected_departure_time::text, 6)~ ''^[+-]'' THEN RIGHT(sub.expected_departure_time::text, 6)
-						ELSE ''+00''
-					END
-				)::timetz AS departure_hour_only,
+				sub.departure_hour,
+				sub.departure_hour_only,
 				sub.day_of_week,
-				COUNT(CASE WHEN sub.otp_state = ''OnTime'' THEN 1 END) AS on_time_count,
-				COUNT(CASE WHEN sub.otp_state = ''Early'' THEN 1 END) AS early_count,
-				COUNT(CASE WHEN sub.otp_state = ''Late'' THEN 1 END) AS late_count,
-				COUNT(sub.actual_departure_time) AS completed,
-				COUNT(*) AS scheduled,
+				sum(on_time_count) as on_time_count,
+				sum(early_count) as early_count,
+				sum(late_count) as late_count,
+				sum(completed) as completed,
+				sum(scheduled) as scheduled,
 				sub.is_timing_point,
 				sub.max_early,
 				sub.max_late,
-				COALESCE(AVG(sub.avg_time_difference/60.0), 0.0) AS avg_time_difference,
+				COALESCE(ROUND(sum(sub.total_avg)/nullif(sum(completed), 0), 4), 0.0) AS avg_time_difference,
 				sub.admin_area_id AS admin_areas,
 				sub.estimated,
 				sub.incomplete_reason
@@ -84,47 +79,27 @@ BEGIN
 				(
 					SELECT
 						ttb.operator_noc,
-						ttb.operator_name,
-						es.line_name,
-						es.noc_and_line_and_servicecode,
+                        ttb.line_name,
+						ttb.noc_and_line_and_servicecode,
 						ttb.date_of_journey,
+						ttb.departure_hour,
+						ttb.departure_hour_only,
 						ttb.day_of_week,
-						ttb.expected_departure_time,
-						COALESCE(ttb.actual_departure_time, ttb.timestamp_after_estimate) as actual_departure_time,
+						ttb.on_time_count,
+						ttb.early_count,
+						ttb.late_count,
+						ttb.completed,
+						ttb.scheduled,
 						ttb.is_timing_point,
-						ttb.otp_state,
-						ttb.time_difference,
-						ttb.stop_id,
-						ttb.stop_latitude,
-						ttb.stop_longitude,
-						ttb.locality_id,
-						CASE
-							WHEN otp_state = ''Early'' AND time_difference >= -600 THEN 10
-							WHEN otp_state = ''Early'' AND time_difference < -600 AND time_difference >= -1200 THEN 20
-							WHEN otp_state = ''Early'' AND time_difference < -1200 AND time_difference >= -1800 THEN 30
-							WHEN otp_state = ''Early'' AND time_difference < -1800 AND time_difference >= -2400 THEN 40
-							WHEN otp_state = ''Early'' AND time_difference < -2400 AND time_difference >= -3000 THEN 50
-							WHEN otp_state = ''Early'' AND time_difference < -3000 AND time_difference >= -3600 THEN 60
-							WHEN otp_state = ''Early'' AND time_difference < -3600 THEN 70
-							ELSE 0
-						END AS max_early,
-						CASE
-							WHEN otp_state = ''Late'' AND time_difference <= 600 THEN 10
-							WHEN otp_state = ''Late'' AND time_difference > 600 AND time_difference <= 1200 THEN 20
-							WHEN otp_state = ''Late'' AND time_difference > 1200 AND time_difference <= 1800 THEN 30
-							WHEN otp_state = ''Late'' AND time_difference > 1800 AND time_difference <= 2400 THEN 40
-							WHEN otp_state = ''Late'' AND time_difference > 2400 AND time_difference <= 3000 THEN 50
-							WHEN otp_state = ''Late'' AND time_difference > 3000 AND time_difference <= 3600 THEN 60
-							WHEN otp_state = ''Late'' AND time_difference > 3600 THEN 70
-							ELSE 0
-						END AS max_late,
-						time_difference AS avg_time_difference,
+						ttb.max_early,
+						ttb.max_late,
+						ttb.avg_time_difference,
 						es.admin_area_id,
-						(ttb.timestamp_after_estimate is not null) AS estimated,
-						ttb.timestamp_after_estimate,
-						ttb.incomplete_reason
+						ttb.estimated,
+						ttb.incomplete_reason,
+						completed * avg_time_difference as total_avg
 					FROM
-						public."Timetable" ttb
+						public.timetable_summary_stops_tz ttb
 					INNER JOIN public.expected_services es
 						ON ttb.date_of_journey = es.date_of_journey
 						AND ttb.operator_noc = es.operator_noc
@@ -134,15 +109,14 @@ BEGIN
 							''-''
 							, -1)
 					WHERE
-						ttb.date_of_journey = %L AND
-						ttb.previous_group_id IS NULL
+						ttb.date_of_journey = %L
 				) AS sub
 			WHERE
 				date_of_journey = %L
 			GROUP BY
+				operator_noc,
 				line_name,
 				noc_and_line_and_servicecode,
-				operator_noc,
 				date_of_journey,
 				day_of_week,
 				departure_hour,
