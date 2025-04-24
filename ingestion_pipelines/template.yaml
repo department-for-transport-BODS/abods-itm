@@ -507,6 +507,85 @@ Resources:
       KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
       RetentionInDays: 30
 
+  #############################################################
+  #### SIRI-SX DB INGESTION FUNCTION (& ASSC. RESOURCES) ####
+  #############################################################
+  SiriSXDbIngestionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
+      # checkov:skip=CKV_AWS_115:Use account level concurrency for now, this is rarely if ever used
+      # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
+      FunctionName: !Sub '${ProjectName}-${Environment}-traveline-db-ingestion-function'
+      CodeUri: ./sirisx_situations_import_function
+      Handler: sirisx_situations_import_function.app.lambda_handler
+      MemorySize: 512
+      Layers: !If
+        - IsNotLocal
+        - - !Ref IngestionFunctionLayer
+        - []
+      Policies:
+        - 'AWSLambdaVPCAccessExecutionRole'
+        - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
+        - Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: !GetAtt SiriSXDbIngestionFunctionLogGroup.Arn
+      Events:
+        SiriSXSchedule:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0/5 * * * ? *) # run every 5 minutes from 00:00
+            Name: !Sub 'SiriSXSchedule${Environment}'
+            Description: Siri SX ingestion schedule
+            Enabled: true
+      VpcConfig:
+        SubnetIds: !Ref VpcSubnets
+        SecurityGroupIds:
+          - !GetAtt SiriSXDbIngestionFunctionSecurityGroup.GroupId
+          - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/ec2/securitygroup/rdsproxy-access/id}}'
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: sirisx_situations_import_function
+          POWERTOOLS_LOG_LEVEL: INFO
+          PROJECT_ENV: !Ref Environment
+          PROJECT_NAME: !Ref ProjectName
+          POSTGRES_HOST: !If
+            - IsNotLocal
+            - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rdsproxy/endpoint}}'
+            - !Ref RdsDbHostAddr
+          POSTGRES_PORT: !Ref RdsDbPort
+          POSTGRES_DB: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
+          POSTGRES_USER: !Sub '${ProjectName}_proxy_rw'
+      LoggingConfig:
+        LogGroup: !Ref SiriSXDbIngestionFunctionLogGroup
+
+  SiriSXDbIngestionFunctionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub 'Security group for ${ProjectName}-${Environment}-sirisx-db-ingestion-function'
+      GroupName: !Sub '${ProjectName}-${Environment}-sirisx-db-ingestion-function'
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          CidrIp: '0.0.0.0/0'
+          Description: Allow all egress
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-sirisx-db-ingestion-function'
+
+  SiriSXDbIngestionFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Condition: IsNotLocal
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ProjectName}-${Environment}-sirisx-db-ingestion-function'
+      KmsKeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/cloudwatch/arn}}'
+      RetentionInDays: 30
+
   #########################################
   #### GENERAL CONFIGURATION RESOURCES ####
   #########################################
