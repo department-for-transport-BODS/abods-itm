@@ -471,7 +471,6 @@ def main():
             tomorrows_data = which_files_exist(current, files)
             if not tomorrows_data["avl_parquet"]:
                 next_day_avl_export_needed.append(current)
-            elif not tomorrows_data["avl_parquet"]:
                 next_day_avl_conversion_needed.append(current)
 
         data = which_files_exist(current, files)
