@@ -443,4 +443,7 @@
     <changeSet id="140" author="abodsuser">
         <sqlFile path="sql/140-update-excess-wait-time-column.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="141" author="abodsuser">
+        <sqlFile path="sql/141-latest-vehicle-positions.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>

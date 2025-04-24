@@ -98,6 +98,7 @@ This process triggers when a message arrives on the DB ingestion queue.
    - Executes the [`load_avl_tables_historic`](../liquibase/procedures/load_avl_tables_historic.sql) stored procedure
    - This procedure:
      - Copies the current batch data into the permanent `SiriVMPositions` table
+     - Updates the `latest_vehicle_positions` table
      - Truncates the staging table to prepare for future batches
 
 6. **Status Update**:
