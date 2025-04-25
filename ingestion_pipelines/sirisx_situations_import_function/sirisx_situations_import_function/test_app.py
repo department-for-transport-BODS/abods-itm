@@ -69,6 +69,7 @@ def test_lambda_handler(
 def test_parse_xml() -> None:
     from .app import NS_URI, parse_xml
 
+    number_of_situation_elements = 2
     xml = f"""
     <Siri xmlns="{NS_URI}">
         <ServiceDelivery>
@@ -114,7 +115,7 @@ def test_parse_xml() -> None:
 
     rows = parse_xml(xml.encode("utf-8"))
 
-    assert len(rows) == 2, "All PtSituationElements parsed"
+    assert len(rows) == number_of_situation_elements, "All PtSituationElements parsed"
 
     row1, row2 = rows
 
@@ -151,10 +152,10 @@ def test_parse_xml() -> None:
 
 
 @patch(
-    "ingestion_pipelines.sirisx_situations_import_function.sirisx_situations_import_function.app.conn"
+    "ingestion_pipelines.sirisx_situations_import_function.sirisx_situations_import_function.app.conn",
 )
 @patch(
-    "ingestion_pipelines.sirisx_situations_import_function.sirisx_situations_import_function.app.execute_batch"
+    "ingestion_pipelines.sirisx_situations_import_function.sirisx_situations_import_function.app.execute_batch",
 )
 def test_insert_rows(
     mock_execute_batch: MagicMock,
