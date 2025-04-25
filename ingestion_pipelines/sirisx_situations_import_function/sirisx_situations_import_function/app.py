@@ -16,13 +16,17 @@ logger = Logger()
 conn = setup_db()
 
 
-def get_element_text(elem: etree._Element, path: str, default=None):
+def get_element_text(elem: etree._Element, path: str, default: str | None =None) -> str | None:
     return elem.findtext(path, default, namespaces={"siri": NS_URI})
 
 
 def parse_situation_element(elem: etree._Element, response_timestamp: datetime, producer_ref: str) -> SituationRecord | None:
     try:
         situation_number = get_element_text(elem, ".//siri:SituationNumber")
+        if not situation_number:
+            logger.error("Unable to parse PTSituation element: SituationNumber not found")
+            return None
+
         version = get_element_text(elem, ".//siri:Version")
         if version is None:
             logger.warning("Missing Version for PTSituationElement. This may lead to duplicates", situation_number=situation_number, producer_ref=producer_ref)
@@ -72,8 +76,14 @@ def parse_xml(xml_bytes: bytes) -> list[SituationRecord]:
     )
     root = etree.fromstring(xml_bytes, parser=parser)
     producer_ref = get_element_text(root, ".//siri:ProducerRef")
+    if not producer_ref:
+        logger.error("Unable to parse XML: No ProducerRef found")
+        return []
     response_timestamp_str = get_element_text(root, ".//siri:ResponseTimestamp")
-    response_timestamp = datetime.fromisoformat(response_timestamp_str.replace("Z", "+00:00"))
+    if not response_timestamp_str:
+        logger.warning("No ResponseTimestamp found, defaulting to datetime.now()")
+
+    response_timestamp = datetime.fromisoformat(response_timestamp_str.replace("Z", "+00:00")) if response_timestamp_str else datetime.now(UTC)
 
     tag = f"{{{NS_URI}}}PtSituationElement"
     context = etree.iterparse(
