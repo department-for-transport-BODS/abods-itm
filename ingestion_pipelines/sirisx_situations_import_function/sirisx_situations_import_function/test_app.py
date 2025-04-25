@@ -1,5 +1,5 @@
+from collections.abc import Generator
 from datetime import UTC, datetime
-from typing import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
