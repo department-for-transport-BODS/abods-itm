@@ -19,13 +19,17 @@ conn = setup_db()
 
 
 def get_element_text(
-    elem: etree._Element, path: str, default: str | None = None,
+    elem: etree._Element,
+    path: str,
+    default: str | None = None,
 ) -> str | None:
     return elem.findtext(path, default, namespaces={"siri": NS_URI})
 
 
 def parse_situation_element(
-    elem: etree._Element, response_timestamp: datetime, producer_ref: str,
+    elem: etree._Element,
+    response_timestamp: datetime,
+    producer_ref: str,
 ) -> SituationRecord | None:
     try:
         situation_number = get_element_text(elem, ".//siri:SituationNumber")
