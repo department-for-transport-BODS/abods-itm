@@ -9,27 +9,39 @@ from psycopg2.extras import execute_batch
 from .models import SituationRecord
 from .shared.db import setup_db
 
-SIRI_SX_CANCELLATIONS_URL = "https://6tfu67dcng.execute-api.eu-west-2.amazonaws.com/v1/siri-sx"
+SIRI_SX_CANCELLATIONS_URL = (
+    "https://6tfu67dcng.execute-api.eu-west-2.amazonaws.com/v1/siri-sx"
+)
 NS_URI = "http://www.siri.org.uk/siri"
 
 logger = Logger()
 conn = setup_db()
 
 
-def get_element_text(elem: etree._Element, path: str, default: str | None =None) -> str | None:
+def get_element_text(
+    elem: etree._Element, path: str, default: str | None = None
+) -> str | None:
     return elem.findtext(path, default, namespaces={"siri": NS_URI})
 
 
-def parse_situation_element(elem: etree._Element, response_timestamp: datetime, producer_ref: str) -> SituationRecord | None:
+def parse_situation_element(
+    elem: etree._Element, response_timestamp: datetime, producer_ref: str
+) -> SituationRecord | None:
     try:
         situation_number = get_element_text(elem, ".//siri:SituationNumber")
         if not situation_number:
-            logger.error("Unable to parse PTSituation element: SituationNumber not found")
+            logger.error(
+                "Unable to parse PTSituation element: SituationNumber not found"
+            )
             return None
 
         version = get_element_text(elem, ".//siri:Version")
         if version is None:
-            logger.warning("Missing Version for PTSituationElement. This may lead to duplicates", situation_number=situation_number, producer_ref=producer_ref)
+            logger.warning(
+                "Missing Version for PTSituationElement. This may lead to duplicates",
+                situation_number=situation_number,
+                producer_ref=producer_ref,
+            )
 
         operator_noc = get_element_text(elem, ".//siri:OperatorRef")
         line_name = get_element_text(elem, ".//siri:PublishedLineName")
@@ -39,12 +51,24 @@ def parse_situation_element(elem: etree._Element, response_timestamp: datetime, 
         progress = get_element_text(elem, ".//siri:Progress")
 
         origin_departure = get_element_text(elem, ".//siri:OriginAimedDepartureTime")
-        date_of_journey = datetime.fromisoformat(origin_departure.replace("Z", "+00:00")) if origin_departure else None
+        date_of_journey = (
+            datetime.fromisoformat(origin_departure.replace("Z", "+00:00"))
+            if origin_departure
+            else None
+        )
 
         start_time = get_element_text(elem, ".//siri:ValidityPeriod/siri:StartTime")
         end_time = get_element_text(elem, ".//siri:ValidityPeriod/siri:EndTime")
-        start_datetime = datetime.fromisoformat(start_time.replace("Z", "+00:00")) if start_time else None
-        end_datetime = datetime.fromisoformat(end_time.replace("Z", "+00:00")) if end_time else None
+        start_datetime = (
+            datetime.fromisoformat(start_time.replace("Z", "+00:00"))
+            if start_time
+            else None
+        )
+        end_datetime = (
+            datetime.fromisoformat(end_time.replace("Z", "+00:00"))
+            if end_time
+            else None
+        )
 
         return SituationRecord(
             producer_ref=producer_ref,
@@ -67,6 +91,7 @@ def parse_situation_element(elem: etree._Element, response_timestamp: datetime, 
         logger.exception("Failed to parse PtSituationElement")
         return None
 
+
 def parse_xml(xml_bytes: bytes) -> list[SituationRecord]:
     parser = etree.XMLParser(
         resolve_entities=False,
@@ -83,7 +108,11 @@ def parse_xml(xml_bytes: bytes) -> list[SituationRecord]:
     if not response_timestamp_str:
         logger.warning("No ResponseTimestamp found, defaulting to datetime.now()")
 
-    response_timestamp = datetime.fromisoformat(response_timestamp_str.replace("Z", "+00:00")) if response_timestamp_str else datetime.now(UTC)
+    response_timestamp = (
+        datetime.fromisoformat(response_timestamp_str.replace("Z", "+00:00"))
+        if response_timestamp_str
+        else datetime.now(UTC)
+    )
 
     tag = f"{{{NS_URI}}}PtSituationElement"
     context = etree.iterparse(
@@ -105,6 +134,7 @@ def parse_xml(xml_bytes: bytes) -> list[SituationRecord]:
         finally:
             elem.clear()
     return rows
+
 
 def insert_rows(rows: list[SituationRecord]) -> None:
     with conn.cursor() as cur:
@@ -157,4 +187,3 @@ def lambda_handler(_event: dict, _context: dict) -> None:
         logger.warning("No rows to insert.")
         return
     insert_rows(rows)
-

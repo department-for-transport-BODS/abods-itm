@@ -11,12 +11,14 @@ from .models import SituationRecord
 def mock_env_vars(monkeypatch) -> None:  # noqa: ANN001 type not exported
     monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-2")
 
+
 @pytest.fixture(autouse=True)
 def mock_setup_db() -> Generator[MagicMock]:
     with patch(f"{__package__}.shared.db.setup_db") as mock_setup_db:
         mock_conn = MagicMock()
         mock_setup_db.return_value = mock_conn
         yield mock_conn
+
 
 @pytest.fixture
 def situation_record() -> SituationRecord:
