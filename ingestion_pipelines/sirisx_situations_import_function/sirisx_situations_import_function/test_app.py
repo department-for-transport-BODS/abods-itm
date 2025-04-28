@@ -1,5 +1,5 @@
 from collections.abc import Generator
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -31,8 +31,9 @@ def situation_record() -> SituationRecord:
         line_name="5",
         direction="inbound",
         date_of_journey=now.date(),
-        start_date=now,
-        end_date=now,
+        origin_departure_time=now,
+        validity_start_date=now,
+        validity_end_date=now,
         journey_code="VJ5",
         condition="cancelled",
         progress="closed",
@@ -136,9 +137,10 @@ def test_parse_xml() -> None:
     assert row1.operator_noc == "OpRef1"
     assert row1.line_name == "10A"
     assert row1.direction == "inbound"
-    assert row1.date_of_journey == datetime(2025, 4, 25, 12, 30, 0, tzinfo=UTC)
-    assert row1.start_date == datetime(2025, 4, 25, 12, 0, 0, tzinfo=UTC)
-    assert row1.end_date == datetime(2025, 4, 25, 14, 0, 0, tzinfo=UTC)
+    assert row1.date_of_journey == date(2025, 4, 25)
+    assert row1.origin_departure_time == datetime(2025, 4, 25, 12, 30, 0, tzinfo=UTC)
+    assert row1.validity_start_date == datetime(2025, 4, 25, 12, 0, 0, tzinfo=UTC)
+    assert row1.validity_end_date == datetime(2025, 4, 25, 14, 0, 0, tzinfo=UTC)
     assert row1.journey_code == "VJ1"
     assert row1.condition == "cancelled"
     assert row1.progress == "closed"
@@ -151,9 +153,10 @@ def test_parse_xml() -> None:
     assert row2.operator_noc == "OpRef2"
     assert row2.line_name == "25B"
     assert row2.direction == "outbound"
-    assert row2.date_of_journey == datetime(2025, 4, 25, 13, 45, 0, tzinfo=UTC)
-    assert row2.start_date == datetime(2025, 4, 25, 13, 0, 0, tzinfo=UTC)
-    assert row2.end_date == datetime(2025, 4, 25, 15, 0, 0, tzinfo=UTC)
+    assert row2.date_of_journey == date(2025, 4, 25)
+    assert row2.origin_departure_time == datetime(2025, 4, 25, 13, 45, 0, tzinfo=UTC)
+    assert row2.validity_start_date == datetime(2025, 4, 25, 13, 0, 0, tzinfo=UTC)
+    assert row2.validity_end_date == datetime(2025, 4, 25, 15, 0, 0, tzinfo=UTC)
     assert row2.journey_code == "VJ2"
     assert row2.condition == "normalService"
     assert row2.progress == "open"

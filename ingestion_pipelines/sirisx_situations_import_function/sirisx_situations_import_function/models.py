@@ -10,9 +10,10 @@ class SituationRecord:
     operator_noc: str | None
     line_name: str | None
     direction: str | None
-    date_of_journey: date | None
-    start_date: datetime | None
-    end_date: datetime | None
+    date_of_journey: date
+    origin_departure_time: datetime
+    validity_start_date: datetime | None
+    validity_end_date: datetime | None
     journey_code: str | None
     condition: str | None
     progress: str | None

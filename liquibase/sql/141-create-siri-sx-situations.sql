@@ -6,13 +6,14 @@ CREATE TABLE public.siri_sx_situations (
     operator_noc TEXT,
     line_name TEXT,
     direction TEXT,
-    date_of_journey TIMESTAMPTZ,
-    start_date TIMESTAMPTZ,
-    end_date TIMESTAMPTZ,
+    date_of_journey DATE NOT NULL,
+    origin_departure_time TIMESTAMPTZ NOT NULL,
+    validity_start_date TIMESTAMPTZ,
+    validity_end_date TIMESTAMPTZ,
     journey_code TEXT,
     condition TEXT,
     progress TEXT,
-    event_timestamp TIMESTAMPTZ,
+    event_timestamp TIMESTAMPTZ NOT NULL,
     creation_time TIMESTAMPTZ,
     UNIQUE (producer_ref, situation_number, version)
 );

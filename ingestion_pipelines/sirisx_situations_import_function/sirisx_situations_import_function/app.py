@@ -59,8 +59,18 @@ def parse_situation_element(
         condition = get_element_text(elem, ".//siri:Condition")
         progress = get_element_text(elem, ".//siri:Progress")
 
-        origin_departure = get_element_text(elem, ".//siri:OriginAimedDepartureTime")
-        date_of_journey = parse_datetime(origin_departure) if origin_departure else None
+        origin_departure_str = get_element_text(
+            elem,
+            ".//siri:OriginAimedDepartureTime",
+        )
+        if not origin_departure_str:
+            logger.error(
+                "Unable to parse PTSituation element: OriginAimedDepartureTime not found",
+            )
+            return None
+
+        origin_departure_time = parse_datetime(origin_departure_str)
+        date_of_journey = origin_departure_time.date()
 
         start_time = get_element_text(elem, ".//siri:ValidityPeriod/siri:StartTime")
         end_time = get_element_text(elem, ".//siri:ValidityPeriod/siri:EndTime")
@@ -75,8 +85,9 @@ def parse_situation_element(
             line_name=line_name,
             direction=direction,
             date_of_journey=date_of_journey,
-            start_date=start_datetime,
-            end_date=end_datetime,
+            origin_departure_time=origin_departure_time,
+            validity_start_date=start_datetime,
+            validity_end_date=end_datetime,
             journey_code=journey_code,
             condition=condition,
             progress=progress,
@@ -145,8 +156,9 @@ def insert_rows(rows: list[SituationRecord]) -> None:
                 line_name,
                 direction,
                 date_of_journey,
-                start_date,
-                end_date,
+                origin_departure_time,
+                validity_start_date,
+                validity_end_date,
                 journey_code,
                 condition,
                 progress,
@@ -161,8 +173,9 @@ def insert_rows(rows: list[SituationRecord]) -> None:
                 %(line_name)s,
                 %(direction)s,
                 %(date_of_journey)s,
-                %(start_date)s,
-                %(end_date)s,
+                %(origin_departure_time)s,
+                %(validity_start_date)s,
+                %(validity_end_date)s,
                 %(journey_code)s,
                 %(condition)s,
                 %(progress)s,
