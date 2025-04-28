@@ -26,6 +26,11 @@ def get_element_text(
     return elem.findtext(path, default, namespaces={"siri": NS_URI})
 
 
+def parse_datetime(datetime_str: str) -> datetime:
+    """Parse ISO string to datetime object"""
+    return datetime.fromisoformat(datetime_str.replace("Z", "+00:00"))
+
+
 def parse_situation_element(
     elem: etree._Element,
     response_timestamp: datetime,
@@ -55,24 +60,12 @@ def parse_situation_element(
         progress = get_element_text(elem, ".//siri:Progress")
 
         origin_departure = get_element_text(elem, ".//siri:OriginAimedDepartureTime")
-        date_of_journey = (
-            datetime.fromisoformat(origin_departure.replace("Z", "+00:00"))
-            if origin_departure
-            else None
-        )
+        date_of_journey = parse_datetime(origin_departure) if origin_departure else None
 
         start_time = get_element_text(elem, ".//siri:ValidityPeriod/siri:StartTime")
         end_time = get_element_text(elem, ".//siri:ValidityPeriod/siri:EndTime")
-        start_datetime = (
-            datetime.fromisoformat(start_time.replace("Z", "+00:00"))
-            if start_time
-            else None
-        )
-        end_datetime = (
-            datetime.fromisoformat(end_time.replace("Z", "+00:00"))
-            if end_time
-            else None
-        )
+        start_datetime = parse_datetime(start_time) if start_time else None
+        end_datetime = parse_datetime(end_time) if end_time else None
 
         return SituationRecord(
             producer_ref=producer_ref,
@@ -113,7 +106,7 @@ def parse_xml(xml_bytes: bytes) -> list[SituationRecord]:
         logger.warning("No ResponseTimestamp found, defaulting to datetime.now()")
 
     response_timestamp = (
-        datetime.fromisoformat(response_timestamp_str.replace("Z", "+00:00"))
+        parse_datetime(response_timestamp_str)
         if response_timestamp_str
         else datetime.now(UTC)
     )
@@ -191,3 +184,6 @@ def lambda_handler(_event: dict, _context: dict) -> None:
         logger.warning("No rows to insert.")
         return
     insert_rows(rows)
+    logger.info(
+        "All rows parsed and inserted",
+    )
