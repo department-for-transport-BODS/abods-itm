@@ -242,7 +242,7 @@ def convert_to_parquet(process_date: date, environment: str):
             {
                 "process_date": process_date.isoformat(),
                 "skip_timetable": "false",
-                "skip_avl": "false",
+                "skip_avl": "true",
                 "overwrite_existing_output": "true",
             }
         ),
@@ -469,15 +469,14 @@ def main():
         next_day = current + timedelta(days=1)
         if next_day not in process_dates:
             tomorrows_data = which_files_exist(current, files)
-            if not tomorrows_data["avl_csv"] and not tomorrows_data["avl_parquet"]:
+            if not tomorrows_data["avl_parquet"]:
                 next_day_avl_export_needed.append(current)
-            elif not tomorrows_data["avl_parquet"]:
                 next_day_avl_conversion_needed.append(current)
 
         data = which_files_exist(current, files)
         if subset:
             timetable_export_needed.append(current)
-            if not data["avl_parquet"] and not data["avl_csv"]:
+            if not data["avl_parquet"]:
                 avl_export_needed.append(current)
                 continue
         else:
@@ -487,9 +486,6 @@ def main():
                 and data["timetable_parquet"]
             ):
                 ready_to_run.append(current)
-                continue
-            if not data["avl_csv"]:
-                avl_export_needed.append(current)
                 continue
             timetable_export_needed.append(current)
 
