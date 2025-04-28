@@ -242,7 +242,7 @@ def convert_to_parquet(process_date: date, environment: str):
             {
                 "process_date": process_date.isoformat(),
                 "skip_timetable": "false",
-                "skip_avl": "false",
+                "skip_avl": "true",
                 "overwrite_existing_output": "true",
             }
         ),
