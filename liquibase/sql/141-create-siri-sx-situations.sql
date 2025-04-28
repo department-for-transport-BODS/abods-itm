@@ -17,4 +17,9 @@ CREATE TABLE public.siri_sx_situations (
     UNIQUE (producer_ref, situation_number, version)
 );
 
+CREATE INDEX idx_situations_date_of_journey
+ON public.siri_sx_situations (
+  date_of_journey
+)
+
 ALTER TABLE public.siri_sx_situations OWNER TO abods_rw;
