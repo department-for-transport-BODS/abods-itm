@@ -541,7 +541,6 @@ def main():
             )
             if (
                 next_day not in avl_export_needed
-                and next_day not in timetable_export_needed
             ):
                 if next_day in next_day_avl_export_needed:
                     avl_export(db_password, db_host, next_day)
