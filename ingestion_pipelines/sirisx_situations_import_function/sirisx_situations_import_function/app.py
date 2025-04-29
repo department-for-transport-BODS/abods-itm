@@ -66,6 +66,8 @@ def parse_situation_element(
         if not origin_departure_str:
             logger.error(
                 "Unable to parse PTSituation element: OriginAimedDepartureTime not found",
+                situation_number=situation_number,
+                producer_ref=producer_ref,
             )
             return None
 
