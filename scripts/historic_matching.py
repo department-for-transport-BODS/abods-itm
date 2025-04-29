@@ -532,17 +532,7 @@ def main():
         if ready_to_run and len(running_tasks) < MAX_CONCURRENT_MATCHING_TASKS:
             # Ensure that we have the avl data for the next day available before we kick off matching
             next_day = ready_to_run[0] + timedelta(days=1)
-            print(
-                {
-                    "next_day_not_in_avl_exported": next_day not in avl_export_needed,
-                    "next_day_not_in_timetable_export_needed": next_day
-                    not in timetable_export_needed,
-                }
-            )
-            if (
-                next_day not in avl_export_needed
-                and next_day not in timetable_export_needed
-            ):
+            if next_day not in avl_export_needed:
                 if next_day in next_day_avl_export_needed:
                     avl_export(db_password, db_host, next_day)
                     next_day_avl_export_needed.remove(next_day)
