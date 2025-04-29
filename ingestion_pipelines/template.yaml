@@ -516,7 +516,7 @@ Resources:
       # checkov:skip=CKV_AWS_116:No DLQ needed, we need to keep retrying
       # checkov:skip=CKV_AWS_115:Use account level concurrency for now, this is rarely if ever used
       # checkov:skip=CKV_AWS_173:Should add env var encryption, but for now nothing is particularly sensitive
-      FunctionName: !Sub '${ProjectName}-${Environment}-traveline-db-ingestion-function'
+      FunctionName: !Sub '${ProjectName}-${Environment}-sirisx-db-ingestion-function'
       CodeUri: ./sirisx_situations_import_function
       Handler: sirisx_situations_import_function.app.lambda_handler
       MemorySize: 512
