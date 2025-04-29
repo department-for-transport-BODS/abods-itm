@@ -532,6 +532,13 @@ def main():
         if ready_to_run and len(running_tasks) < MAX_CONCURRENT_MATCHING_TASKS:
             # Ensure that we have the avl data for the next day available before we kick off matching
             next_day = ready_to_run[0] + timedelta(days=1)
+            print(
+                {
+                    "next_day_not_in_avl_exported": next_day not in avl_export_needed,
+                    "next_day_not_in_timetable_export_needed": next_day
+                    not in timetable_export_needed,
+                }
+            )
             if (
                 next_day not in avl_export_needed
                 and next_day not in timetable_export_needed
@@ -594,6 +601,15 @@ def main():
             timetable_export(db_password, db_host, process_date, subset)
             convert_to_parquet(process_date, environment)
             ready_to_run = sorted({*ready_to_run, process_date})
+            print(
+                {
+                    "ready_to_run": ready_to_run,
+                    "running_tasks": running_tasks,
+                    "summaries_to_run": summaries_to_run,
+                    "avl_export_needed": avl_export_needed,
+                    "timetable_export_needed": timetable_export_needed,
+                }
+            )
 
         sleep(60)
 
