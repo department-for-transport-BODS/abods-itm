@@ -17,4 +17,6 @@ jobs:
           days-before-branch-stale: 60
           exempt-branches-regex: ^(sandbox|dev|test|main)$
           exempt-protected-branches: true
+          ignore-branches-with-open-prs: true
+          ignore-unknown-authors: true
           operations-per-run: 100

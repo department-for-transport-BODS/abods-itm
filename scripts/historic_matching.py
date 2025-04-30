@@ -242,7 +242,7 @@ def convert_to_parquet(process_date: date, environment: str):
             {
                 "process_date": process_date.isoformat(),
                 "skip_timetable": "false",
-                "skip_avl": "false",
+                "skip_avl": "true",
                 "overwrite_existing_output": "true",
             }
         ),
@@ -469,15 +469,14 @@ def main():
         next_day = current + timedelta(days=1)
         if next_day not in process_dates:
             tomorrows_data = which_files_exist(current, files)
-            if not tomorrows_data["avl_csv"] and not tomorrows_data["avl_parquet"]:
+            if not tomorrows_data["avl_parquet"]:
                 next_day_avl_export_needed.append(current)
-            elif not tomorrows_data["avl_parquet"]:
                 next_day_avl_conversion_needed.append(current)
 
         data = which_files_exist(current, files)
         if subset:
             timetable_export_needed.append(current)
-            if not data["avl_parquet"] and not data["avl_csv"]:
+            if not data["avl_parquet"]:
                 avl_export_needed.append(current)
                 continue
         else:
@@ -487,9 +486,6 @@ def main():
                 and data["timetable_parquet"]
             ):
                 ready_to_run.append(current)
-                continue
-            if not data["avl_csv"]:
-                avl_export_needed.append(current)
                 continue
             timetable_export_needed.append(current)
 
@@ -536,10 +532,7 @@ def main():
         if ready_to_run and len(running_tasks) < MAX_CONCURRENT_MATCHING_TASKS:
             # Ensure that we have the avl data for the next day available before we kick off matching
             next_day = ready_to_run[0] + timedelta(days=1)
-            if (
-                next_day not in avl_export_needed
-                and next_day not in timetable_export_needed
-            ):
+            if next_day not in avl_export_needed:
                 if next_day in next_day_avl_export_needed:
                     avl_export(db_password, db_host, next_day)
                     next_day_avl_export_needed.remove(next_day)
@@ -598,6 +591,15 @@ def main():
             timetable_export(db_password, db_host, process_date, subset)
             convert_to_parquet(process_date, environment)
             ready_to_run = sorted({*ready_to_run, process_date})
+            print(
+                {
+                    "ready_to_run": ready_to_run,
+                    "running_tasks": running_tasks,
+                    "summaries_to_run": summaries_to_run,
+                    "avl_export_needed": avl_export_needed,
+                    "timetable_export_needed": timetable_export_needed,
+                }
+            )
 
         sleep(60)
 

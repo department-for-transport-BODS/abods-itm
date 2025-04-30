@@ -845,7 +845,7 @@ begin
             FROM
               public.%I a
               JOIN public.naptan_stoppoint b
-                ON a.stop_id = b.id::text
+                ON a.atco_code = b.atco_code
               WINDOW w AS (
                 PARTITION BY transmodel_vehiclejourney_id
                 ORDER BY
