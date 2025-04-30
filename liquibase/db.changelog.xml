@@ -443,4 +443,7 @@
     <changeSet id="140" author="abodsuser">
         <sqlFile path="sql/140-update-excess-wait-time-column.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="141" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="sql/141-create-siri-sx-situations.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
