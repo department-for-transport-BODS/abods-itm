@@ -446,4 +446,7 @@
     <changeSet id="141" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="sql/141-create-siri-sx-situations.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="142" author="abodsuser">
+        <sqlFile path="sql/142-add-expected-journeys-is-cancelled-column.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
