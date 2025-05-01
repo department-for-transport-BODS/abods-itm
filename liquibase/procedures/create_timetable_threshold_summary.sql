@@ -103,6 +103,12 @@ BEGIN
                AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, ''-'', -1)
                AND ttb.frequent_service = FALSE
                AND ttb.no_recorded = FALSE
+               INNER JOIN public.expected_journeys ej ON ttb.date_of_journey = ej.date_of_journey
+               AND ttb.operator_noc = ej.operator_noc
+               AND ttb.line_name = ej.line_name
+               AND ttb.journey_code = ej.journey_code
+               AND ttb.direction = ej.direction
+               WHERE ej.cancelled != TRUE
                GROUP BY ttb.operator_noc,
                         ttb.line_name,
                         es.noc_and_line_and_servicecode,
