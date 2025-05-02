@@ -807,7 +807,7 @@ begin
               journey_code,
               date_of_journey AS date_of_journey,
               departure_time,
-              stop_id,
+              b.id AS stop_id,
               ST_Y(b.location)::real lt,
               ST_X(b.location)::real AS lon,
               common_name AS stopname,
