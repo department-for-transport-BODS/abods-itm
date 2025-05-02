@@ -141,6 +141,8 @@ BEGIN
               AND ttb.operator_noc = ej.operator_noc
               AND ttb.line_name = ej.line_name
               AND ttb.service_code = split_part(ej.noc_and_line_and_servicecode, '-', -1)
+              AND ttb.journey_code = ej.journey_code
+              AND ttb.direction = ej.direction
               AND ej.is_cancelled != TRUE
             WHERE
               ttb.date_of_journey = partition_date
