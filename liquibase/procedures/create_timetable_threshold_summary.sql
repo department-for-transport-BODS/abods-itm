@@ -108,6 +108,7 @@ BEGIN
                AND ttb.line_name = ej.line_name
                AND ttb.journey_code = ej.journey_code
                AND ttb.direction = ej.direction
+               AND ttb.service_code = split_part(ej.noc_and_line_and_servicecode, ''-'', -1)
                WHERE ej.cancelled != TRUE
                GROUP BY ttb.operator_noc,
                         ttb.line_name,
