@@ -142,6 +142,8 @@ BEGIN
 							ej.noc_and_line_and_servicecode,
 							''-''
 							, -1)
+						AND ttb.journey_code = ej.journey_code
+						AND ttb.direction = ej.direction
 						AND ej.is_cancelled != TRUE
 					WHERE
 						ttb.date_of_journey = %L
