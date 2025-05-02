@@ -811,7 +811,7 @@ begin
               ST_Y(b.location)::real lt,
               ST_X(b.location)::real AS lon,
               common_name AS stopname,
-              a.stop_index,
+              b.stop_index::text,
               b.common_name AS stop_name,
               a.is_timing_point,
               b.locality_id,
