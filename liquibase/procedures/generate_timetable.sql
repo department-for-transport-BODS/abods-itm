@@ -820,7 +820,7 @@ begin
               day_of_week,
               stop_type,
               group_id,
-              a.atco_code,
+              b.atco_code::text,
               row_number() over(
                 PARTITION BY operator_ref,
                 line_name,
