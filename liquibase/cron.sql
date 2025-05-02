@@ -5,6 +5,12 @@ SELECT cron.schedule(
        );
 
 SELECT cron.schedule(
+                'flag_cancelled_expected_journeys',
+                '30 01 * * *', -- at 01:30
+                $$CALL public.flag_cancelled_expected_journeys(CURRENT_DATE - 1);$$
+        );
+
+SELECT cron.schedule(
                'summary_by_stop',
                '00 02 * * *', -- at 02:00
                $$CALL public.summary_by_stops(CURRENT_DATE - 2);CALL public.summary_by_stops(CURRENT_DATE - 1);$$
