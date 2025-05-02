@@ -76,7 +76,6 @@ begin
              end_time,
              direction;
 
-
     RAISE NOTICE '% Analysing expected journeys for %', clock_timestamp(), partition_date::text;
 
     analyse expected_journeys;
