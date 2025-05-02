@@ -1,6 +1,6 @@
 CREATE OR REPLACE PROCEDURE public.generate_timetable(IN partition_date date)
  LANGUAGE plpgsql
-AS $procedure$
+AS $$
 
 declare
     longdatestring   text := to_char(partition_date, 'YYYY_MM_DD');
@@ -1252,6 +1252,5 @@ begin
 
     RAISE NOTICE '% generate_timetable complete', clock_timestamp();
 end;
-$procedure$
-;
+$$
 ;
