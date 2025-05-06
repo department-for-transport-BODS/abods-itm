@@ -30,15 +30,17 @@ def parse_datetime(datetime_str: str) -> datetime:
     """Parse ISO string to datetime object"""
     return datetime.fromisoformat(datetime_str.replace("Z", "+00:00"))
 
+
 def parse_direction(direction_text: str) -> str:
     """Parse direction text to normalized string"""
     direction_map = {
         "Inbound": "inbound",
         "Outbound": "outbound",
         "AntiClockwise": "antiClockwise",
-        "Clockwise": "clockwise"
+        "Clockwise": "clockwise",
     }
     return direction_map[direction_text]
+
 
 def parse_situation_element(
     elem: etree._Element,
