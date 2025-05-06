@@ -66,7 +66,12 @@ def parse_situation_element(
         operator_noc = get_element_text(elem, ".//siri:OperatorRef")
         line_name = get_element_text(elem, ".//siri:PublishedLineName")
         direction_text = get_element_text(elem, ".//siri:DirectionRef")
-        direction = parse_direction(direction_text or "")
+        if not direction_text:
+            logger.error(
+                "Unable to parse PTSituation element: DirectionRef not found",
+            )
+            return None
+        direction = parse_direction(direction_text)
         journey_code = get_element_text(elem, ".//siri:DatedVehicleJourneyRef")
         condition = get_element_text(elem, ".//siri:Condition")
         progress = get_element_text(elem, ".//siri:Progress")
