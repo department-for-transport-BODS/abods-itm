@@ -48,6 +48,8 @@ BEGIN
         avg_time_difference,
         admin_areas,
 		estimated,
+        count_delayed,
+		average_delay,
         incomplete_reason
     )
     SELECT
@@ -64,9 +66,11 @@ BEGIN
         sub.is_timing_point,
         sub.max_early,
         sub.max_late,
-        sub.avg_time_difference,
+        COALESCE(ROUND(sum(sub.total_avg)/nullif(sum(sub.completed), 0), 4), 0.0) AS avg_time_difference,
         sub.admin_areas,
 		sub.estimated,
+        SUM(sub.count_delayed) as count_delayed,
+		COALESCE(ROUND(sum(sub.total_average_delayed)/nullif(sum(sub.count_delayed), 0), 4), 0.0) as average_delay,
         sub.incomplete_reason
     FROM
         (
@@ -87,7 +91,10 @@ BEGIN
                 avg_time_difference,
                 admin_areas,
 				estimated,
-                incomplete_reason
+                count_delayed,
+                incomplete_reason,
+                count_delayed * average_delay as total_average_delayed,
+				completed * avg_time_difference as total_avg
             FROM
                 public.timetable_summary_service_tz
             WHERE
