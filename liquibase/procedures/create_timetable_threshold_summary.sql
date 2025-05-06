@@ -81,6 +81,8 @@ BEGIN
                  (SELECT operator_noc,
                          line_name,
                          service_code,
+                         journey_code,
+                         direction,
                          CASE
                              WHEN timetable_id = first_value(timetable_id) OVER(PARTITION BY group_id, vehiclejourney_id
                                                                                 ORDER BY group_id, expected_departure_time DESC, stop_index DESC)
