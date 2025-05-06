@@ -88,7 +88,6 @@ BEGIN
                 is_timing_point,
                 max_early,
                 max_late,
-                avg_time_difference,
                 admin_areas,
 				estimated,
                 count_delayed,
