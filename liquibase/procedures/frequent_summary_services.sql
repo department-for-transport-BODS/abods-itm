@@ -78,7 +78,7 @@ BEGIN
             SELECT
               ttb.operator_noc,
               ttb.service_code,
-              es.noc_and_line_and_servicecode,
+              ej.noc_and_line_and_servicecode,
               ttb.line_name,
               ttb.date_of_journey,
               ttb.day_of_week,
@@ -137,10 +137,13 @@ BEGIN
               ttb.is_timing_point
             FROM
               public."Timetable" ttb
-              INNER JOIN public.expected_services es ON ttb.date_of_journey = es.date_of_journey
-              AND ttb.operator_noc = es.operator_noc
-              AND ttb.line_name = es.line_name
-              AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, '-', -1)
+              INNER JOIN public.expected_journeys ej ON ttb.date_of_journey = ej.date_of_journey
+              AND ttb.operator_noc = ej.operator_noc
+              AND ttb.line_name = ej.line_name
+              AND ttb.service_code = split_part(ej.noc_and_line_and_servicecode, '-', -1)
+              AND ttb.journey_code = ej.journey_code
+              AND ttb.direction = ej.direction
+              AND ej.is_cancelled != TRUE
             WHERE
               ttb.date_of_journey = partition_date
               AND ttb.previous_group_id IS NOT NULL

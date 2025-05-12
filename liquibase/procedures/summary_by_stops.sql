@@ -95,7 +95,7 @@ BEGIN
 					SELECT
 					ttb.operator_noc,
 					ttb.service_code,
-					es.noc_and_line_and_servicecode,
+					ej.noc_and_line_and_servicecode,
 					ttb.stop_id,
 					ttb.locality_id,
 					ttb.line_name,
@@ -134,14 +134,17 @@ BEGIN
 					ttb.incomplete_reason AS incomplete_reason
 				FROM
 					public."Timetable" ttb
-					INNER JOIN public.expected_services es
-						ON ttb.date_of_journey = es.date_of_journey
-						AND ttb.operator_noc = es.operator_noc
-						AND ttb.line_name = es.line_name
+					INNER JOIN public.expected_journeys ej
+						ON ttb.date_of_journey = ej.date_of_journey
+						AND ttb.operator_noc = ej.operator_noc
+						AND ttb.line_name = ej.line_name
 						AND ttb.service_code = split_part(
-							es.noc_and_line_and_servicecode,
+							ej.noc_and_line_and_servicecode,
 							''-''
 							, -1)
+						AND ttb.journey_code = ej.journey_code
+						AND ttb.direction = ej.direction
+						AND ej.is_cancelled != TRUE
 					WHERE
 						ttb.date_of_journey = %L
 						and ttb.previous_group_id is null

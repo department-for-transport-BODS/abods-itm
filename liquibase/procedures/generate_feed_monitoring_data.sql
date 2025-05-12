@@ -63,6 +63,7 @@ begin
             FROM public.expected_journeys ej -- expected_journeys
             WHERE ej.date_of_journey = date_trunc('day', start_time)
               AND ej.expected_journey_start < end_time
+              AND ej.is_cancelled != TRUE
               AND case
                       when ej.expected_journey_end < ej.expected_journey_start
                           then ej.expected_journey_end + interval '1 day'
