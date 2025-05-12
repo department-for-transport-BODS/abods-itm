@@ -1,2 +1,0 @@
-ALTER TABLE IF EXISTS public.expected_journeys
-ADD COLUMN IF NOT EXISTS is_cancelled BOOLEAN DEFAULT FALSE;

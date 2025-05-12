@@ -32,28 +32,6 @@ BEGIN
                 'DELETE FROM public.%I',
                 tablename
                 );
-
-        -- Temp table for expected journeys with admin ids from expected_services, filtering out cancelled journeys
-        DROP TABLE IF EXISTS temp_expected_journeys_with_service_admin_ids;
-        CREATE TEMP TABLE temp_expected_journeys_with_service_admin_ids AS
-        SELECT
-            ej.date_of_journey,
-            ej.operator_noc,
-            ej.line_name,
-            ej.journey_code,
-            ej.direction,
-            ej.noc_and_line_and_servicecode,
-            es.service_name,
-            es.admin_area_id
-        FROM public.expected_journeys ej
-        INNER JOIN public.expected_services es
-            ON ej.date_of_journey = es.date_of_journey
-            AND ej.operator_noc = es.operator_noc
-            AND ej.line_name = es.line_name
-            AND split_part(ej.noc_and_line_and_servicecode, '-' , -1) = split_part(es.noc_and_line_and_servicecode, '-' , -1)
-        WHERE ej.date_of_journey = partition_date
-          AND ej.is_cancelled != TRUE;
-
         RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
 
         EXECUTE format(
@@ -88,12 +66,12 @@ BEGIN
             FROM
               (SELECT ttb.operator_noc,
                       ttb.line_name,
-                      ej.noc_and_line_and_servicecode,
-                      ej.service_name,
+                      es.noc_and_line_and_servicecode,
+                      es.service_name,
                       floor(ttb.time_difference::float/60) AS time_diff_minutes,
                       ttb.date_of_journey,
                       ttb.is_timing_point,
-                      ej.admin_area_id,
+                      es.admin_area_id,
                       date_trunc(''hour'', ttb.expected_departure_time::timestamptz) AS departure_hour,
                       date_trunc(''hour'', ttb.expected_departure_time::timestamptz) AS departure_hour_only,
                       ttb.day_of_week,
@@ -103,8 +81,6 @@ BEGIN
                  (SELECT operator_noc,
                          line_name,
                          service_code,
-                         journey_code,
-                         direction,
                          CASE
                              WHEN timetable_id = first_value(timetable_id) OVER(PARTITION BY group_id, vehiclejourney_id
                                                                                 ORDER BY group_id, expected_departure_time DESC, stop_index DESC)
@@ -121,21 +97,19 @@ BEGIN
                          (time_difference IS NULL) AS no_recorded
                   FROM public."Timetable"
                   WHERE date_of_journey = %L) ttb
-               INNER JOIN temp_expected_journeys_with_service_admin_ids ej ON ttb.date_of_journey = ej.date_of_journey
-               AND ttb.operator_noc = ej.operator_noc
-               AND ttb.line_name = ej.line_name
-               AND ttb.journey_code = ej.journey_code
-               AND ttb.direction = ej.direction
-               AND ttb.service_code = split_part(ej.noc_and_line_and_servicecode, ''-'', -1)
-               WHERE ttb.frequent_service = FALSE
+               INNER JOIN public.expected_services es ON ttb.date_of_journey = es.date_of_journey
+               AND ttb.operator_noc = es.operator_noc
+               AND ttb.line_name = es.line_name
+               AND ttb.service_code = split_part(es.noc_and_line_and_servicecode, ''-'', -1)
+               AND ttb.frequent_service = FALSE
                AND ttb.no_recorded = FALSE
                GROUP BY ttb.operator_noc,
                         ttb.line_name,
-                        ej.noc_and_line_and_servicecode,
-                        ej.service_name,
+                        es.noc_and_line_and_servicecode,
+                        es.service_name,
                         ttb.date_of_journey,
                         ttb.is_timing_point,
-                        ej.admin_area_id,
+			es.admin_area_id,
                         floor(ttb.time_difference::float/60),
                         DATE_TRUNC(''hour'', ttb.expected_departure_time),
                         ttb.day_of_week,
