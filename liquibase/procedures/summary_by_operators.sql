@@ -70,7 +70,7 @@ BEGIN
         sub.admin_areas,
 		sub.estimated,
         SUM(sub.count_delayed) as count_delayed,
-		COALESCE(ROUND(sum(sub.total_average_delayed)/nullif(sum(sub.count_delayed), 0), 4), 0.0) as average_delay,
+		ROUND(sum(sub.total_average_delayed)/nullif(sum(sub.count_delayed), 0), 4) as average_delay,
         sub.incomplete_reason
     FROM
         (
@@ -110,7 +110,6 @@ BEGIN
         is_timing_point,
         max_early,
         max_late,
-        avg_time_difference,
         admin_areas,
 		estimated,
         incomplete_reason',

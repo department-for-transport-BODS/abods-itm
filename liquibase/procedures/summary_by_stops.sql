@@ -171,15 +171,31 @@ BEGIN
 					sub.direction,
 					sub.stop_index,
 					COUNT(sub.time_difference) FILTER (WHERE sub.time_difference > 0) as count_delayed,
-					COALESCE(AVG(sub.time_difference) FILTER(WHERE sub.time_difference > 0), 0.0) as average_delay,
+					AVG(sub.time_difference) FILTER(WHERE sub.time_difference > 0) as average_delay,
 					AVG(EXTRACT(EPOCH FROM (sub.expected_departure_time - sub.previous_stop_expected_departure)))
-    					FILTER (WHERE sub.expected_departure_time IS NOT NULL AND sub.previous_stop_expected_departure IS NOT NULL) as diff_sched_time_to_stop,
+    					FILTER (WHERE sub.expected_departure_time IS NOT NULL 
+										AND sub.actual_departure_time IS NOT NULL
+										AND sub.previous_stop_expected_departure IS NOT NULL
+										AND sub.previous_stop_actual_departure IS NOT NULL
+								) as diff_sched_time_to_stop,
 					AVG(EXTRACT(EPOCH FROM (sub.expected_departure_time - tp_sub.previous_timing_point_expected_departure)))
-    					FILTER (WHERE sub.expected_departure_time IS NOT NULL AND tp_sub.previous_timing_point_expected_departure IS NOT NULL) as diff_sched_time_to_stop_timing_point,
+    					FILTER (WHERE sub.expected_departure_time IS NOT NULL 
+										AND sub.actual_departure_time is NOT NULL
+										AND tp_sub.previous_timing_point_actual_departure is NOT NULL
+										AND tp_sub.previous_timing_point_expected_departure IS NOT NULL
+								) as diff_sched_time_to_stop_timing_point,
 					AVG(EXTRACT(EPOCH FROM (sub.actual_departure_time - sub.previous_stop_actual_departure)))
-    					FILTER (WHERE sub.actual_departure_time IS NOT NULL AND sub.previous_stop_actual_departure IS NOT NULL) as diff_actual_time_to_stop,
+    					FILTER (WHERE sub.actual_departure_time IS NOT NULL
+										AND sub.expected_departure_time IS NOT NULL 
+										AND sub.previous_stop_expected_departure IS NOT NULL
+										AND sub.previous_stop_actual_departure IS NOT NULL
+								) as diff_actual_time_to_stop,
 					AVG(EXTRACT(EPOCH FROM (sub.actual_departure_time - tp_sub.previous_timing_point_actual_departure)))
-    					FILTER (WHERE sub.expected_departure_time IS NOT NULL AND tp_sub.previous_timing_point_actual_departure IS NOT NULL) as diff_actual_time_to_stop_timing_point,
+    					FILTER (WHERE sub.actual_departure_time IS NOT NULL 
+										AND sub.expected_departure_time IS NOT NULL
+										AND tp_sub.previous_timing_point_expected_departure IS NOT NULL 
+										AND tp_sub.previous_timing_point_actual_departure IS NOT NULL
+								) as diff_actual_time_to_stop_timing_point,
 					sub.incomplete_reason
 				FROM
 					journeys_with_previous_stop_departure sub

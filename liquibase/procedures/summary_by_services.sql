@@ -74,12 +74,12 @@ BEGIN
 				sub.is_timing_point,
 				sub.max_early,
 				sub.max_late,
-				COALESCE(ROUND(sum(sub.total_avg)/nullif(sum(sub.completed), 0), 4), 0.0) AS avg_time_difference,
+				COALESCE(ROUND(sum(sub.total_avg)/nullif(sum(completed), 0), 4), 0.0) AS avg_time_difference,
 				sub.admin_area_id AS admin_areas,
 				sub.estimated,
 				sub.direction,
 				SUM(sub.count_delayed) as count_delayed,
-				COALESCE(ROUND(sum(sub.total_average_delayed)/nullif(sum(sub.count_delayed), 0), 4), 0.0) as average_delay,
+				ROUND(sum(sub.total_average_delayed)/nullif(sum(count_delayed), 0), 4) as average_delay,
 				sub.incomplete_reason
 			FROM
 				(
@@ -99,6 +99,7 @@ BEGIN
 						ttb.is_timing_point,
 						ttb.max_early,
 						ttb.max_late,
+						ttb.avg_time_difference,
 						es.admin_area_id,
 						ttb.estimated,
 						ttb.direction,
