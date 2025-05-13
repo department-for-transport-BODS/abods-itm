@@ -446,4 +446,10 @@
     <changeSet id="141" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="sql/141-create-siri-sx-situations.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="142" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/drop_sirivm_partition_by_date.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="143" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/drop_sirivm_partitions_in_range.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
