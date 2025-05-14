@@ -31,6 +31,17 @@ def parse_datetime(datetime_str: str) -> datetime:
     return datetime.fromisoformat(datetime_str.replace("Z", "+00:00"))
 
 
+def parse_direction(direction_text: str) -> str:
+    """Parse direction text to normalized string"""
+    direction_map = {
+        "inbound": "inbound",
+        "outbound": "outbound",
+        "anticlockwise": "antiClockwise",
+        "clockwise": "clockwise",
+    }
+    return direction_map[str.lower(direction_text)]
+
+
 def parse_situation_element(
     elem: etree._Element,
     response_timestamp: datetime,
@@ -54,7 +65,13 @@ def parse_situation_element(
 
         operator_noc = get_element_text(elem, ".//siri:OperatorRef")
         line_name = get_element_text(elem, ".//siri:PublishedLineName")
-        direction = get_element_text(elem, ".//siri:DirectionRef")
+        direction_text = get_element_text(elem, ".//siri:DirectionRef")
+        if not direction_text:
+            logger.error(
+                "Unable to parse PTSituation element: DirectionRef not found",
+            )
+            return None
+        direction = parse_direction(direction_text)
         journey_code = get_element_text(elem, ".//siri:DatedVehicleJourneyRef")
         condition = get_element_text(elem, ".//siri:Condition")
         progress = get_element_text(elem, ".//siri:Progress")

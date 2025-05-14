@@ -1,7 +1,6 @@
-create or replace procedure generate_timetable(IN partition_date date)
-    language plpgsql
-as
-$$
+CREATE OR REPLACE PROCEDURE public.generate_timetable(IN partition_date date)
+ LANGUAGE plpgsql
+AS $$
 
 declare
     longdatestring   text := to_char(partition_date, 'YYYY_MM_DD');
@@ -807,7 +806,7 @@ begin
               journey_code,
               date_of_journey AS date_of_journey,
               departure_time,
-              stop_id,
+              coalesce(b.id::text, '''') AS stop_id,
               ST_Y(b.location)::real lt,
               ST_X(b.location)::real AS lon,
               common_name AS stopname,
@@ -845,7 +844,7 @@ begin
             FROM
               public.%I a
               JOIN public.naptan_stoppoint b
-                ON a.atco_code = b.atco_code
+                ON LOWER(a.atco_code) = LOWER(b.atco_code)
               WINDOW w AS (
                 PARTITION BY transmodel_vehiclejourney_id
                 ORDER BY
@@ -1253,6 +1252,7 @@ begin
 
     RAISE NOTICE '% generate_timetable complete', clock_timestamp();
 end;
-$$;
+$$
+;
 
 alter procedure generate_timetable owner to abods_proxy_rw;
