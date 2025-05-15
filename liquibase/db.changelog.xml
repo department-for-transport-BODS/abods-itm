@@ -446,7 +446,10 @@
     <changeSet id="141" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="sql/141-create-siri-sx-situations.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="141" author="abodsuser" >
+    <changeSet id="142" author="abodsuser" >
         <sqlFile path="sql/142-add-scheduled-and-actual-diff-in-summaries.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="143" author="abodsuser" >
+        <sqlFile path="sql/143-routes-to-journey-mapping.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
