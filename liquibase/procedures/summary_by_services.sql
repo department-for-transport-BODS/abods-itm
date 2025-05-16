@@ -53,6 +53,9 @@ BEGIN
 				avg_time_difference,
 				admin_areas,
 				estimated,
+				direction,
+				count_delayed,
+				average_delay,
 				incomplete_reason
 			)
 			SELECT
@@ -74,6 +77,9 @@ BEGIN
 				COALESCE(ROUND(sum(sub.total_avg)/nullif(sum(completed), 0), 4), 0.0) AS avg_time_difference,
 				sub.admin_area_id AS admin_areas,
 				sub.estimated,
+				sub.direction,
+				SUM(sub.count_delayed) as count_delayed,
+				ROUND(sum(sub.total_average_delayed)/nullif(sum(count_delayed), 0), 4) as average_delay,
 				sub.incomplete_reason
 			FROM
 				(
@@ -96,8 +102,11 @@ BEGIN
 						ttb.avg_time_difference,
 						es.admin_area_id,
 						ttb.estimated,
+						ttb.direction,
+						ttb.count_delayed,
 						ttb.incomplete_reason,
-						completed * avg_time_difference as total_avg
+						ttb.count_delayed * ttb.average_delay as total_average_delayed,
+						ttb.completed * ttb.avg_time_difference as total_avg
 					FROM
 						public.timetable_summary_stops_tz ttb
 					INNER JOIN public.expected_services es
@@ -126,6 +135,7 @@ BEGIN
 				admin_area_id,
 				max_late,
 				estimated,
+				direction,
 				incomplete_reason',
                 tablename,
                 partition_date,

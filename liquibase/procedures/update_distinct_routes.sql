@@ -2,6 +2,8 @@ create or replace procedure update_distinct_routes(IN partition_date date)
     language plpgsql
 as
 $$
+DECLARE
+    tablename TEXT;
 begin
 
     RAISE NOTICE 'Updating distinct_routes for % at %', partition_date, clock_timestamp();
@@ -11,6 +13,8 @@ begin
     drop table if exists temp_distinct_route_calc;
     create temporary table temp_distinct_route_calc as
     select distinct concat(operator_noc, '-', line_name, '-', service_code) as noc_and_line_and_servicecode,
+                    group_id, 
+                    date_of_journey,
                     string_agg(
                     atco_code,
                     ','
@@ -53,6 +57,50 @@ begin
         noc_and_line_and_servicecode
         ) do nothing;
 
+    RAISE NOTICE 'Done at inserting into distinct routes %', clock_timestamp();
+
+    tablename := 'route_to_journeys_' || to_char(partition_date, 'YYYY_MM_DD');
+
+    RAISE NOTICE '% (Re)Creating partition public.%', clock_timestamp(), tablename;
+
+    EXECUTE format(
+            'CREATE TABLE IF NOT EXISTS public.%I PARTITION OF public.route_to_journeys FOR VALUES FROM (%L) TO (%L)',
+            tablename,
+            partition_date,
+            partition_date + INTERVAL '1' DAY
+            );
+
+    EXECUTE format('ALTER TABLE public.%I OWNER TO abods_rw', tablename);
+
+    RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
+
+        EXECUTE format(
+                'DELETE FROM public.%I',
+                tablename
+                );
+
+    RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
+
+    EXECUTE format(
+        'INSERT INTO public.%I(
+            group_id,
+            date_of_journey,
+            distinct_route_id
+        )
+        SELECT
+            distinct tdr.group_id,
+            tdr.date_of_journey,
+            r.id
+        FROM
+            temp_distinct_route_calc tdr 
+        JOIN
+            public.distinct_routes r
+        ON 
+            tdr.route = r.route
+        ',
+        tablename
+    );
+   
     RAISE NOTICE 'Done at %', clock_timestamp();
 
 end;
