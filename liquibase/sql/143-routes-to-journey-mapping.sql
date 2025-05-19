@@ -1,5 +1,5 @@
 CREATE TABLE public.route_to_journeys (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     group_id text NOT NULL,
     date_of_journey date NOT NULL,
     distinct_route_id integer NOT NULL
