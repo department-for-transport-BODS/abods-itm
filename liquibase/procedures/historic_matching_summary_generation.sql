@@ -28,6 +28,9 @@ BEGIN
 
         RAISE NOTICE '% ----------------Calling summary_by_operators----------------', clock_timestamp();
         CALL public.summary_by_operators(partition_date);
+
+        RAISE NOTICE '% ----------------Calling incomplete_data_load----------------', clock_timestamp();
+        CALL public.incomplete_data_load(partition_date);
     END IF;
 
     RAISE NOTICE '% historic_matching_summary_generation complete', clock_timestamp();
