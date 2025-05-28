@@ -1,8 +1,9 @@
 CREATE TABLE public.route_to_journeys (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGSERIAL,
     group_id text NOT NULL,
     date_of_journey date NOT NULL,
     distinct_route_id integer NOT NULL
+    PRIMARY KEY (id, date_of_journey)
 ) PARTITION BY RANGE (date_of_journey);
 
 ALTER TABLE public.route_to_journeys OWNER TO abods_rw;
