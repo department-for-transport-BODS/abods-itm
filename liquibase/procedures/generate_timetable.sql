@@ -103,7 +103,7 @@ begin
                     inactive_at_date_prequery
                   WHERE
                         id_rank = 1
-                    AND modified < query_date
+                    AND modified <= query_date
                     AND status IN (''inactive'', ''expired'')
                 ),
                 ranked_revisions AS (
