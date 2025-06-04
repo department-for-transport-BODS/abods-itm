@@ -461,4 +461,7 @@
     <changeSet id="146" author="abodsuser" >
         <sqlFile path="sql/146-nonoperatingdatesexceptions-to-int8.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="147" author="abodsuser" >
+        <sqlFile path="sql/147-drop-tracks-unique-constraint.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
