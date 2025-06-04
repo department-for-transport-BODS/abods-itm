@@ -17,7 +17,7 @@ begin
         distance
     from 
         bods.transmodel_tracks
-    on conflict(from_atco_code, to_atco_code)
+    on conflict(id)
     DO UPDATE SET
         geometry = ST_AsGeoJSON(EXCLUDED.geometry),
         distance = EXCLUDED.distance;
