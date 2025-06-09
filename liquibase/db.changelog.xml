@@ -464,4 +464,7 @@
     <changeSet id="147" author="abodsuser" >
         <sqlFile path="sql/147-drop-tracks-unique-constraint.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="148" author="abodsuser" >
+        <sqlFile path="sql/148-add-reprocessing-columns.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
