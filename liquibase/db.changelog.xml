@@ -467,4 +467,7 @@
     <changeSet id="148" author="abodsuser" >
         <sqlFile path="sql/148-add-reprocessing-columns.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="149" author="abodsuser" >
+        <sqlFile path="sql/149-add-avl-column-expected-journeys.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
