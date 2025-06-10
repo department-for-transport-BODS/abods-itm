@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS public.expected_journeys
+ADD COLUMN IF NOT EXISTS avl_recorded BOOLEAN;
