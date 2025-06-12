@@ -7,3 +7,8 @@ CONSTRAINT fk_service_pattern FOREIGN KEY (service_pattern_id)
 REFERENCES public.transmodel_servicepattern(id)
 ON DELETE CASCADE
 );
+
+
+ALTER TABLE expected_services_by_date
+ADD COLUMN IF NOT EXISTS total_distance INTEGER,
+ADD COLUMN IF NOT EXISTS avl_true_distance INTEGER;
