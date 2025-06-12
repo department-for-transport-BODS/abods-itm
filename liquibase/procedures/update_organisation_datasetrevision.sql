@@ -40,7 +40,9 @@ begin
                                                      requestor_ref,
                                                      username,
                                                      short_description,
-                                                     num_of_timing_points)
+                                                     num_of_timing_points, 
+                                                     modified_before_reprocessing,
+                                                     status_before_reprocessing)
     select id,
            created,
            modified,
@@ -70,7 +72,9 @@ begin
            requestor_ref,
            username,
            short_description,
-           num_of_timing_points
+           num_of_timing_points,
+           modified_before_reprocessing,
+           status_before_reprocessing
     from bods.organisation_datasetrevision od
     on conflict (id) do update set (
                                     created,
@@ -101,7 +105,9 @@ begin
                                     requestor_ref,
                                     username,
                                     short_description,
-                                    num_of_timing_points
+                                    num_of_timing_points,
+                                    modified_before_reprocessing,
+                                    status_before_reprocessing
                                        )= (
                                            EXCLUDED.created,
                                            EXCLUDED.modified,
@@ -130,8 +136,10 @@ begin
                                            EXCLUDED."password",
                                            EXCLUDED.requestor_ref,
                                            EXCLUDED.username,
-                                           EXCLUDED.short_description,
-                                           EXCLUDED.num_of_timing_points
+                                           EXCLUDED.short_description, 
+                                           EXCLUDED.num_of_timing_points,
+                                           EXCLUDED.modified_before_reprocessing,
+                                           EXCLUDED.status_before_reprocessing
         );
 end;
 $$;
