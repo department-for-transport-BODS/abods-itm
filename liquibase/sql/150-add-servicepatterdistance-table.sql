@@ -12,3 +12,24 @@ ON DELETE CASCADE
 ALTER TABLE expected_services_by_date
 ADD COLUMN IF NOT EXISTS total_distance INTEGER,
 ADD COLUMN IF NOT EXISTS avl_true_distance INTEGER;
+
+DROP MATERIALIZED VIEW IF EXISTS public.expected_services;
+
+CREATE MATERIALIZED VIEW public.expected_services
+TABLESPACE pg_default
+AS
+SELECT DISTINCT 
+    esbd.date_of_journey,
+    sd.noc_and_line_and_servicecode,
+    sd.operator_noc,
+    sd.line_name,
+    sd.service_name,
+    esbd.admin_area_id,
+    esbd.total_distance,
+    esbd.avl_true_distance
+FROM 
+    expected_services_by_date esbd
+LEFT JOIN 
+    service_details sd 
+    ON esbd.noc_and_line_and_servicecode = sd.noc_and_line_and_servicecode
+WITH DATA;
