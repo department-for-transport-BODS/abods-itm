@@ -1,7 +1,5 @@
 """Bus starting early"""
 
-import datetime
-
 from ..util import run_historic_matching_test
 
 matches = []
