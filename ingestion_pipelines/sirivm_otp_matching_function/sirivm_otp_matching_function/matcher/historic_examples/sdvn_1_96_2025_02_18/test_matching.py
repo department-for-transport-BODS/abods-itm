@@ -1,5 +1,4 @@
-# TODO: Add description of what makes the journey unique
-""""""
+"""Journey that starts after midnight from a late running service"""
 
 import datetime
 
@@ -12,7 +11,12 @@ matches = [
         "last_time_in_zone_str": "00:04:00",
         "timetable_id": 2792841889,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 4, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            4,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -24,7 +28,13 @@ matches = [
         "last_time_in_zone_str": "00:06:04",
         "timetable_id": 2792839998,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 6, 4, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            6,
+            4,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -36,7 +46,13 @@ matches = [
         "last_time_in_zone_str": "00:07:05",
         "timetable_id": 2792841953,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 7, 5, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            7,
+            5,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -49,7 +65,13 @@ matches = [
         "timetable_id": 2792841881,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 7, 36, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            7,
+            36,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -60,7 +82,13 @@ matches = [
         "last_time_in_zone_str": "00:08:06",
         "timetable_id": 2792841877,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 8, 6, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            8,
+            6,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -73,7 +101,13 @@ matches = [
         "timetable_id": 2792839990,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 8, 50, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            8,
+            50,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -84,7 +118,13 @@ matches = [
         "last_time_in_zone_str": "00:09:07",
         "timetable_id": 2792840018,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 9, 7, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            9,
+            7,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -97,7 +137,13 @@ matches = [
         "timetable_id": 2792842234,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 10, 46, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            10,
+            46,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -108,7 +154,13 @@ matches = [
         "last_time_in_zone_str": "00:11:08",
         "timetable_id": 2792842214,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 11, 8, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            11,
+            8,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -121,7 +173,13 @@ matches = [
         "timetable_id": 2792841815,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 11, 39, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            11,
+            39,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -133,7 +191,13 @@ matches = [
         "timetable_id": 2792841811,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 12, 1, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            12,
+            1,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -144,7 +208,13 @@ matches = [
         "last_time_in_zone_str": "00:13:10",
         "timetable_id": 2792841770,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 13, 10, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            13,
+            10,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -157,7 +227,13 @@ matches = [
         "timetable_id": 2792841676,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 14, 7, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            14,
+            7,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -168,7 +244,13 @@ matches = [
         "last_time_in_zone_str": "00:14:12",
         "timetable_id": 2792845197,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 14, 12, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            14,
+            12,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -181,7 +263,13 @@ matches = [
         "timetable_id": 2792841627,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 14, 42, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            14,
+            42,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -193,7 +281,13 @@ matches = [
         "timetable_id": 2792841578,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 14, 55, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            14,
+            55,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -205,7 +299,13 @@ matches = [
         "timetable_id": 2792841505,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 18, 55, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            18,
+            55,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "Early",
         "stop_type": "Non-final",
@@ -216,7 +316,13 @@ matches = [
         "last_time_in_zone_str": "00:21:17",
         "timetable_id": 2792841480,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 21, 17, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            21,
+            17,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -228,7 +334,13 @@ matches = [
         "last_time_in_zone_str": "00:31:24",
         "timetable_id": 2792841308,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 31, 24, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            31,
+            24,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "Late",
@@ -240,7 +352,13 @@ matches = [
         "last_time_in_zone_str": "00:32:25",
         "timetable_id": 2792841259,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 32, 25, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            32,
+            25,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "Late",
@@ -253,7 +371,13 @@ matches = [
         "timetable_id": 2792841210,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 33, 37, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            33,
+            37,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "Late",
         "stop_type": "Non-final",
@@ -265,7 +389,13 @@ matches = [
         "timetable_id": 2792840108,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 34, 54, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            34,
+            54,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -276,7 +406,13 @@ matches = [
         "last_time_in_zone_str": "00:36:28",
         "timetable_id": 2792841088,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 36, 28, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            36,
+            28,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -289,7 +425,13 @@ matches = [
         "timetable_id": 2792841039,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 36, 58, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            36,
+            58,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -301,7 +443,13 @@ matches = [
         "timetable_id": 2792841957,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 38, 47, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            38,
+            47,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -312,7 +460,13 @@ matches = [
         "last_time_in_zone_str": "00:39:31",
         "timetable_id": 2792840941,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 39, 31, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            39,
+            31,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -325,7 +479,13 @@ matches = [
         "timetable_id": 2792840892,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 40, 7, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            40,
+            7,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -337,7 +497,13 @@ matches = [
         "timetable_id": 2792840807,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 41, 3, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            41,
+            3,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -348,7 +514,13 @@ matches = [
         "last_time_in_zone_str": "00:41:35",
         "timetable_id": 2792840758,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 41, 35, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            41,
+            35,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -361,7 +533,13 @@ matches = [
         "timetable_id": 2792840733,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 42, 30, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            42,
+            30,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -373,7 +551,13 @@ matches = [
         "timetable_id": 2792838375,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 43, 26, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            43,
+            26,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -384,7 +568,13 @@ matches = [
         "last_time_in_zone_str": "00:43:37",
         "timetable_id": 2792840660,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 43, 37, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            43,
+            37,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -397,7 +587,13 @@ matches = [
         "timetable_id": 2792840611,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 44, 2, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            44,
+            2,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -409,7 +605,13 @@ matches = [
         "timetable_id": 2792840562,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 44, 35, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            44,
+            35,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -421,7 +623,13 @@ matches = [
         "timetable_id": 2792840513,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 45, 6, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            45,
+            6,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -433,7 +641,13 @@ matches = [
         "timetable_id": 2792840464,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 45, 24, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            45,
+            24,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -444,7 +658,13 @@ matches = [
         "last_time_in_zone_str": "00:45:40",
         "timetable_id": 2792840415,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 45, 40, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            45,
+            40,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -457,7 +677,13 @@ matches = [
         "timetable_id": 2792840366,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 46, 20, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            46,
+            20,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "OnTime",
         "stop_type": "Non-final",
@@ -469,7 +695,13 @@ matches = [
         "timetable_id": 2792840317,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 46, 40, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            46,
+            40,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "Early",
         "stop_type": "Non-final",
@@ -481,7 +713,13 @@ matches = [
         "timetable_id": 2792840268,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 47, 12, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            47,
+            12,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "Early",
         "stop_type": "Non-final",
@@ -493,7 +731,13 @@ matches = [
         "timetable_id": 2792840243,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 47, 38, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            47,
+            38,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "Early",
         "stop_type": "Non-final",
@@ -505,7 +749,13 @@ matches = [
         "timetable_id": 2792840194,
         "last_time_in_zone": None,
         "timestamp_after_estimate": datetime.datetime(
-            2025, 2, 19, 0, 48, 24, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            48,
+            24,
+            tzinfo=datetime.UTC,
         ),
         "otp_state": "Early",
         "stop_type": "Non-final",
@@ -516,7 +766,13 @@ matches = [
         "last_time_in_zone_str": "00:49:48",
         "timetable_id": 2792845246,
         "last_time_in_zone": datetime.datetime(
-            2025, 2, 19, 0, 49, 48, tzinfo=datetime.timezone.utc
+            2025,
+            2,
+            19,
+            0,
+            49,
+            48,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",

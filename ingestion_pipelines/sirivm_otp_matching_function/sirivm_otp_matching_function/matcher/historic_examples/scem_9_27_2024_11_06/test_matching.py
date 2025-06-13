@@ -1,5 +1,4 @@
-# TODO: Add description of what makes the journey unique
-""""""
+"""Bus starting early"""
 
 import datetime
 
