@@ -56,6 +56,9 @@ BEGIN
     WHERE 
         esbd.date_of_journey = ad.date_of_journey
         AND esbd.noc_and_line_and_servicecode = ad.noc_and_line_and_servicecode;
+       
+REFRESH MATERIALIZED VIEW expected_services;
+
 END;
 $procedure$
 ;
