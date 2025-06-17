@@ -473,4 +473,7 @@
     <changeSet id="150" author="abodsuser" >
         <sqlFile path="sql/150-add-servicepatterdistance-table.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="151" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/updated_expected_service_distances.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
