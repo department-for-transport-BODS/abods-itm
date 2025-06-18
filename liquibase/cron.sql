@@ -119,5 +119,5 @@ SELECT cron.schedule(
 SELECT cron.schedule(
                'populate distances in expected services',
                '30 4 * * *', -- at 04:30
-               $$CALL update_expected_service_distances(CURRENT_DATE - 1);$$
+               $$CALL update_expected_service_distances(CURRENT_DATE - 1);CALL update_expected_service_distances(CURRENT_DATE - 2);$$
        );
