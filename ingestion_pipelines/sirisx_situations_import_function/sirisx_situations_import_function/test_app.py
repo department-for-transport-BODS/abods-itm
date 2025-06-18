@@ -57,7 +57,7 @@ def test_lambda_handler(
     mock_insert_rows: MagicMock,
     situation_record: SituationRecord,
 ) -> None:
-    from .app import lambda_handler # noqa: PLC0415,I001
+    from .app import lambda_handler  # noqa: PLC0415,I001
 
     # Mock response from requests.get
     mock_response = MagicMock()
@@ -77,7 +77,7 @@ def test_lambda_handler(
 
 
 def test_parse_xml() -> None:
-    from .app import NS_URI, parse_xml # noqa: PLC0415,I001
+    from .app import NS_URI, parse_xml  # noqa: PLC0415,I001
 
     number_of_situation_elements = 2
     xml = f"""
@@ -174,7 +174,7 @@ def test_insert_rows(
     mock_conn: MagicMock,
     situation_record: SituationRecord,
 ) -> None:
-    from .app import insert_rows # noqa: PLC0415,I001
+    from .app import insert_rows  # noqa: PLC0415,I001
 
     mock_cursor = MagicMock()
     mock_conn.cursor.return_value.__enter__.return_value = mock_cursor

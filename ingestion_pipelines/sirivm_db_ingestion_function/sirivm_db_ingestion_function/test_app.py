@@ -36,7 +36,7 @@ def test_lambda_handler_success(
     mock_process_batch: MagicMock,
     mock_update_batch_status: MagicMock,
 ) -> None:
-    from .app import lambda_handler # noqa: PLC0415,I001
+    from .app import lambda_handler  # noqa: PLC0415,I001
 
     lambda_handler(TEST_EVENT, LambdaContext())
 
