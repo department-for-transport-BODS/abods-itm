@@ -28,7 +28,7 @@ def get_element_text(
 
 def parse_datetime(datetime_str: str) -> datetime:
     """Parse ISO string to datetime object"""
-    return datetime.fromisoformat(datetime_str.replace("Z", "+00:00"))
+    return datetime.fromisoformat(datetime_str.replace("Z", "+00:00")) # noqa: FURB162
 
 
 def parse_direction(direction_text: str) -> str:
