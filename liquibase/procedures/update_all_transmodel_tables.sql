@@ -34,7 +34,7 @@ begin
     raise notice 'Running update_transmodel_tracks at %', clock_timestamp();
     call public.update_transmodel_tracks();
     raise notice 'Running update_transmodel_servicepatterndistance at %', clock_timestamp();
-    call update_transmodel_servicepatterndistance()    
+    call update_transmodel_servicepatterndistance();
 end;
 $$;
 
