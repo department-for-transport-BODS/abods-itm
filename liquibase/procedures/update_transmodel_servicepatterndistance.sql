@@ -11,7 +11,7 @@ begin
     select distance,
            geom,
            service_pattern_id
-    from bods.transmodel_servicepattern ts
+    from bods.transmodel_servicepatterndistance ts
     where ts.id > max_current
     on conflict do nothing;
 end;
