@@ -11,7 +11,13 @@ matches = [
         "last_time_in_zone_str": "08:00:21",
         "timetable_id": 3746244226,
         "last_time_in_zone": datetime.datetime(
-            2025, 6, 18, 8, 0, 21, tzinfo=datetime.UTC
+            2025,
+            6,
+            18,
+            8,
+            0,
+            21,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -23,7 +29,13 @@ matches = [
         "last_time_in_zone_str": "08:02:38",
         "timetable_id": 3746244227,
         "last_time_in_zone": datetime.datetime(
-            2025, 6, 18, 8, 2, 38, tzinfo=datetime.UTC
+            2025,
+            6,
+            18,
+            8,
+            2,
+            38,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -35,7 +47,13 @@ matches = [
         "last_time_in_zone_str": "08:03:45",
         "timetable_id": 3746244228,
         "last_time_in_zone": datetime.datetime(
-            2025, 6, 18, 8, 3, 45, tzinfo=datetime.UTC
+            2025,
+            6,
+            18,
+            8,
+            3,
+            45,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -47,7 +65,13 @@ matches = [
         "last_time_in_zone_str": "08:05:31",
         "timetable_id": 3746244229,
         "last_time_in_zone": datetime.datetime(
-            2025, 6, 18, 8, 5, 31, tzinfo=datetime.UTC
+            2025,
+            6,
+            18,
+            8,
+            5,
+            31,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -59,7 +83,13 @@ matches = [
         "last_time_in_zone_str": "08:08:07",
         "timetable_id": 3746244230,
         "last_time_in_zone": datetime.datetime(
-            2025, 6, 18, 8, 8, 7, tzinfo=datetime.UTC
+            2025,
+            6,
+            18,
+            8,
+            8,
+            7,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -71,7 +101,13 @@ matches = [
         "last_time_in_zone_str": "08:11:52",
         "timetable_id": 3746244231,
         "last_time_in_zone": datetime.datetime(
-            2025, 6, 18, 8, 11, 52, tzinfo=datetime.UTC
+            2025,
+            6,
+            18,
+            8,
+            11,
+            52,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -83,7 +119,13 @@ matches = [
         "last_time_in_zone_str": "08:26:39",
         "timetable_id": 3746244232,
         "last_time_in_zone": datetime.datetime(
-            2025, 6, 18, 8, 26, 39, tzinfo=datetime.UTC
+            2025,
+            6,
+            18,
+            8,
+            26,
+            39,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -95,7 +137,13 @@ matches = [
         "last_time_in_zone_str": "08:30:36",
         "timetable_id": 3746244233,
         "last_time_in_zone": datetime.datetime(
-            2025, 6, 18, 8, 30, 36, tzinfo=datetime.UTC
+            2025,
+            6,
+            18,
+            8,
+            30,
+            36,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -107,7 +155,13 @@ matches = [
         "last_time_in_zone_str": "08:30:55",
         "timetable_id": 3746244234,
         "last_time_in_zone": datetime.datetime(
-            2025, 6, 18, 8, 30, 55, tzinfo=datetime.UTC
+            2025,
+            6,
+            18,
+            8,
+            30,
+            55,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
@@ -119,7 +173,13 @@ matches = [
         "last_time_in_zone_str": "08:32:32",
         "timetable_id": 3746244235,
         "last_time_in_zone": datetime.datetime(
-            2025, 6, 18, 8, 32, 32, tzinfo=datetime.UTC
+            2025,
+            6,
+            18,
+            8,
+            32,
+            32,
+            tzinfo=datetime.UTC,
         ),
         "timestamp_after_estimate": None,
         "otp_state": "OnTime",
