@@ -467,4 +467,19 @@
     <changeSet id="148" author="abodsuser" >
         <sqlFile path="sql/148-add-reprocessing-columns.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="149" author="abodsuser" >
+        <sqlFile path="sql/149-add-avl-column-expected-journeys.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="150" author="abodsuser" >
+        <sqlFile path="sql/150-add-servicepatterdistance-table.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="151" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/update_expected_service_distances.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="152" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/update_transmodel_servicepatterndistance.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="153" author="abodsuser" >
+        <sqlFile path="sql/153-update-foreign-schema-transmodel-servicepatterndistance.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>

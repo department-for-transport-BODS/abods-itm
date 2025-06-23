@@ -115,3 +115,9 @@ SELECT cron.schedule(
                '15 17 * * *', -- at 17:15
                $$CALL drop_sirivm_partitions_in_range((CURRENT_DATE - INTERVAL '6 months 7 days')::date,(CURRENT_DATE - INTERVAL '6 months')::date);$$
        );
+
+SELECT cron.schedule(
+               'populate distances in expected services',
+               '30 4 * * *', -- at 04:30
+               $$CALL update_expected_service_distances(CURRENT_DATE - 1);CALL update_expected_service_distances(CURRENT_DATE - 2);$$
+       );

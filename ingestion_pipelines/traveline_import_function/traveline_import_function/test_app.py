@@ -46,7 +46,7 @@ def test_lambda_handler(
     mock_execute_values: MagicMock,
     mock_fromcsv: MagicMock,
 ) -> None:
-    from .app import lambda_handler
+    from .app import lambda_handler  # noqa: PLC0415,I001
 
     mock_fromcsv.return_value.distinct.return_value.dicts.return_value = (
         MOCK_NOC_CSV_DATA
