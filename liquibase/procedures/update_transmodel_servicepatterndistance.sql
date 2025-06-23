@@ -12,7 +12,7 @@ begin
            geom,
            service_pattern_id
     from bods.transmodel_servicepatterndistance ts
-    where ts.id > max_current
+    where ts.service_pattern_id > max_current
     on conflict do nothing;
 end;
 $procedure$
