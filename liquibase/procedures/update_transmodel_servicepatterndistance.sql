@@ -8,10 +8,11 @@ begin
     insert into public.transmodel_servicepatterndistance (distance,
                                                   geom,
                                                   service_pattern_id)
-    select distance,
-           geom,
-           service_pattern_id
+    select ts.distance,
+           ts.geom,
+           ts.service_pattern_id
     from bods.transmodel_servicepatterndistance ts
+    right join public.transmodel_servicepattern tsp on tsp.id = ts.service_pattern_id
     where ts.service_pattern_id > max_current
     on conflict do nothing;
 end;
