@@ -474,12 +474,12 @@
         <sqlFile path="sql/150-add-servicepatterdistance-table.sql" splitStatements="false"/>
     </changeSet>
     <changeSet id="151" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="procedures/updated_expected_service_distances.sql" splitStatements="false"/>
+        <sqlFile path="procedures/update_expected_service_distances.sql" splitStatements="false"/>
     </changeSet>
     <changeSet id="152" author="abodsuser" runOnChange="true" runInTransaction="true">
-        <sqlFile path="procedures/add-update_transmodel_servicepatterndistance.sql" splitStatements="false"/>
+        <sqlFile path="procedures/update_transmodel_servicepatterndistance.sql" splitStatements="false"/>
     </changeSet>
     <changeSet id="153" author="abodsuser" >
-        <sqlFile path="sql/153-update-foreign-schema-transmodel_servicepatterndistance.sql" splitStatements="false"/>
+        <sqlFile path="sql/153-update-foreign-schema-transmodel-servicepatterndistance.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
