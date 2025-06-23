@@ -55,10 +55,6 @@ Resources:
         - IsNotLocal
         - !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/lambda/arn}}'
         - !Ref AWS::NoValue
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
@@ -181,10 +177,6 @@ Resources:
       FunctionName: !Sub '${ProjectName}-${Environment}-sirivm-db-ingestion-function'
       CodeUri: ./sirivm_db_ingestion_function
       Handler: sirivm_db_ingestion_function.app.lambda_handler
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
@@ -276,10 +268,6 @@ Resources:
       Handler: sirivm_timetable_s3_generation_function.app.lambda_handler
       Timeout: 900
       MemorySize: 5000
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
@@ -388,10 +376,6 @@ Resources:
       CodeUri: ./traveline_import_function
       Handler: traveline_import_function.app.lambda_handler
       MemorySize: 512
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
@@ -469,10 +453,6 @@ Resources:
       Handler: convert_to_parquet_function.app.lambda_handler
       Timeout: 600
       MemorySize: 5000
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - KMSDecryptPolicy:
             KeyId: !Sub '{{resolve:ssm:/${ProjectName}/shared/kms/s3/arn}}'
@@ -589,15 +569,6 @@ Resources:
   #########################################
   #### GENERAL CONFIGURATION RESOURCES ####
   #########################################
-  IngestionFunctionLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: !Sub '${ProjectName}-${Environment}-ingestion-layer'
-      ContentUri: ./ingestion_layer
-      CompatibleRuntimes:
-        - python3.13
-    Metadata:
-      BuildMethod: python3.13
 
   SnsSubscriptionFunction:
     Type: AWS::Serverless::Function
@@ -807,10 +778,6 @@ Resources:
       Handler: sirivm_otp_matching_function.app.lambda_handler
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
@@ -874,10 +841,6 @@ Resources:
       Handler: sirivm_otp_matching_function.app.lambda_handler
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
@@ -941,10 +904,6 @@ Resources:
       Handler: sirivm_otp_matching_function.app.lambda_handler
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
@@ -1008,10 +967,6 @@ Resources:
       Handler: sirivm_otp_matching_function.app.lambda_handler
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
@@ -1075,10 +1030,6 @@ Resources:
       Handler: sirivm_otp_matching_function.app.lambda_handler
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
@@ -1142,10 +1093,6 @@ Resources:
       Handler: sirivm_otp_matching_function.app.lambda_handler
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
@@ -1209,10 +1156,6 @@ Resources:
       Handler: sirivm_otp_matching_function.app.lambda_handler
       MemorySize: 5000
       ReservedConcurrentExecutions: 1
-      Layers: !If
-        - IsNotLocal
-        - - !Ref IngestionFunctionLayer
-        - []
       Policies:
         - 'AWSLambdaVPCAccessExecutionRole'
         - !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/rds_proxy_rw_policy/arn}}'
