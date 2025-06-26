@@ -26,31 +26,38 @@ def _update_batch_status(
     )
 
 
+def chunked(iterable, chunk_size):
+    """Yield successive chunks from iterable."""
+    for i in range(0, len(iterable), chunk_size):
+        yield iterable[i : i + chunk_size]
+
+
 def execute_values_amended(
     cur: psycopg2.extensions.cursor,
     sql: str,
     values: list,
 ) -> None:
     logger.debug("Executing SQL query", sql=sql, values=values)
-    result = execute_values(
-        cur=cur,
-        sql=sql,
-        argslist=values,
-        fetch=True,
-    )
-    expected = len(values)
-    actual = len(result)
-    if expected == actual:
-        logger.debug("Updated all rows", expected=expected, actual=actual)
-    else:
-        result_timetable_id = [r[0] for r in result]
-        not_updated = [v for v in values if v[0] not in result_timetable_id]
-        logger.warning(
-            "An unexpected number of rows were updated",
-            not_updated=not_updated,
-            expected=expected,
-            actual=actual,
+    for batch in chunked(values, 2000):
+        result = execute_values(
+            cur=cur,
+            sql=sql,
+            argslist=batch,
+            fetch=True,
         )
+        expected = len(values)
+        actual = len(result)
+        if expected == actual:
+            logger.debug("Updated all rows", expected=expected, actual=actual)
+        else:
+            result_timetable_id = [r[0] for r in result]
+            not_updated = [v for v in values if v[0] not in result_timetable_id]
+            logger.warning(
+                "An unexpected number of rows were updated",
+                not_updated=not_updated,
+                expected=expected,
+                actual=actual,
+            )
 
 
 class TimetableDBClient:

@@ -12,6 +12,8 @@ import boto3
 import duckdb
 from aws_lambda_powertools import Logger
 
+from .matcher.models import NewDbMatch
+
 from .client_db import TimetableDBClient
 from .matcher.matching import match_group_id_avls
 from .matcher.timetable_store import TimetableStore
@@ -197,6 +199,8 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                 total_stops = sum(len(route) for route in timetable.values())
                 total_matches = 0
                 routes_processed = 0
+                records_to_update: list[NewDbMatch] = []
+                level = initial_level
 
                 with log_execution_time(
                     logger,
@@ -226,8 +230,6 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
 
                         if group_id in group_ids_to_debug:
                             level = "DEBUG"
-                        else:
-                            level = initial_level
 
                         logger.setLevel(level)
 
@@ -249,6 +251,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                                 for match in journey_matches
                             }.values(),
                         )
+                        records_to_update.extend(deduplicated_matches)
                         if len(deduplicated_matches) < len(journey_matches):
                             logger.debug(
                                 "Found some duplicate matches for the same timetable id. Removed earlier ones",
@@ -258,12 +261,18 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         routes_processed += processed_routes
                         total_matches += match_count
 
-                        db_client.historic_update_success(
-                            deduplicated_matches,
-                            process_date,
-                            level,
-                        )
+                        # db_client.historic_update_success(
+                        #     deduplicated_matches,
+                        #     process_date,
+                        #     level,
+                        # )
                         logger.setLevel(initial_level)
+
+                db_client.historic_update_success(
+                    records_to_update,
+                    process_date,
+                    level,
+                )
                 logger.info(
                     "Processed operator data",
                     total_routes=total_routes,
