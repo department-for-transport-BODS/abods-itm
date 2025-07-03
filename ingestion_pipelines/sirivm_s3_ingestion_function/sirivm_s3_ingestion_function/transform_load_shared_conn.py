@@ -60,7 +60,7 @@ def parse_direction(vehicle_activity):  # noqa: ANN001, ANN201
     return direction_ref
 
 
-def normalize_direction(direction_ref): # noqa: ANN001, ANN201
+def normalize_direction(direction_ref):  # noqa: ANN001, ANN201
     """Map direction ref to normalized values. Either inbound or outbound"""
     direction_map = {
         "1": "outbound",
