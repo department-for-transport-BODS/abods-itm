@@ -1,6 +1,7 @@
 # This file is the entry point of an ECS task that performs a long-lived matching process.
 # It lives alongside the lambda code for ease of development
 
+import multiprocessing
 import os
 import sys
 from datetime import UTC, date, datetime, timedelta
@@ -18,6 +19,8 @@ from .client_db import TimetableDBClient
 from .matcher.matching import match_group_id_avls
 from .matcher.timetable_store import TimetableStore
 from .matcher.utils import log_execution_time
+
+import platform
 
 if TYPE_CHECKING:
     from .matcher.models import (
@@ -352,13 +355,16 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
                 Key=remote_tomorrow_avl_path,
                 Filename=local_tomorrow_avl_path,
             )
-
-        operator_queue = Queue()
+        if platform.system() == "Darwin":
+            operator_queue = multiprocessing.Manager().Queue()
+        else:
+            operator_queue = Queue()
+        
         with duckdb.connect("avl_timetable.db") as conn:
             with log_execution_time(logger, "build_db"):
                 # Input data is created in the convert_to_parquet function
                 conn.execute(f"""
-                    CREATE TABLE avl AS
+                    CREATE OR REPLACE TABLE avl AS
                     SELECT *
                     FROM '{local_avl_path}'
                 """)  # noqa: S608 Not really sql injection
@@ -368,7 +374,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
                     FROM '{local_tomorrow_avl_path}'
                 """)  # noqa: S608 Not really sql injection
                 conn.execute(f"""
-                    CREATE TABLE timetable AS
+                    CREATE OR REPLACE TABLE timetable AS
                     SELECT *
                     FROM '{local_timetable_path}'
                 """)  # noqa: S608 Not really sql injection
