@@ -69,6 +69,8 @@ def normalize_direction(direction_ref):  # noqa: ANN001, ANN201
         "anticlockwise": "inbound",
         "inbound": "inbound",
         "outbound": "outbound",
+        "eastbound": "outbound",
+        "westbound": "inbound",
     }
     direction_clean = direction_ref.strip().lower()
     return direction_map.get(direction_clean, direction_ref)
