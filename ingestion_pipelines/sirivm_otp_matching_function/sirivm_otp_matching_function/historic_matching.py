@@ -238,6 +238,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
 
                         logger.setLevel(level)
 
+                        logger.info("Testing log from feature barnch------------")
                         journey_matches, processed_routes, match_count = (
                             match_group_id_avls(
                                 timetable_store,
