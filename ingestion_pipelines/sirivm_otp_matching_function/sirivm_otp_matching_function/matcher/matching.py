@@ -756,7 +756,7 @@ def match_group_id_avls(
     match_count = len({match["timetable_id"] for match in journey_matches})
     processed_routes = len(matched_routes)
     logger.info(
-        "Processed group_id",
+        "Processed group_id**************",
         expected_stop_count=sum([len(route) for route in matched_routes.values()]),
         processed_avls=len(avls) - unprocessed_avls,
         skipped_avls=unprocessed_avls,

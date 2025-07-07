@@ -728,7 +728,7 @@ def main():
 
         completed_dates = check_for_completed_tasks(environment)
         
-        if skip_summary_generation:
+        if not skip_summary_generation:
             sleep(60)
             continue
         summaries_to_run = sorted({*summaries_to_run, *completed_dates})
