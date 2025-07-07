@@ -1,4 +1,4 @@
 psycopg2-binary==2.9.10
 aws-lambda-powertools==3.9.0
 aws-lambda-powertools[parser]
-boto3==1.37.23
+boto3==1.39.3
