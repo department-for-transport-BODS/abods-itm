@@ -284,11 +284,13 @@ def timetable_export2(db_password: str, db_host: str, process_date: date, subset
         )
     else:
         if journeys_sql_list:
+            print('subset called*****')
             run_query2(
                 f"CALL historic_subset_timetable_export('{process_date.isoformat()}',ARRAY[{journeys_sql_list}]::text[]);",
                 db_host,
                 db_password,
             )
+            print('return*****')
             return
         run_query2(
             f"CALL historic_timetable_export('{process_date.isoformat()}');",

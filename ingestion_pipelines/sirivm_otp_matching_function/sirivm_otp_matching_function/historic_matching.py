@@ -49,7 +49,6 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
         config={"access_mode": "READ_ONLY"},
     ) as process_conn:
         process_date = date.fromisoformat(date_str)
-        records_to_update: list[NewDbMatch] = []
         while True:
             try:
                 operator_ref = task_queue.get(timeout=10)
@@ -257,7 +256,9 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                                 for match in journey_matches
                             }.values(),
                         )
+                        logger.info(f"deduplicated_matches------------{len(deduplicated_matches)}")
                         records_to_update.extend(deduplicated_matches)
+                        logger.info(f"records_to_update------------{len(records_to_update)}")
                         if len(deduplicated_matches) < len(journey_matches):
                             logger.debug(
                                 "Found some duplicate matches for the same timetable id. Removed earlier ones",
@@ -424,6 +425,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
 
         print(f"before historic matching update**********************")
         db_client = TimetableDBClient()
+        print(f"records_to_update----------{len(records_to_update)}")
         db_client.historic_update_success(
             records_to_update,
             date.fromisoformat(process_date),
