@@ -574,7 +574,7 @@ def main():
         )
     
     input_journeys = input("Enter journey group ids (comma-separated values of format opref|line|journeycode|journeydate):")
-    skip_summary_generation = get_boolean_input("Skip generating summaries?")
+    skip_summary_generation = get_boolean_input("Generating summaries?")
 
     raw_values = [v.strip() for v in input_journeys.lower().split(',') if v.strip()]
     pattern = re.compile(r'^([^|]+\|){3}\d{4}-\d{2}-\d{2}$')
@@ -731,7 +731,6 @@ def main():
         if skip_summary_generation:
             sleep(60)
             continue
-        
         summaries_to_run = sorted({*summaries_to_run, *completed_dates})
         if completed_dates:
             print(

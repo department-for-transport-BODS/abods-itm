@@ -149,6 +149,8 @@ class TimetableDBClient:
         """Update database to reflect successful historic matching"""
         if log_level:
             logger.setLevel(log_level)
+        
+        logger.info(f"length----------{len(entries_to_update)}")
         with self.connection.cursor() as cursor:
             # In historic matching, we know that the date we're working with is always the right,
             # but it doesn't hurt to align the code with live matching, so that we can deduplicate later

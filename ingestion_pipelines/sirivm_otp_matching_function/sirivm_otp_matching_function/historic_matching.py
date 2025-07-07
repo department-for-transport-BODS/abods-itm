@@ -2,12 +2,13 @@
 # It lives alongside the lambda code for ease of development
 
 import multiprocessing
+from multiprocessing.managers import ListProxy
 import os
 import sys
 from datetime import UTC, date, datetime, timedelta
 from multiprocessing import Process, Queue
 from queue import Empty
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import boto3
 import duckdb
@@ -38,6 +39,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
     date_str: str,
     task_count: int,
     task_queue: Queue,
+    records_to_update: List[NewDbMatch],
     worker_id: int,
 ) -> None:
     logger.append_keys(worker_id=worker_id)
@@ -47,6 +49,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
         config={"access_mode": "READ_ONLY"},
     ) as process_conn:
         process_date = date.fromisoformat(date_str)
+        records_to_update: list[NewDbMatch] = []
         while True:
             try:
                 operator_ref = task_queue.get(timeout=10)
@@ -202,7 +205,6 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                 total_stops = sum(len(route) for route in timetable.values())
                 total_matches = 0
                 routes_processed = 0
-                records_to_update: list[NewDbMatch] = []
                 level = initial_level
 
                 with log_execution_time(
@@ -271,11 +273,6 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         # )
                         logger.setLevel(initial_level)
 
-                db_client.historic_update_success(
-                    records_to_update,
-                    process_date,
-                    level,
-                )
                 logger.info(
                     "Processed operator data",
                     total_routes=total_routes,
@@ -398,6 +395,8 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
             operator_queue.qsize()
         )  # Should be fine since nothing is reading yet
 
+        records_to_update = multiprocessing.Manager().list()
+
         operator_queue.put(None)  # Sentinel value to indicate no more work
 
         logger.info(
@@ -410,7 +409,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
         for i in range(num_workers):
             worker = Process(
                 target=operator_worker_task,
-                args=(process_date, operator_count, operator_queue, i),
+                args=(process_date, operator_count, operator_queue, records_to_update,i),
             )
             worker.start()
             workers.append(worker)
@@ -422,6 +421,14 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
         for worker in workers:
             worker.join()
 
+        print(f"before historic matching update**********************")
+        db_client = TimetableDBClient()
+        db_client.historic_update_success(
+            records_to_update,
+            date.fromisoformat(process_date),
+            initial_level,
+        )
+        print(f"after historic matching update**********************")
         logger.info("Finished processing AVL data")
     except Exception:
         logger.exception("An error occurred")
