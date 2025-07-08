@@ -39,7 +39,6 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
     date_str: str,
     task_count: int,
     task_queue: Queue,
-    records_to_update: List[NewDbMatch],
     worker_id: int,
 ) -> None:
     logger.append_keys(worker_id=worker_id)
@@ -49,6 +48,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
         config={"access_mode": "READ_ONLY"},
     ) as process_conn:
         process_date = date.fromisoformat(date_str)
+        records_to_update = []
         while True:
             try:
                 operator_ref = task_queue.get(timeout=10)
@@ -215,6 +215,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                 ):
                     for group_id, avls in avls_by_group_id.items():
                         if not group_id.endswith(process_date.isoformat()):
+                            logger.info(f"Group id {group_id} does not match process date {process_date.isoformat()}------------")
                             continue
 
                         # If there are avls from after midnight as well, add those
@@ -274,6 +275,8 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         #     level,
                         # )
                         logger.setLevel(initial_level)
+                    
+                    db_client.insert_into_temp_table_for_update(records_to_update, process_date, level)
 
                 logger.info(
                     "Processed operator data",
@@ -361,17 +364,28 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
         
         with duckdb.connect("avl_timetable.db") as conn:
             with log_execution_time(logger, "build_db"):
+                logger.info(f"local_avl_path date----{local_avl_path}")
                 # Input data is created in the convert_to_parquet function
                 conn.execute(f"""
                     CREATE OR REPLACE TABLE avl AS
                     SELECT *
                     FROM '{local_avl_path}'
                 """)  # noqa: S608 Not really sql injection
+                data1= conn.execute("SELECT DISTINCT date_of_journey FROM avl").fetchall()
+
+                for row in data1:
+                    logger.info(f"Distinct date----{row}")
+
                 conn.execute(f"""
                     INSERT INTO avl
                     SELECT *
                     FROM '{local_tomorrow_avl_path}'
                 """)  # noqa: S608 Not really sql injection
+                data1= conn.execute("SELECT DISTINCT date_of_journey FROM avl").fetchall()
+
+                for row in data1:
+                    logger.info(f"Distinct date******{row}")
+                
                 conn.execute(f"""
                     CREATE OR REPLACE TABLE timetable AS
                     SELECT *
@@ -393,6 +407,11 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
                 ).fetchall():
                     operator_queue.put(row[0])
 
+        db_client = TimetableDBClient()
+        
+        db_client.drop_temp_table_for_update(process_date)
+        db_client.create_temp_table_for_update(process_date)
+
         operator_count = (
             operator_queue.qsize()
         )  # Should be fine since nothing is reading yet
@@ -411,7 +430,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
         for i in range(num_workers):
             worker = Process(
                 target=operator_worker_task,
-                args=(process_date, operator_count, operator_queue, records_to_update,i),
+                args=(process_date, operator_count, operator_queue,i),
             )
             worker.start()
             workers.append(worker)
@@ -423,15 +442,8 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
         for worker in workers:
             worker.join()
 
-        print(f"before historic matching update**********************")
-        db_client = TimetableDBClient()
-        print(f"records_to_update----------{len(records_to_update)}")
-        db_client.historic_update_success(
-            records_to_update,
-            date.fromisoformat(process_date),
-            initial_level,
-        )
-        print(f"after historic matching update**********************")
+        db_client.bulk_historic_update_success(process_date, initial_level)
+        #db_client.drop_temp_table_for_update(process_date)
         logger.info("Finished processing AVL data")
     except Exception:
         logger.exception("An error occurred")
