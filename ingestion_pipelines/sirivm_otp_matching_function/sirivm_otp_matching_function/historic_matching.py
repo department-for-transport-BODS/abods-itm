@@ -48,7 +48,6 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
         config={"access_mode": "READ_ONLY"},
     ) as process_conn:
         process_date = date.fromisoformat(date_str)
-        records_to_update = []
         while True:
             try:
                 operator_ref = task_queue.get(timeout=10)
@@ -213,6 +212,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                     operator_timetables=len(timetable),
                     operator_ref=operator_ref,
                 ):
+                    records_to_update = []
                     for group_id, avls in avls_by_group_id.items():
                         if not group_id.endswith(process_date.isoformat()):
                             logger.info(f"Group id {group_id} does not match process date {process_date.isoformat()}------------")
@@ -258,9 +258,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                             }.values(),
                         )
                         logger.info(f"deduplicated_matches------------{len(deduplicated_matches)}")
-                        db_client.insert_into_temp_table_for_update(deduplicated_matches, process_date, level)
                         records_to_update.extend(deduplicated_matches)
-                        logger.info(f"records_to_update------------{len(records_to_update)}")
                         if len(deduplicated_matches) < len(journey_matches):
                             logger.debug(
                                 "Found some duplicate matches for the same timetable id. Removed earlier ones",
@@ -276,6 +274,9 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         #     level,
                         # )
                         logger.setLevel(initial_level)
+                    
+                    logger.info(f"records_to_update------------{len(records_to_update)}")
+                    db_client.insert_into_temp_table_for_update(records_to_update, process_date, level)
                     
 
                 logger.info(
@@ -411,6 +412,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
         
         db_client.drop_temp_table_for_update(process_date)
         db_client.create_temp_table_for_update(process_date)
+        db_client.create_indexes_temp_table(process_date)
 
         operator_count = (
             operator_queue.qsize()
