@@ -258,6 +258,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                             }.values(),
                         )
                         logger.info(f"deduplicated_matches------------{len(deduplicated_matches)}")
+                        db_client.insert_into_temp_table_for_update(deduplicated_matches, process_date, level)
                         records_to_update.extend(deduplicated_matches)
                         logger.info(f"records_to_update------------{len(records_to_update)}")
                         if len(deduplicated_matches) < len(journey_matches):
@@ -276,7 +277,6 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         # )
                         logger.setLevel(initial_level)
                     
-                    db_client.insert_into_temp_table_for_update(records_to_update, process_date, level)
 
                 logger.info(
                     "Processed operator data",
