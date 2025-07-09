@@ -283,6 +283,7 @@ class TimetableDBClient:
                     for record in batch
                 ]
                 
+                logger.info(f"insert----------------{len(values)}")
                 execute_values(
                     cursor,
                     sql.SQL(
@@ -331,7 +332,7 @@ class TimetableDBClient:
         temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
         batch_size = 50000;
         with self.connection.cursor() as cursor:
-            min_max_id_query = sql.SQL("""SELECT MAX(timetable_id), MIN(timetable_id) FROM {table}""").format(
+            min_max_id_query = sql.SQL("""SELECT COALESCE(MAX(timetable_id),0), COALESCE(MIN(timetable_id),0) FROM {table}""").format(
                         table=sql.Identifier(temp_table_name)
                     )
             
@@ -339,8 +340,8 @@ class TimetableDBClient:
             max_id, min_id = cursor.fetchone()
             
             while min_id <= max_id:
-                logger.info(f"upper_id----------------{upper_id}")
                 upper_id = min_id + batch_size
+                logger.info(f"upper_id----------------{upper_id}")
                 update_sql = sql.SQL("""
                         with updated_matched_stats as (
                             select 
