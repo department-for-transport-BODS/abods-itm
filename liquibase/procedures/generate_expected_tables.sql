@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE public.generate_expected_tables(IN partition_date date)
- LANGUAGE plpgsql
-AS $procedure$
+create or replace procedure generate_expected_tables(IN partition_date date)
+    language plpgsql
+as
+$$
 begin
     RAISE NOTICE '% Deleting expected journeys for %', clock_timestamp(), partition_date::text;
 
