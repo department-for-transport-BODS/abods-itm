@@ -9,7 +9,7 @@ SELECT DISTINCT
     esbd.date_of_journey,
     sd.noc_and_line_and_servicecode,
     sd.operator_noc,
-    esbd.license,
+    sd.license,
     sd.line_name,
     sd.service_name,
     esbd.admin_area_id,
