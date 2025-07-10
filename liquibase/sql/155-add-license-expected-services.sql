@@ -21,3 +21,7 @@ LEFT JOIN
     service_details sd 
     ON esbd.noc_and_line_and_servicecode = sd.noc_and_line_and_servicecode
 WITH DATA;
+
+
+CREATE INDEX IF NOT EXISTS idx_expected_services_license
+ON public.expected_services(license);
