@@ -1,7 +1,6 @@
-create or replace procedure generate_expected_tables(IN partition_date date)
-    language plpgsql
-as
-$$
+CREATE OR REPLACE PROCEDURE public.generate_expected_tables(IN partition_date date)
+ LANGUAGE plpgsql
+AS $procedure$
 begin
     RAISE NOTICE '% Deleting expected journeys for %', clock_timestamp(), partition_date::text;
 
@@ -108,10 +107,12 @@ begin
 
     insert into service_details (noc_and_line_and_servicecode,
                                  operator_noc,
+                                 license,
                                  line_name,
                                  service_name)
     select distinct noc_and_line_and_servicecode,
                     operator_noc,
+                    split_part(split_part(noc_and_line_and_servicecode, '-', 3), ':', 1) AS license,
                     line_name,
                     first_value(journey_pattern_description)
                     over (partition by date_of_journey, operator_noc, line_name, noc_and_line_and_servicecode order by stop_count desc, journey_pattern_description asc) as service_name
@@ -121,11 +122,13 @@ begin
         do update set (
                        operator_noc,
                        line_name,
-                       service_name
+                       service_name,
+                       license
                           ) = (
                                EXCLUDED.operator_noc,
                                EXCLUDED.line_name,
-                               EXCLUDED.service_name
+                               EXCLUDED.service_name,
+                               EXCLUDED.license
         );
 
     RAISE NOTICE '% Analysing service_details for %', clock_timestamp(), partition_date::text;
@@ -158,6 +161,5 @@ begin
     RAISE NOTICE '% generate_expected_tables complete', clock_timestamp();
 
 end;
-$$;
-
-alter procedure generate_expected_tables owner to abods_proxy_rw;
+$procedure$
+;
