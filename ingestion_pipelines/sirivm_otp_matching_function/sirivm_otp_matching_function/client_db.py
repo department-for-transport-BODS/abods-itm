@@ -142,6 +142,11 @@ class TimetableDBClient:
 
             _update_batch_status(cursor, batch_id, "Success")
 
+
+    def reinitialiseDBConnection(self):
+        if self.connection.closed:
+            self.connection = setup_db()
+
     @timer(logger)
     def historic_update_success(
         self,
@@ -154,6 +159,7 @@ class TimetableDBClient:
             logger.setLevel(log_level)
         
         logger.info(f"length----------{len(entries_to_update)}")
+        self.reinitialiseDBConnection()
         with self.connection.cursor() as cursor:
             # In historic matching, we know that the date we're working with is always the right,
             # but it doesn't hurt to align the code with live matching, so that we can deduplicate later
@@ -265,7 +271,9 @@ class TimetableDBClient:
             logger.setLevel(log_level)
         
         temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date.isoformat()
+        logger.info(f"entries_to_update----------------{len(entries_to_update)}")
         for batch in chunked(entries_to_update, 10000):
+            self.reinitialiseDBConnection()
             with self.connection.cursor() as cursor:
                 # In historic matching, we know that the date we're working with is always the right,
                 # but it doesn't hurt to align the code with live matching, so that we can deduplicate later
@@ -331,6 +339,7 @@ class TimetableDBClient:
         
         temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
         batch_size = 50000;
+        self.reinitialiseDBConnection()
         with self.connection.cursor() as cursor:
             date_to_process = date.fromisoformat(process_date)
             alternate_date = date_to_process - timedelta(days=1)
@@ -342,8 +351,10 @@ class TimetableDBClient:
             cursor.execute(min_max_id_query)
             max_id, min_id = cursor.fetchone()
             
-            while min_id <= max_id:
-                upper_id = min_id + batch_size
+        while min_id <= max_id:
+            self.reinitialiseDBConnection()
+            upper_id = min_id + batch_size
+            with self.connection.cursor() as cursor:
                 logger.info(f"upper_id----------------{upper_id}")
                 update_sql = sql.SQL("""
                         with updated_matched_stats as (
@@ -370,7 +381,7 @@ class TimetableDBClient:
                                     ON 
                                         th.timetable_id=pt.timetable_id 
                                 WHERE th.timetable_id >= %s AND th.timetable_id < %s
-                                     AND pt.date_of_journey in (%s, %s)
+                                    AND pt.date_of_journey in (%s, %s)
                         ) 
                         UPDATE public."Timetable" u
                         SET 
@@ -396,4 +407,4 @@ class TimetableDBClient:
                             table=sql.Identifier(temp_table_name)
                         )
                 cursor.execute(update_sql, (min_id, upper_id, date_to_process, alternate_date))
-                min_id = upper_id
+            min_id = upper_id
