@@ -162,5 +162,6 @@ begin
     RAISE NOTICE '% generate_expected_tables complete', clock_timestamp();
 
 end;
-$procedure$
-;
+$$;
+
+alter procedure generate_expected_tables owner to abods_proxy_rw;
