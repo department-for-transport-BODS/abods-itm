@@ -332,10 +332,13 @@ class TimetableDBClient:
         temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
         batch_size = 50000;
         with self.connection.cursor() as cursor:
+            date_to_process = date.fromisoformat(process_date)
+            alternate_date = date_to_process - timedelta(days=1)
+            logger.info("before min man query----------------")
             min_max_id_query = sql.SQL("""SELECT COALESCE(MAX(timetable_id),0), COALESCE(MIN(timetable_id),0) FROM {table}""").format(
                         table=sql.Identifier(temp_table_name)
                     )
-            
+            logger.info("after min man query----------------")
             cursor.execute(min_max_id_query)
             max_id, min_id = cursor.fetchone()
             
@@ -366,9 +369,8 @@ class TimetableDBClient:
                                 FROM {table} th join public."Timetable" pt 
                                     ON 
                                         th.timetable_id=pt.timetable_id 
-                                    AND 
-                                        (th.date_of_journey = pt.date_of_journey or th.previous_day_of_journey = pt.date_of_journey)
                                 WHERE th.timetable_id >= %s AND th.timetable_id < %s
+                                     AND pt.date_of_journey in (%s, %s)
                         ) 
                         UPDATE public."Timetable" u
                         SET 
@@ -393,5 +395,5 @@ class TimetableDBClient:
                     """).format(
                             table=sql.Identifier(temp_table_name)
                         )
-                cursor.execute(update_sql, (min_id, upper_id))
+                cursor.execute(update_sql, (min_id, upper_id, date_to_process, alternate_date))
                 min_id = upper_id

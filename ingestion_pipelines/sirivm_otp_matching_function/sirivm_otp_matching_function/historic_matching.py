@@ -408,7 +408,6 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
 
         db_client = TimetableDBClient()
         
-        db_client.bulk_historic_update_success(process_date, initial_level)
         db_client.drop_temp_table_for_update(process_date)
         db_client.create_temp_table_for_update(process_date)
         db_client.create_indexes_temp_table(process_date)
