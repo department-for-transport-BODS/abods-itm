@@ -1,0 +1,1 @@
+ALTER TABLE service_details ADD COLUMN IF NOT EXISTS license TEXT;
