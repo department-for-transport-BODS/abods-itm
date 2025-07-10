@@ -1,11 +1,11 @@
 from collections.abc import Sequence
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 from typing import Literal
 
 import psycopg2.extras
 from aws_lambda_powertools import Logger
 from psycopg2.extras import execute_values
-from psycopg2 import sql
+from psycopg2 import OperationalError, sql
 
 from .matcher.models import BadDbMatch, NewDbMatch
 from .matcher.utils import timer
@@ -14,7 +14,8 @@ from .shared.db import setup_db
 logger = Logger()
 
 TEMP_TABLE_FOR_HISTORIC_MATCHING = "temp_historic_timetable"
-
+MAX_RETRIES = 3
+RETRY_DELAY = 5 
 
 def _update_batch_status(
     cursor: psycopg2.extensions.cursor,
@@ -144,8 +145,12 @@ class TimetableDBClient:
 
 
     def reinitialiseDBConnection(self):
+        logger.info("reinitialising connection*********************")
         if self.connection.closed:
             self.connection = setup_db()
+            self.reinitialiseDBConnection()
+
+        logger.info("connected*********************")
 
     @timer(logger)
     def historic_update_success(
@@ -159,7 +164,6 @@ class TimetableDBClient:
             logger.setLevel(log_level)
         
         logger.info(f"length----------{len(entries_to_update)}")
-        self.reinitialiseDBConnection()
         with self.connection.cursor() as cursor:
             # In historic matching, we know that the date we're working with is always the right,
             # but it doesn't hurt to align the code with live matching, so that we can deduplicate later
@@ -273,43 +277,50 @@ class TimetableDBClient:
         temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date.isoformat()
         logger.info(f"entries_to_update----------------{len(entries_to_update)}")
         for batch in chunked(entries_to_update, 10000):
-            self.reinitialiseDBConnection()
-            with self.connection.cursor() as cursor:
-                # In historic matching, we know that the date we're working with is always the right,
-                # but it doesn't hurt to align the code with live matching, so that we can deduplicate later
-                alternate_date = process_date - timedelta(days=1)
-                values = [
-                    (
-                        record["timetable_id"],
-                        record["time_difference"],
-                        record["last_time_in_zone"],
-                        record["stop_type"],
-                        record["timestamp_after_estimate"],
-                        process_date.isoformat(),
-                        alternate_date.isoformat(),
-                    )
-                    for record in batch
-                ]
-                
-                logger.info(f"insert----------------{len(values)}")
-                execute_values(
-                    cursor,
-                    sql.SQL(
-                        """
-                            INSERT into {table} (
-                                timetable_id,
-                                time_difference,
-                                last_time_in_zone,
-                                stop_type,
-                                timestamp_after_estimate,
-                                date_of_journey,
-                                previous_day_of_journey
-                            ) VALUES %s
-                        """
-                        ).format(
-                            table=sql.Identifier(temp_table_name)
-                        ),
-                    values)
+            # In historic matching, we know that the date we're working with is always the right,
+            # but it doesn't hurt to align the code with live matching, so that we can deduplicate later
+            alternate_date = process_date - timedelta(days=1)
+            values = [
+                (
+                    record["timetable_id"],
+                    record["time_difference"],
+                    record["last_time_in_zone"],
+                    record["stop_type"],
+                    record["timestamp_after_estimate"],
+                    process_date.isoformat(),
+                    alternate_date.isoformat(),
+                )
+                for record in batch
+            ]
+            for attempt in range(1, MAX_RETRIES + 1):
+                try:
+                    if self.connection.closed:
+                        self.reinitialiseDBConnection()
+                    with self.connection.cursor() as cursor:
+                        logger.info(f"insert----------------{len(values)}")
+                        execute_values(
+                            cursor,
+                            sql.SQL(
+                                """
+                                    INSERT into {table} (
+                                        timetable_id,
+                                        time_difference,
+                                        last_time_in_zone,
+                                        stop_type,
+                                        timestamp_after_estimate,
+                                        date_of_journey,
+                                        previous_day_of_journey
+                                    ) VALUES %s
+                                """
+                                ).format(
+                                    table=sql.Identifier(temp_table_name)
+                                ),
+                            values)
+                        break
+                except OperationalError as e:
+                    if "SSL connection has been closed unexpectedly" in str(e):
+                        logger.info("SSL Connection error**********")
+                        time.sleep(RETRY_DELAY)
 
 
     @timer(logger)
@@ -339,72 +350,89 @@ class TimetableDBClient:
         
         temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
         batch_size = 50000;
-        self.reinitialiseDBConnection()
-        with self.connection.cursor() as cursor:
-            date_to_process = date.fromisoformat(process_date)
-            alternate_date = date_to_process - timedelta(days=1)
-            logger.info("before min man query----------------")
-            min_max_id_query = sql.SQL("""SELECT COALESCE(MAX(timetable_id),0), COALESCE(MIN(timetable_id),0) FROM {table}""").format(
-                        table=sql.Identifier(temp_table_name)
-                    )
-            logger.info("after min man query----------------")
-            cursor.execute(min_max_id_query)
-            max_id, min_id = cursor.fetchone()
+        date_to_process = date.fromisoformat(process_date)
+        alternate_date = date_to_process - timedelta(days=1)
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                if self.connection.closed:
+                    self.reinitialiseDBConnection()
+                with self.connection.cursor() as cursor:
+                    logger.info("before min man query----------------")
+                    min_max_id_query = sql.SQL("""SELECT COALESCE(MAX(timetable_id),0), COALESCE(MIN(timetable_id),0) FROM {table}""").format(
+                                table=sql.Identifier(temp_table_name)
+                            )
+                    logger.info("after min man query----------------")
+                    cursor.execute(min_max_id_query)
+                    max_id, min_id = cursor.fetchone()
+                    break
+            except OperationalError as e:
+                if "SSL connection has been closed unexpectedly" in str(e):
+                    logger.info("Min-Max:: SSL Connection error**********")
+                    time.sleep(RETRY_DELAY)
+        
             
         while min_id <= max_id:
-            self.reinitialiseDBConnection()
-            upper_id = min_id + batch_size
-            with self.connection.cursor() as cursor:
-                logger.info(f"upper_id----------------{upper_id}")
-                update_sql = sql.SQL("""
-                        with updated_matched_stats as (
-                            select 
-                                th.timetable_id, 
-                                th.time_difference,
-                                th.last_time_in_zone,
-                                th.stop_type,
-                                th.timestamp_after_estimate,
-                                th.date_of_journey,
-                                th.previous_day_of_journey,
-                                pt.expected_departure_time, 
-                                pt.otp_state, 
-                                pt.set_down, 
-                                CASE
-                                    WHEN th.time_difference::int < 0 THEN
-                                        COALESCE(
-                                                EXTRACT(epoch FROM(th.last_time_in_zone::timestamp AT TIME ZONE 'UTC' - pt.expected_departure_time)),
-                                                EXTRACT(epoch FROM (th.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC' - pt.expected_departure_time))
-                                        )::int
-                                    ELSE th.time_difference::int
-                                END as new_time_difference 
-                                FROM {table} th join public."Timetable" pt 
-                                    ON 
-                                        th.timetable_id=pt.timetable_id 
-                                WHERE th.timetable_id >= %s AND th.timetable_id < %s
-                                    AND pt.date_of_journey in (%s, %s)
-                        ) 
-                        UPDATE public."Timetable" u
-                        SET 
-                            otp_state = CASE
-                                            WHEN t.new_time_difference > -7200 THEN
-                                                CASE
-                                                    WHEN t.new_time_difference::int > 359 THEN 'Late'
-                                                    WHEN (t.stop_type = 'Non-final'
-                                                        AND (t.set_down IS NULL OR NOT t.set_down)
-                                                        AND t.new_time_difference::int < -60) THEN 'Early'
-                                                    ELSE 'OnTime'
-                                                END
-                                            ELSE t.otp_state
-                                        END,
-                            time_difference = t.new_time_difference,
-                            actual_departure_time = t.last_time_in_zone::timestamp AT TIME ZONE 'UTC',
-                            timestamp_after_estimate = t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC',
-                            load_time_stamp = now()::timestamp(0)
-                        FROM updated_matched_stats t
-                            WHERE u.timetable_id = t.timetable_id::bigint
-                            AND u.date_of_journey IN (t.date_of_journey::date, t.previous_day_of_journey::date);
-                    """).format(
-                            table=sql.Identifier(temp_table_name)
-                        )
-                cursor.execute(update_sql, (min_id, upper_id, date_to_process, alternate_date))
-            min_id = upper_id
+            for attempt in range(1, MAX_RETRIES + 1):
+                try:
+                    if self.connection.closed:
+                        self.reinitialiseDBConnection()
+                    upper_id = min_id + batch_size
+                    with self.connection.cursor() as cursor:
+                        logger.info(f"upper_id----------------{upper_id}")
+                        update_sql = sql.SQL("""
+                                with updated_matched_stats as (
+                                    select 
+                                        th.timetable_id, 
+                                        th.time_difference,
+                                        th.last_time_in_zone,
+                                        th.stop_type,
+                                        th.timestamp_after_estimate,
+                                        th.date_of_journey,
+                                        th.previous_day_of_journey,
+                                        pt.expected_departure_time, 
+                                        pt.otp_state, 
+                                        pt.set_down, 
+                                        CASE
+                                            WHEN th.time_difference::int < 0 THEN
+                                                COALESCE(
+                                                        EXTRACT(epoch FROM(th.last_time_in_zone::timestamp AT TIME ZONE 'UTC' - pt.expected_departure_time)),
+                                                        EXTRACT(epoch FROM (th.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC' - pt.expected_departure_time))
+                                                )::int
+                                            ELSE th.time_difference::int
+                                        END as new_time_difference 
+                                        FROM {table} th join public."Timetable" pt 
+                                            ON 
+                                                th.timetable_id=pt.timetable_id 
+                                        WHERE th.timetable_id >= %s AND th.timetable_id < %s
+                                            AND pt.date_of_journey in (%s, %s)
+                                ) 
+                                UPDATE public."Timetable" u
+                                SET 
+                                    otp_state = CASE
+                                                    WHEN t.new_time_difference > -7200 THEN
+                                                        CASE
+                                                            WHEN t.new_time_difference::int > 359 THEN 'Late'
+                                                            WHEN (t.stop_type = 'Non-final'
+                                                                AND (t.set_down IS NULL OR NOT t.set_down)
+                                                                AND t.new_time_difference::int < -60) THEN 'Early'
+                                                            ELSE 'OnTime'
+                                                        END
+                                                    ELSE t.otp_state
+                                                END,
+                                    time_difference = t.new_time_difference,
+                                    actual_departure_time = t.last_time_in_zone::timestamp AT TIME ZONE 'UTC',
+                                    timestamp_after_estimate = t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC',
+                                    load_time_stamp = now()::timestamp(0)
+                                FROM updated_matched_stats t
+                                    WHERE u.timetable_id = t.timetable_id::bigint
+                                    AND u.date_of_journey IN (t.date_of_journey::date, t.previous_day_of_journey::date);
+                            """).format(
+                                    table=sql.Identifier(temp_table_name)
+                                )
+                        cursor.execute(update_sql, (min_id, upper_id, date_to_process, alternate_date))
+                    min_id = upper_id
+                    break
+                except OperationalError as e:
+                    if "SSL connection has been closed unexpectedly" in str(e):
+                        logger.info("Update:: SSL Connection error**********")
+                        time.sleep(RETRY_DELAY)
