@@ -1,5 +1,6 @@
 from collections.abc import Sequence
-from datetime import date, time, timedelta
+from datetime import date, timedelta
+import time
 from typing import Literal
 
 import psycopg2.extras
@@ -353,6 +354,7 @@ class TimetableDBClient:
         date_to_process = date.fromisoformat(process_date)
         alternate_date = date_to_process - timedelta(days=1)
         for attempt in range(1, MAX_RETRIES + 1):
+            logger.info("Min-max attempt----------------{attempt}")
             try:
                 if self.connection.closed:
                     self.reinitialiseDBConnection()
@@ -361,9 +363,9 @@ class TimetableDBClient:
                     min_max_id_query = sql.SQL("""SELECT COALESCE(MAX(timetable_id),0), COALESCE(MIN(timetable_id),0) FROM {table}""").format(
                                 table=sql.Identifier(temp_table_name)
                             )
-                    logger.info("after min man query----------------")
                     cursor.execute(min_max_id_query)
                     max_id, min_id = cursor.fetchone()
+                    logger.info("after min man query----------------")
                     break
             except OperationalError as e:
                 if "SSL connection has been closed unexpectedly" in str(e):
@@ -373,6 +375,7 @@ class TimetableDBClient:
             
         while min_id <= max_id:
             for attempt in range(1, MAX_RETRIES + 1):
+                logger.info("attempt----------------{attempt}")
                 try:
                     if self.connection.closed:
                         self.reinitialiseDBConnection()
