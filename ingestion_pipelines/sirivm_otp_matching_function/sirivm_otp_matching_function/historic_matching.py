@@ -361,6 +361,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
         else:
             operator_queue = Queue()
         
+        logger.info("Code should not be in prod***********")
         with duckdb.connect("avl_timetable.db") as conn:
             with log_execution_time(logger, "build_db"):
                 logger.info(f"local_avl_path date----{local_avl_path}")

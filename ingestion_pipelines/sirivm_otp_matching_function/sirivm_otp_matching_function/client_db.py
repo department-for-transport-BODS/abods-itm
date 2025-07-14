@@ -350,7 +350,7 @@ class TimetableDBClient:
             logger.setLevel(log_level)
         
         temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
-        batch_size = 200000;
+        batch_size = 50000;
         date_to_process = date.fromisoformat(process_date)
         alternate_date = date_to_process - timedelta(days=1)
         for attempt in range(1, MAX_RETRIES + 1):
