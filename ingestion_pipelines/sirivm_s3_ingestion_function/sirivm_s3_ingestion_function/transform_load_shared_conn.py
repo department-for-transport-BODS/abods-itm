@@ -56,8 +56,9 @@ def parse_xml(source, batch_id, source_type="string"):  # noqa: ANN001, ANN201 -
 
 def parse_direction(vehicle_activity):  # noqa: ANN001, ANN201
     direction_ref_elem = vehicle_activity.find(".//siri:DirectionRef", NS)
-    direction_ref = direction_ref_elem.text if direction_ref_elem is not None else None
-    return direction_ref
+    if not direction_ref_elem:
+        return None
+    return direction_ref_elem.text
 
 
 def normalize_direction(direction_ref):  # noqa: ANN001, ANN201
