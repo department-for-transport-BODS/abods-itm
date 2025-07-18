@@ -155,70 +155,73 @@ class TimetableDBClient:
         """Update database to reflect successful historic matching"""
         if log_level:
             logger.setLevel(log_level)
+
+        alternate_date = process_date - timedelta(days=1)
+
         with self.connection.cursor() as cursor:
             # In historic matching, we know that the date we're working with is always the right,
             # but it doesn't hurt to align the code with live matching, so that we can deduplicate later
-            alternate_date = process_date - timedelta(days=1)
-            values = [
-                (
-                    record["timetable_id"],
-                    record["time_difference"],
-                    record["last_time_in_zone"],
-                    record["stop_type"],
-                    record["timestamp_after_estimate"],
-                    process_date.isoformat(),
-                    alternate_date.isoformat(),
+            for target_date in [process_date, alternate_date]:
+                partition = self.partition_name(target_date)
+                values = [
+                    (
+                        record["timetable_id"],
+                        record["time_difference"],
+                        record["last_time_in_zone"],
+                        record["stop_type"],
+                        record["timestamp_after_estimate"],
+                        target_date.isoformat(),
+                    )
+                    for record in entries_to_update
+                ]
+                execute_values_amended(
+                    cur=cursor,
+                    sql=f"""
+                        -- Recalculating time difference when it's less than zero to make sure it's calculated correctly
+                        UPDATE public.{partition} u
+                        SET time_difference          =
+                                CASE
+                                    WHEN t.time_difference::int < 0 THEN
+                                        COALESCE(
+                                                EXTRACT(epoch FROM(t.last_time_in_zone_utc::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time)),
+                                                EXTRACT(epoch FROM (t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time))
+                                        )::int
+                                    ELSE t.time_difference::int
+                                END,
+                            actual_departure_time    = t.last_time_in_zone_utc::timestamp AT TIME ZONE 'UTC',
+                            timestamp_after_estimate = t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC',
+                            load_time_stamp          = now()::timestamp(0)
+                        FROM (VALUES %s) AS t(timetable_id, time_difference, last_time_in_zone_utc, is_final_stop, timestamp_after_estimate, journey_date)
+                        WHERE u.timetable_id = t.timetable_id::bigint
+                        AND date_of_journey = t.journey_date::date
+                        RETURNING u.timetable_id;
+                    """, # noqa: S608
+                    values=values,
                 )
-                for record in entries_to_update
-            ]
-            execute_values_amended(
-                cur=cursor,
-                sql="""
-                    -- Recalculating time difference when it's less than zero to make sure it's calculated correctly
-                    UPDATE public."Timetable" u
-                    SET time_difference          =
-                            CASE
-                                WHEN t.time_difference::int < 0 THEN
-                                    COALESCE(
-                                            EXTRACT(epoch FROM(t.last_time_in_zone_utc::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time)),
-                                            EXTRACT(epoch FROM (t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time))
-                                    )::int
-                                ELSE t.time_difference::int
-                            END,
-                        actual_departure_time    = t.last_time_in_zone_utc::timestamp AT TIME ZONE 'UTC',
-                        timestamp_after_estimate = t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC',
-                        load_time_stamp          = now()::timestamp(0)
-                    FROM (VALUES %s) AS t(timetable_id, time_difference, last_time_in_zone_utc, is_final_stop, timestamp_after_estimate, journey_date, alternate_journey_date)
-                    WHERE u.timetable_id = t.timetable_id::bigint
-                      AND date_of_journey IN (t.journey_date::date, t.alternate_journey_date::date)
-                    RETURNING u.timetable_id;
-                """,
-                values=values,
-            )
-            # Update otp state again as the otp calculation is not taking the updated time difference value
-            execute_values_amended(
-                cur=cursor,
-                sql="""
-                    UPDATE public."Timetable" u
-                    SET otp_state = CASE
-                                        WHEN u.time_difference::int > 359 THEN 'Late'
-                                        -- If it's the final stop, we don't consider it early
-                                        WHEN (t.is_final_stop = 'Non-final'
-                                          -- When passengers aren't being picked up, we don't consider it early
-                                          AND (u.set_down IS NULL OR NOT u.set_down)
-                                          AND u.time_difference::int < -60) THEN 'Early'
-                                        ELSE 'OnTime'
-                                    END,
-                        load_time_stamp = now()::timestamp(0)
-                    FROM (VALUES %s) AS t(timetable_id, time_difference, last_time_in_zone_utc, is_final_stop, timestamp_after_estimate, journey_date, alternate_journey_date)
-                    WHERE u.timetable_id = t.timetable_id::bigint
-                      AND date_of_journey IN (t.journey_date::date, t.alternate_journey_date::date)
-                      AND COALESCE (
-                                  EXTRACT(epoch FROM (t.last_time_in_zone_utc::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time)),
-                                  EXTRACT(epoch FROM (t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time)),
-                                  0
-                          ) > -7200
-                    RETURNING u.timetable_id;
-                """,
-                values=values,
-            )
+                # Update otp state again as the otp calculation is not taking the updated time difference value
+                execute_values_amended(
+                    cur=cursor,
+                    sql=f"""
+                        UPDATE public.{partition} u
+                        SET otp_state = CASE
+                                            WHEN u.time_difference::int > 359 THEN 'Late'
+                                            -- If it's the final stop, we don't consider it early
+                                            WHEN (t.is_final_stop = 'Non-final'
+                                            -- When passengers aren't being picked up, we don't consider it early
+                                            AND (u.set_down IS NULL OR NOT u.set_down)
+                                            AND u.time_difference::int < -60) THEN 'Early'
+                                            ELSE 'OnTime'
+                                        END,
+                            load_time_stamp = now()::timestamp(0)
+                        FROM (VALUES %s) AS t(timetable_id, time_difference, last_time_in_zone_utc, is_final_stop, timestamp_after_estimate, journey_date)
+                        WHERE u.timetable_id = t.timetable_id::bigint
+                        AND date_of_journey = t.journey_date::date
+                        AND COALESCE (
+                                    EXTRACT(epoch FROM (t.last_time_in_zone_utc::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time)),
+                                    EXTRACT(epoch FROM (t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time)),
+                                    0
+                            ) > -7200
+                        RETURNING u.timetable_id;
+                    """, # noqa: S608
+                    values=values,
+                )
