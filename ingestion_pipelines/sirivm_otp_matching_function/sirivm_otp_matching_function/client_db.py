@@ -75,7 +75,6 @@ class TimetableDBClient:
         process_date: date,
     ) -> None:
         """Update database to reflect successful live matching"""
-
         # In the time after midnight, we may have matched a stop where the date_of_journey is
         # the previous day, so we should check both partitions in the DB
         alternate_date = process_date - timedelta(days=1)
