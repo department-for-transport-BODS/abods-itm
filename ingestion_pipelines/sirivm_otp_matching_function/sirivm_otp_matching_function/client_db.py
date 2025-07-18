@@ -194,7 +194,7 @@ class TimetableDBClient:
                         WHERE u.timetable_id = t.timetable_id::bigint
                         AND date_of_journey = t.journey_date::date
                         RETURNING u.timetable_id;
-                    """, # noqa: S608
+                    """,  # noqa: S608
                     values=values,
                 )
                 # Update otp state again as the otp calculation is not taking the updated time difference value
@@ -221,6 +221,6 @@ class TimetableDBClient:
                                     0
                             ) > -7200
                         RETURNING u.timetable_id;
-                    """, # noqa: S608
+                    """,  # noqa: S608
                     values=values,
                 )
