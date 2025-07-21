@@ -93,13 +93,12 @@ class TimetableDBClient:
                                 otp_state = NULL,
                                 load_time_stamp = now()::timestamp(0),
                                 timestamp_after_estimate = NULL
-                            FROM (VALUES %s) AS t(timetable_id, journey_date)
+                            FROM (VALUES %s) AS t(timetable_id)
                             WHERE u.timetable_id = t.timetable_id::bigint
-                            AND u.date_of_journey = t.journey_date::date
                             RETURNING u.timetable_id;
                         """,  # noqa: S608
                         values=[
-                            (entry["timetable_id"], target_date.isoformat())
+                            (entry["timetable_id"],)
                             for entry in entries_to_remove
                         ],
                     )
@@ -122,11 +121,9 @@ class TimetableDBClient:
                         time_difference,
                         last_time_in_zone_utc,
                         otp_state,
-                        timestamp_after_estimate,
-                        journey_date
+                        timestamp_after_estimate
                     )
                     WHERE u.timetable_id = t.timetable_id::bigint
-                    AND u.date_of_journey = t.journey_date::date
                     RETURNING u.timetable_id;
                 """,  # noqa: S608
                     values=[
@@ -136,7 +133,6 @@ class TimetableDBClient:
                             record["last_time_in_zone"],
                             record["otp_state"],
                             record["timestamp_after_estimate"],
-                            target_date.isoformat(),
                         )
                         for record in entries_to_update
                     ],
@@ -169,7 +165,6 @@ class TimetableDBClient:
                         record["last_time_in_zone"],
                         record["stop_type"],
                         record["timestamp_after_estimate"],
-                        target_date.isoformat(),
                     )
                     for record in entries_to_update
                 ]
@@ -190,9 +185,8 @@ class TimetableDBClient:
                             actual_departure_time    = t.last_time_in_zone_utc::timestamp AT TIME ZONE 'UTC',
                             timestamp_after_estimate = t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC',
                             load_time_stamp          = now()::timestamp(0)
-                        FROM (VALUES %s) AS t(timetable_id, time_difference, last_time_in_zone_utc, is_final_stop, timestamp_after_estimate, journey_date)
+                        FROM (VALUES %s) AS t(timetable_id, time_difference, last_time_in_zone_utc, is_final_stop, timestamp_after_estimate)
                         WHERE u.timetable_id = t.timetable_id::bigint
-                        AND date_of_journey = t.journey_date::date
                         RETURNING u.timetable_id;
                     """,  # noqa: S608
                     values=values,
@@ -212,9 +206,8 @@ class TimetableDBClient:
                                             ELSE 'OnTime'
                                         END,
                             load_time_stamp = now()::timestamp(0)
-                        FROM (VALUES %s) AS t(timetable_id, time_difference, last_time_in_zone_utc, is_final_stop, timestamp_after_estimate, journey_date)
+                        FROM (VALUES %s) AS t(timetable_id, time_difference, last_time_in_zone_utc, is_final_stop, timestamp_after_estimate)
                         WHERE u.timetable_id = t.timetable_id::bigint
-                        AND date_of_journey = t.journey_date::date
                         AND COALESCE (
                                     EXTRACT(epoch FROM (t.last_time_in_zone_utc::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time)),
                                     EXTRACT(epoch FROM (t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC' - u.expected_departure_time)),
