@@ -485,4 +485,7 @@
     <changeSet id="154" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/update_transmodel_servicepatterndistance.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="155" author="abodsuser" >
+        <sqlFile path="sql/155-update-foreign-schema-datasetrevision-upload-file.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
