@@ -98,8 +98,7 @@ class TimetableDBClient:
                             RETURNING u.timetable_id;
                         """,  # noqa: S608
                         values=[
-                            (entry["timetable_id"],)
-                            for entry in entries_to_remove
+                            (entry["timetable_id"],) for entry in entries_to_remove
                         ],
                     )
 
