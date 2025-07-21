@@ -106,31 +106,54 @@ begin
 
     RAISE NOTICE '% Upserting service_details for %', clock_timestamp(), partition_date::text;
 
-    insert into service_details (noc_and_line_and_servicecode,
-                                 operator_noc,
-                                 license,
-                                 line_name,
-                                 service_name)
-    select distinct noc_and_line_and_servicecode,
-                    operator_noc,
-                    split_part(split_part(noc_and_line_and_servicecode, '-', 3), ':', 1) AS license,
-                    line_name,
-                    first_value(journey_pattern_description)
-                    over (partition by date_of_journey, operator_noc, line_name, noc_and_line_and_servicecode order by stop_count desc, journey_pattern_description asc) as service_name
-    from expected_journeys
-    where date_of_journey = partition_date
-    on conflict (noc_and_line_and_servicecode)
-        do update set (
-                       operator_noc,
-                       line_name,
-                       service_name,
-                       license
-                          ) = (
-                               EXCLUDED.operator_noc,
-                               EXCLUDED.line_name,
-                               EXCLUDED.service_name,
-                               EXCLUDED.license
-        );
+	WITH journey_data AS (
+	    SELECT
+	        ej.noc_and_line_and_servicecode,
+	        ej.operator_noc,
+	        split_part(split_part(ej.noc_and_line_and_servicecode, '-', 3), ':', 1) AS license,
+	        ej.line_name,
+	        FIRST_VALUE(ej.journey_pattern_description)
+	            OVER (PARTITION BY ej.noc_and_line_and_servicecode ORDER BY ej.stop_count DESC, ej.journey_pattern_description ASC) AS service_name,
+	        ej.admin_area_id
+	    FROM expected_journeys ej
+	    WHERE ej.date_of_journey = partition_date
+	)
+	
+	INSERT INTO service_details (
+	    noc_and_line_and_servicecode,
+	    operator_noc,
+	    license,
+	    line_name,
+	    service_name,
+	    admin_areas
+	)
+	SELECT
+	    jd.noc_and_line_and_servicecode,
+	    jd.operator_noc,
+	    jd.license,
+	    jd.line_name,
+	    jd.service_name,
+	    ARRAY_AGG(DISTINCT ua.admin_area_id) AS admin_areas
+	FROM journey_data jd,
+	     LATERAL unnest(jd.admin_area_id) AS ua(admin_area_id)
+	GROUP BY
+	    jd.noc_and_line_and_servicecode,
+	    jd.operator_noc,
+	    jd.license,
+	    jd.line_name,
+	    jd.service_name
+	
+	ON CONFLICT (noc_and_line_and_servicecode)
+	DO UPDATE SET
+	    operator_noc = EXCLUDED.operator_noc,
+	    line_name = EXCLUDED.line_name,
+	    service_name = EXCLUDED.service_name,
+	    license = EXCLUDED.license,
+	    admin_areas = (
+	        SELECT ARRAY(
+	            SELECT DISTINCT unnest(service_details.admin_areas || EXCLUDED.admin_areas)
+	        )
+	    );
 
     RAISE NOTICE '% Analysing service_details for %', clock_timestamp(), partition_date::text;
 
