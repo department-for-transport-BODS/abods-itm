@@ -25,3 +25,6 @@ WITH DATA;
 
 CREATE INDEX IF NOT EXISTS idx_expected_services_license
 ON public.expected_services(license);
+
+ALTER TABLE service_details
+ADD COLUMN admin_areas int[];
