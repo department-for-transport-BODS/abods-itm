@@ -350,6 +350,7 @@ def convert_to_parquet(process_date: date, environment: str):
     print("Converting timetable csv data to parquet format")
     response = lambda_client.invoke(
         FunctionName=f"abods-{environment}-convert-to-parquet-function",
+        InvocationType='RequestResponse',
         Payload=json.dumps(
             {
                 "process_date": process_date.isoformat(),
@@ -594,6 +595,7 @@ def main():
 
     def prep_data(current: date, include_timetable_export: bool = False):
         current_data = which_files_exist(current, files)
+        print(f"current_data-----{current_data}")
         if not current_data["avl_csv"] or input_journeys:
             avl_export_needed.append(current)
 
@@ -608,10 +610,12 @@ def main():
             if not current_data["timetable_csv"]:
                 timetable_export_needed.append(current)
 
-            if current_data["avl_csv"] and not current_data["avl_parquet"]:
+            if current_data["timetable_csv"] and not current_data["timetable_parquet"]:
                 timetable_parquet_only.append(current)
 
 
+    print(f"avl_parquet_only------{avl_parquet_only}")
+    print(f"timetable_parquet_only------{timetable_parquet_only}")
     for current in process_dates:
         prep_data(current, include_timetable_export=True)
 
