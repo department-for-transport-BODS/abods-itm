@@ -54,6 +54,29 @@ def parse_xml(source, batch_id, source_type="string"):  # noqa: ANN001, ANN201 -
     return data
 
 
+def parse_direction(vehicle_activity):  # noqa: ANN001, ANN201
+    direction_ref_elem = vehicle_activity.find(".//siri:DirectionRef", NS)
+    if not direction_ref_elem:
+        return None
+    return direction_ref_elem.text
+
+
+def normalize_direction(direction_ref):  # noqa: ANN001, ANN201
+    """Map direction ref to normalized values. Either inbound or outbound"""
+    direction_map = {
+        "1": "outbound",
+        "2": "inbound",
+        "clockwise": "outbound",
+        "anticlockwise": "inbound",
+        "inbound": "inbound",
+        "outbound": "outbound",
+        "eastbound": "outbound",
+        "westbound": "inbound",
+    }
+    direction_clean = direction_ref.strip().lower()
+    return direction_map.get(direction_clean, direction_ref)
+
+
 def extract_data(vehicle_activity, service_delivery_timestamp, batch_id):  # noqa: ANN001, ANN201 - BODS-7131
     NS = {"siri": "http://www.siri.org.uk/siri"}  # noqa: N806 - BODS-7131
     recorded_at_time = vehicle_activity.find(".//siri:RecordedAtTime", NS).text
@@ -64,8 +87,8 @@ def extract_data(vehicle_activity, service_delivery_timestamp, batch_id):  # noq
     line_name = line_name_elem.text if line_name_elem is not None else None
     operator_ref = vehicle_activity.find(".//siri:OperatorRef", NS).text
     vehicle_ref = vehicle_activity.find(".//siri:VehicleRef", NS).text
-    direction_ref_elem = vehicle_activity.find(".//siri:DirectionRef", NS)
-    direction_ref = direction_ref_elem.text if direction_ref_elem is not None else None
+    direction_ref = parse_direction(vehicle_activity)
+    direction_ref_normalized = normalize_direction(direction_ref)
 
     journey_ref_1_elem = vehicle_activity.find(
         ".//siri:FramedVehicleJourneyRef/siri:DatedVehicleJourneyRef",
@@ -107,7 +130,7 @@ def extract_data(vehicle_activity, service_delivery_timestamp, batch_id):  # noq
         operator_ref,
         vehicle_ref,
         journey_ref,
-        direction_ref,
+        direction_ref_normalized,
         date_of_journey,
         batch_id,
         origin_ref,
