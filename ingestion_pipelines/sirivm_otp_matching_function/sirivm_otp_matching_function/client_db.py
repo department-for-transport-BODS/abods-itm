@@ -64,7 +64,7 @@ class TimetableDBClient:
             _update_batch_status(cursor, batch_id, "Failed")
 
     def partition_name(self, date: date) -> str:
-        return f'"Timetable_p{date.strftime("%Y%m%d")}"'
+        return f'"Timetable_p{date.strftime("%Y_%m_%d")}"'
 
     @timer(logger)
     def live_update_success(
