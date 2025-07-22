@@ -146,12 +146,10 @@ class TimetableDBClient:
 
 
     def reinitialiseDBConnection(self):
-        logger.info("reinitialising connection*********************")
         if self.connection.closed:
             self.connection = setup_db()
             self.reinitialiseDBConnection()
 
-        logger.info("connected*********************")
 
     @timer(logger)
     def historic_update_success(
@@ -164,7 +162,6 @@ class TimetableDBClient:
         if log_level:
             logger.setLevel(log_level)
         
-        logger.info(f"length----------{len(entries_to_update)}")
         with self.connection.cursor() as cursor:
             # In historic matching, we know that the date we're working with is always the right,
             # but it doesn't hurt to align the code with live matching, so that we can deduplicate later
@@ -276,7 +273,6 @@ class TimetableDBClient:
             logger.setLevel(log_level)
         
         temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date.isoformat()
-        logger.info(f"entries_to_update----------------{len(entries_to_update)}")
         for batch in chunked(entries_to_update, 10000):
             # In historic matching, we know that the date we're working with is always the right,
             # but it doesn't hurt to align the code with live matching, so that we can deduplicate later
@@ -293,12 +289,11 @@ class TimetableDBClient:
                 )
                 for record in batch
             ]
-            for attempt in range(1, MAX_RETRIES + 1):
+            for _ in range(1, MAX_RETRIES + 1):
                 try:
                     if self.connection.closed:
                         self.reinitialiseDBConnection()
                     with self.connection.cursor() as cursor:
-                        logger.info(f"insert----------------{len(values)}")
                         execute_values(
                             cursor,
                             sql.SQL(
@@ -320,13 +315,16 @@ class TimetableDBClient:
                         break
                 except OperationalError as e:
                     if "SSL connection has been closed unexpectedly" in str(e):
-                        logger.info("SSL Connection error**********")
+                        logger.info(f"Insert into temp table:: SSL Connection error:: {e}")
                         time.sleep(RETRY_DELAY)
 
 
     @timer(logger)
     def create_indexes_temp_table(self, process_date: str) -> None:
         temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
+        if self.connection.closed:
+            self.reinitialiseDBConnection()
+            
         with self.connection.cursor() as cursor:
             cursor.execute(sql.SQL("""CREATE INDEX {index} ON {table}(timetable_id,date_of_journey)""").format(
                             index=sql.Identifier("idx_id_1_"+temp_table_name),
@@ -350,38 +348,33 @@ class TimetableDBClient:
             logger.setLevel(log_level)
         
         temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
-        batch_size = 50000;
+        batch_size = 20000;
         date_to_process = date.fromisoformat(process_date)
         alternate_date = date_to_process - timedelta(days=1)
-        for attempt in range(1, MAX_RETRIES + 1):
-            logger.info("Min-max attempt----------------{attempt}")
+        for _ in range(1, MAX_RETRIES + 1):
             try:
                 if self.connection.closed:
                     self.reinitialiseDBConnection()
                 with self.connection.cursor() as cursor:
-                    logger.info("before min man query----------------")
                     min_max_id_query = sql.SQL("""SELECT COALESCE(MAX(timetable_id),0), COALESCE(MIN(timetable_id),0) FROM {table}""").format(
                                 table=sql.Identifier(temp_table_name)
                             )
                     cursor.execute(min_max_id_query)
                     max_id, min_id = cursor.fetchone()
-                    logger.info("after min man query----------------")
                     break
             except OperationalError as e:
                 if "SSL connection has been closed unexpectedly" in str(e):
-                    logger.info("Min-Max:: SSL Connection error**********")
+                    logger.error(f"Query Min-Max:: SSL Connection error {e}")
                     time.sleep(RETRY_DELAY)
         
             
         while min_id <= max_id:
-            for attempt in range(1, MAX_RETRIES + 1):
-                logger.info("attempt----------------{attempt}")
+            for _ in range(1, MAX_RETRIES + 1):
                 try:
                     if self.connection.closed:
                         self.reinitialiseDBConnection()
                     upper_id = min_id + batch_size
                     with self.connection.cursor() as cursor:
-                        logger.info(f"upper_id----------------{upper_id}")
                         update_sql = sql.SQL("""
                                 with updated_matched_stats as (
                                     select 
@@ -437,5 +430,5 @@ class TimetableDBClient:
                     break
                 except OperationalError as e:
                     if "SSL connection has been closed unexpectedly" in str(e):
-                        logger.info("Update:: SSL Connection error**********")
+                        logger.error(f"Bulk update:: SSL Connection error id between {min_id} and {max_id}:: {e}")
                         time.sleep(RETRY_DELAY)

@@ -7,7 +7,6 @@ import subprocess
 from datetime import datetime, date, timedelta
 from subprocess import CalledProcessError
 from time import sleep
-from typing import Optional
 from zoneinfo import ZoneInfo
 
 import boto3
@@ -23,6 +22,7 @@ DB_USER = "root"
 BASE_PREFIX = "historic/"
 MAX_LIVE_MATCHING_QUEUE_LENGTH = 6
 MAX_CONCURRENT_MATCHING_TASKS = 5
+ENV_IS_LOCAL = 'IS_LOCAL'
 
 custom_executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 
@@ -124,7 +124,6 @@ running_tasks = {}
 
 
 def start_historic_matching(current: date, environment: str):
-    print(f"start_historic_matching------{current}")
     run_output = run_matching(current, environment)
     for task_arn, status, process_date in parse_task_output(run_output):
         running_tasks[task_arn] = {
@@ -187,36 +186,12 @@ def wait_for_queues(environment: str):
         sleep(60)
 
 
-def run_query2(query: str, db_host: str, db_password: str):
-    psql_path = shutil.which("psql")
-    if not psql_path:
-        raise RuntimeError("psql not found in PATH")
-    subprocess.run(
-        [
-            # This is where it's installed on the bastion, doesn't seem to be on PATH when called by subprocess
-            psql_path,
-            "--echo-queries",
-            "--dbname=abods",
-            "-h",
-            '127.0.0.1',
-            "-p",
-            '15432',
-            "-U",
-            DB_USER,
-            "-c",
-            query,
-        ],
-        env={"PGPASSWORD": db_password},
-        check=True,
-    )
-
-
 def run_query(query: str, db_host: str, db_password: str):
     psql_path = shutil.which("psql")
     if not psql_path:
         raise RuntimeError("psql not found in PATH")
-    subprocess.run(
-        [
+    
+    cmd = [
             # This is where it's installed on the bastion, doesn't seem to be on PATH when called by subprocess
             psql_path,
             "--echo-queries",
@@ -227,7 +202,13 @@ def run_query(query: str, db_host: str, db_password: str):
             DB_USER,
             "-c",
             query,
-        ],
+        ]
+    
+    if os.environ.get(ENV_IS_LOCAL) == "true":
+        cmd.extend(["-p", '15432'])
+
+    subprocess.run(
+        cmd,
         env={"PGPASSWORD": db_password},
         check=True,
     )
@@ -251,21 +232,6 @@ def timetable_generation(
     wait_for_queues(environment)
 
 
-def timetable_export(db_password: str, db_host: str, process_date: date, subset: bool):
-    print('timetable_export called*****')
-    if subset:
-        run_query(
-            f"CALL historic_timetable_export_unregistered_subset('{process_date.isoformat()}');",
-            db_host,
-            db_password,
-        )
-    else:
-        run_query(
-            f"CALL historic_timetable_export('{process_date.isoformat()}');",
-            db_host,
-            db_password,
-        )
-
 def subset_avl_export(db_password: str, db_host: str, process_date: date):
     run_query(
         f"CALL historic_avl_export('{process_date.isoformat()}');",
@@ -274,44 +240,26 @@ def subset_avl_export(db_password: str, db_host: str, process_date: date):
     )
 
 
-def timetable_export2(db_password: str, db_host: str, process_date: date, subset: bool, journeys_sql_list: str = None):
-    print('timetable_export called*****')
+def timetable_export(db_password: str, db_host: str, process_date: date, subset: bool, journeys_sql_list: str = None):
     if subset:
-        run_query2(
+        run_query(
             f"CALL historic_timetable_export_unregistered_subset('{process_date.isoformat()}');",
             db_host,
             db_password,
         )
     else:
         if journeys_sql_list:
-            print('subset called*****')
-            run_query2(
+            run_query(
                 f"CALL historic_subset_timetable_export('{process_date.isoformat()}',ARRAY[{journeys_sql_list}]::text[]);",
                 db_host,
                 db_password,
             )
-            print('return*****')
             return
-        run_query2(
+        run_query(
             f"CALL historic_timetable_export('{process_date.isoformat()}');",
             db_host,
             db_password,
         )
-
-
-def avl_export2(db_password: str, db_host: str, process_date: date, journeys_sql_list: str = None):
-    if journeys_sql_list:
-        run_query2(
-            f"CALL historic_subset_avl_export('{process_date.isoformat()}',ARRAY[{journeys_sql_list}]::text[]);",
-            db_host,
-            db_password,
-        )
-        return
-    run_query2(
-        f"CALL historic_avl_export('{process_date.isoformat()}');",
-        db_host,
-        db_password,
-    )
 
 
 def avl_export(db_password: str, db_host: str, process_date: date, journeys_sql_list: str = None):
@@ -534,11 +482,10 @@ def which_files_exist(current: date, files: list[str]):
 
 
 def main():
-    is_local = False
     while True:
         environment = input("Which environment? (prod|uat|sandbox|local): ").strip().lower()
         if environment == "local":
-            is_local = True
+            os.environ[ENV_IS_LOCAL] = "true"
             environment = "sandbox"
             break
         if environment == "sandbox":
@@ -551,6 +498,10 @@ def main():
 
     sirivm_bucket= f'abods-{environment}-exporter-bucket'
     db_host = get_db_host(environment)
+
+    if os.environ.get(ENV_IS_LOCAL) == "true":
+        db_host='127.0.0.1'
+
     subset = get_boolean_input("Process only unregistered subset?")
     force_timetable_export = False
     if subset:
@@ -595,7 +546,6 @@ def main():
 
     def prep_data(current: date, include_timetable_export: bool = False):
         current_data = which_files_exist(current, files)
-        print(f"current_data-----{current_data}")
         if not current_data["avl_csv"] or input_journeys:
             avl_export_needed.append(current)
 
@@ -614,8 +564,6 @@ def main():
                 timetable_parquet_only.append(current)
 
 
-    print(f"avl_parquet_only------{avl_parquet_only}")
-    print(f"timetable_parquet_only------{timetable_parquet_only}")
     for current in process_dates:
         prep_data(current, include_timetable_export=True)
 
@@ -671,7 +619,6 @@ def main():
     env = os.environ.copy()
     env["SIRIVM_BUCKET"] = sirivm_bucket
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    script_path = os.path.join(root_dir,"sirivm_otp_matching_function", "sirivm_otp_matching_function", "historic_matching.py")
     working_dir = os.path.join(root_dir, "ingestion_pipelines","sirivm_otp_matching_function")
 
     summaries_to_run = []
@@ -691,12 +638,12 @@ def main():
             process_date = process_date_array.pop(0)
             next_day = process_date + timedelta(days=1)
             if process_date in avl_export_needed:
-                export_task.append(asyncio.to_thread(avl_export2,db_password, db_host, process_date, sql_list_journeys))
+                export_task.append(asyncio.to_thread(avl_export,db_password, db_host, process_date, sql_list_journeys))
                 timetable_export_needed = sorted({*timetable_export_needed, process_date})
                 avl_parquet_tasks.append(process_date)
             
             if next_day in avl_export_needed and next_day not in avl_exported:
-                export_task.append(asyncio.to_thread(avl_export2,db_password, db_host, next_day, sql_list_journeys))
+                export_task.append(asyncio.to_thread(avl_export,db_password, db_host, next_day, sql_list_journeys))
                 avl_exported.append(next_day)
                 avl_parquet_tasks.append(next_day)
 
@@ -705,12 +652,12 @@ def main():
                     timetable_generation(
                         db_password, db_host, process_date, environment, subset
                     )
-                export_task.append(asyncio.to_thread(timetable_export2,db_password, db_host, process_date, subset, sql_list_journeys))
+                export_task.append(asyncio.to_thread(timetable_export,db_password, db_host, process_date, subset, sql_list_journeys))
                 timetable_parquet_tasks.append(process_date)
 
             asyncio.run(csv_export(export_task))
             asyncio.run(csv_to_parquet(avl_parquet_tasks,timetable_parquet_tasks))
-            if is_local:
+            if os.environ.get(ENV_IS_LOCAL) == "true":
                 env["PROCESS_DATE"] = process_date.strftime("%Y-%m-%d")
                 env["POSTGRES_HOST"] = "127.0.0.1"
                 env["POSTGRES_PORT"] = "15432"
@@ -729,7 +676,7 @@ def main():
                         f"{current_time_london().isoformat()}: Dates still queued for matching: {';'.join(d.isoformat() for d in process_date_array)}"
                     )
 
-        if not is_local:
+        if not os.environ.get(ENV_IS_LOCAL):
             look_for_existing_tasks(environment)
 
         completed_dates = check_for_completed_tasks(environment)

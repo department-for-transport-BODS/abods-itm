@@ -215,7 +215,6 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                     records_to_update = []
                     for group_id, avls in avls_by_group_id.items():
                         if not group_id.endswith(process_date.isoformat()):
-                            logger.info(f"Group id {group_id} does not match process date {process_date.isoformat()}------------")
                             continue
 
                         # If there are avls from after midnight as well, add those
@@ -266,14 +265,8 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         routes_processed += processed_routes
                         total_matches += match_count
 
-                        # db_client.historic_update_success(
-                        #     deduplicated_matches,
-                        #     process_date,
-                        #     level,
-                        # )
                         logger.setLevel(initial_level)
                     
-                    logger.info(f"records_to_update------------{len(records_to_update)}")
                     db_client.insert_into_temp_table_for_update(records_to_update, process_date, level)
                     
 
@@ -361,30 +354,20 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
         else:
             operator_queue = Queue()
         
-        logger.info("Code should not be in prod***********")
         with duckdb.connect("avl_timetable.db") as conn:
             with log_execution_time(logger, "build_db"):
-                logger.info(f"local_avl_path date----{local_avl_path}")
                 # Input data is created in the convert_to_parquet function
                 conn.execute(f"""
                     CREATE OR REPLACE TABLE avl AS
                     SELECT *
                     FROM '{local_avl_path}'
                 """)  # noqa: S608 Not really sql injection
-                data1= conn.execute("SELECT DISTINCT date_of_journey FROM avl").fetchall()
-
-                for row in data1:
-                    logger.info(f"Distinct date----{row}")
 
                 conn.execute(f"""
                     INSERT INTO avl
                     SELECT *
                     FROM '{local_tomorrow_avl_path}'
                 """)  # noqa: S608 Not really sql injection
-                data1= conn.execute("SELECT DISTINCT date_of_journey FROM avl").fetchall()
-
-                for row in data1:
-                    logger.info(f"Distinct date******{row}")
                 
                 conn.execute(f"""
                     CREATE OR REPLACE TABLE timetable AS
@@ -442,7 +425,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
             worker.join()
 
         db_client.bulk_historic_update_success(process_date, initial_level)
-        #db_client.drop_temp_table_for_update(process_date)
+        db_client.drop_temp_table_for_update(process_date)
         logger.info("Finished processing AVL data")
     except Exception:
         logger.exception("An error occurred")
