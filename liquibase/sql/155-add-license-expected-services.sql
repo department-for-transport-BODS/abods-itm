@@ -1,6 +1,12 @@
-ALTER TABLE service_details ADD COLUMN IF NOT EXISTS license TEXT;
+
 
 DROP MATERIALIZED VIEW IF EXISTS public.expected_services;
+
+ALTER TABLE service_details
+ADD COLUMN IF NOT EXISTS admin_areas int[];
+
+ALTER TABLE service_details 
+ADD COLUMN IF NOT EXISTS license TEXT;
 
 CREATE MATERIALIZED VIEW public.expected_services
 TABLESPACE pg_default
@@ -26,5 +32,4 @@ WITH DATA;
 CREATE INDEX IF NOT EXISTS idx_expected_services_license
 ON public.expected_services(license);
 
-ALTER TABLE service_details
-ADD COLUMN admin_areas int[];
+
