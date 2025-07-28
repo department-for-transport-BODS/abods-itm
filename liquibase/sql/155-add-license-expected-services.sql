@@ -6,7 +6,7 @@ ALTER TABLE service_details
 ADD COLUMN IF NOT EXISTS admin_areas int[];
 
 ALTER TABLE service_details 
-ADD COLUMN IF NOT EXISTS license TEXT;
+ADD COLUMN IF NOT EXISTS license VARCHAR(255);
 
 CREATE MATERIALIZED VIEW public.expected_services
 TABLESPACE pg_default
