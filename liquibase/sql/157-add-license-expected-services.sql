@@ -1,0 +1,36 @@
+
+
+DROP MATERIALIZED VIEW IF EXISTS public.expected_services;
+
+ALTER TABLE service_details
+ADD COLUMN IF NOT EXISTS admin_areas int[];
+
+ALTER TABLE service_details 
+ADD COLUMN IF NOT EXISTS license VARCHAR(20);
+
+CREATE MATERIALIZED VIEW public.expected_services
+TABLESPACE pg_default
+AS
+SELECT DISTINCT 
+    esbd.date_of_journey,
+    sd.noc_and_line_and_servicecode,
+    sd.operator_noc,
+    sd.license,
+    sd.line_name,
+    sd.service_name,
+    esbd.admin_area_id,
+    esbd.total_distance,
+    esbd.avl_true_distance
+FROM 
+    expected_services_by_date esbd
+LEFT JOIN 
+    service_details sd 
+    ON esbd.noc_and_line_and_servicecode = sd.noc_and_line_and_servicecode
+WITH DATA;
+
+alter materialized view public.expected_services owner to abods_proxy_rw;
+
+CREATE INDEX IF NOT EXISTS idx_expected_services_license
+ON public.expected_services(license);
+
+
