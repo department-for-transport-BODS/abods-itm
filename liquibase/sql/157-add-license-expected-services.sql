@@ -28,6 +28,7 @@ LEFT JOIN
     ON esbd.noc_and_line_and_servicecode = sd.noc_and_line_and_servicecode
 WITH DATA;
 
+alter materialized view public.expected_services owner to abods_proxy_rw;
 
 CREATE INDEX IF NOT EXISTS idx_expected_services_license
 ON public.expected_services(license);
