@@ -493,4 +493,8 @@
     </changeSet>
     <changeSet id="157" author="abodsuser" >
         <sqlFile path="sql/157-add-license-expected-services.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="158" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/generate_timetable.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
