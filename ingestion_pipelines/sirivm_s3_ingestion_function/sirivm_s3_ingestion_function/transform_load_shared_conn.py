@@ -59,7 +59,7 @@ def parse_direction(vehicle_activity):  # noqa: ANN001, ANN201
     direction_ref_elem = vehicle_activity.find(".//siri:DirectionRef", NS)
     print(f'vehicle_activity----{vehicle_activity}')
     print(f'direction_ref_elem----{direction_ref_elem}')
-    if not direction_ref_elem:
+    if direction_ref_elem is None or not direction_ref_elem.text:
         return None
     print(f'text----{direction_ref_elem.text}')
     return direction_ref_elem.text
