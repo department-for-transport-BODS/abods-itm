@@ -49,7 +49,6 @@ def parse_xml(source, batch_id, source_type="string"):  # noqa: ANN001, ANN201 -
             service_delivery_timestamp,
             batch_id,
         )
-        print(f'extracted_data----{extracted_data}')
         if extracted_data:  # Ensure extracted_data is not None
             data.append(extracted_data)
     return data
@@ -57,11 +56,8 @@ def parse_xml(source, batch_id, source_type="string"):  # noqa: ANN001, ANN201 -
 
 def parse_direction(vehicle_activity):  # noqa: ANN001, ANN201
     direction_ref_elem = vehicle_activity.find(".//siri:DirectionRef", NS)
-    print(f'vehicle_activity----{vehicle_activity}')
-    print(f'direction_ref_elem----{direction_ref_elem}')
     if direction_ref_elem is None or not direction_ref_elem.text:
         return None
-    print(f'text----{direction_ref_elem.text}')
     return direction_ref_elem.text
 
 
@@ -95,9 +91,7 @@ def extract_data(vehicle_activity, service_delivery_timestamp, batch_id):  # noq
     operator_ref = vehicle_activity.find(".//siri:OperatorRef", NS).text
     vehicle_ref = vehicle_activity.find(".//siri:VehicleRef", NS).text
     direction_ref = parse_direction(vehicle_activity)
-    print(f"direction_ref-------{direction_ref}")
     direction_ref_normalized = normalize_direction(direction_ref)
-    print(f"direction_ref_normalized-------{direction_ref_normalized}")
 
     journey_ref_1_elem = vehicle_activity.find(
         ".//siri:FramedVehicleJourneyRef/siri:DatedVehicleJourneyRef",
