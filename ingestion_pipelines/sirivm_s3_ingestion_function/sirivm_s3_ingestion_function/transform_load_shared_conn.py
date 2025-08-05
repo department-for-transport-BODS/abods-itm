@@ -65,6 +65,7 @@ def extract_data(vehicle_activity, service_delivery_timestamp, batch_id):  # noq
     operator_ref = vehicle_activity.find(".//siri:OperatorRef", NS).text
     vehicle_ref = vehicle_activity.find(".//siri:VehicleRef", NS).text
     direction_ref_elem = vehicle_activity.find(".//siri:DirectionRef", NS)
+    print(f"direction_ref_elem------{direction_ref_elem}")
     direction_ref = direction_ref_elem.text if direction_ref_elem is not None else None
 
     journey_ref_1_elem = vehicle_activity.find(
