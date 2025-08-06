@@ -491,4 +491,7 @@
     <changeSet id="156" author="abodsuser" >
         <sqlFile path="sql/156-add-license-expected-services.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="157" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/populate_avl_recorded_expected_journeys.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
