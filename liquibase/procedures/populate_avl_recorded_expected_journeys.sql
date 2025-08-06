@@ -22,3 +22,4 @@ BEGIN
     RAISE NOTICE '% populate_avl_recorded_expected_journeys complete', clock_timestamp();
 END;
 $procedure$;
+
