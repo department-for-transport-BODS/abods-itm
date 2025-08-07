@@ -230,45 +230,6 @@ BEGIN
           incomplete_data_tmp_stops_with_invalid_gps_in_zone
       )
       AND date_of_journey = partition_date;
-     
- RAISE NOTICE '% Populating avl_recorded column in expected Journeys', clock_timestamp();
-
-	UPDATE public.expected_journeys
-	SET avl_recorded = null
-	WHERE date_of_journey = partition_date;
-
-	    -- Set avl_recorded to False for journeys missing operator NOCs
-	UPDATE public.expected_journeys
-	SET avl_recorded = FALSE
-	WHERE vehicle_journey_id IN (
-	    SELECT vehiclejourney_id 
-	    FROM incomplete_data_tmp_stops_without_operator_nocs
-	)
-	AND date_of_journey = partition_date;
-	
-	-- Set avl_recorded to False for journeys missing services
-	UPDATE public.expected_journeys
-	SET avl_recorded = FALSE
-	WHERE vehicle_journey_id IN (
-	    SELECT vehiclejourney_id 
-	    FROM incomplete_data_tmp_stops_without_services
-	)
-	AND date_of_journey = partition_date;
-	
-	-- Set avl_recorded to False for journeys missing journey codes
-	UPDATE public.expected_journeys
-	SET avl_recorded = FALSE
-	WHERE vehicle_journey_id IN (
-	    SELECT vehiclejourney_id 
-	    FROM incomplete_data_tmp_stops_without_journey_codes
-	)
-	AND date_of_journey = partition_date;
-	
-	-- Set avl_recorded to True for all remaining journeys
-	UPDATE public.expected_journeys
-	SET avl_recorded = TRUE
-	WHERE avl_recorded IS NULL
-	AND date_of_journey = partition_date;
 
     RAISE NOTICE '% Dropping temp tables', clock_timestamp();
 

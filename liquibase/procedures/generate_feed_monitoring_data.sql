@@ -54,12 +54,9 @@ begin
             create temporary table feedmon_temp_expected_journeys as
             select DISTINCT ej.operator_noc,
                             ej.group_id,
+                            ej.direction,
                             ej.expected_journey_start,
-                            case
-                                when ej.expected_journey_end < ej.expected_journey_start
-                                    then ej.expected_journey_end + interval '1 day'
-                                else ej.expected_journey_end
-                                end as expected_journey_end -- todo case can be removed when departure_day_shift is sorted
+                            ej.expected_journey_end -- todo case can be removed when departure_day_shift is sorted
             FROM public.expected_journeys ej -- expected_journeys
             WHERE ej.date_of_journey = date_trunc('day', start_time)
               AND ej.expected_journey_start < end_time
@@ -80,6 +77,7 @@ begin
 
             create temporary table feedmon_temp_valid_avl as
             select s.group_id,
+            	   s.direction_ref,
                    s.recorded_at_time
             from "SiriVMPositions" s
             where s.date_of_journey = date_trunc('day', start_time)
@@ -99,6 +97,7 @@ begin
             with grouped_by_group as (select gs.minute_series,
                                              fej.operator_noc,
                                              fej.group_id,
+                                             fej.direction,
                                              count(avl.recorded_at_time) as avl_records
                                       from generate_series(start_time, end_time - INTERVAL '1 minute',
                                                            INTERVAL '1 minute') as gs(minute_series)
@@ -109,16 +108,18 @@ begin
                                                left join
                                            feedmon_temp_valid_avl avl
                                            on avl.group_id = fej.group_id
+                                           	   and avl.direction_ref = fej.direction
                                                and avl.recorded_at_time >= gs.minute_series
                                                and avl.recorded_at_time < gs.minute_series + INTERVAL '1 minute'
                                       group by gs.minute_series,
                                                fej.operator_noc,
-                                               fej.group_id)
+                                               fej.group_id,
+                                               fej.direction)
             select date_trunc('day', minute_series)::date           as date_of_journey,
                    minute_series,
                    operator_noc,
-                   count(*)                                         as expected_distinct_group_id,
-                   sum(case when avl_records > 0 then 1 else 0 end) as actual_distinct_group_id,
+                   count(*)                                         as expected_distinct_group_id_direction,
+                   sum(case when avl_records > 0 then 1 else 0 end) as actual_distinct_group_id_direction,
                    sum(avl_records)                                 as actual_live_positions_per_minute
             from grouped_by_group
             group by date_trunc('day', minute_series)::date,
@@ -186,8 +187,8 @@ begin
 				date_of_journey,
 				operator_noc,
 				minute_series,
-				expected_distinct_group_id,
-				actual_distinct_group_id,
+				expected_distinct_group_id_direction,
+				actual_distinct_group_id_direction,
 				actual_live_positions_per_minute
 			from feedmon_temp_minute_rollup
             ',
@@ -214,16 +215,18 @@ begin
                 drop table if exists feedmon_temp_hour_rollup;
 
                 create temporary table feedmon_temp_hour_rollup as
-                with distinct_groups as (select distinct operator_noc, group_id
+                with distinct_groups as (select distinct operator_noc, group_id, direction
                                          from feedmon_temp_expected_journeys),
                      group_counts as (select fej.operator_noc,
                                              fej.group_id,
+                                             fej.direction,
                                              count(avl.recorded_at_time) as avl_records
                                       from distinct_groups fej
                                                left join feedmon_temp_valid_avl avl
                                                          on avl.group_id = fej.group_id
                                       group by fej.operator_noc,
-                                               fej.group_id)
+                                               fej.group_id,
+                                               fej.direction)
                 select operator_noc,
                        count(*)                                         as expected_distinct_group_id,
                        sum(case when avl_records > 0 then 1 else 0 end) as actual_distinct_group_id
