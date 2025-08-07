@@ -56,7 +56,7 @@ def parse_xml(source, batch_id, source_type="string"):  # noqa: ANN001, ANN201 -
 
 def parse_direction(vehicle_activity):  # noqa: ANN001, ANN201
     direction_ref_elem = vehicle_activity.find(".//siri:DirectionRef", NS)
-    if not direction_ref_elem:
+    if direction_ref_elem is None or not direction_ref_elem.text:
         return None
     return direction_ref_elem.text
 
