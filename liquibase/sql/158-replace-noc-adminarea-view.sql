@@ -20,6 +20,7 @@ CREATE OR REPLACE VIEW public.noc_adminarea
 AS SELECT national_operator_code, adminarea_id
 FROM public.noc_adminarea_import;
 
+ALTER VIEW IF EXISTS public.noc_adminarea OWNER TO abods_rw;
 
 CREATE OR REPLACE VIEW public.bods_organisationoperator
 AS SELECT oo.organisation_id,
