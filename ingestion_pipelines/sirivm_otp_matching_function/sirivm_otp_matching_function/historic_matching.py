@@ -1,7 +1,9 @@
 # This file is the entry point of an ECS task that performs a long-lived matching process.
 # It lives alongside the lambda code for ease of development
 
+import multiprocessing
 import os
+import platform
 import sys
 from datetime import UTC, date, datetime, timedelta
 from multiprocessing import Process, Queue
@@ -18,9 +20,7 @@ from .matcher.timetable_store import TimetableStore
 from .matcher.utils import log_execution_time
 
 if TYPE_CHECKING:
-    from .matcher.models import (
-        Stop,
-    )
+    from .matcher.models import Stop
 
 logger = Logger()
 initial_level = logger.log_level
@@ -197,6 +197,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                 total_stops = sum(len(route) for route in timetable.values())
                 total_matches = 0
                 routes_processed = 0
+                level = initial_level
 
                 with log_execution_time(
                     logger,
@@ -205,6 +206,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                     operator_timetables=len(timetable),
                     operator_ref=operator_ref,
                 ):
+                    records_to_update = []
                     for group_id, avls in avls_by_group_id.items():
                         if not group_id.endswith(process_date.isoformat()):
                             continue
@@ -226,8 +228,6 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
 
                         if group_id in group_ids_to_debug:
                             level = "DEBUG"
-                        else:
-                            level = initial_level
 
                         logger.setLevel(level)
 
@@ -249,6 +249,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                                 for match in journey_matches
                             }.values(),
                         )
+                        records_to_update.extend(deduplicated_matches)
                         if len(deduplicated_matches) < len(journey_matches):
                             logger.debug(
                                 "Found some duplicate matches for the same timetable id. Removed earlier ones",
@@ -258,12 +259,14 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         routes_processed += processed_routes
                         total_matches += match_count
 
-                        db_client.historic_update_success(
-                            deduplicated_matches,
-                            process_date,
-                            level,
-                        )
                         logger.setLevel(initial_level)
+
+                    db_client.insert_into_temp_table_for_update(
+                        records_to_update,
+                        process_date,
+                        level,
+                    )
+
                 logger.info(
                     "Processed operator data",
                     total_routes=total_routes,
@@ -343,23 +346,28 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
                 Key=remote_tomorrow_avl_path,
                 Filename=local_tomorrow_avl_path,
             )
+        if platform.system() == "Darwin":
+            operator_queue = multiprocessing.Manager().Queue()
+        else:
+            operator_queue = Queue()
 
-        operator_queue = Queue()
         with duckdb.connect("avl_timetable.db") as conn:
             with log_execution_time(logger, "build_db"):
                 # Input data is created in the convert_to_parquet function
                 conn.execute(f"""
-                    CREATE TABLE avl AS
+                    CREATE OR REPLACE TABLE avl AS
                     SELECT *
                     FROM '{local_avl_path}'
                 """)  # noqa: S608 Not really sql injection
+
                 conn.execute(f"""
                     INSERT INTO avl
                     SELECT *
                     FROM '{local_tomorrow_avl_path}'
                 """)  # noqa: S608 Not really sql injection
+
                 conn.execute(f"""
-                    CREATE TABLE timetable AS
+                    CREATE OR REPLACE TABLE timetable AS
                     SELECT *
                     FROM '{local_timetable_path}'
                 """)  # noqa: S608 Not really sql injection
@@ -378,6 +386,12 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
                         """,
                 ).fetchall():
                     operator_queue.put(row[0])
+
+        db_client = TimetableDBClient()
+
+        db_client.drop_temp_table_for_update(process_date)
+        db_client.create_temp_table_for_update(process_date)
+        db_client.create_indexes_temp_table(process_date)
 
         operator_count = (
             operator_queue.qsize()
@@ -407,6 +421,8 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
         for worker in workers:
             worker.join()
 
+        db_client.bulk_historic_update_success(process_date, initial_level)
+        db_client.drop_temp_table_for_update(process_date)
         logger.info("Finished processing AVL data")
     except Exception:
         logger.exception("An error occurred")

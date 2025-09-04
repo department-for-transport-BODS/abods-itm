@@ -1,9 +1,11 @@
-from collections.abc import Sequence
+import time
+from collections.abc import Iterable, Iterator, Sequence
 from datetime import date, timedelta
 from typing import Literal
 
-import psycopg2.extras
+import psycopg2
 from aws_lambda_powertools import Logger
+from psycopg2 import OperationalError, sql
 from psycopg2.extras import execute_values
 
 from .matcher.models import BadDbMatch, NewDbMatch
@@ -11,6 +13,10 @@ from .matcher.utils import timer
 from .shared.db import setup_db
 
 logger = Logger()
+
+TEMP_TABLE_FOR_HISTORIC_MATCHING = "temp_historic_timetable"
+MAX_RETRIES = 3
+RETRY_DELAY = 5
 
 
 def _update_batch_status(
@@ -26,31 +32,38 @@ def _update_batch_status(
     )
 
 
+def chunked(iterable: Iterable[list], chunk_size: int) -> Iterator[list]:
+    """Yield successive chunks from iterable."""
+    for i in range(0, len(iterable), chunk_size):
+        yield iterable[i : i + chunk_size]
+
+
 def execute_values_amended(
     cur: psycopg2.extensions.cursor,
     sql: str,
     values: list,
 ) -> None:
     logger.debug("Executing SQL query", sql=sql, values=values)
-    result = execute_values(
-        cur=cur,
-        sql=sql,
-        argslist=values,
-        fetch=True,
-    )
-    expected = len(values)
-    actual = len(result)
-    if expected == actual:
-        logger.debug("Updated all rows", expected=expected, actual=actual)
-    else:
-        result_timetable_id = [r[0] for r in result]
-        not_updated = [v for v in values if v[0] not in result_timetable_id]
-        logger.warning(
-            "An unexpected number of rows were updated",
-            not_updated=not_updated,
-            expected=expected,
-            actual=actual,
+    for batch in chunked(values, 2000):
+        result = execute_values(
+            cur=cur,
+            sql=sql,
+            argslist=batch,
+            fetch=True,
         )
+        expected = len(values)
+        actual = len(result)
+        if expected == actual:
+            logger.debug("Updated all rows", expected=expected, actual=actual)
+        else:
+            result_timetable_id = [r[0] for r in result]
+            not_updated = [v for v in values if v[0] not in result_timetable_id]
+            logger.warning(
+                "An unexpected number of rows were updated",
+                not_updated=not_updated,
+                expected=expected,
+                actual=actual,
+            )
 
 
 class TimetableDBClient:
@@ -139,6 +152,11 @@ class TimetableDBClient:
 
             _update_batch_status(cursor, batch_id, "Success")
 
+    def re_initialise_db_connection(self) -> None:
+        if self.connection.closed:
+            self.connection = setup_db()
+            self.re_initialise_db_connection()
+
     @timer(logger)
     def historic_update_success(
         self,
@@ -216,3 +234,236 @@ class TimetableDBClient:
                     """,  # noqa: S608
                     values=values,
                 )
+
+    @timer(logger)
+    def create_temp_table_for_update(self, process_date: str) -> None:
+        temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
+        create_table_query = sql.SQL("""
+            CREATE TABLE IF NOT EXISTS {table} (
+                timetable_id bigserial NOT NULL,
+                time_difference int4 NULL,
+                last_time_in_zone timestamptz NULL,
+                stop_type text NULL,
+                timestamp_after_estimate timestamptz NULL,
+                date_of_journey date NOT NULL,
+                previous_day_of_journey date NOT NULL
+            )
+        """).format(table=sql.Identifier(temp_table_name))
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(create_table_query)
+
+    @timer(logger)
+    def drop_temp_table_for_update(self, process_date: str) -> None:
+        temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
+        drop_table_query = sql.SQL("""
+            DROP TABLE IF EXISTS {table}
+        """).format(table=sql.Identifier(temp_table_name))
+        with self.connection.cursor() as cursor:
+            cursor.execute(drop_table_query)
+
+    @timer(logger)
+    def insert_into_temp_table_for_update(
+        self,
+        entries_to_update: Sequence[NewDbMatch],
+        process_date: date,
+        log_level: str | None = None,
+    ) -> None:
+        """Insert database to reflect successful historic matching"""
+        if log_level:
+            logger.setLevel(log_level)
+
+        temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date.isoformat()
+        for batch in chunked(entries_to_update, 10000):
+            # In historic matching, we know that the date we're working with is always the right,
+            # but it doesn't hurt to align the code with live matching, so that we can deduplicate later
+            alternate_date = process_date - timedelta(days=1)
+            values = [
+                (
+                    record["timetable_id"],
+                    record["time_difference"],
+                    record["last_time_in_zone"],
+                    record["stop_type"],
+                    record["timestamp_after_estimate"],
+                    process_date.isoformat(),
+                    alternate_date.isoformat(),
+                )
+                for record in batch
+            ]
+            for _ in range(1, MAX_RETRIES + 1):
+                try:
+                    if self.connection.closed:
+                        self.re_initialise_db_connection()
+                    with self.connection.cursor() as cursor:
+                        execute_values(
+                            cursor,
+                            sql.SQL(
+                                """
+                                    INSERT into {table} (
+                                        timetable_id,
+                                        time_difference,
+                                        last_time_in_zone,
+                                        stop_type,
+                                        timestamp_after_estimate,
+                                        date_of_journey,
+                                        previous_day_of_journey
+                                    ) VALUES %s
+                                """,
+                            ).format(table=sql.Identifier(temp_table_name)),
+                            values,
+                        )
+                        break
+                except OperationalError as e:
+                    if "SSL connection has been closed unexpectedly" in str(e):
+                        logger.info(
+                            f"Insert into temp table:: SSL Connection error:: {e}",
+                        )
+                        time.sleep(RETRY_DELAY)
+
+    @timer(logger)
+    def create_indexes_temp_table(self, process_date: str) -> None:
+        temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
+        if self.connection.closed:
+            self.re_initialise_db_connection()
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                sql.SQL(
+                    """CREATE INDEX {index} ON {table}(timetable_id,date_of_journey)""",
+                ).format(
+                    index=sql.Identifier("idx_id_1_" + temp_table_name),
+                    table=sql.Identifier(temp_table_name),
+                ),
+            )
+            cursor.execute(
+                sql.SQL(
+                    """CREATE INDEX {index} ON {table}(timetable_id,previous_day_of_journey)""",
+                ).format(
+                    index=sql.Identifier("idx_id_2_" + temp_table_name),
+                    table=sql.Identifier(temp_table_name),
+                ),
+            )
+
+    @timer(logger)
+    def bulk_historic_update_success(
+        self,
+        process_date: str,
+        log_level: str | None = None,
+    ) -> None:
+        """Bulk update database to reflect successful historic matching"""
+        if log_level:
+            logger.setLevel(log_level)
+
+        temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
+        batch_size = 20000
+        date_to_process = date.fromisoformat(process_date)
+        alternate_date = date_to_process - timedelta(days=1)
+
+        min_id, max_id = self._get_min_max_id(temp_table_name)
+        self._bulk_update_loop(
+            temp_table_name,
+            min_id,
+            max_id,
+            batch_size,
+            date_to_process,
+            alternate_date,
+        )
+
+    def _get_min_max_id(self, temp_table_name: str) -> tuple[int, int]:
+        for _ in range(1, MAX_RETRIES + 1):
+            try:
+                if self.connection.closed:
+                    self.re_initialise_db_connection()
+                with self.connection.cursor() as cursor:
+                    min_max_id_query = sql.SQL(
+                        """SELECT COALESCE(MAX(timetable_id),0), COALESCE(MIN(timetable_id),0) FROM {table}""",
+                    ).format(table=sql.Identifier(temp_table_name))
+                    cursor.execute(min_max_id_query)
+                    max_id, min_id = cursor.fetchone()
+                    return min_id, max_id
+            except OperationalError as e:
+                if "SSL connection has been closed unexpectedly" in str(e):
+                    logger.exception(
+                        "Bulk update:: SSL Connection error id between %s and %s",
+                        min_id,
+                        max_id,
+                    )
+                    time.sleep(RETRY_DELAY)
+        return 0, 0
+
+    def _bulk_update_loop(
+        self,
+        temp_table_name: str,
+        min_id: int,
+        max_id: int,
+        batch_size: int,
+        date_to_process: date,
+        alternate_date: date,
+    ) -> None:
+        while min_id <= max_id:
+            for _ in range(1, MAX_RETRIES + 1):
+                try:
+                    if self.connection.closed:
+                        self.re_initialise_db_connection()
+                    upper_id = min_id + batch_size
+                    with self.connection.cursor() as cursor:
+                        update_sql = sql.SQL("""
+                                with updated_matched_stats as (
+                                    select
+                                        th.timetable_id,
+                                        th.time_difference,
+                                        th.last_time_in_zone,
+                                        th.stop_type,
+                                        th.timestamp_after_estimate,
+                                        th.date_of_journey,
+                                        th.previous_day_of_journey,
+                                        pt.expected_departure_time,
+                                        pt.otp_state,
+                                        pt.set_down,
+                                        CASE
+                                            WHEN th.time_difference::int < 0 THEN
+                                                COALESCE(
+                                                        EXTRACT(epoch FROM(th.last_time_in_zone::timestamp AT TIME ZONE 'UTC' - pt.expected_departure_time)),
+                                                        EXTRACT(epoch FROM (th.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC' - pt.expected_departure_time))
+                                                )::int
+                                            ELSE th.time_difference::int
+                                        END as new_time_difference
+                                        FROM {table} th join public."Timetable" pt
+                                            ON
+                                                th.timetable_id=pt.timetable_id
+                                        WHERE th.timetable_id >= %s AND th.timetable_id < %s
+                                            AND pt.date_of_journey in (%s, %s)
+                                )
+                                UPDATE public."Timetable" u
+                                SET
+                                    otp_state = CASE
+                                                    WHEN t.new_time_difference > -7200 THEN
+                                                        CASE
+                                                            WHEN t.new_time_difference::int > 359 THEN 'Late'
+                                                            WHEN (t.stop_type = 'Non-final'
+                                                                AND (t.set_down IS NULL OR NOT t.set_down)
+                                                                AND t.new_time_difference::int < -60) THEN 'Early'
+                                                            ELSE 'OnTime'
+                                                        END
+                                                    ELSE t.otp_state
+                                                END,
+                                    time_difference = t.new_time_difference,
+                                    actual_departure_time = t.last_time_in_zone::timestamp AT TIME ZONE 'UTC',
+                                    timestamp_after_estimate = t.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC',
+                                    load_time_stamp = now()::timestamp(0)
+                                FROM updated_matched_stats t
+                                    WHERE u.timetable_id = t.timetable_id::bigint
+                                    AND u.date_of_journey IN (t.date_of_journey::date, t.previous_day_of_journey::date);
+                            """).format(table=sql.Identifier(temp_table_name))
+                        cursor.execute(
+                            update_sql,
+                            (min_id, upper_id, date_to_process, alternate_date),
+                        )
+                    min_id = upper_id
+                    break
+                except OperationalError as e:
+                    if "SSL connection has been closed unexpectedly" in str(e):
+                        logger.exception(
+                            f"Bulk update:: SSL Connection error id between {min_id} and {max_id}",
+                        )
+                        time.sleep(RETRY_DELAY)
