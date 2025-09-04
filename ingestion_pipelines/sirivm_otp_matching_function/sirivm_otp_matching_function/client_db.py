@@ -1,9 +1,9 @@
+import time
+import psycopg2
 from collections.abc import Sequence
 from datetime import date, timedelta
-import time
-from typing import Literal
+from typing import Iterable, Iterator, Literal
 
-import psycopg2.extras
 from aws_lambda_powertools import Logger
 from psycopg2.extras import execute_values
 from psycopg2 import OperationalError, sql
@@ -32,7 +32,7 @@ def _update_batch_status(
     )
 
 
-def chunked(iterable, chunk_size):
+def chunked(iterable: Iterable[list], chunk_size: int) -> Iterator[list]:
     """Yield successive chunks from iterable."""
     for i in range(0, len(iterable), chunk_size):
         yield iterable[i : i + chunk_size]
@@ -152,10 +152,10 @@ class TimetableDBClient:
 
             _update_batch_status(cursor, batch_id, "Success")
 
-    def reinitialiseDBConnection(self):
+    def re_initialise_db_connection(self):
         if self.connection.closed:
             self.connection = setup_db()
-            self.reinitialiseDBConnection()
+            self.re_initialise_db_connection()
 
     @timer(logger)
     def historic_update_success(
@@ -268,7 +268,7 @@ class TimetableDBClient:
         entries_to_update: Sequence[NewDbMatch],
         process_date: date,
         log_level: str | None = None,
-    ):
+    ) -> None:
         """Insert database to reflect successful historic matching"""
         if log_level:
             logger.setLevel(log_level)
@@ -293,7 +293,7 @@ class TimetableDBClient:
             for _ in range(1, MAX_RETRIES + 1):
                 try:
                     if self.connection.closed:
-                        self.reinitialiseDBConnection()
+                        self.re_initialise_db_connection()
                     with self.connection.cursor() as cursor:
                         execute_values(
                             cursor,
@@ -310,7 +310,7 @@ class TimetableDBClient:
                                     ) VALUES %s
                                 """
                             ).format(table=sql.Identifier(temp_table_name)),
-                            values,
+                            values
                         )
                         break
                 except OperationalError as e:
@@ -324,7 +324,7 @@ class TimetableDBClient:
     def create_indexes_temp_table(self, process_date: str) -> None:
         temp_table_name = TEMP_TABLE_FOR_HISTORIC_MATCHING + process_date
         if self.connection.closed:
-            self.reinitialiseDBConnection()
+            self.re_initialise_db_connection()
 
         with self.connection.cursor() as cursor:
             cursor.execute(
@@ -332,7 +332,7 @@ class TimetableDBClient:
                     """CREATE INDEX {index} ON {table}(timetable_id,date_of_journey)"""
                 ).format(
                     index=sql.Identifier("idx_id_1_" + temp_table_name),
-                    table=sql.Identifier(temp_table_name),
+                    table=sql.Identifier(temp_table_name)
                 )
             )
             cursor.execute(
@@ -340,7 +340,7 @@ class TimetableDBClient:
                     """CREATE INDEX {index} ON {table}(timetable_id,previous_day_of_journey)"""
                 ).format(
                     index=sql.Identifier("idx_id_2_" + temp_table_name),
-                    table=sql.Identifier(temp_table_name),
+                    table=sql.Identifier(temp_table_name)
                 )
             )
 
@@ -358,27 +358,44 @@ class TimetableDBClient:
         batch_size = 20000
         date_to_process = date.fromisoformat(process_date)
         alternate_date = date_to_process - timedelta(days=1)
+
+        min_id, max_id = self._get_min_max_id(temp_table_name)
+        self._bulk_update_loop(
+            temp_table_name, min_id, max_id, batch_size, date_to_process, alternate_date
+        )
+
+    def _get_min_max_id(self, temp_table_name: str) -> tuple[int, int]:
         for _ in range(1, MAX_RETRIES + 1):
             try:
                 if self.connection.closed:
-                    self.reinitialiseDBConnection()
+                    self.re_initialise_db_connection()
                 with self.connection.cursor() as cursor:
                     min_max_id_query = sql.SQL(
                         """SELECT COALESCE(MAX(timetable_id),0), COALESCE(MIN(timetable_id),0) FROM {table}"""
                     ).format(table=sql.Identifier(temp_table_name))
                     cursor.execute(min_max_id_query)
                     max_id, min_id = cursor.fetchone()
-                    break
+                    return min_id, max_id
             except OperationalError as e:
                 if "SSL connection has been closed unexpectedly" in str(e):
-                    logger.error(f"Query Min-Max:: SSL Connection error {e}")
+                    logger.exception(f"Query Min-Max:: SSL Connection error {e}")
                     time.sleep(RETRY_DELAY)
+        return 0, 0
 
+    def _bulk_update_loop(
+        self,
+        temp_table_name: str,
+        min_id: int,
+        max_id: int,
+        batch_size: int,
+        date_to_process: date,
+        alternate_date: date,
+    ) -> None:
         while min_id <= max_id:
             for _ in range(1, MAX_RETRIES + 1):
                 try:
                     if self.connection.closed:
-                        self.reinitialiseDBConnection()
+                        self.re_initialise_db_connection()
                     upper_id = min_id + batch_size
                     with self.connection.cursor() as cursor:
                         update_sql = sql.SQL("""
@@ -437,7 +454,7 @@ class TimetableDBClient:
                     break
                 except OperationalError as e:
                     if "SSL connection has been closed unexpectedly" in str(e):
-                        logger.error(
+                        logger.exception(
                             f"Bulk update:: SSL Connection error id between {min_id} and {max_id}:: {e}"
                         )
                         time.sleep(RETRY_DELAY)

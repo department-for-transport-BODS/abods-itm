@@ -4,19 +4,21 @@
 import json
 import os
 import subprocess
-from datetime import datetime, date, timedelta
-from subprocess import CalledProcessError
-from time import sleep
-from zoneinfo import ZoneInfo
-
 import boto3
-from botocore.config import Config
-
 import shutil
 
 import asyncio
 import re
 import concurrent.futures
+
+
+from datetime import datetime, date, timedelta
+from subprocess import CalledProcessError
+from time import sleep
+from zoneinfo import ZoneInfo
+
+from botocore.config import Config
+
 
 DB_USER = "root"
 BASE_PREFIX = "historic/"
