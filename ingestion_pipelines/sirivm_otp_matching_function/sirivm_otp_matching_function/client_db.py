@@ -2,7 +2,8 @@ import time
 import psycopg2
 from collections.abc import Sequence
 from datetime import date, timedelta
-from typing import Iterable, Iterator, Literal
+from collections.abc import Iterable, Iterator
+from typing import Literal
 
 from aws_lambda_powertools import Logger
 from psycopg2.extras import execute_values
@@ -152,7 +153,7 @@ class TimetableDBClient:
 
             _update_batch_status(cursor, batch_id, "Success")
 
-    def re_initialise_db_connection(self):
+    def re_initialise_db_connection(self) -> None:
         if self.connection.closed:
             self.connection = setup_db()
             self.re_initialise_db_connection()
@@ -308,9 +309,9 @@ class TimetableDBClient:
                                         date_of_journey,
                                         previous_day_of_journey
                                     ) VALUES %s
-                                """
+                                """,
                             ).format(table=sql.Identifier(temp_table_name)),
-                            values
+                            values,
                         )
                         break
                 except OperationalError as e:
