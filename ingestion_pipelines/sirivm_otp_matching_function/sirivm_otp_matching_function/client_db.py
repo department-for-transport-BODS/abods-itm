@@ -1,13 +1,13 @@
 import time
-import psycopg2
-from collections.abc import Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from datetime import date, timedelta
-from collections.abc import Iterable, Iterator
 from typing import Literal
 
-from aws_lambda_powertools import Logger
+import psycopg2
 from psycopg2.extras import execute_values
 from psycopg2 import OperationalError, sql
+
+from aws_lambda_powertools import Logger
 
 from .matcher.models import BadDbMatch, NewDbMatch
 from .matcher.utils import timer
