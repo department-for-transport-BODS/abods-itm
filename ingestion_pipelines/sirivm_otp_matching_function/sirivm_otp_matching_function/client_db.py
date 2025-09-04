@@ -329,19 +329,19 @@ class TimetableDBClient:
         with self.connection.cursor() as cursor:
             cursor.execute(
                 sql.SQL(
-                    """CREATE INDEX {index} ON {table}(timetable_id,date_of_journey)"""
+                    """CREATE INDEX {index} ON {table}(timetable_id,date_of_journey)""",
                 ).format(
                     index=sql.Identifier("idx_id_1_" + temp_table_name),
-                    table=sql.Identifier(temp_table_name)
-                )
+                    table=sql.Identifier(temp_table_name),
+                ),
             )
             cursor.execute(
                 sql.SQL(
-                    """CREATE INDEX {index} ON {table}(timetable_id,previous_day_of_journey)"""
+                    """CREATE INDEX {index} ON {table}(timetable_id,previous_day_of_journey)""",
                 ).format(
                     index=sql.Identifier("idx_id_2_" + temp_table_name),
-                    table=sql.Identifier(temp_table_name)
-                )
+                    table=sql.Identifier(temp_table_name),
+                ),
             )
 
     @timer(logger)
@@ -361,7 +361,7 @@ class TimetableDBClient:
 
         min_id, max_id = self._get_min_max_id(temp_table_name)
         self._bulk_update_loop(
-            temp_table_name, min_id, max_id, batch_size, date_to_process, alternate_date
+            temp_table_name, min_id, max_id, batch_size, date_to_process, alternate_date,
         )
 
     def _get_min_max_id(self, temp_table_name: str) -> tuple[int, int]:
@@ -371,7 +371,7 @@ class TimetableDBClient:
                     self.re_initialise_db_connection()
                 with self.connection.cursor() as cursor:
                     min_max_id_query = sql.SQL(
-                        """SELECT COALESCE(MAX(timetable_id),0), COALESCE(MIN(timetable_id),0) FROM {table}"""
+                        """SELECT COALESCE(MAX(timetable_id),0), COALESCE(MIN(timetable_id),0) FROM {table}""",
                     ).format(table=sql.Identifier(temp_table_name))
                     cursor.execute(min_max_id_query)
                     max_id, min_id = cursor.fetchone()
