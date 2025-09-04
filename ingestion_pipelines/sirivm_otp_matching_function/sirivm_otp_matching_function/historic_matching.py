@@ -19,11 +19,8 @@ from .matcher.matching import match_group_id_avls
 from .matcher.timetable_store import TimetableStore
 from .matcher.utils import log_execution_time
 
-
 if TYPE_CHECKING:
-    from .matcher.models import (
-        Stop,
-    )
+    from .matcher.models import Stop
 
 logger = Logger()
 initial_level = logger.log_level
