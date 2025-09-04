@@ -378,7 +378,7 @@ class TimetableDBClient:
                     return min_id, max_id
             except OperationalError as e:
                 if "SSL connection has been closed unexpectedly" in str(e):
-                    logger.exception(f"Query Min-Max:: SSL Connection error {e}")
+                    logger.exception(f"Query Min-Max:: SSL Connection error")
                     time.sleep(RETRY_DELAY)
         return 0, 0
 
@@ -400,17 +400,17 @@ class TimetableDBClient:
                     with self.connection.cursor() as cursor:
                         update_sql = sql.SQL("""
                                 with updated_matched_stats as (
-                                    select 
-                                        th.timetable_id, 
+                                    select
+                                        th.timetable_id,
                                         th.time_difference,
                                         th.last_time_in_zone,
                                         th.stop_type,
                                         th.timestamp_after_estimate,
                                         th.date_of_journey,
                                         th.previous_day_of_journey,
-                                        pt.expected_departure_time, 
-                                        pt.otp_state, 
-                                        pt.set_down, 
+                                        pt.expected_departure_time,
+                                        pt.otp_state,
+                                        pt.set_down,
                                         CASE
                                             WHEN th.time_difference::int < 0 THEN
                                                 COALESCE(
@@ -418,15 +418,15 @@ class TimetableDBClient:
                                                         EXTRACT(epoch FROM (th.timestamp_after_estimate::timestamp AT TIME ZONE 'UTC' - pt.expected_departure_time))
                                                 )::int
                                             ELSE th.time_difference::int
-                                        END as new_time_difference 
-                                        FROM {table} th join public."Timetable" pt 
-                                            ON 
-                                                th.timetable_id=pt.timetable_id 
+                                        END as new_time_difference
+                                        FROM {table} th join public."Timetable" pt
+                                            ON
+                                                th.timetable_id=pt.timetable_id
                                         WHERE th.timetable_id >= %s AND th.timetable_id < %s
                                             AND pt.date_of_journey in (%s, %s)
-                                ) 
+                                )
                                 UPDATE public."Timetable" u
-                                SET 
+                                SET
                                     otp_state = CASE
                                                     WHEN t.new_time_difference > -7200 THEN
                                                         CASE
@@ -455,6 +455,6 @@ class TimetableDBClient:
                 except OperationalError as e:
                     if "SSL connection has been closed unexpectedly" in str(e):
                         logger.exception(
-                            f"Bulk update:: SSL Connection error id between {min_id} and {max_id}:: {e}"
+                            f"Bulk update:: SSL Connection error id between {min_id} and {max_id}",
                         )
                         time.sleep(RETRY_DELAY)

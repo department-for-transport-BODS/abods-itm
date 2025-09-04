@@ -2,19 +2,16 @@
 # It lives alongside the lambda code for ease of development
 
 import multiprocessing
-from multiprocessing.managers import ListProxy
 import os
 import sys
 from datetime import UTC, date, datetime, timedelta
 from multiprocessing import Process, Queue
 from queue import Empty
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 import boto3
 import duckdb
 from aws_lambda_powertools import Logger
-
-from .matcher.models import NewDbMatch
 
 from .client_db import TimetableDBClient
 from .matcher.matching import match_group_id_avls
