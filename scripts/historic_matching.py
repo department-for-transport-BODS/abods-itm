@@ -22,7 +22,7 @@ DB_USER = "root"
 BASE_PREFIX = "historic/"
 MAX_LIVE_MATCHING_QUEUE_LENGTH = 6
 MAX_CONCURRENT_MATCHING_TASKS = 5
-ENV_IS_LOCAL = 'IS_LOCAL'
+ENV_IS_LOCAL = "IS_LOCAL"
 
 custom_executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 
@@ -30,11 +30,11 @@ s3 = boto3.client("s3")
 paginator = s3.get_paginator("list_objects_v2")
 
 lambda_client = boto3.client(
-        "lambda",
-        config=Config(
-            read_timeout=15 * 60,
-        ),
-    )
+    "lambda",
+    config=Config(
+        read_timeout=15 * 60,
+    ),
+)
 
 
 def get_db_host(environment: str):
@@ -190,22 +190,22 @@ def run_query(query: str, db_host: str, db_password: str):
     psql_path = shutil.which("psql")
     if not psql_path:
         raise RuntimeError("psql not found in PATH")
-    
+
     cmd = [
-            # This is where it's installed on the bastion, doesn't seem to be on PATH when called by subprocess
-            psql_path,
-            "--echo-queries",
-            "--dbname=abods",
-            "-h",
-            db_host,
-            "-U",
-            DB_USER,
-            "-c",
-            query,
-        ]
-    
+        # This is where it's installed on the bastion, doesn't seem to be on PATH when called by subprocess
+        psql_path,
+        "--echo-queries",
+        "--dbname=abods",
+        "-h",
+        db_host,
+        "-U",
+        DB_USER,
+        "-c",
+        query,
+    ]
+
     if os.environ.get(ENV_IS_LOCAL) == "true":
-        cmd.extend(["-p", '15432'])
+        cmd.extend(["-p", "15432"])
 
     subprocess.run(
         cmd,
@@ -240,7 +240,13 @@ def subset_avl_export(db_password: str, db_host: str, process_date: date):
     )
 
 
-def timetable_export(db_password: str, db_host: str, process_date: date, subset: bool, journeys_sql_list: str = None):
+def timetable_export(
+    db_password: str,
+    db_host: str,
+    process_date: date,
+    subset: bool,
+    journeys_sql_list: str = None,
+):
     if subset:
         run_query(
             f"CALL historic_timetable_export_unregistered_subset('{process_date.isoformat()}');",
@@ -262,7 +268,9 @@ def timetable_export(db_password: str, db_host: str, process_date: date, subset:
         )
 
 
-def avl_export(db_password: str, db_host: str, process_date: date, journeys_sql_list: str = None):
+def avl_export(
+    db_password: str, db_host: str, process_date: date, journeys_sql_list: str = None
+):
     if journeys_sql_list:
         run_query(
             f"CALL historic_subset_avl_export('{process_date.isoformat()}',ARRAY[{journeys_sql_list}]::text[]);",
@@ -293,12 +301,12 @@ def convert_avl_to_parquet(process_date: date, environment: str):
     print(f"Lambda returned {response['StatusCode']}")
     print(json.loads(response["Payload"].read()))
 
-    
+
 def convert_to_parquet(process_date: date, environment: str):
     print("Converting timetable csv data to parquet format")
     response = lambda_client.invoke(
         FunctionName=f"abods-{environment}-convert-to-parquet-function",
-        InvocationType='RequestResponse',
+        InvocationType="RequestResponse",
         Payload=json.dumps(
             {
                 "process_date": process_date.isoformat(),
@@ -483,7 +491,9 @@ def which_files_exist(current: date, files: list[str]):
 
 def main():
     while True:
-        environment = input("Which environment? (prod|uat|sandbox|local): ").strip().lower()
+        environment = (
+            input("Which environment? (prod|uat|sandbox|local): ").strip().lower()
+        )
         if environment == "local":
             os.environ[ENV_IS_LOCAL] = "true"
             environment = "sandbox"
@@ -496,11 +506,11 @@ def main():
             break
         print("Wrong, try again")
 
-    sirivm_bucket= f'abods-{environment}-exporter-bucket'
+    sirivm_bucket = f"abods-{environment}-exporter-bucket"
     db_host = get_db_host(environment)
 
     if os.environ.get(ENV_IS_LOCAL) == "true":
-        db_host='127.0.0.1'
+        db_host = "127.0.0.1"
 
     subset = get_boolean_input("Process only unregistered subset?")
     force_timetable_export = False
@@ -526,12 +536,14 @@ def main():
                 data["process_date"].isoformat() for arn, data in running_tasks.items()
             )
         )
-    
-    input_journeys = input("Enter journey group ids (comma-separated values of format opref|line|journeycode|journeydate):")
+
+    input_journeys = input(
+        "Enter journey group ids (comma-separated values of format opref|line|journeycode|journeydate):"
+    )
     skip_summary_generation = get_boolean_input("Generating summaries?")
 
-    raw_values = [v.strip() for v in input_journeys.lower().split(',') if v.strip()]
-    pattern = re.compile(r'^([^|]+\|){3}\d{4}-\d{2}-\d{2}$')
+    raw_values = [v.strip() for v in input_journeys.lower().split(",") if v.strip()]
+    pattern = re.compile(r"^([^|]+\|){3}\d{4}-\d{2}-\d{2}$")
     journeys = [v for v in raw_values if pattern.match(v)]
     sql_quoted_journeys = [f"'{v}'" for v in journeys]
     sql_list_journeys = ", ".join(sql_quoted_journeys)
@@ -541,7 +553,7 @@ def main():
     avl_export_needed = []
     avl_parquet_only = []
     timetable_export_needed = []
-    timetable_parquet_only= []
+    timetable_parquet_only = []
     ready_to_run = []
 
     def prep_data(current: date, include_timetable_export: bool = False):
@@ -563,7 +575,6 @@ def main():
             if current_data["timetable_csv"] and not current_data["timetable_parquet"]:
                 timetable_parquet_only.append(current)
 
-
     for current in process_dates:
         prep_data(current, include_timetable_export=True)
 
@@ -572,13 +583,22 @@ def main():
             continue
         prep_data(next_day)
 
-
     async def csv_to_parquet(avl_parquet: list[date], timetable_parquet: list[date]):
         loop = asyncio.get_running_loop()
-        avl_parquet_tasks = [loop.run_in_executor(custom_executor, convert_avl_to_parquet, current, environment) for current in avl_parquet]
-        timetable_parquet_tasks = [loop.run_in_executor(custom_executor, convert_to_parquet, current, environment) for current in timetable_parquet]
-        await asyncio.gather(*avl_parquet_tasks,*timetable_parquet_tasks)
-    
+        avl_parquet_tasks = [
+            loop.run_in_executor(
+                custom_executor, convert_avl_to_parquet, current, environment
+            )
+            for current in avl_parquet
+        ]
+        timetable_parquet_tasks = [
+            loop.run_in_executor(
+                custom_executor, convert_to_parquet, current, environment
+            )
+            for current in timetable_parquet
+        ]
+        await asyncio.gather(*avl_parquet_tasks, *timetable_parquet_tasks)
+
     ready_to_run = sorted(ready_to_run)
     avl_export_needed = sorted(avl_export_needed)
     timetable_export_needed = sorted(timetable_export_needed)
@@ -605,13 +625,13 @@ def main():
             regenerate_timetables = get_boolean_input(
                 "Should timetable data be re-generated before export?"
             )
-    
+
     if regenerate_timetables:
         print("Will regenerate timetables")
 
     db_password = get_db_password(environment)
 
-    asyncio.run(csv_to_parquet(avl_parquet_only,timetable_parquet_only))
+    asyncio.run(csv_to_parquet(avl_parquet_only, timetable_parquet_only))
 
     async def csv_export(export_tasks: list):
         await asyncio.gather(*export_tasks)
@@ -619,31 +639,43 @@ def main():
     env = os.environ.copy()
     env["SIRIVM_BUCKET"] = sirivm_bucket
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    working_dir = os.path.join(root_dir, "ingestion_pipelines","sirivm_otp_matching_function")
+    working_dir = os.path.join(
+        root_dir, "ingestion_pipelines", "sirivm_otp_matching_function"
+    )
 
     summaries_to_run = []
     failed_summaries = []
     avl_exported = []
 
     process_date_array = sorted(process_dates)
-    while (
-        process_date_array
-        or running_tasks
-        or summaries_to_run
-    ):
-        avl_parquet_tasks=[]
-        timetable_parquet_tasks=[]
-        export_task=[]
+    while process_date_array or running_tasks or summaries_to_run:
+        avl_parquet_tasks = []
+        timetable_parquet_tasks = []
+        export_task = []
         if process_date_array and len(running_tasks) < MAX_CONCURRENT_MATCHING_TASKS:
             process_date = process_date_array.pop(0)
             next_day = process_date + timedelta(days=1)
             if process_date in avl_export_needed:
-                export_task.append(asyncio.to_thread(avl_export,db_password, db_host, process_date, sql_list_journeys))
-                timetable_export_needed = sorted({*timetable_export_needed, process_date})
+                export_task.append(
+                    asyncio.to_thread(
+                        avl_export,
+                        db_password,
+                        db_host,
+                        process_date,
+                        sql_list_journeys,
+                    )
+                )
+                timetable_export_needed = sorted(
+                    {*timetable_export_needed, process_date}
+                )
                 avl_parquet_tasks.append(process_date)
-            
+
             if next_day in avl_export_needed and next_day not in avl_exported:
-                export_task.append(asyncio.to_thread(avl_export,db_password, db_host, next_day, sql_list_journeys))
+                export_task.append(
+                    asyncio.to_thread(
+                        avl_export, db_password, db_host, next_day, sql_list_journeys
+                    )
+                )
                 avl_exported.append(next_day)
                 avl_parquet_tasks.append(next_day)
 
@@ -652,35 +684,44 @@ def main():
                     timetable_generation(
                         db_password, db_host, process_date, environment, subset
                     )
-                export_task.append(asyncio.to_thread(timetable_export,db_password, db_host, process_date, subset, sql_list_journeys))
+                export_task.append(
+                    asyncio.to_thread(
+                        timetable_export,
+                        db_password,
+                        db_host,
+                        process_date,
+                        subset,
+                        sql_list_journeys,
+                    )
+                )
                 timetable_parquet_tasks.append(process_date)
 
             asyncio.run(csv_export(export_task))
-            asyncio.run(csv_to_parquet(avl_parquet_tasks,timetable_parquet_tasks))
+            asyncio.run(csv_to_parquet(avl_parquet_tasks, timetable_parquet_tasks))
             if os.environ.get(ENV_IS_LOCAL) == "true":
                 env["PROCESS_DATE"] = process_date.strftime("%Y-%m-%d")
                 env["POSTGRES_HOST"] = "127.0.0.1"
                 env["POSTGRES_PORT"] = "15432"
                 env["POSTGRES_USER"] = DB_USER
                 env["POSTGRES_DB"] = "abods"
-                env["LOCAL_DB_PASSWORD"]= db_password
+                env["LOCAL_DB_PASSWORD"] = db_password
                 subprocess.run(
-                    ["python","-m", "sirivm_otp_matching_function.historic_matching"],
+                    ["python", "-m", "sirivm_otp_matching_function.historic_matching"],
                     cwd=working_dir,
                     env=env,
-                    check=True
+                    check=True,
                 )
             else:
                 start_historic_matching(process_date, environment)
             print(
-                        f"{current_time_london().isoformat()}: Dates still queued for matching: {';'.join(d.isoformat() for d in process_date_array)}"
-                    )
+                f"{current_time_london().isoformat()}: Dates still queued for matching: {';'.join(d.isoformat() for d in process_date_array)}"
+            )
 
         if not os.environ.get(ENV_IS_LOCAL):
             look_for_existing_tasks(environment)
 
         completed_dates = check_for_completed_tasks(environment)
-        
+
         if not skip_summary_generation:
             sleep(60)
             continue
@@ -711,7 +752,6 @@ def main():
             continue
 
         sleep(60)
-
 
     print("All processing complete")
     if failed_summaries:

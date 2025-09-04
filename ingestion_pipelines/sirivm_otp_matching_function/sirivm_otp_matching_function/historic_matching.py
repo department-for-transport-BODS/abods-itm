@@ -266,9 +266,10 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         total_matches += match_count
 
                         logger.setLevel(initial_level)
-                    
-                    db_client.insert_into_temp_table_for_update(records_to_update, process_date, level)
-                    
+
+                    db_client.insert_into_temp_table_for_update(
+                        records_to_update, process_date, level
+                    )
 
                 logger.info(
                     "Processed operator data",
@@ -353,7 +354,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
             operator_queue = multiprocessing.Manager().Queue()
         else:
             operator_queue = Queue()
-        
+
         with duckdb.connect("avl_timetable.db") as conn:
             with log_execution_time(logger, "build_db"):
                 # Input data is created in the convert_to_parquet function
@@ -368,7 +369,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
                     SELECT *
                     FROM '{local_tomorrow_avl_path}'
                 """)  # noqa: S608 Not really sql injection
-                
+
                 conn.execute(f"""
                     CREATE OR REPLACE TABLE timetable AS
                     SELECT *
@@ -391,7 +392,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
                     operator_queue.put(row[0])
 
         db_client = TimetableDBClient()
-        
+
         db_client.drop_temp_table_for_update(process_date)
         db_client.create_temp_table_for_update(process_date)
         db_client.create_indexes_temp_table(process_date)
@@ -412,7 +413,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, C901 Complexity not much of an is
         for i in range(num_workers):
             worker = Process(
                 target=operator_worker_task,
-                args=(process_date, operator_count, operator_queue,i),
+                args=(process_date, operator_count, operator_queue, i),
             )
             worker.start()
             workers.append(worker)

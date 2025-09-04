@@ -1,7 +1,7 @@
 SELECT cron.schedule(
                'Update headway & SiriVMposition id',
                '00 01 * * *', -- at 01:00
-               $$CALL public.populate_headway(CURRENT_DATE - 2);CALL public.populate_headway(CURRENT_DATE - 1);CALL public.incomplete_data_load(CURRENT_DATE - 2);CALL public.incomplete_data_load(CURRENT_DATE - 1);$$
+               $$CALL public.populate_headway(CURRENT_DATE - 2);CALL public.populate_headway(CURRENT_DATE - 1);CALL public.incomplete_data_load(CURRENT_DATE - 2);CALL populate_avl_recorded_expected_journeys(CURRENT_DATE - 2);CALL public.incomplete_data_load(CURRENT_DATE - 1);CALL populate_avl_recorded_expected_journeys(CURRENT_DATE - 1);$$
        );
 
 SELECT cron.schedule(
