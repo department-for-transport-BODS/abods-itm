@@ -316,7 +316,7 @@ class TimetableDBClient:
                 except OperationalError as e:
                     if "SSL connection has been closed unexpectedly" in str(e):
                         logger.info(
-                            f"Insert into temp table:: SSL Connection error:: {e}"
+                            f"Insert into temp table:: SSL Connection error:: {e}",
                         )
                         time.sleep(RETRY_DELAY)
 
