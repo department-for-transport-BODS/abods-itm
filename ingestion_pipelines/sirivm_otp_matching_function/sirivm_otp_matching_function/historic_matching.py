@@ -3,6 +3,7 @@
 
 import multiprocessing
 import os
+import platform
 import sys
 from datetime import UTC, date, datetime, timedelta
 from multiprocessing import Process, Queue
@@ -18,7 +19,6 @@ from .matcher.matching import match_group_id_avls
 from .matcher.timetable_store import TimetableStore
 from .matcher.utils import log_execution_time
 
-import platform
 
 if TYPE_CHECKING:
     from .matcher.models import (
@@ -265,7 +265,7 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         logger.setLevel(initial_level)
 
                     db_client.insert_into_temp_table_for_update(
-                        records_to_update, process_date, level
+                        records_to_update, process_date, level,
                     )
 
                 logger.info(

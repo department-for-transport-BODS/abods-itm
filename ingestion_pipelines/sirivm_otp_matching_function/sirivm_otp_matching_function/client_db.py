@@ -378,7 +378,11 @@ class TimetableDBClient:
                     return min_id, max_id
             except OperationalError as e:
                 if "SSL connection has been closed unexpectedly" in str(e):
-                    logger.exception(f"Query Min-Max:: SSL Connection error")
+                    logger.exception(
+                            "Bulk update:: SSL Connection error id between %s and %s",
+                            min_id,
+                            max_id,
+                        )
                     time.sleep(RETRY_DELAY)
         return 0, 0
 
