@@ -4,8 +4,8 @@ from datetime import date, timedelta
 from typing import Literal
 
 import psycopg2
-from psycopg2.extras import execute_values
 from psycopg2 import OperationalError, sql
+from psycopg2.extras import execute_values
 
 from aws_lambda_powertools import Logger
 
