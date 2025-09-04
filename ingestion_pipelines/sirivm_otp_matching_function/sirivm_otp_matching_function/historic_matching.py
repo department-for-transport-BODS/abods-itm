@@ -262,7 +262,9 @@ def operator_worker_task(  # noqa: PLR0912, PLR0915, C901 Complexity not much of
                         logger.setLevel(initial_level)
 
                     db_client.insert_into_temp_table_for_update(
-                        records_to_update, process_date, level,
+                        records_to_update,
+                        process_date,
+                        level,
                     )
 
                 logger.info(

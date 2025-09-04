@@ -361,7 +361,12 @@ class TimetableDBClient:
 
         min_id, max_id = self._get_min_max_id(temp_table_name)
         self._bulk_update_loop(
-            temp_table_name, min_id, max_id, batch_size, date_to_process, alternate_date,
+            temp_table_name,
+            min_id,
+            max_id,
+            batch_size,
+            date_to_process,
+            alternate_date,
         )
 
     def _get_min_max_id(self, temp_table_name: str) -> tuple[int, int]:
@@ -379,10 +384,10 @@ class TimetableDBClient:
             except OperationalError as e:
                 if "SSL connection has been closed unexpectedly" in str(e):
                     logger.exception(
-                            "Bulk update:: SSL Connection error id between %s and %s",
-                            min_id,
-                            max_id,
-                        )
+                        "Bulk update:: SSL Connection error id between %s and %s",
+                        min_id,
+                        max_id,
+                    )
                     time.sleep(RETRY_DELAY)
         return 0, 0
 
