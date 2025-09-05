@@ -4,7 +4,7 @@ CREATE OR REPLACE PROCEDURE public.update_expected_service_distances(
 LANGUAGE plpgsql
 AS $procedure$
 BEGIN
-    WITH distinct_timetable AS (
+    WITH journeys AS (
         SELECT DISTINCT vehiclejourney_id, servicepattern_id
         FROM public."Timetable"
         WHERE date_of_journey = partition_date
