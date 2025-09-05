@@ -65,3 +65,4 @@ BEGIN
     REFRESH MATERIALIZED VIEW expected_services;
 END;
 $procedure$;
+
