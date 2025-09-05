@@ -20,7 +20,7 @@ BEGIN
         FROM 
             public.expected_journeys ej
         JOIN 
-            distinct_timetable dt
+            journeys dt
             ON dt.vehiclejourney_id = ej.vehicle_journey_id
         GROUP BY 
             dt.servicepattern_id,
