@@ -652,6 +652,13 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
         BlockPublicPolicy: true
+      VersioningConfiguration:
+        Status: !Sub '${VersioningConfiguration}'
+      Tags:
+        - Key: backup
+          Value: !Sub '${BackupEnabled}'
+        - Key: backup_plan
+          Value: bods-backup
 
   ExporterBucket:
     Type: AWS::S3::Bucket
@@ -666,6 +673,13 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
         BlockPublicPolicy: true
+      VersioningConfiguration:
+        Status: !Sub '${VersioningConfiguration}'
+      Tags:
+        - Key: backup
+          Value: !Sub '${BackupEnabled}'
+        - Key: backup_plan
+          Value: bods-backup
 
   SiriVmIngestionQueue:
     Type: AWS::SQS::Queue
