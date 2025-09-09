@@ -34,6 +34,12 @@ Parameters:
   VpcSubnets:
     Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
     Default: ''
+  VersioningConfiguration:
+    Type: String
+    Default: 'Suspended'
+  BackupEnabled:
+    Type: String
+    Default: 'false'
 
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, 'local']]
