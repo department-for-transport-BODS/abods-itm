@@ -3,7 +3,7 @@ create or replace procedure update_transmodel_nonoperatingdatesexceptions()
 as
 $$
 declare
-    max_current int := coalesce((select max(id)
+    max_current int8 := coalesce((select max(id)
                                  from public.transmodel_nonoperatingdatesexceptions), 0);
 begin
     insert into public.transmodel_nonoperatingdatesexceptions (id,

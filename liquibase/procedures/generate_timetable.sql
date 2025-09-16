@@ -103,7 +103,7 @@ begin
                     inactive_at_date_prequery
                   WHERE
                         id_rank = 1
-                    AND modified < query_date
+                    AND COALESCE(modified_before_reprocessing, modified) <= query_date
                     AND status IN (''inactive'', ''expired'')
                 ),
                 ranked_revisions AS (
@@ -1075,7 +1075,11 @@ begin
               t.servicepattern_id,
               t.vehiclejourney_id,
               t.admin_area_id,
-              t.direction,
+	      CASE
+	      	WHEN t.direction = ''clockwise'' THEN ''outbound''
+		WHEN t.direction = ''antiClockwise'' THEN ''inbound''
+		ELSE LOWER(TRIM(REGEXP_REPLACE(t.direction, ''[^a-zA-Z]'', '''', ''g'')))
+	      END AS direction,
               t.departure_day_shift,
               t.registered,
               CASE

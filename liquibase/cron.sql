@@ -1,7 +1,7 @@
 SELECT cron.schedule(
                'Update headway & SiriVMposition id',
                '00 01 * * *', -- at 01:00
-               $$CALL public.populate_headway(CURRENT_DATE - 2);CALL public.populate_headway(CURRENT_DATE - 1);CALL public.incomplete_data_load(CURRENT_DATE - 2);CALL public.incomplete_data_load(CURRENT_DATE - 1);$$
+               $$CALL public.populate_headway(CURRENT_DATE - 2);CALL public.populate_headway(CURRENT_DATE - 1);CALL public.incomplete_data_load(CURRENT_DATE - 2);CALL populate_avl_recorded_expected_journeys(CURRENT_DATE - 2);CALL public.incomplete_data_load(CURRENT_DATE - 1);CALL populate_avl_recorded_expected_journeys(CURRENT_DATE - 1);$$
        );
 
 SELECT cron.schedule(
@@ -114,4 +114,16 @@ SELECT cron.schedule(
                'export data for historic matching',
                '30 17 * * *', -- at 17:30
                $$CALL historic_timetable_export(CURRENT_DATE - 1);CALL historic_avl_export(CURRENT_DATE - 1);$$
+       );
+
+SELECT cron.schedule(
+               'delete sirivm data 6 months ago (the week leading up to)',
+               '15 17 * * *', -- at 17:15
+               $$CALL drop_sirivm_partitions_in_range((CURRENT_DATE - INTERVAL '6 months 7 days')::date,(CURRENT_DATE - INTERVAL '6 months')::date);$$
+       );
+
+SELECT cron.schedule(
+               'populate distances in expected services',
+               '30 4 * * *', -- at 04:30
+               $$CALL update_expected_service_distances(CURRENT_DATE - 1);CALL update_expected_service_distances(CURRENT_DATE - 2);$$
        );

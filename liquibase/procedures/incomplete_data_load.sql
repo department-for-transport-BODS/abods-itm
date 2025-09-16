@@ -12,7 +12,8 @@ BEGIN
 
     CREATE TABLE incomplete_data_tmp_stops_without_operator_nocs AS
     SELECT
-      timetable_id
+      timetable_id,
+      vehiclejourney_id
     FROM
       public."Timetable" t
     WHERE t.date_of_journey = partition_date
@@ -35,7 +36,8 @@ BEGIN
 
     CREATE TABLE incomplete_data_tmp_stops_without_journey_codes AS
     SELECT
-      timetable_id
+      timetable_id,
+      vehiclejourney_id
     FROM
       public."Timetable" t
     WHERE date_of_journey = partition_date
@@ -48,6 +50,7 @@ BEGIN
           public."Timetable" t2
           JOIN public."SiriVMPositions" s
             ON t2.group_id = s.group_id
+            AND t2.direction = s.direction_ref
         WHERE t2.timetable_id = t.timetable_id
           AND t2.date_of_journey = partition_date
           AND t2.expected_departure_time < earliest_departure_time
@@ -71,7 +74,8 @@ BEGIN
 
     CREATE TABLE incomplete_data_tmp_stops_without_services AS
     SELECT
-      t.timetable_id
+      t.timetable_id,
+      vehiclejourney_id
     FROM
       public."Timetable" t
     WHERE t.date_of_journey = partition_date

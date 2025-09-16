@@ -16,7 +16,7 @@ SHORT_JOURNEY_STOP_COUNT = 3
 END_OF_JOURNEY_PROPORTION = 3 / 4
 """Proportion of the journey that is considered the 'end' of the journey"""
 
-ESTIMATED_MATCHING_TIME_UPPER_LIMIT_IN_SECONDS = 60
+ESTIMATED_MATCHING_TIME_UPPER_LIMIT_IN_SECONDS = 180
 """Maximum time between pings that can be considered for estimated matching"""
 
 ESTIMATED_MATCHING_DISTANCE_UPPER_LIMIT_IN_METRES = 2000

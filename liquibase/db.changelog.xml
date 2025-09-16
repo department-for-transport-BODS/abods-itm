@@ -446,10 +446,67 @@
     <changeSet id="141" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="sql/141-create-siri-sx-situations.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="142" author="abodsuser">
-        <sqlFile path="sql/142-add-expected-journeys-is-cancelled-column.sql" splitStatements="false"/>
+    <changeSet id="142" author="abodsuser" >
+        <sqlFile path="sql/142-add-scheduled-and-actual-diff-in-summaries.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="143" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="143" author="abodsuser" >
+        <sqlFile path="sql/143-routes-to-journey-mapping.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="144" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/drop_sirivm_partition_by_date.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="145" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/drop_sirivm_partitions_in_range.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="146" author="abodsuser" >
+        <sqlFile path="sql/146-nonoperatingdatesexceptions-to-int8.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="147" author="abodsuser" >
+        <sqlFile path="sql/147-drop-tracks-unique-constraint.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="148" author="abodsuser" >
+        <sqlFile path="sql/148-add-reprocessing-columns.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="149" author="abodsuser" >
+        <sqlFile path="sql/149-add-avl-column-expected-journeys.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="150" author="abodsuser" >
+        <sqlFile path="sql/150-add-servicepatterdistance-table.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="151" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/update_expected_service_distances.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="152" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/update_transmodel_servicepatterndistance.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="153" author="abodsuser" >
+        <sqlFile path="sql/153-update-foreign-schema-transmodel-servicepatterndistance.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="154" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/update_transmodel_servicepatterndistance.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="155" author="abodsuser" >
+        <sqlFile path="sql/155-update-foreign-schema-datasetrevision-upload-file.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="156" author="abodsuser" >
+        <sqlFile path="sql/156-add-license-expected-services.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="157" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/populate_avl_recorded_expected_journeys.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="158" author="abodsuser">
+        <sqlFile path="sql/158-replace-noc-adminarea-view.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="159" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/historic_subset_avl_export.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="160" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/historic_subset_timetable_export.sql" splitStatements="false"/>
+    </changeSet>    
+    <changeSet id="161" author="abodsuser">
+        <sqlFile path="sql/161-add-expected-journeys-is-cancelled-column.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="162" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/flag_cancelled_expected_journeys.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
