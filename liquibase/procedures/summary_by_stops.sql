@@ -78,8 +78,8 @@ BEGIN
 							ELSE 0
 						END AS max_late,
 						(ttb.timestamp_after_estimate is not null) AS estimated,
-						LAG(ttb.expected_departure_time) OVER (PARTITION BY group_id, vehiclejourney_id ORDER BY expected_departure_time) AS previous_stop_expected_departure,
-						LAG(COALESCE(ttb.actual_departure_time, ttb.timestamp_after_estimate)) OVER (PARTITION BY group_id, vehiclejourney_id ORDER BY expected_departure_time) AS previous_stop_actual_departure,
+						LAG(ttb.expected_departure_time) OVER (PARTITION BY ttb.group_id, ttb.vehiclejourney_id ORDER BY ttb.expected_departure_time) AS previous_stop_expected_departure,
+						LAG(COALESCE(ttb.actual_departure_time, ttb.timestamp_after_estimate)) OVER (PARTITION BY ttb.group_id, ttb.vehiclejourney_id ORDER BY ttb.expected_departure_time) AS previous_stop_actual_departure,
 						ttb.incomplete_reason AS incomplete_reason
 					FROM
 					public."Timetable" ttb
