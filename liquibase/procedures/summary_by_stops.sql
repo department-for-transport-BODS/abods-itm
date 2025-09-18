@@ -93,10 +93,10 @@ BEGIN
 								, -1)
 							AND ttb.journey_code = ej.journey_code
 							AND ttb.direction = ej.direction
-							AND ej.is_cancelled != TRUE
 					WHERE
 						ttb.date_of_journey = %L
-						and ttb.previous_group_id is null
+						AND ttb.previous_group_id is null
+						AND ej.is_cancelled != TRUE
 				),
 				journeys_filtered_with_timing_points AS (
 					SELECT
