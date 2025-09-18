@@ -47,4 +47,6 @@ END;
 $$;
 
 alter procedure historic_subset_avl_export owner to abods_proxy_rw;
+
+--dropping as this procedure is no longer used
 DROP PROCEDURE IF EXISTS historic_subset_avl_export;
