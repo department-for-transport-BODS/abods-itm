@@ -34,15 +34,12 @@ def get_rds_token() -> str:
 def setup_db() -> psycopg2.extensions.connection:
     try:
         logger.info("Creating new DB connection")
-        db_password = environ.get("LOCAL_DB_PASSWORD")
-        if not db_password:
-            db_password = get_rds_token()
         conn = psycopg2.connect(
             host=db_host,
             port=db_port,
             database=db_database,
             user=db_user,
-            password=db_password,
+            password=get_rds_token(),
             sslmode="require",
         )
         conn.autocommit = True
