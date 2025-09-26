@@ -3,38 +3,54 @@ create or replace procedure summary_by_stops(IN partition_date date DEFAULT (CUR
 as
 $$
 DECLARE
-    tablename TEXT;
+	longdatestring	TEXT := to_char(partition_date, 'YYYY_MM_DD');
+    tablename 		TEXT;
 
 BEGIN
-    tablename := 'timetable_summary_stops_tz_' || to_char(partition_date, 'YYYY_MM_DD');
+	RAISE NOTICE 'Starting summary_by_stops for %', partition_date;
+    tablename := concat('timetable_summary_stops_tz_', longdatestring);
 
-    IF NOT EXISTS (SELECT 1
-                   FROM public."Timetable"
-                   WHERE date_of_journey = partition_date) THEN
+    IF NOT EXISTS (SELECT relname
+                   FROM pg_class
+                   WHERE relname = concat('Timetable_p', longdatestring)
+	) THEN
         RAISE NOTICE '% No timetable data for date %', clock_timestamp(), partition_date;
     ELSE
-        RAISE NOTICE '% (Re)Creating partition public.%', clock_timestamp(), tablename;
-
-        EXECUTE format(
-                'CREATE TABLE IF NOT EXISTS public.%I PARTITION OF public.timetable_summary_stops_tz FOR VALUES FROM (%L) TO (%L)',
-                tablename,
-                partition_date,
-                partition_date + INTERVAL '1' DAY
-                );
-
-        EXECUTE format('ALTER TABLE public.%I OWNER TO abods_rw', tablename);
-
-        RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
-
-        EXECUTE format(
-                'DELETE FROM public.%I',
-                tablename
-                );
+		
+	    -- check for existence of dated table
+	    if not exists(
+	      select relname 
+	      from pg_class 
+	      where relname = tablename
+	    ) then 
+	      raise notice 'Dated table % not found', tablename;
+	      raise notice 'Creating table %', tablename;
+	    
+	      -- Create partition table initially unattached
+	        execute format(
+	            'CREATE TABLE public.%I (like public.%I INCLUDING ALL);',
+	            tablename,
+	            'timetable_summary_stops_tz'
+	          );
+	        
+	          execute format('ALTER TABLE public.%I OWNER to abods_rw', tablename);
+	    else
+	        raise notice 'Dated table % found', tablename;
+	        RAISE NOTICE '% Deleting from %', clock_timestamp(), tablename;
+	        execute format('DELETE FROM public.%I', tablename);
+	    end if;
 
         RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
+		RAISE NOTICE 'Starting data aggregation and insert...';
 
-        EXECUTE format(
-				'WITH journeys_with_previous_stop_departure AS(
+      
+		RAISE NOTICE 'Running main EXECUTE for journeys_with_previous_stop_departure and insert...';
+		EXECUTE format('WITH 
+					expected_journeys_for_date AS(
+						select * from public.expected_journeys
+						where date_of_journey = %L
+					),
+					journeys_with_previous_stop_departure AS(
 					SELECT
 						ttb.timetable_id,
 						ttb.operator_noc,
@@ -82,10 +98,9 @@ BEGIN
 						LAG(COALESCE(ttb.actual_departure_time, ttb.timestamp_after_estimate)) OVER (PARTITION BY ttb.group_id, ttb.vehiclejourney_id ORDER BY ttb.expected_departure_time) AS previous_stop_actual_departure,
 						ttb.incomplete_reason AS incomplete_reason
 					FROM
-					public."Timetable" ttb
-						INNER JOIN public.expected_journeys ej
-							ON ttb.date_of_journey = ej.date_of_journey
-							AND ttb.operator_noc = ej.operator_noc
+					public.%I ttb
+						INNER JOIN expected_journeys_for_date ej
+							ON ttb.operator_noc = ej.operator_noc
 							AND ttb.line_name = ej.line_name
 							AND ttb.service_code = split_part(
 								ej.noc_and_line_and_servicecode,
@@ -94,8 +109,7 @@ BEGIN
 							AND ttb.journey_code = ej.journey_code
 							AND ttb.direction = ej.direction
 					WHERE
-						ttb.date_of_journey = %L
-						AND ttb.previous_group_id is null
+						ttb.previous_group_id IS NULL
 						AND ej.is_cancelled != TRUE
 				),
 				journeys_filtered_with_timing_points AS (
@@ -109,69 +123,69 @@ BEGIN
 						is_timing_point = true
 				)
 				INSERT INTO public.%I(
-				operator_noc,
-				service_code,
-				noc_and_line_and_servicecode,
-				stop_id,
-				locality_id,
-				line_name,
-				stop_latitude,
-				stop_longitude,
-				date_of_journey,
-				departure_hour,
-				departure_hour_only,
-				day_of_week,
-				on_time_count,
-				early_count,
-				late_count,
-				completed,
-				scheduled,
-				common_name,
-				is_timing_point,
-				max_early,
-				max_late,
-				avg_time_difference,
-				estimated,
-				direction,
-				stop_index,
-				count_delayed,
-				average_delay,
-				diff_sched_time_to_stop,
-				diff_sched_time_to_stop_timing_point,
-				diff_actual_time_to_stop,
-				diff_actual_time_to_stop_timing_point,
-				incomplete_reason
-			)
-			SELECT
-				sub.operator_noc,
-				sub.service_code,
-				sub.noc_and_line_and_servicecode,
-				sub.stop_id,
-				sub.locality_id,
-				sub.line_name,
-				sub.stop_latitude,
-				sub.stop_longitude,
-				sub.date_of_journey,
-				date_trunc(''hour'', sub.expected_departure_time::timestamptz) AS departure_hour,
-				(EXTRACT(HOUR FROM sub.expected_departure_time)::text || '':00:00'' ||
-					CASE
-						WHEN RIGHT(sub.expected_departure_time::text, 6)~ ''^[+-]'' THEN RIGHT(sub.expected_departure_time::text, 6)
-						ELSE ''+00''
-					END
-				)::timetz AS departure_hour_only,
-				sub.day_of_week,
-				COUNT(CASE WHEN sub.otp_state = ''OnTime'' THEN 1 END) AS on_time_count,
-				COUNT(CASE WHEN sub.otp_state = ''Early'' THEN 1 END) AS early_count,
-				COUNT(CASE WHEN sub.otp_state = ''Late'' THEN 1 END) AS late_count,
-				COUNT(sub.actual_departure_time) AS completed,
-				COUNT(*) AS scheduled,
-				sub.common_name,
-				sub.is_timing_point,
-				sub.max_early,
-				sub.max_late,
-				COALESCE(AVG(sub.time_difference/60.0), 0.0) AS avg_time_difference,
-				sub.estimated,
-				sub.direction,
+					operator_noc,
+					service_code,
+					noc_and_line_and_servicecode,
+					stop_id,
+					locality_id,
+					line_name,
+					stop_latitude,
+					stop_longitude,
+					date_of_journey,
+					departure_hour,
+					departure_hour_only,
+					day_of_week,
+					on_time_count,
+					early_count,
+					late_count,
+					completed,
+					scheduled,
+					common_name,
+					is_timing_point,
+					max_early,
+					max_late,
+					avg_time_difference,
+					estimated,
+					direction,
+					stop_index,
+					count_delayed,
+					average_delay,
+					diff_sched_time_to_stop,
+					diff_sched_time_to_stop_timing_point,
+					diff_actual_time_to_stop,
+					diff_actual_time_to_stop_timing_point,
+					incomplete_reason
+				)
+				SELECT
+					sub.operator_noc,
+					sub.service_code,
+					sub.noc_and_line_and_servicecode,
+					sub.stop_id,
+					sub.locality_id,
+					sub.line_name,
+					sub.stop_latitude,
+					sub.stop_longitude,
+					sub.date_of_journey,
+					date_trunc(''hour'', sub.expected_departure_time::timestamptz) AS departure_hour,
+					(EXTRACT(HOUR FROM sub.expected_departure_time)::text || '':00:00'' ||
+						CASE
+							WHEN RIGHT(sub.expected_departure_time::text, 6)~ ''^[+-]'' THEN RIGHT(sub.expected_departure_time::text, 6)
+							ELSE ''+00''
+						END
+					)::timetz AS departure_hour_only,
+					sub.day_of_week,
+					COUNT(CASE WHEN sub.otp_state = ''OnTime'' THEN 1 END) AS on_time_count,
+					COUNT(CASE WHEN sub.otp_state = ''Early'' THEN 1 END) AS early_count,
+					COUNT(CASE WHEN sub.otp_state = ''Late'' THEN 1 END) AS late_count,
+					COUNT(sub.actual_departure_time) AS completed,
+					COUNT(*) AS scheduled,
+					sub.common_name,
+					sub.is_timing_point,
+					sub.max_early,
+					sub.max_late,
+					COALESCE(AVG(sub.time_difference/60.0), 0.0) AS avg_time_difference,
+					sub.estimated,
+					sub.direction,
 					sub.stop_index,
 					COUNT(sub.time_difference) FILTER (WHERE sub.time_difference > 0) as count_delayed,
 					AVG(sub.time_difference) FILTER(WHERE sub.time_difference > 0) as average_delay,
@@ -225,12 +239,47 @@ BEGIN
 					direction,
 					stop_index,
 					incomplete_reason',
-                partition_date,
+				partition_date,
+                concat('Timetable_p', longdatestring),
                 tablename);
+
+	    ----------------------------
+	    --Attaching new partition --
+	    ----------------------------
+	           
+	    -- Check if partition is attached to master table;	
+	    if not exists (
+	      select
+	        p.relname as parent,
+	        c.relname as child 
+	      FROM pg_inherits i 
+	      JOIN pg_class p ON i.inhparent = p.oid
+	      JOIN pg_class c ON i.inhrelid = c.oid
+	      WHERE p.relname='timetable_summary_stops_tz'
+	      and c.relname like tablename
+	    ) then 
+	      raise notice 'Dated table % not attached to %', tablename, 'timetable_summary_stops_tz';
+	      raise notice 'Attaching table %  to %', tablename, 'timetable_summary_stops_tz';
+	    
+	      -- Attach table if it isn't  attached
+	      execute format(
+	        'alter table public.%I
+	        attach partition public.%I
+	        FOR VALUES FROM (%L) TO (%L);',
+			'timetable_summary_stops_tz',
+	        tablename,
+	              partition_date,
+	              partition_date + interval '1' day	
+	      );
+	    else
+	      raise notice 'Dated table % already attached to %', tablename, 'timetable_summary_stops_tz' ;
+	    end if;
     END IF;
 
-    RAISE NOTICE '% summary_by_stops complete', clock_timestamp();
-END;
-$$;
 
-alter procedure summary_by_stops owner to abods_proxy_rw;
+
+    RAISE NOTICE '% summary_by_stops complete', clock_timestamp();
+		RAISE NOTICE 'Finished summary_by_stops for %', partition_date;
+END;
+$procedure$
+;
