@@ -52,7 +52,7 @@ BEGIN
             AND ej.line_name = es.line_name
             AND split_part(ej.noc_and_line_and_servicecode, '-' , -1) = split_part(es.noc_and_line_and_servicecode, '-' , -1)
         WHERE ej.date_of_journey = partition_date
-          AND ej.is_cancelled != TRUE;
+          AND ej.is_cancelled = FALSE;
 
         RAISE NOTICE '% Adding new data to %', clock_timestamp(), tablename;
 
