@@ -502,5 +502,11 @@
     </changeSet>
     <changeSet id="160" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/historic_subset_timetable_export.sql" splitStatements="false"/>
+    </changeSet>    
+    <changeSet id="161" author="abodsuser">
+        <sqlFile path="sql/161-add-expected-journeys-is-cancelled-column.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="162" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/flag_cancelled_expected_journeys.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>

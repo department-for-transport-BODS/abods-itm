@@ -34,10 +34,14 @@ def parse_datetime(datetime_str: str) -> datetime:
 def parse_direction(direction_text: str) -> str:
     """Parse direction text to normalized string"""
     direction_map = {
+        "1": "outbound",
+        "2": "inbound",
+        "clockwise": "outbound",
+        "anticlockwise": "inbound",
         "inbound": "inbound",
         "outbound": "outbound",
-        "anticlockwise": "antiClockwise",
-        "clockwise": "clockwise",
+        "eastbound": "outbound",
+        "westbound": "inbound",
     }
     return direction_map[str.lower(direction_text)]
 
