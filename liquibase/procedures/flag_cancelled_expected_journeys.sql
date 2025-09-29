@@ -3,6 +3,10 @@ create or replace procedure flag_cancelled_expected_journeys(IN partition_date d
 as
 $$
 begin
+    -- Set all is_cancelled to FALSE for the partition date before flagging cancelled ones
+    UPDATE expected_journeys 
+    SET is_cancelled = FALSE 
+    WHERE date_of_journey = partition_date;
 
     RAISE NOTICE '% Flagging cancelled journeys for %', clock_timestamp(), partition_date::text;
 
@@ -11,15 +15,11 @@ begin
     FROM (
         SELECT DISTINCT ON (producer_ref, situation_number)
             producer_ref,
-            situation_number,
             operator_noc,
             line_name,
             journey_code,
             direction,
-            date_of_journey,
-            condition,
-            progress,
-            event_timestamp
+            date_of_journey
         FROM siri_sx_situations
         WHERE date_of_journey = partition_date
         ORDER BY producer_ref, situation_number, event_timestamp DESC
