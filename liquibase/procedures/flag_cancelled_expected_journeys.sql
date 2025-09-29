@@ -13,13 +13,14 @@ begin
     UPDATE expected_journeys ej
     SET is_cancelled = TRUE
     FROM (
-        SELECT DISTINCT ON (producer_ref, situation_number)
+        SELECT DISTINCT ON (producer_ref, operator_noc, line_name, journey_code, direction)
             producer_ref,
             operator_noc,
             line_name,
             journey_code,
             direction,
-            date_of_journey
+            date_of_journey,
+            condition
         FROM siri_sx_situations
         WHERE date_of_journey = partition_date
         ORDER BY producer_ref, situation_number, event_timestamp DESC
@@ -29,8 +30,8 @@ begin
     AND ej.line_name = latest_situation.line_name
     AND ej.journey_code = latest_situation.journey_code
     AND ej.direction = latest_situation.direction
-    AND latest_situation.condition != 'normalService' -- # Cancelled service
-    AND latest_situation.progress = 'open'; -- # On-going situation
+    AND latest_situation.condition != 'normalService'; -- # Cancelled service
+    
 
     RAISE NOTICE '% flag_cancelled_expected_journeys complete', clock_timestamp();
 
