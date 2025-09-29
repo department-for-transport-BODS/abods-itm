@@ -10,7 +10,7 @@ from .models import SituationRecord
 from .shared.db import setup_db
 
 SIRI_SX_CANCELLATIONS_URL = (
-    "https://6tfu67dcng.execute-api.eu-west-2.amazonaws.com/v1/siri-sx"
+    "https://obg8kxwhq9.execute-api.eu-west-2.amazonaws.com/v1/siri-sx"
 )
 NS_URI = "http://www.siri.org.uk/siri"
 
