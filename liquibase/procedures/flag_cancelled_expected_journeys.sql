@@ -23,7 +23,7 @@ begin
             condition
         FROM siri_sx_situations
         WHERE date_of_journey = partition_date
-        ORDER BY producer_ref, situation_number, event_timestamp DESC
+        ORDER BY producer_ref, operator_noc, line_name, journey_code, direction, event_timestamp DESC
     ) latest_situation
     WHERE ej.date_of_journey = latest_situation.date_of_journey
     AND ej.operator_noc = latest_situation.operator_noc
