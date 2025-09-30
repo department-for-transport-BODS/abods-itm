@@ -1,4 +1,3 @@
-
 from datetime import UTC, datetime
 from io import BytesIO
 from os import environ
