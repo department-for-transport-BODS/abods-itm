@@ -1,7 +1,8 @@
+
 from datetime import UTC, datetime
 from io import BytesIO
+from os import environ
 
-import os
 import requests
 from aws_lambda_powertools import Logger
 from lxml import etree
@@ -10,7 +11,7 @@ from psycopg2.extras import execute_batch
 from .models import SituationRecord
 from .shared.db import setup_db
 
-SIRI_SX_CANCELLATIONS_URL = os.environ["SIRI_SX_CANCELLATIONS_URL"]
+siri_sx_cancellations_url = environ.get("SIRI_SX_CANCELLATIONS_URL")
 NS_URI = "http://www.siri.org.uk/siri"
 
 logger = Logger()
@@ -211,7 +212,7 @@ def insert_rows(rows: list[SituationRecord]) -> None:
 
 def lambda_handler(_event: dict, _context: dict) -> None:
     logger.info("Retrieving XML from SIRI SX")
-    response = requests.get(SIRI_SX_CANCELLATIONS_URL, timeout=30)
+    response = requests.get(siri_sx_cancellations_url, timeout=30)
     response.raise_for_status()
     xml_bytes = response.content
     rows = parse_xml(xml_bytes)
