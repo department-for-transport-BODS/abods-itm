@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from io import BytesIO
 
+import os
 import requests
 from aws_lambda_powertools import Logger
 from lxml import etree
@@ -9,9 +10,7 @@ from psycopg2.extras import execute_batch
 from .models import SituationRecord
 from .shared.db import setup_db
 
-SIRI_SX_CANCELLATIONS_URL = (
-    "https://obg8kxwhq9.execute-api.eu-west-2.amazonaws.com/v1/siri-sx"
-)
+SIRI_SX_CANCELLATIONS_URL = os.environ["SIRI_SX_CANCELLATIONS_URL"]
 NS_URI = "http://www.siri.org.uk/siri"
 
 logger = Logger()
