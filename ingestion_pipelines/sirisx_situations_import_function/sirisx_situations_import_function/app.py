@@ -17,6 +17,7 @@ siri_sx_cancellations_url = environ.get("SIRI_SX_CANCELLATIONS_URL")
 NS_URI = "http://www.siri.org.uk/siri"
 
 logger = Logger()
+conn = setup_db()
 
 
 def get_element_text(
@@ -240,7 +241,6 @@ def insert_rows(cur: cursor, rows: list[SituationRecord]) -> None:
 
 
 def lambda_handler(_event: dict, _context: dict) -> None:
-    conn = setup_db()
     ensure_db_connection(conn)
     logger.info("Retrieving XML from SIRI SX")
     response = requests.get(siri_sx_cancellations_url, timeout=30)
