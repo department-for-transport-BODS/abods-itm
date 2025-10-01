@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from io import BytesIO
 from os import environ
+import time
 
 import requests
 from aws_lambda_powertools import Logger
@@ -14,7 +15,7 @@ siri_sx_cancellations_url = environ.get("SIRI_SX_CANCELLATIONS_URL")
 NS_URI = "http://www.siri.org.uk/siri"
 
 logger = Logger()
-conn = setup_db()
+#conn = setup_db()
 
 
 def get_element_text(
@@ -166,7 +167,25 @@ def parse_xml(xml_bytes: bytes) -> list[SituationRecord]:
     return rows
 
 
+def ensure_db_connection(retry_count: int = 3):
+    for attempt in range(retry_count):
+        try:
+            if conn.closed:
+                logger.info("Database connection closed, reconnecting... (attempt %d)", attempt + 1)
+                conn = setup_db()
+            return
+        except AttributeError:
+            logger.info("Database connection not initialized, reconnecting... (attempt %d)", attempt + 1)
+        except Exception as e:
+            logger.error(f"Database connection error: {e}. Retrying... (attempt {attempt + 1})")
+        time.sleep(1)
+    # Final check after retries
+    if getattr(conn, 'closed', True):
+        raise RuntimeError("Failed to establish database connection after retries.")
+
 def insert_rows(rows: list[SituationRecord]) -> None:
+#   ensure_db_connection()
+    conn = setup_db()
     with conn.cursor() as cur:
         logger.info("Inserting journey event rows", count=len(rows))
         insert_stmt = """
@@ -222,3 +241,4 @@ def lambda_handler(_event: dict, _context: dict) -> None:
     logger.info(
         "All rows parsed and inserted",
     )
+    
