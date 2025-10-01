@@ -67,7 +67,7 @@ def test_lambda_handler(
 ) -> None:
     from .app import lambda_handler  # noqa: PLC0415,I001
 
-    mock_ensure_db_connection.return_value= None
+    mock_ensure_db_connection.return_value = None
     mock_cursor = MagicMock()
     mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
 
