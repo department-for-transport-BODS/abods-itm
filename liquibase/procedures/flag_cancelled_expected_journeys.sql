@@ -32,7 +32,7 @@ begin
     AND ej.direction = latest_situation.direction
     AND latest_situation.condition != 'normalService' -- # Cancelled service
     AND ej.operator_noc NOT IN (
-        SELECT noc FROM bods.organisation_operatorcode WHERE organisation_id = 15
+        SELECT noc FROM bods.organisation_operatorcode WHERE organisation_id = 15 --remove stagecoach, can remove once uat
     );
     
 
