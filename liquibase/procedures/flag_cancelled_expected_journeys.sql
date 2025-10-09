@@ -30,7 +30,10 @@ begin
     AND ej.line_name = latest_situation.line_name
     AND ej.journey_code = latest_situation.journey_code
     AND ej.direction = latest_situation.direction
-    AND latest_situation.condition != 'normalService'; -- # Cancelled service
+    AND latest_situation.condition != 'normalService' -- # Cancelled service
+    AND ej.operator_noc NOT IN (
+        SELECT noc FROM bods.organisation_operatorcode WHERE organisation_id = 15
+    );
     
 
     RAISE NOTICE '% flag_cancelled_expected_journeys complete', clock_timestamp();
