@@ -495,7 +495,7 @@
         <sqlFile path="procedures/populate_avl_recorded_expected_journeys.sql" splitStatements="false"/>
     </changeSet>
     <changeSet id="158" author="abodsuser">
-        <sqlFile path="sql/158-replace-noc-adminarea-view.sql" splitStatements="false"/>
+        <sqlFile path="sql/158-replace-noc-adminarea-view.sql" splitStatements="false"/> 
     </changeSet>
     <changeSet id="159" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/historic_subset_avl_export.sql" splitStatements="false"/>
@@ -503,4 +503,13 @@
     <changeSet id="160" author="abodsuser" runOnChange="true" runInTransaction="true">
         <sqlFile path="procedures/historic_subset_timetable_export.sql" splitStatements="false"/>
     </changeSet>    
+    <changeSet id="161" author="abodsuser">
+        <sqlFile path="sql/161-add-expected-journeys-is-cancelled-column.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="162" author="abodsuser" runOnChange="true" runInTransaction="true">
+        <sqlFile path="procedures/flag_cancelled_expected_journeys.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="163" author="abodsuser">
+        <sqlFile path="sql/163-fix-servicepatterndistance.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>

@@ -33,8 +33,8 @@ BEGIN
             ss.service_pattern_id,
             ss.noc_and_line_and_servicecode,
             ss.total_count,
-            ss.total_count * sd.distance AS total_distance, 
-            ss.avl_true_count * sd.distance AS avl_true_distance
+            ss.total_count * COALESCE(sd.coord_track_distance, sd.distance) AS total_distance, 
+            ss.avl_true_count * COALESCE(sd.coord_track_distance, sd.distance) AS avl_true_distance
         FROM 
             service_summary ss
         JOIN 
