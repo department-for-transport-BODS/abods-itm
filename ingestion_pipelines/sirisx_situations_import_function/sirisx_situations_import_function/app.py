@@ -1,17 +1,19 @@
+import time
 from datetime import UTC, datetime
 from io import BytesIO
+from os import environ
 
+import psycopg2
 import requests
 from aws_lambda_powertools import Logger
 from lxml import etree
+from psycopg2.extensions import cursor
 from psycopg2.extras import execute_batch
 
 from .models import SituationRecord
 from .shared.db import setup_db
 
-SIRI_SX_CANCELLATIONS_URL = (
-    "https://6tfu67dcng.execute-api.eu-west-2.amazonaws.com/v1/siri-sx"
-)
+siri_sx_cancellations_url = environ.get("SIRI_SX_CANCELLATIONS_URL")
 NS_URI = "http://www.siri.org.uk/siri"
 
 logger = Logger()
@@ -34,10 +36,14 @@ def parse_datetime(datetime_str: str) -> datetime:
 def parse_direction(direction_text: str) -> str:
     """Parse direction text to normalized string"""
     direction_map = {
+        "1": "outbound",
+        "2": "inbound",
+        "clockwise": "outbound",
+        "anticlockwise": "inbound",
         "inbound": "inbound",
         "outbound": "outbound",
-        "anticlockwise": "antiClockwise",
-        "clockwise": "clockwise",
+        "eastbound": "outbound",
+        "westbound": "inbound",
     }
     return direction_map[str.lower(direction_text)]
 
@@ -163,59 +169,89 @@ def parse_xml(xml_bytes: bytes) -> list[SituationRecord]:
     return rows
 
 
-def insert_rows(rows: list[SituationRecord]) -> None:
-    with conn.cursor() as cur:
-        logger.info("Inserting journey event rows", count=len(rows))
-        insert_stmt = """
-            INSERT INTO public.siri_sx_situations (
-                producer_ref,
-                situation_number,
-                version,
-                operator_noc,
-                line_name,
-                direction,
-                date_of_journey,
-                origin_departure_time,
-                validity_start_date,
-                validity_end_date,
-                journey_code,
-                condition,
-                progress,
-                event_timestamp,
-                creation_time
+def ensure_db_connection(
+    conn: psycopg2.extensions.connection,
+    retry_count: int = 3,
+) -> None:
+    for attempt in range(retry_count):
+        try:
+            if conn is None or conn.closed:
+                logger.info(
+                    "Database connection closed, reconnecting... (attempt %d)",
+                    attempt + 1,
+                )
+                conn = setup_db()
+            else:
+                return
+        except AttributeError:
+            logger.info(
+                "Database connection not initialized, reconnecting... (attempt %d)",
+                attempt + 1,
             )
-            VALUES (
-                %(producer_ref)s,
-                %(situation_number)s,
-                %(version)s,
-                %(operator_noc)s,
-                %(line_name)s,
-                %(direction)s,
-                %(date_of_journey)s,
-                %(origin_departure_time)s,
-                %(validity_start_date)s,
-                %(validity_end_date)s,
-                %(journey_code)s,
-                %(condition)s,
-                %(progress)s,
-                %(event_timestamp)s,
-                %(creation_time)s
+        except Exception:
+            logger.exception(
+                f"Database connection error - Retrying... (attempt {attempt + 1})",
             )
-            ON CONFLICT (producer_ref, situation_number, version) DO NOTHING;
-        """
-        execute_batch(cur, insert_stmt, [row.to_dict() for row in rows], page_size=1000)
+        time.sleep(1)
+    # Final check after retries
+    if getattr(conn, "closed", True):
+        raise RuntimeError("Failed to establish database connection after retries.")
+
+
+def insert_rows(cur: cursor, rows: list[SituationRecord]) -> None:
+    logger.info("Inserting journey event rows", count=len(rows))
+    insert_stmt = """
+        INSERT INTO public.siri_sx_situations (
+            producer_ref,
+            situation_number,
+            version,
+            operator_noc,
+            line_name,
+            direction,
+            date_of_journey,
+            origin_departure_time,
+            validity_start_date,
+            validity_end_date,
+            journey_code,
+            condition,
+            progress,
+            event_timestamp,
+            creation_time
+        )
+        VALUES (
+            %(producer_ref)s,
+            %(situation_number)s,
+            %(version)s,
+            %(operator_noc)s,
+            %(line_name)s,
+            %(direction)s,
+            %(date_of_journey)s,
+            %(origin_departure_time)s,
+            %(validity_start_date)s,
+            %(validity_end_date)s,
+            %(journey_code)s,
+            %(condition)s,
+            %(progress)s,
+            %(event_timestamp)s,
+            %(creation_time)s
+        )
+        ON CONFLICT (producer_ref, situation_number, version) DO NOTHING;
+    """
+    execute_batch(cur, insert_stmt, [row.to_dict() for row in rows], page_size=1000)
 
 
 def lambda_handler(_event: dict, _context: dict) -> None:
+    ensure_db_connection(conn)
     logger.info("Retrieving XML from SIRI SX")
-    response = requests.get(SIRI_SX_CANCELLATIONS_URL, timeout=30)
+    response = requests.get(siri_sx_cancellations_url, timeout=30)
     response.raise_for_status()
     xml_bytes = response.content
     rows = parse_xml(xml_bytes)
     if not rows:
         logger.warning("No rows to insert.")
         return
-    insert_rows(rows)
+    with conn.cursor() as cur:
+        insert_rows(cur, rows)
     logger.info(
         "All rows parsed and inserted",
     )

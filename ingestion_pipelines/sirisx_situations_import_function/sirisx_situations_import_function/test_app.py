@@ -43,6 +43,12 @@ def situation_record() -> SituationRecord:
 
 
 @patch(
+    "ingestion_pipelines.sirisx_situations_import_function.sirisx_situations_import_function.app.ensure_db_connection",
+)
+@patch(
+    "ingestion_pipelines.sirisx_situations_import_function.sirisx_situations_import_function.app.conn",
+)
+@patch(
     "ingestion_pipelines.sirisx_situations_import_function.sirisx_situations_import_function.app.insert_rows",
 )
 @patch(
@@ -55,9 +61,15 @@ def test_lambda_handler(
     mock_get: MagicMock,
     mock_parse_xml: MagicMock,
     mock_insert_rows: MagicMock,
+    mock_conn: MagicMock,
+    mock_ensure_db_connection: MagicMock,
     situation_record: SituationRecord,
 ) -> None:
     from .app import lambda_handler  # noqa: PLC0415,I001
+
+    mock_ensure_db_connection.return_value = None
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
 
     # Mock response from requests.get
     mock_response = MagicMock()
@@ -73,7 +85,7 @@ def test_lambda_handler(
     # Check expected calls
     mock_get.assert_called_once()
     mock_parse_xml.assert_called_once_with(b"<siri-xs-xml>")
-    mock_insert_rows.assert_called_once_with([situation_record])
+    mock_insert_rows.assert_called_once_with(mock_cursor, [situation_record])
 
 
 def test_parse_xml() -> None:
@@ -179,7 +191,7 @@ def test_insert_rows(
     mock_cursor = MagicMock()
     mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
 
-    insert_rows([situation_record])
+    insert_rows(mock_conn, [situation_record])
 
     mock_execute_batch.assert_called_once()
     args, _ = mock_execute_batch.call_args
