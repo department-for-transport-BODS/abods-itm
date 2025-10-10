@@ -8,6 +8,10 @@ BEGIN
                    WHERE date_of_journey = partition_date) THEN
         RAISE NOTICE 'No timetable data for date %', partition_date;
     ELSE
+
+        RAISE NOTICE '% ----------------Calling incomplete_data_load----------------', clock_timestamp();
+        CALL public.incomplete_data_load(partition_date);
+
         RAISE NOTICE '% ----------------Calling generate_expected_tables----------------', clock_timestamp();
         CALL public.generate_expected_tables(partition_date);
 
@@ -29,8 +33,12 @@ BEGIN
         RAISE NOTICE '% ----------------Calling summary_by_operators----------------', clock_timestamp();
         CALL public.summary_by_operators(partition_date);
 
-        RAISE NOTICE '% ----------------Calling incomplete_data_load----------------', clock_timestamp();
-        CALL public.incomplete_data_load(partition_date);
+        RAISE NOTICE '% ----------------Calling populate_avl_recorded_expected_journeys----------------', clock_timestamp();
+        CALL public.populate_avl_recorded_expected_journeys(partition_date);
+
+        RAISE NOTICE '% ----------------Calling update_expected_service_distances----------------', clock_timestamp();
+        CALL public.update_expected_service_distances(partition_date);
+
     END IF;
 
     RAISE NOTICE '% historic_matching_summary_generation complete', clock_timestamp();

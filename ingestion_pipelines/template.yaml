@@ -34,6 +34,12 @@ Parameters:
   VpcSubnets:
     Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
     Default: ''
+  VersioningConfiguration:
+    Type: String
+    Default: 'Suspended'
+  BackupEnabled:
+    Type: String
+    Default: 'false'
 
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, 'local']]
@@ -561,6 +567,7 @@ Resources:
           POSTGRES_PORT: !Ref RdsDbPort
           POSTGRES_DB: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
           POSTGRES_USER: !Sub '${ProjectName}_proxy_rw'
+          SIRI_SX_CANCELLATIONS_URL: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/siri-sx-cancellations-url}}'
       LoggingConfig:
         LogGroup: !Ref SiriSXDbIngestionFunctionLogGroup
 
@@ -652,6 +659,13 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
         BlockPublicPolicy: true
+      VersioningConfiguration:
+        Status: !Sub '${VersioningConfiguration}'
+      Tags:
+        - Key: backup
+          Value: !Sub '${BackupEnabled}'
+        - Key: backup_plan
+          Value: bods-backup
 
   ExporterBucket:
     Type: AWS::S3::Bucket
@@ -666,6 +680,13 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
         BlockPublicPolicy: true
+      VersioningConfiguration:
+        Status: !Sub '${VersioningConfiguration}'
+      Tags:
+        - Key: backup
+          Value: !Sub '${BackupEnabled}'
+        - Key: backup_plan
+          Value: bods-backup
 
   SiriVmIngestionQueue:
     Type: AWS::SQS::Queue
