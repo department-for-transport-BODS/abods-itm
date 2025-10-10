@@ -30,7 +30,7 @@ def confirm_subscription(  # noqa: ANN201 - BODS-7131
     poll_interval=10,  # noqa: ANN001 - BODS-7131
 ):
     """Poll the SQS queue to find and confirm the subscription confirmation message"""
-    subscription_arn, is_confirmed = check_subscription_status(topic_arn, queue_arn)
+    _, is_confirmed = check_subscription_status(topic_arn, queue_arn)
 
     if not is_confirmed:
         end_time = time.time() + timeout_seconds

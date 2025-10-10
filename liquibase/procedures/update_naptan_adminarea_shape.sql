@@ -8,6 +8,7 @@ begin
     select admin_area_id, st_concavehull(st_collect(location), 0.3)
     from public.naptan_stoppoint naa
     where st_intersects((select st_concavehull(st_collect(boundary), 0.9) from public.uk_borders), location)
+    and admin_area_id not in (110, 147)
     group by admin_area_id;
 end;
 $$;

@@ -98,3 +98,5 @@ prod:
         Environment='prod'
         VpcId='/abods/prod/vpc/id'
         VpcSubnets='/abods/prod/vpc/subnets/private'
+        VersioningConfiguration='Enabled'
+        BackupEnabled='true'
