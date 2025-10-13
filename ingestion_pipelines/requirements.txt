@@ -16,7 +16,7 @@
 # Tools used for dev purposes
 ruff==0.12.12
 pytest==8.4.2
-checkov==3.1.47
+checkov==3.2.483
 boto3-stubs[essential]==1.37.19
 types-psycopg2==2.9.21.20250915
 lxml-stubs==0.5.1
