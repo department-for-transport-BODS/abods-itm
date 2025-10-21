@@ -14,7 +14,19 @@ FROM public.noc_adminarea;
 
 DROP VIEW IF EXISTS public.bods_organisationoperator;
 
-DROP MATERIALIZED VIEW IF EXISTS public.noc_adminarea;
+-- Detect type and drop accordingly
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_views WHERE schemaname = 'public' AND viewname = 'noc_adminarea'
+  ) THEN
+    EXECUTE 'DROP VIEW public.noc_adminarea';
+  ELSIF EXISTS (
+    SELECT 1 FROM pg_matviews WHERE schemaname = 'public' AND matviewname = 'noc_adminarea'
+  ) THEN
+    EXECUTE 'DROP MATERIALIZED VIEW public.noc_adminarea';
+  END IF;
+END $$;
 
 CREATE OR REPLACE VIEW public.noc_adminarea
 AS SELECT national_operator_code, adminarea_id
