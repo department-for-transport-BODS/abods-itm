@@ -12,8 +12,22 @@ national_operator_code, adminarea_id
 SELECT national_operator_code, adminarea_id
 FROM public.noc_adminarea;
 
-DROP VIEW IF EXISTS public.bods_organisationoperator;
+DROP TABLE IF EXISTS public.bods_organisationoperator;
+-- Detect type and drop accordingly
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_views WHERE schemaname = 'public' AND viewname = 'bods_organisationoperator'
+  ) THEN
+    EXECUTE 'DROP VIEW public.bods_organisationoperator';
+  ELSIF EXISTS (
+    SELECT 1 FROM pg_matviews WHERE schemaname = 'public' AND matviewname = 'bods_organisationoperator'
+  ) THEN
+    EXECUTE 'DROP MATERIALIZED VIEW public.bods_organisationoperator';
+  END IF;
+END $$;
 
+DROP TABLE IF EXISTS public.noc_adminarea;
 -- Detect type and drop accordingly
 DO $$
 BEGIN
