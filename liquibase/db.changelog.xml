@@ -512,4 +512,7 @@
     <changeSet id="163" author="abodsuser">
         <sqlFile path="sql/163-fix-servicepatterndistance.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="164" author="abodsuser">
+        <sqlFile path="sql/164-disable-login-on-failed-auth.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
