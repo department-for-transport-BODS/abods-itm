@@ -9,7 +9,6 @@ jobs:
       - uses: astral-sh/ruff-action@v1
         name: "lint"
         with:
-          version: "0.13.0"
           args: "check"
       - uses: astral-sh/ruff-action@v1
         name: "format"
