@@ -31,9 +31,25 @@ def update_batch_status(
             db_ingestion_strt_prc_ts = %s,
             db_ingestion_end_prc_ts = %s,
             s3_avl_gz_key = %s
-        WHERE batch_id = %s;
+                WHERE batch_id = %s
+                    AND (
+                        db_ingestion_status IS DISTINCT FROM %s
+                        OR db_ingestion_strt_prc_ts IS DISTINCT FROM %s
+                        OR db_ingestion_end_prc_ts IS DISTINCT FROM %s
+                        OR s3_avl_gz_key IS DISTINCT FROM %s
+                    );
         """,
-        [status, start_time, end_time, key, batch_id],
+                [
+                        status,
+                        start_time,
+                        end_time,
+                        key,
+                        batch_id,
+                        status,
+                        start_time,
+                        end_time,
+                        key,
+                ],
     )
 
 
