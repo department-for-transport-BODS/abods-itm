@@ -21,8 +21,13 @@ def _update_batch_status(
     """Update the OTP update status for a specific batch"""
     logger.debug("Setting OTP update status")
     cursor.execute(
-        "UPDATE public.batch SET otp_update_status = %s WHERE batch_id = %s;",
-        [status, batch_id],
+        """
+                UPDATE public.batch
+                SET otp_update_status = %s
+                WHERE batch_id = %s
+                    AND otp_update_status IS DISTINCT FROM %s;
+                """,
+        [status, batch_id, status],
     )
 
 
