@@ -69,28 +69,28 @@ def write_list_to_file(output_csv_file, lst, sirivm_process_bucket, fname):  # n
         logging.info(f"gzip file {fname} uploaded to {sirivm_process_bucket} created")  # noqa: LOG015
 
 
-def update_s3_ingestion_status(  # noqa: ANN201 
-        cur,
-        batch_id,
-        status,
-        end_time,
-        key,
-):
-        cur.execute(
-                """
-                UPDATE public.batch
-                SET s3_ingestion_status = %s,
-                        s3_ingestion_end_prc_ts = %s,
-                        s3_avl_gip_key = COALESCE(%s, s3_avl_gip_key)
-                WHERE batch_id = %s
-                    AND (
-                        s3_ingestion_status IS DISTINCT FROM %s
-                        OR s3_ingestion_end_prc_ts IS DISTINCT FROM %s
-                        OR (%s IS NOT NULL AND s3_avl_gip_key IS DISTINCT FROM %s)
-                    );
-                        """,
-                    [status, end_time, key, batch_id, status, end_time, key, key],
-        )
+def update_s3_ingestion_status(
+    cur: psycopg2.extensions.cursor,
+    batch_id: int,
+    status: str,
+    end_time: str,
+    key: str | None,
+) -> None:
+    cur.execute(
+        """
+        UPDATE public.batch
+        SET s3_ingestion_status = %s,
+            s3_ingestion_end_prc_ts = %s,
+            s3_avl_gip_key = COALESCE(%s, s3_avl_gip_key)
+        WHERE batch_id = %s
+            AND (
+                s3_ingestion_status IS DISTINCT FROM %s
+                OR s3_ingestion_end_prc_ts IS DISTINCT FROM %s
+                OR (%s IS NOT NULL AND s3_avl_gip_key IS DISTINCT FROM %s)
+            );
+        """,
+        [status, end_time, key, batch_id, status, end_time, key, key],
+    )
 
 
 def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # noqa: PLR0915 - BODS-7131
