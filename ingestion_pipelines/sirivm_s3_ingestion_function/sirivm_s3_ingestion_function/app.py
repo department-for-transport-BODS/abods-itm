@@ -69,7 +69,7 @@ def write_list_to_file(output_csv_file, lst, sirivm_process_bucket, fname):  # n
         logging.info(f"gzip file {fname} uploaded to {sirivm_process_bucket} created")  # noqa: LOG015
 
 
-def update_s3_ingestion_status(  # noqa: ANN201 - BODS-7131
+def update_s3_ingestion_status(  # noqa: ANN201 
         cur,
         batch_id,
         status,
@@ -88,8 +88,8 @@ def update_s3_ingestion_status(  # noqa: ANN201 - BODS-7131
                         OR s3_ingestion_end_prc_ts IS DISTINCT FROM %s
                         OR (%s IS NOT NULL AND s3_avl_gip_key IS DISTINCT FROM %s)
                     );
-                """,
-                [status, end_time, key, batch_id, status, end_time, key, key],
+                        """,
+                    [status, end_time, key, batch_id, status, end_time, key, key],
         )
 
 
