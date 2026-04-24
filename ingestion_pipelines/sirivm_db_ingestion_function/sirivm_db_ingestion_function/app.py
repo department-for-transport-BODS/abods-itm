@@ -39,17 +39,17 @@ def update_batch_status(
                         OR s3_avl_gz_key IS DISTINCT FROM %s
                     );
         """,
-                [
-                        status,
-                        start_time,
-                        end_time,
-                        key,
-                        batch_id,
-                        status,
-                        start_time,
-                        end_time,
-                        key,
-                ],
+        [
+            status,
+            start_time,
+            end_time,
+            key,
+            batch_id,
+            status,
+            start_time,
+            end_time,
+            key,
+        ],
     )
 
 
