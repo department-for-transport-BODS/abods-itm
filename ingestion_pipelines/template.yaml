@@ -435,6 +435,10 @@ Resources:
           POSTGRES_PORT: !Ref RdsDbPort
           POSTGRES_DB: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
           POSTGRES_USER: !Sub '${ProjectName}_proxy_rw'
+          NOC_BUCKET_NAME: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/s3/noc/bucket_name}}'
+          NOC_S3_KEY: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/s3/noc/noclines_key}}'
+          NOC_BUCKET_REGION: eu-west-2
+          NOC_ROLE_ARN: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/noc_read_role/arn}}'
       LoggingConfig:
         LogGroup: !Ref TravelineDbIngestionFunctionLogGroup
 
