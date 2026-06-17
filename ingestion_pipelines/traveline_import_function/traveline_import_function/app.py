@@ -135,7 +135,7 @@ def lambda_handler(_event: dict, _context: dict) -> None:
     rows = tuple(
         (
             row["NOCCODE"],
-            row.get("PubNm") or row.get("OperatorPublicName"),
+            row.get("PubNm"),
             row.get("Licence"),
             row.get("Mode"),
         )
