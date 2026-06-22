@@ -72,3 +72,4 @@ def lambda_handler(_event: dict, _context: dict) -> None:
         raise TravelineImportError(
             "NOC_ROLE_ARN environment variable must be set for cross-account access",
         )
+        
