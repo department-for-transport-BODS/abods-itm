@@ -1,11 +1,8 @@
-import io
 import os
 
 import boto3
-import petl
 from aws_lambda_powertools import Logger
 from botocore.client import BaseClient
-from psycopg2.extras import execute_values
 
 from .shared.db import setup_db
 
@@ -74,5 +71,5 @@ def lambda_handler(_event: dict, _context: dict) -> None:
         raise TravelineImportError("NOC_BUCKET_REGION environment variable must be set")
     if not role_arn:
         raise TravelineImportError(
-            "NOC_ROLE_ARN environment variable must be set for cross-account access"
+            "NOC_ROLE_ARN environment variable must be set for cross-account access",
         )
