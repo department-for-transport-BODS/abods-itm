@@ -8,19 +8,19 @@ from .app import lambda_handler
 MOCK_NOC_CSV_DATA = [
     {
         "NOCCODE": "123",
-        "OperatorPublicName": "Operator A",
+        "PubNm": "Operator A",
         "Licence": "LIC123",
         "Mode": "Bus",
     },
     {
         "NOCCODE": "456",
-        "OperatorPublicName": "Operator B",
+        "PubNm": "Operator B",
         "Licence": "LIC456",
         "Mode": "Train",
     },
     {
         "NOCCODE": "789",
-        "OperatorPublicName": "Operator C",
+        "PubNm": "Operator C",
         "Licence": "LIC789",
         "Mode": "Ferry",
     },
@@ -30,7 +30,7 @@ MOCK_NOC_CSV_DATA = [
 @pytest.fixture(autouse=True)
 def mock_setup_db() -> Generator[MagicMock]:
     with patch(
-        f"{__package__}.shared.db.setup_db",
+        "ingestion_pipelines.traveline_import_function.traveline_import_function.app.setup_db",
     ) as mock_setup_db:
         mock_conn = MagicMock()
         mock_setup_db.return_value = mock_conn
