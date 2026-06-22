@@ -1,8 +1,10 @@
 import os
 
 import boto3
+import petl
 from aws_lambda_powertools import Logger
 from botocore.client import BaseClient
+from psycopg2.extras import execute_values
 
 from .shared.db import setup_db
 
@@ -73,3 +75,55 @@ def lambda_handler(_event: dict, _context: dict) -> None:
         raise TravelineImportError(
             "NOC_ROLE_ARN environment variable must be set for cross-account access",
         )
+
+    s3_client = get_s3_client(region, role_arn)
+    key = resolve_noclines_key(s3_client, bucket, key_prefix)
+    noc_url = s3_client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": bucket, "Key": key},
+    )
+
+    noc_table = petl.fromcsv(noc_url).distinct("NOCCODE")
+
+    logger.info("Converting data to tuples")
+
+    rows = tuple(
+        (row["NOCCODE"], row["PubNm"], row["Licence"], row["Mode"])
+        for row in noc_table.dicts()
+    )
+
+    with conn.cursor() as cur:
+        logger.info("Attempting to create table if not exists")
+
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS traveline_operators (
+                noc_code varchar NOT NULL,
+                "name" varchar NULL,
+                licence varchar NULL,
+                "mode" varchar NULL,
+                CONSTRAINT travelinedata_pk PRIMARY KEY (noc_code)
+            );
+            """,
+        )
+
+        logger.info("Inserting NOC data")
+
+        execute_values(
+            cur,
+            """
+            INSERT INTO traveline_operators (
+                noc_code,
+                name,
+                licence,
+                mode
+            )
+            VALUES %s
+            ON CONFLICT (noc_code)
+                DO UPDATE SET name = EXCLUDED.name
+            """,
+            rows,
+            page_size=5000,
+        )
+
+    conn.commit()
