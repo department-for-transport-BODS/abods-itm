@@ -6,7 +6,6 @@ from botocore.client import BaseClient
 
 from .shared.db import setup_db
 
-
 logger = Logger()
 conn = setup_db()
 
