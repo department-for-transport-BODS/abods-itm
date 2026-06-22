@@ -47,7 +47,7 @@ def mock_env_vars(monkeypatch) -> None:  # noqa: ANN001 type not exported
 
 
 @patch(
-    "ingestion_pipelines.traveline_import_function.traveline_import_function.app.get_s3_client"
+    "ingestion_pipelines.traveline_import_function.traveline_import_function.app.get_s3_client",
 )
 @patch("petl.fromcsv")
 @patch("psycopg2.extras.execute_values")
