@@ -7,7 +7,6 @@ from botocore.client import BaseClient
 from .shared.db import setup_db
 
 logger = Logger()
-conn = setup_db()
 
 
 class TravelineImportError(RuntimeError):
@@ -57,6 +56,8 @@ def resolve_noclines_key(s3_client: BaseClient, bucket: str, prefix: str) -> str
 
 
 def lambda_handler(_event: dict, _context: dict) -> None:
+    conn = setup_db()
+
     bucket = os.getenv("NOC_BUCKET_NAME")
     key_prefix = os.getenv("NOC_S3_KEY")
     region = os.getenv("NOC_BUCKET_REGION")
