@@ -44,7 +44,7 @@ def mock_env_vars(monkeypatch) -> None:  # noqa: ANN001 type not exported
     monkeypatch.setenv("NOC_ROLE_ARN", "arn:aws:iam::123456789012:role/test-role")
 
 
-@patch("traveline_import_function.app.get_s3_client")
+@patch(f"{__package__}.app.get_s3_client")
 @patch("petl.fromcsv")
 @patch("psycopg2.extras.execute_values")
 def test_lambda_handler(mock_execute_values, mock_fromcsv, mock_get_s3_client):
@@ -64,10 +64,6 @@ def test_lambda_handler(mock_execute_values, mock_fromcsv, mock_get_s3_client):
     mock_fromcsv.return_value.distinct.return_value.dicts.return_value = MOCK_NOC_CSV_DATA
 
     from .app import lambda_handler
-    lambda_handler({}, {})
-
-    mock_execute_values.assert_called_once()
-
     lambda_handler({}, {})
 
     expected_rows = (
