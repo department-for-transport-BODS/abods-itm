@@ -58,37 +58,45 @@ def resolve_noclines_key(s3_client: BaseClient, bucket: str, prefix: str) -> str
 
 
 def lambda_handler(_event: dict, _context: dict) -> None:
-    conn = setup_db()
 
     bucket = os.getenv("NOC_BUCKET_NAME")
     key_prefix = os.getenv("NOC_S3_KEY")
     region = os.getenv("NOC_BUCKET_REGION")
-    role_arn = os.getenv("NOC_ROLE_ARN")
+    role_arn = os.getenv("NOC_ROLE_ARN")  # optional for cross-account
 
     if not bucket:
-        raise TravelineImportError("NOC_BUCKET_NAME environment variable must be set")
+        raise Exception("NOC_BUCKET_NAME environment variable must be set")
     if not key_prefix:
-        raise TravelineImportError("NOC_S3_KEY environment variable must be set")
+        raise Exception("NOC_S3_KEY environment variable must be set")
     if not region:
-        raise TravelineImportError("NOC_BUCKET_REGION environment variable must be set")
+        raise Exception("NOC_BUCKET_REGION environment variable must be set")
     if not role_arn:
-        raise TravelineImportError(
-            "NOC_ROLE_ARN environment variable must be set for cross-account access",
+        raise Exception(
+            "NOC_ROLE_ARN environment variable must be set for cross-account access"
         )
+
+    logger.info("Retrieving noclines data from S3")
+
+    conn = setup_db()
 
     s3_client = get_s3_client(region, role_arn)
     key = resolve_noclines_key(s3_client, bucket, key_prefix)
-    noc_url = s3_client.generate_presigned_url(
-        "get_object",
-        Params={"Bucket": bucket, "Key": key},
-    )
+    logger.info("Resolved noclines key: %s", key)
+    obj = s3_client.get_object(Bucket=bucket, Key=key)
+    csv_text = obj["Body"].read().decode("utf-8-sig")
 
-    noc_table = petl.fromcsv(noc_url).distinct("NOCCODE")
+    # Keep the same style as current file: petl + distinct("NOCCODE")
+    noc_table = petl.fromcsv(io.StringIO(csv_text)).distinct("NOCCODE")
 
     logger.info("Converting data to tuples")
 
     rows = tuple(
-        (row["NOCCODE"], row["PubNm"], row["Licence"], row["Mode"])
+        (
+            row["NOCCODE"],
+            row.get("PubNm"),
+            row.get("Licence"),
+            row.get("Mode"),
+        )
         for row in noc_table.dicts()
     )
 
@@ -125,5 +133,5 @@ def lambda_handler(_event: dict, _context: dict) -> None:
             rows,
             page_size=5000,
         )
-
-    conn.commit()
+        
+ conn.commit()
