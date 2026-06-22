@@ -55,9 +55,9 @@ def test_lambda_handler(mock_execute_values, mock_fromcsv, mock_get_s3_client):
                 {
                     "Key": "test/prefix/table_noclines_latest_csv.csv",
                     "LastModified": ANY,
-                }
-            ]
-        }
+                },
+            ],
+        },
     ]
 
     mock_fromcsv.return_value.distinct.return_value.dicts.return_value = MOCK_NOC_CSV_DATA
