@@ -43,8 +43,7 @@ def mock_env_vars(monkeypatch) -> None:  # noqa: ANN001 type not exported
     monkeypatch.setenv("NOC_BUCKET_REGION", "eu-west-2")
     monkeypatch.setenv("NOC_ROLE_ARN", "arn:aws:iam::123456789012:role/test-role")
 
-
-@patch(f"{__package__}.app.get_s3_client")
+@patch("ingestion_pipelines.traveline_import_function.traveline_import_function.app.get_s3_client")
 @patch("petl.fromcsv")
 @patch("psycopg2.extras.execute_values")
 def test_lambda_handler(mock_execute_values, mock_fromcsv, mock_get_s3_client):
