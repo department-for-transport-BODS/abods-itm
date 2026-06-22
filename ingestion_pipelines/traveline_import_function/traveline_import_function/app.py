@@ -1,3 +1,4 @@
+import io
 import os
 
 import boto3
@@ -65,13 +66,13 @@ def lambda_handler(_event: dict, _context: dict) -> None:
     role_arn = os.getenv("NOC_ROLE_ARN")  # optional for cross-account
 
     if not bucket:
-        raise Exception("NOC_BUCKET_NAME environment variable must be set")
+        raise TravelineImportError("NOC_BUCKET_NAME environment variable must be set")
     if not key_prefix:
-        raise Exception("NOC_S3_KEY environment variable must be set")
+        raise TravelineImportError("NOC_S3_KEY environment variable must be set")
     if not region:
-        raise Exception("NOC_BUCKET_REGION environment variable must be set")
+        raise TravelineImportError("NOC_BUCKET_REGION environment variable must be set")
     if not role_arn:
-        raise Exception(
+        raise TravelineImportError(
             "NOC_ROLE_ARN environment variable must be set for cross-account access"
         )
 
@@ -133,5 +134,5 @@ def lambda_handler(_event: dict, _context: dict) -> None:
             rows,
             page_size=5000,
         )
-        
- conn.commit()
+
+    conn.commit()
