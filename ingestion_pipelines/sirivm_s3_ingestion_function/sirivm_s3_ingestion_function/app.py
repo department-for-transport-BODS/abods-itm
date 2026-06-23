@@ -69,6 +69,30 @@ def write_list_to_file(output_csv_file, lst, sirivm_process_bucket, fname):  # n
         logging.info(f"gzip file {fname} uploaded to {sirivm_process_bucket} created")  # noqa: LOG015
 
 
+def update_s3_ingestion_status(
+    cur: psycopg2.extensions.cursor,
+    batch_id: int,
+    status: str,
+    end_time: str,
+    key: str | None,
+) -> None:
+    cur.execute(
+        """
+        UPDATE public.batch
+        SET s3_ingestion_status = %s,
+            s3_ingestion_end_prc_ts = %s,
+            s3_avl_gip_key = COALESCE(%s, s3_avl_gip_key)
+        WHERE batch_id = %s
+            AND (
+                s3_ingestion_status IS DISTINCT FROM %s
+                OR s3_ingestion_end_prc_ts IS DISTINCT FROM %s
+                OR (%s IS NOT NULL AND s3_avl_gip_key IS DISTINCT FROM %s)
+            );
+        """,
+        [status, end_time, key, batch_id, status, end_time, key, key],
+    )
+
+
 def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # noqa: PLR0915 - BODS-7131
     logging.info(  # noqa: LOG015
         f"Starting s3 ingestion - Time to Run [{round(context.get_remaining_time_in_millis() / 1000)}] seconds / Memory [{context.memory_limit_in_mb}] Mb",
@@ -153,9 +177,12 @@ def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # no
                             f"Written to gzip file key to Queue {process_queue}",
                         )
                         end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
-                        cur.execute(
-                            "Update public.batch set s3_ingestion_status = 'Success',s3_ingestion_end_prc_ts=%s,s3_avl_gip_key=%s where batch_id=%s  ;",
-                            [end_time, key, batch_id],
+                        update_s3_ingestion_status(
+                            cur,
+                            batch_id,
+                            "Success",
+                            end_time,
+                            key,
                         )
                         cur.close()
                         # get 7 queues to trigger 7 otp matching lambdas
@@ -200,9 +227,12 @@ def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # no
                         logging.exception(  # noqa: LOG015
                             f"Lambda failed either connecting to database or processing AVL Zip file or writing to queue. Error {e}",  # noqa: TRY401 - BODS-7131
                         )
-                        cur.execute(
-                            "Update public.batch set s3_ingestion_status = 'Failed',s3_ingestion_end_prc_ts=%s,s3_avl_gip_key=%s where batch_id=%s ;",
-                            [end_time, key, batch_id],
+                        update_s3_ingestion_status(
+                            cur,
+                            batch_id,
+                            "Failed",
+                            end_time,
+                            key,
                         )
                         cur.close()
                         # raise e
@@ -211,9 +241,12 @@ def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # no
                     logging.exception(  # noqa: LOG015
                         f"Error getting object {key} from bucket {bucket}. Error {e}",  # noqa: TRY401 - BODS-7131
                     )
-                    cur.execute(
-                        "Update public.batch set s3_ingestion_status = 'Failed',s3_ingestion_end_prc_ts=%s,s3_avl_gip_key=%s  where batch_id=%s ;",
-                        [end_time, key, batch_id],
+                    update_s3_ingestion_status(
+                        cur,
+                        batch_id,
+                        "Failed",
+                        end_time,
+                        key,
                     )
                     cur.close()
                     # raise e
@@ -221,9 +254,12 @@ def lambda_handler(event: dict[str, any], context: LambdaContext) -> None:  # no
             end_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
             logging.info(f"Event {event}")  # noqa: LOG015
             logging.exception(f"Error consuming the event. Error {e}")  # noqa: LOG015, TRY401
-            cur.execute(
-                "Update public.batch set s3_ingestion_status = 'Failed',s3_ingestion_end_prc_ts=%s where batch_id=%s ;",
-                [end_time, batch_id],
+            update_s3_ingestion_status(
+                cur,
+                batch_id,
+                "Failed",
+                end_time,
+                None,
             )
             cur.close()
             # raise e
