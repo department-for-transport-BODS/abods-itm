@@ -96,3 +96,85 @@ def test_lambda_handler_error(
         ANY,
         "test-key",
     )
+
+
+@pytest.mark.parametrize(
+    ("status", "start_time", "end_time", "key", "expected_params"),
+    [
+        (
+            "Inprogress",
+            "2026-04-28T10:00:00",
+            None,
+            "test-key",
+            [
+                "Inprogress",
+                "2026-04-28T10:00:00",
+                None,
+                "test-key",
+                "batch123",
+                "Inprogress",
+                "2026-04-28T10:00:00",
+                None,
+                "test-key",
+            ],
+        ),
+        (
+            "Success",
+            "2026-04-28T10:00:00",
+            "2026-04-28T10:05:00",
+            "test-key",
+            [
+                "Success",
+                "2026-04-28T10:00:00",
+                "2026-04-28T10:05:00",
+                "test-key",
+                "batch123",
+                "Success",
+                "2026-04-28T10:00:00",
+                "2026-04-28T10:05:00",
+                "test-key",
+            ],
+        ),
+        (
+            "Failed",
+            "2026-04-28T10:00:00",
+            "2026-04-28T10:05:00",
+            "test-key",
+            [
+                "Failed",
+                "2026-04-28T10:00:00",
+                "2026-04-28T10:05:00",
+                "test-key",
+                "batch123",
+                "Failed",
+                "2026-04-28T10:00:00",
+                "2026-04-28T10:05:00",
+                "test-key",
+            ],
+        ),
+    ],
+)
+def test_update_batch_status_uses_conditional_update(
+    status: str,
+    start_time: str,
+    end_time: str | None,
+    key: str,
+    expected_params: list[object],
+) -> None:
+    from .app import update_batch_status  # noqa: PLC0415,I001
+
+    mock_cursor = MagicMock()
+    update_batch_status(
+        mock_cursor,
+        "batch123",
+        status,
+        start_time,
+        end_time,
+        key,
+    )
+
+    sql, params = mock_cursor.execute.call_args[0]
+
+    assert "WHERE batch_id = %s" in sql
+    assert "IS DISTINCT FROM" in sql
+    assert params == expected_params
