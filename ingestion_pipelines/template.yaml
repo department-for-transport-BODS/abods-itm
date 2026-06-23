@@ -39,7 +39,7 @@ Parameters:
     Default: 'bods-1297-data-landing-zone'
   NocRoleArn:
     Type: String
-    Default: 'arn:aws:iam::390403896175:role/bods-1297-data-landing-zone-cross-account-role'
+    Default: ''
   BucketRegion:
     Type: String
     Default: 'eu-west-2'
