@@ -9,8 +9,6 @@ from psycopg2.extras import execute_values
 
 from .shared.db import setup_db
 
-# TRAVELINE_NOC_URL = "https://www.travelinedata.org.uk/wp-content/themes/desktop/qeight_download.php?allGroupsD=-1&allRegionD=-1&allModeD=-1&allCessationD=-1&searchTextD=&maxPage=231&selectPageId=1&downloadType=CSV&submit=Download"
-
 logger = Logger()
 conn = setup_db()
 
@@ -76,7 +74,7 @@ def lambda_handler(_event: dict, _context: dict) -> None:
         raise TravelineImportError("NOC_BUCKET_REGION environment variable must be set")
     if not role_arn:
         raise TravelineImportError(
-            "NOC_ROLE_ARN environment variable must be set for cross-account access"
+            "NOC_ROLE_ARN environment variable must be set for cross-account access",
         )
 
     logger.info("Retrieving noclines data from S3")
@@ -89,7 +87,6 @@ def lambda_handler(_event: dict, _context: dict) -> None:
     obj = s3_client.get_object(Bucket=bucket, Key=key)
     csv_text = obj["Body"].read().decode("utf-8-sig")
 
-    # Keep the same style as current file: petl + distinct("NOCCODE")
     noc_table = petl.fromcsv(io.StringIO(csv_text)).distinct("NOCCODE")
 
     logger.info("Converting data to tuples")
