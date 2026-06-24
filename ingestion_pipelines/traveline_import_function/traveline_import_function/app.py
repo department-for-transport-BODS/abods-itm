@@ -10,7 +10,6 @@ from psycopg2.extras import execute_values
 from .shared.db import setup_db
 
 logger = Logger()
-conn = setup_db()
 
 
 class TravelineImportError(RuntimeError):
