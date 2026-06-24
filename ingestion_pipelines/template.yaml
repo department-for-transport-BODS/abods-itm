@@ -454,7 +454,7 @@ Resources:
           POSTGRES_DB: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
           POSTGRES_USER: !Sub '${ProjectName}_proxy_rw'
           NOC_BUCKET: !Ref NocBucket
-          NOC_ROLE_ARN: !Ref NocRoleArn
+          NOC_ROLE_ARN: !Sub '{{resolve:ssm:/abods/shared/data-landing-zone-role-arn}}'
           BUCKET_REGION: !Ref BucketRegion
           NOC_S3_KEY: !Ref NocS3Key
       LoggingConfig:
