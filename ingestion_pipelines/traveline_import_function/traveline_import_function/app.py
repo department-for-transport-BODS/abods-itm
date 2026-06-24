@@ -9,13 +9,15 @@ from psycopg2.extras import execute_values
 
 from .shared.db import setup_db
 
-#TRAVELINE_NOC_URL = "https://www.travelinedata.org.uk/wp-content/themes/desktop/qeight_download.php?allGroupsD=-1&allRegionD=-1&allModeD=-1&allCessationD=-1&searchTextD=&maxPage=231&selectPageId=1&downloadType=CSV&submit=Download"
+# TRAVELINE_NOC_URL = "https://www.travelinedata.org.uk/wp-content/themes/desktop/qeight_download.php?allGroupsD=-1&allRegionD=-1&allModeD=-1&allCessationD=-1&searchTextD=&maxPage=231&selectPageId=1&downloadType=CSV&submit=Download"
 
 logger = Logger()
 conn = setup_db()
 
+
 class TravelineImportError(RuntimeError):
     pass
+
 
 def get_s3_client(region: str, role_arn: str | None) -> BaseClient:
     if not role_arn:
@@ -37,6 +39,7 @@ def get_s3_client(region: str, role_arn: str | None) -> BaseClient:
         aws_session_token=creds["SessionToken"],
     )
 
+
 def resolve_noclines_key(s3_client: BaseClient, bucket: str, prefix: str) -> str:
     paginator = s3_client.get_paginator("list_objects_v2")
     pages = paginator.paginate(Bucket=bucket, Prefix=prefix)
@@ -56,6 +59,7 @@ def resolve_noclines_key(s3_client: BaseClient, bucket: str, prefix: str) -> str
 
     selected = max(candidates, key=lambda o: o["LastModified"])
     return selected["Key"]
+
 
 def lambda_handler(_event: dict, _context: dict) -> None:
 
