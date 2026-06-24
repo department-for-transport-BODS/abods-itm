@@ -38,7 +38,7 @@ Parameters:
     Type: String
     Default: 'bods-1297-data-landing-zone'
   NocRoleArn:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
     Default: ''
   BucketRegion:
     Type: String
