@@ -34,6 +34,18 @@ Parameters:
   VpcSubnets:
     Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
     Default: ''
+  NocBucket:
+    Type: String
+    Default: 'bods-1297-data-landing-zone'
+  NocRoleArn:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: ''
+  BucketRegion:
+    Type: String
+    Default: 'eu-west-2'
+  NocS3Key:
+    Type: String
+    Default: 'raw/noc'
   VersioningConfiguration:
     Type: String
     Default: 'Suspended'
@@ -435,6 +447,10 @@ Resources:
           POSTGRES_PORT: !Ref RdsDbPort
           POSTGRES_DB: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
           POSTGRES_USER: !Sub '${ProjectName}_proxy_rw'
+          NOC_BUCKET: !Ref NocBucket
+          NOC_ROLE_ARN: !Ref NocRoleArn
+          BUCKET_REGION: !Ref BucketRegion
+          NOC_S3_KEY: !Ref NocS3Key
       LoggingConfig:
         LogGroup: !Ref TravelineDbIngestionFunctionLogGroup
 
