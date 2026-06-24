@@ -136,3 +136,4 @@ def lambda_handler(_event: dict, _context: dict) -> None:
         )
 
     conn.commit()
+    
