@@ -38,8 +38,8 @@ Parameters:
     Type: String
     Default: 'bods-1297-data-landing-zone'
   NocRoleArn:
-    Type: AWS::SSM::Parameter::Value<String>
-    Default: ''
+    Type: String
+    Default: '/abods/shared/data-landing-zone-role-arn'
   BucketRegion:
     Type: String
     Default: 'eu-west-2'
@@ -448,7 +448,7 @@ Resources:
           POSTGRES_DB: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
           POSTGRES_USER: !Sub '${ProjectName}_proxy_rw'
           NOC_BUCKET: !Ref NocBucket
-          NOC_ROLE_ARN: !Ref NocRoleArn
+          NOC_ROLE_ARN: !Sub '{{resolve:ssm-secure:${NocRoleArn}}}'
           BUCKET_REGION: !Ref BucketRegion
           NOC_S3_KEY: !Ref NocS3Key
       LoggingConfig:
