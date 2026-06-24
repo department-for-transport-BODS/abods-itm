@@ -38,8 +38,8 @@ Parameters:
     Type: String
     Default: 'bods-1297-data-landing-zone'
   NocRoleArn:
-    Type: AWS::SSM::Parameter::Value<String>
-    Default: '/abods/shared/data-landing-zone-role-arn'
+    Type: String
+    Default: ''
   BucketRegion:
     Type: String
     Default: 'eu-west-2'
@@ -421,6 +421,12 @@ Resources:
               - logs:CreateLogStream
               - logs:PutLogEvents
             Resource: !GetAtt TravelineDbIngestionFunctionLogGroup.Arn
+        - Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - 'ssm:GetParameter'
+            Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/abods/shared/data-landing-zone-role-arn'
       Events:
         TravelineSchedule:
           Type: Schedule
