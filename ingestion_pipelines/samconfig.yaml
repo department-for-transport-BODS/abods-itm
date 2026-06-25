@@ -47,6 +47,7 @@ sandbox:
         Environment='sandbox'
         VpcId='/abods/sandbox/vpc/id'
         VpcSubnets='/abods/sandbox/vpc/subnets/private'
+        NocRoleArn='/abods/shared/bods-data-landing-zone-role-arn'
 
 dev:
   deploy:
@@ -59,6 +60,7 @@ dev:
         Environment='dev'
         VpcId='/abods/dev/vpc/id'
         VpcSubnets='/abods/dev/vpc/subnets/private'
+        NocRoleArn='/abods/shared/bods-data-landing-zone-role-arn'
 
 test:
   deploy:
@@ -71,6 +73,7 @@ test:
         Environment='test'
         VpcId='/abods/test/vpc/id'
         VpcSubnets='/abods/test/vpc/subnets/private'
+        NocRoleArn='/abods/shared/bods-data-landing-zone-role-arn'
 
 uat:
   deploy:
@@ -83,6 +86,7 @@ uat:
         Environment='uat'
         VpcId='/abods/uat/vpc/id'
         VpcSubnets='/abods/uat/vpc/subnets/private'
+        NocRoleArn='/abods/shared/bods-data-landing-zone-role-arn'
 
 prod:
   sync:
@@ -98,5 +102,6 @@ prod:
         Environment='prod'
         VpcId='/abods/prod/vpc/id'
         VpcSubnets='/abods/prod/vpc/subnets/private'
+        NocRoleArn='/abods/shared/bods-data-landing-zone-role-arn'
         VersioningConfiguration='Enabled'
         BackupEnabled='true'

@@ -34,6 +34,18 @@ Parameters:
   VpcSubnets:
     Type: AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>
     Default: ''
+  NocBucket:
+    Type: String
+    Default: 'bods-1297-data-landing-zone'
+  NocRoleArn:
+    Type: String
+    Default: ''
+  BucketRegion:
+    Type: String
+    Default: 'eu-west-2'
+  NocS3Key:
+    Type: String
+    Default: 'raw/noc'
   VersioningConfiguration:
     Type: String
     Default: 'Suspended'
@@ -409,6 +421,12 @@ Resources:
               - logs:CreateLogStream
               - logs:PutLogEvents
             Resource: !GetAtt TravelineDbIngestionFunctionLogGroup.Arn
+        - Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - 'ssm:GetParameter'
+            Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${NocRoleArn}'
       Events:
         TravelineSchedule:
           Type: Schedule
@@ -435,10 +453,10 @@ Resources:
           POSTGRES_PORT: !Ref RdsDbPort
           POSTGRES_DB: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/rds/dbname}}'
           POSTGRES_USER: !Sub '${ProjectName}_proxy_rw'
-          NOC_BUCKET_NAME: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/s3/noc/bucket_name}}'
-          NOC_S3_KEY: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/s3/noc/noclines_key}}'
-          NOC_BUCKET_REGION: eu-west-2
-          NOC_ROLE_ARN: !Sub '{{resolve:ssm:/${ProjectName}/${Environment}/iam/noc_read_role/arn}}'
+          NOC_BUCKET: !Ref NocBucket
+          NOC_ROLE_ARN: !Sub '{{resolve:ssm:${NocRoleArn}}}'
+          BUCKET_REGION: !Ref BucketRegion
+          NOC_S3_KEY: !Ref NocS3Key
       LoggingConfig:
         LogGroup: !Ref TravelineDbIngestionFunctionLogGroup
 
