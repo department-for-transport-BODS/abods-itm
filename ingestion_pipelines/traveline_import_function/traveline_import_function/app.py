@@ -59,17 +59,17 @@ def resolve_noclines_key(s3_client: BaseClient, bucket: str, prefix: str) -> str
 
 
 def lambda_handler(_event: dict, _context: dict) -> None:
-    bucket = os.getenv("NOC_BUCKET_NAME")
+    bucket = os.getenv("NOC_BUCKET")
     key_prefix = os.getenv("NOC_S3_KEY")
-    region = os.getenv("NOC_BUCKET_REGION")
+    region = os.getenv("BUCKET_REGION")
     role_arn = os.getenv("NOC_ROLE_ARN")  # optional for cross-account
 
     if not bucket:
-        raise TravelineImportError("NOC_BUCKET_NAME environment variable must be set")
+        raise TravelineImportError("NOC_BUCKET environment variable must be set")
     if not key_prefix:
         raise TravelineImportError("NOC_S3_KEY environment variable must be set")
     if not region:
-        raise TravelineImportError("NOC_BUCKET_REGION environment variable must be set")
+        raise TravelineImportError("BUCKET_REGION environment variable must be set")
     if not role_arn:
         raise TravelineImportError(
             "NOC_ROLE_ARN environment variable must be set for cross-account access",

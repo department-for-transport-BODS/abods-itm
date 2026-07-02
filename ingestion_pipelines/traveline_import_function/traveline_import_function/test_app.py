@@ -38,9 +38,9 @@ def mock_setup_db() -> Generator[MagicMock]:
 @pytest.fixture(autouse=True)
 def mock_env_vars(monkeypatch) -> None:  # noqa: ANN001 type not exported
     monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-2")
-    monkeypatch.setenv("NOC_BUCKET_NAME", "test-bucket")
+    monkeypatch.setenv("NOC_BUCKET", "test-bucket")
     monkeypatch.setenv("NOC_S3_KEY", "noc/prefix/")
-    monkeypatch.setenv("NOC_BUCKET_REGION", "eu-west-2")
+    monkeypatch.setenv("BUCKET_REGION", "eu-west-2")
     monkeypatch.setenv("NOC_ROLE_ARN", "arn:aws:iam::123456789012:role/test-role")
 
 
