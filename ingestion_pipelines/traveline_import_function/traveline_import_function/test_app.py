@@ -3,22 +3,24 @@ from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 
+from .app import lambda_handler
+
 MOCK_NOC_CSV_DATA = [
     {
         "NOCCODE": "123",
-        "OperatorPublicName": "Operator A",
+        "PubNm": "Operator A",
         "Licence": "LIC123",
         "Mode": "Bus",
     },
     {
         "NOCCODE": "456",
-        "OperatorPublicName": "Operator B",
+        "PubNm": "Operator B",
         "Licence": "LIC456",
         "Mode": "Train",
     },
     {
         "NOCCODE": "789",
-        "OperatorPublicName": "Operator C",
+        "PubNm": "Operator C",
         "Licence": "LIC789",
         "Mode": "Ferry",
     },
@@ -28,7 +30,7 @@ MOCK_NOC_CSV_DATA = [
 @pytest.fixture(autouse=True)
 def mock_setup_db() -> Generator[MagicMock]:
     with patch(
-        f"{__package__}.shared.db.setup_db",
+        "ingestion_pipelines.traveline_import_function.traveline_import_function.app.setup_db",
     ) as mock_setup_db:
         mock_conn = MagicMock()
         mock_setup_db.return_value = mock_conn
@@ -38,15 +40,34 @@ def mock_setup_db() -> Generator[MagicMock]:
 @pytest.fixture(autouse=True)
 def mock_env_vars(monkeypatch) -> None:  # noqa: ANN001 type not exported
     monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-2")
+    monkeypatch.setenv("NOC_BUCKET_NAME", "test-bucket")
+    monkeypatch.setenv("NOC_S3_KEY", "test/prefix/")
+    monkeypatch.setenv("NOC_BUCKET_REGION", "eu-west-2")
+    monkeypatch.setenv("NOC_ROLE_ARN", "arn:aws:iam::123456789012:role/test-role")
 
 
+@patch(
+    "ingestion_pipelines.traveline_import_function.traveline_import_function.app.get_s3_client",
+)
 @patch("petl.fromcsv")
 @patch("psycopg2.extras.execute_values")
 def test_lambda_handler(
     mock_execute_values: MagicMock,
     mock_fromcsv: MagicMock,
+    mock_get_s3_client: MagicMock,
 ) -> None:
-    from .app import lambda_handler  # noqa: PLC0415,I001
+    mock_s3 = MagicMock()
+    mock_get_s3_client.return_value = mock_s3
+    mock_s3.get_paginator.return_value.paginate.return_value = [
+        {
+            "Contents": [
+                {
+                    "Key": "test/prefix/table_noclines_latest_csv.csv",
+                    "LastModified": ANY,
+                },
+            ],
+        },
+    ]
 
     mock_fromcsv.return_value.distinct.return_value.dicts.return_value = (
         MOCK_NOC_CSV_DATA
