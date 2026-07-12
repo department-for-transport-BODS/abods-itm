@@ -111,31 +111,41 @@ jobs:
         run: |
           echo "AWS_ACCOUNT_ID=${{ vars.AWS_ACCOUNT_ID }}" >> $GITHUB_OUTPUT
 
-      - name: validate release candidate version
+      - name: validate release candidate version (with retry)
         env:
           VERSION: ${{ steps.verify.outputs.VERSION }}
         run: |
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="$RC_SRC/abods-itm/releases/$VERSION" || rc_path="$RC_SRC/abods-itm/releases-dev/$VERSION"
+          # Determine S3 paths
+          if [[ "$VERSION" =~ ^v[0-9]+(\.[0-9]+){2}$ ]]; then
+            rc_path="$RC_SRC/abods-itm/releases/$VERSION"
+          else
+            rc_path="$RC_SRC/abods-itm/releases-dev/$VERSION"
+          fi
 
           rc_backend_path="$rc_path/backend"
           rc_database_path="$rc_path/liquibase"
 
-          # Database validation
-          if [[ `aws s3 ls s3://$rc_database_path|head` ]]; then
-            echo "[INFO] Release candidate version [${VERSION}] for component (DATABASE) successfully validated"
-          else
-            echo "[ERROR] Release candidate version [${VERSION}] does not exist for component (DATABASE). Exiting"
+          check_s3_with_retry() {
+            local s3path="$1"
+            local label="$2"
+            for i in {1..6}; do
+              if aws s3 ls "s3://$s3path" | head -1; then
+                echo "[INFO] Release candidate version [${VERSION}] for component ($label) successfully validated"
+                return 0
+              else
+                echo "[WARN] Release candidate version [${VERSION}] does not exist for component ($label), attempt $i/6. Waiting 10s..."
+                sleep 10
+              fi
+            done
+            echo "[ERROR] Release candidate version [${VERSION}] does not exist for component ($label) after retries. Exiting"
             exit 1
-          fi
+          }
 
-          # Application validation
-          # Backend
-          if [[ `aws s3 ls s3://$rc_backend_path|head` ]]; then
-            echo "[INFO] Release candidate version [${VERSION}] for component (BACKEND) successfully validated"
-          else
-            echo "[ERROR] Release candidate version [${VERSION}] does not exist for component (BACKEND). Exiting"
-            exit 1
-          fi
+          # Retry check for database artefacts
+          check_s3_with_retry "$rc_database_path" "DATABASE"
+
+          # Retry check for backend artefacts
+          check_s3_with_retry "$rc_backend_path" "BACKEND"
 
   database:
     runs-on: ubuntu-latest
@@ -151,15 +161,20 @@ jobs:
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
-      - name: deploy database migrations for ${{ env.RC_ENV }}
-        ## TEMPORARY CHANGE TO AVOID DESTROYING DATA IN DB
+      - name: deploy database migrations for ${{ env.RC_ENV }} (with retry)
         if: ${{ env.RC_ENV != 'sandbox' }}
         env:
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods-itm/releases" || rc_path="abods-itm/releases-dev"
+          # Determine S3 path
+          if [[ "$VERSION" =~ ^v[0-9]+(\.[0-9]+){2}$ ]]; then
+            rc_path="abods-itm/releases"
+          else
+            rc_path="abods-itm/releases-dev"
+          fi
 
           lambda_function_name="${{ vars.PROJECT_NAME }}-${RC_ENV}-pglifecycle-function"
+
           cat <<EOF > $GITHUB_WORKSPACE/payload.json
           {
             "type": "run_migrations",
@@ -174,19 +189,31 @@ jobs:
           EOF
 
           openssl base64 -out $GITHUB_WORKSPACE/encoded_payload.json -in $GITHUB_WORKSPACE/payload.json 
-          response=$(aws lambda invoke --function-name $lambda_function_name --region $AWS_REGION --payload file://$GITHUB_WORKSPACE/encoded_payload.json response.txt 2>&1)
-          status_code=$(cat response.txt | jq -r '.statusCode')
-          status_code=${status_code:-"unset"}
-          echo "Status Code is: $status_code"
-          if [[ "$status_code" == "500" ]]; then
-            echo "[ERROR] Deployment of application component (DATABASE) with version ${VERSION} failed with error:"
-            echo "${response}"
-            exit 1
-          else
-            response_payload=$(cat response.txt)
-            echo "Response Payload: $response_payload"
-            echo "[INFO] Application component (DATABASE) with version ${VERSION} successfully deployed into ${RC_ENV^^}"
-          fi
+
+          # Retry logic for Lambda invocation
+          max_attempts=5
+          attempt=1
+          while (( attempt <= max_attempts )); do
+            echo "[INFO] Lambda deployment attempt $attempt/$max_attempts"
+            response=$(aws lambda invoke --function-name $lambda_function_name --region $AWS_REGION --payload file://$GITHUB_WORKSPACE/encoded_payload.json response.txt 2>&1)
+            status_code=$(cat response.txt | jq -r '.statusCode')
+            status_code=${status_code:-"unset"}
+            echo "Status Code is: $status_code"
+            if [[ "$status_code" == "200" ]]; then
+              response_payload=$(cat response.txt)
+              echo "Response Payload: $response_payload"
+              echo "[INFO] Application component (DATABASE) with version ${VERSION} successfully deployed into ${RC_ENV^^}"
+              break
+            elif [[ "$attempt" -eq "$max_attempts" ]]; then
+              echo "[ERROR] Deployment of application component (DATABASE) with version ${VERSION} failed with error after $max_attempts attempts:"
+              echo "${response}"
+              exit 1
+            else
+              echo "[WARN] Deployment failed with status $status_code, retrying in $(( attempt * 5 ))s..."
+              sleep $(( attempt * 5 ))
+              ((attempt++))
+            fi
+          done
 
   backend:
     runs-on: ubuntu-latest
@@ -207,14 +234,46 @@ jobs:
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
-      - name: retrieve backend
+      - name: retrieve backend (with retry)
         env:
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods-itm/releases/$VERSION/backend" || rc_path="abods-itm/releases-dev/$VERSION/backend"
+          # Determine S3 path
+          if [[ "$VERSION" =~ ^v[0-9]+(\.[0-9]+){2}$ ]]; then
+            rc_path="abods-itm/releases/$VERSION/backend"
+          else
+            rc_path="abods-itm/releases-dev/$VERSION/backend"
+          fi
 
-          aws s3 cp s3://$RC_SRC/$rc_path/packaged.yaml .
-          aws s3 cp s3://$RC_SRC/$rc_path/samconfig.yaml .
+          # Retry download for packaged.yaml
+          for i in {1..6}; do
+            if aws s3 cp s3://$RC_SRC/$rc_path/packaged.yaml .; then
+              echo "packaged.yaml downloaded"
+              break
+            else
+              echo "packaged.yaml not found, waiting 10s... (attempt $i/6)"
+              sleep 10
+            fi
+            if [[ $i -eq 6 ]]; then
+              echo "[ERROR] packaged.yaml not found after 6 attempts"
+              exit 1
+            fi
+          done
+
+          # Retry download for samconfig.yaml
+          for i in {1..6}; do
+            if aws s3 cp s3://$RC_SRC/$rc_path/samconfig.yaml .; then
+              echo "samconfig.yaml downloaded"
+              break
+            else
+              echo "samconfig.yaml not found, waiting 10s... (attempt $i/6)"
+              sleep 10
+            fi
+            if [[ $i -eq 6 ]]; then
+              echo "[ERROR] samconfig.yaml not found after 6 attempts"
+              exit 1
+            fi
+          done
           echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully downloaded"
 
       - name: get stack name
