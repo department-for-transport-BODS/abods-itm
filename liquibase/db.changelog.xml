@@ -114,7 +114,7 @@
     <changeSet id="34" author="abodsuser">
         <sqlFile path="sql/34-timetable-group-id-add-quote.sql" splitStatements="false"/>
     </changeSet>
-    <changeSet id="35" author="abodsuser" runOnChange="true" runInTransaction="true">
+    <changeSet id="35" author="abodsuser">
         <sqlFile path="sql/35-otc-foreign-tables.sql" splitStatements="false"/>
     </changeSet>
     <changeSet id="36" author="abodsuser">
@@ -517,5 +517,8 @@
     </changeSet>
     <changeSet id="165" author="abodsuser" runInTransaction="false">
         <sqlFile path="sql/165-add-batch-id-index.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="166" author="abodsuser">
+        <sqlFile path="sql/166-update-foreign-schema-otc_inactiveservice-registration_number.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
