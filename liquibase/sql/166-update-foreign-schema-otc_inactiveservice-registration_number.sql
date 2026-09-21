@@ -2,7 +2,10 @@ DO $$
   declare otc_inactiveservice_def text;
   declare exec_text text;
 BEGIN
-  IF EXISTS(SELECT * from public.bods_otcinactiveservice)
+  IF EXISTS(SELECT * 
+    FROM public.bods_otcinactiveservice
+    WHERE table_name='bods_otcinactiveservice'
+    AND table_schema='public')
   THEN
     otc_inactiveservice_def := pg_get_viewdef('public.bods_otcinactiveservice');
     drop view public.bods_otcinactiveservice;
