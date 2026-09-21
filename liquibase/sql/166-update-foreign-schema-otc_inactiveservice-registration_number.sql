@@ -3,7 +3,7 @@ DO $$
   declare exec_text text;
 BEGIN
   IF EXISTS(SELECT * 
-    FROM public.bods_otcinactiveservice
+    FROM information_schema.views
     WHERE table_name='bods_otcinactiveservice'
     AND table_schema='public')
   THEN
