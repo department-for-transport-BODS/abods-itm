@@ -518,4 +518,7 @@
     <changeSet id="165" author="abodsuser" runInTransaction="false">
         <sqlFile path="sql/165-add-batch-id-index.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="166" author="abodsuser">
+        <sqlFile path="sql/166-update-foreign-schema-otc_inactiveservice-registration_number.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
