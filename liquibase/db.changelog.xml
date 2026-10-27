@@ -521,4 +521,7 @@
     <changeSet id="166" author="abodsuser">
         <sqlFile path="sql/166-update-foreign-schema-otc_inactiveservice-registration_number.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet id="167" author="abodsuser">
+        <sqlFile path="sql/167-grant-auto-test-read-access.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
