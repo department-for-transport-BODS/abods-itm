@@ -34,11 +34,18 @@ RUN mkdir -p bin lib && \
 FROM public.ecr.aws/lambda/python:3.11
 
 RUN yum update -y && \
-yum install -y aws-cli ca-certificates gzip yum-utils
+yum install -y aws-cli ca-certificates curl gzip tar yum-utils
 
-RUN rpm --import https://repo.liquibase.com/liquibase.asc && \
-    yum-config-manager --add-repo https://repo.liquibase.com/repo-liquibase-com.repo && \
-    yum update -y && yum install -y liquibase-4.27.0-1
+# The Liquibase RPM repo currently serves unsigned packages (fails yum gpgcheck),
+# so install the release tarball and verify its pinned checksum instead.
+ENV LIQUIBASE_VERSION=4.27.0
+ENV LIQUIBASE_SHA256=50d89e1fc10249bf198f1a8ff2d81fd0b68e6ca0805db28a94d38649784d82f0
+RUN curl -fsSL -o /tmp/liquibase.tar.gz "https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.tar.gz" && \
+    echo "${LIQUIBASE_SHA256}  /tmp/liquibase.tar.gz" | sha256sum -c - && \
+    mkdir -p /opt/liquibase && \
+    tar -xzf /tmp/liquibase.tar.gz -C /opt/liquibase && \
+    ln -s /opt/liquibase/liquibase /usr/local/bin/liquibase && \
+    rm -f /tmp/liquibase.tar.gz
 
 RUN yum install -y java-17-amazon-corretto-headless && \
     yum clean all
