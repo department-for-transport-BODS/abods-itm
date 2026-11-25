@@ -1,6 +1,6 @@
 aws-lambda-powertools==3.22.0
-boto3==1.40.61
+boto3==1.44.9
 duckdb==1.4.4
-psycopg2-binary==2.9.10
-pyproj==3.7.0
+psycopg2-binary==2.9.13
+pyproj==3.8.0
 pytz==2025.2
